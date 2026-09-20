@@ -10,7 +10,13 @@ import { GoogleCalendarIntegrationCard } from './components/GoogleCalendarIntegr
 import { initialScheduleItems } from './schedule.data'
 import { validateScheduleDraft } from './schedule.validation'
 import { getReminderState } from './schedule.reminder'
+import {
+  createGoogleCalendarEvent,
+  deleteGoogleCalendarEvent,
+  updateGoogleCalendarEvent,
+} from '../../integrations/calendar/calendarApi'
 import { getNotificationSupport, requestNotificationPermission, showNotification } from '../../integrations/notifications/browserNotification'
+import { toGoogleCalendarEventPayload } from '../../integrations/calendar/googleCalendar'
 import type { ScheduleDraft, ScheduleItem, ScheduleType } from './schedule.types'
 
 const getToday = () => new Intl.DateTimeFormat('sv-SE').format(new Date())
@@ -42,7 +48,13 @@ export function ScheduleView({ schedule, onScheduleChange }: ScheduleViewProps) 
     if (!result.valid) return result.message
 
     if (editingId) {
-      onScheduleChange(normalizedSchedule.map((item) => item.id === editingId ? { ...item, ...draft } : item))
+      onScheduleChange(normalizedSchedule.map((item) => {
+        if (item.id !== editingId) return item
+        const nextCalendarState = item.googleCalendar.status === 'synced' || item.googleCalendar.status === 'error'
+          ? { ...item.googleCalendar, status: 'pending' as const, error: undefined }
+          : item.googleCalendar
+        return { ...item, ...draft, googleCalendar: nextCalendarState }
+      }))
     } else {
       onScheduleChange([...normalizedSchedule, {
         ...draft,
@@ -53,10 +65,49 @@ export function ScheduleView({ schedule, onScheduleChange }: ScheduleViewProps) 
     return null
   }
 
-  const deleteSchedule = (id: number) => {
-    const item = normalizedSchedule.find((entry) => entry.id === id)
-    if (!item || !window.confirm('Delete “' + item.title + '”?')) return
-    onScheduleChange(normalizedSchedule.filter((entry) => entry.id !== id))
+  const syncSchedule = async (item: ScheduleItem) => {
+    const pending = {
+      ...item.googleCalendar,
+      status: 'pending' as const,
+      error: undefined,
+    }
+    onScheduleChange(normalizedSchedule.map((entry) => entry.id === item.id ? { ...entry, googleCalendar: pending } : entry))
+
+    try {
+      const event = toGoogleCalendarEventPayload(item)
+      const result = item.googleCalendar.eventId
+        ? await updateGoogleCalendarEvent(item, item.googleCalendar.eventId, event)
+        : await createGoogleCalendarEvent(item, event)
+
+      onScheduleChange(normalizedSchedule.map((entry) => entry.id === item.id ? {
+        ...entry,
+        googleCalendar: {
+          ...entry.googleCalendar,
+          status: 'synced',
+          eventId: result.eventId,
+          lastSyncedAt: new Date().toISOString(),
+          error: undefined,
+        },
+      } : entry))
+    } catch (reason) {
+      const message = reason instanceof Error ? reason.message : 'Calendar sync failed.'
+      onScheduleChange(normalizedSchedule.map((entry) => entry.id === item.id ? {
+        ...entry,
+        googleCalendar: {
+          ...entry.googleCalendar,
+          status: 'error',
+          error: message,
+        },
+      } : entry))
+      throw reason
+    }
+  }
+
+  const deleteSchedule = async (item: ScheduleItem) => {
+    if (item.googleCalendar.eventId) {
+      await deleteGoogleCalendarEvent(item, item.googleCalendar.eventId)
+    }
+    onScheduleChange(normalizedSchedule.filter((entry) => entry.id !== item.id))
   }
 
   const resetToSeed = () => {
@@ -125,11 +176,11 @@ export function ScheduleView({ schedule, onScheduleChange }: ScheduleViewProps) 
       <div className="schedule-summary"><span>Reminder engine active.</span><span>•</span><span>{reminderCount} reminder {reminderCount === 1 ? 'is' : 'are'} scheduled for this date.</span></div>
 
       <div className="content-card schedule-events-card">
-        {visibleItems.length === 0 ? <EmptyState title="Nothing scheduled" description="Choose another date, clear the filter, or add a new activity." /> : <div className="schedule-events">{visibleItems.map((item, index) => <ScheduleItemCard key={item.id} item={item} index={index} onView={setDetailItem} onEdit={openEdit} onDelete={deleteSchedule} />)}</div>}
+        {visibleItems.length === 0 ? <EmptyState title="Nothing scheduled" description="Choose another date, clear the filter, or add a new activity." /> : <div className="schedule-events">{visibleItems.map((item, index) => <ScheduleItemCard key={item.id} item={item} index={index} onView={setDetailItem} onEdit={openEdit} onSync={syncSchedule} onDelete={deleteSchedule} />)}</div>}
       </div>
 
       <ScheduleForm open={formOpen} initialItem={editingItem} defaultDate={date} onClose={() => setFormOpen(false)} onSubmit={saveSchedule} />
-      <ScheduleDetail item={detailItem} onClose={() => setDetailItem(undefined)} onEdit={openEdit} />
+      <ScheduleDetail item={detailItem} onClose={() => setDetailItem(undefined)} onEdit={openEdit} onSync={syncSchedule} />
     </section>
   )
 }
