@@ -21,6 +21,8 @@ import {
 } from './dataStore.js'
 import { claimTelegramUpdate, createTelegramLinkCode, deleteTelegramConnectionByUserId, getTelegramConnectionByChatId, getTelegramConnectionByUserId, redeemTelegramLinkCode, isTelegramPersistenceConfigured } from './integrations/telegramStore.js'
 import { isTelegramConfigured, parseCommand, sendTelegramMessage, verifyWebhookSecret } from './integrations/telegram.js'
+import { getWhatsAppConfig, isWhatsAppConfigured, parseWhatsAppCommand, sendWhatsAppText, verifyWebhookChallenge, verifyWhatsAppSignature, buildWhatsAppUpdateHash } from './integrations/whatsapp.js'
+import { createWhatsAppLinkCode, deleteWhatsAppConnectionByUserId, getWhatsAppConnectionByUserId, getWhatsAppConnectionByWaId, redeemWhatsAppLinkCode, claimWhatsAppUpdate, isWhatsAppPersistenceConfigured } from './integrations/whatsappStore.js'
 import {
   createSchedule,
   deleteSchedule,
@@ -282,7 +284,23 @@ async function getValidAccessToken(ownerId: string, connection: GoogleConnection
   return connection.token.accessToken
 }
 
+async function readRequestBody(req: IncomingMessage) {
+  return await new Promise<string>((resolve, reject) => {
+    let body = ''
+    req.on('data', (chunk: Buffer | string) => {
+      body += chunk.toString()
+      if (body.length > 256 * 1024) {
+        reject(new Error('Request body is too large.'))
+        req.destroy()
+      }
+    })
+    req.on('end', () => resolve(body))
+    req.on('error', reject)
+  })
+}
+
 async function readRequestJson(req: IncomingMessage) {
+
   return await new Promise<Record<string, unknown>>((resolve, reject) => {
     let body = ''
     req.on('data', (chunk: Buffer | string) => {
@@ -839,6 +857,190 @@ async function handleDeleteFinance(req: IncomingMessage, res: ServerResponse, ur
   sendJson(res, 200, { deleted: true })
 }
 
+const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN ?? ''
+
+function getWhatsAppMessage(body: Record<string, unknown>) {
+  const entries = Array.isArray(body.entry) ? body.entry : []
+  const entry = entries[0] && typeof entries[0] === 'object' ? entries[0] as Record<string, unknown> : null
+  const changes = Array.isArray(entry?.changes) ? entry.changes : []
+  const change = changes[0] && typeof changes[0] === 'object' ? changes[0] as Record<string, unknown> : null
+  const value = change?.value && typeof change.value === 'object' ? change.value as Record<string, unknown> : null
+  const messages = Array.isArray(value?.messages) ? value.messages : []
+  const message = messages[0] && typeof messages[0] === 'object' ? messages[0] as Record<string, unknown> : null
+  const contacts = Array.isArray(value?.contacts) ? value.contacts : []
+  const contact = contacts[0] && typeof contacts[0] === 'object' ? contacts[0] as Record<string, unknown> : null
+  const profile = contact?.profile && typeof contact.profile === 'object' ? contact.profile as Record<string, unknown> : null
+  const textNode = message?.text && typeof message.text === 'object' ? message.text as Record<string, unknown> : null
+
+  return {
+    message,
+    value,
+    from: typeof message?.from === 'string' ? message.from : null,
+    type: typeof message?.type === 'string' ? message.type : null,
+    text: typeof textNode?.body === 'string' ? textNode.body : '',
+    displayName: typeof profile?.name === 'string' ? profile.name : undefined,
+  }
+}
+
+async function whatsAppHelp(to: string) {
+  await sendWhatsAppText(to, [
+    'MiD-Daily WhatsApp commands:',
+    '/task <title>',
+    '/expense <amount> <category> <title>',
+    '/expenses',
+    '/schedule',
+    '/schedule tomorrow',
+    '/disconnect',
+  ].join('\\n'))
+}
+
+async function handleWhatsAppStatus(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  const connection = await getWhatsAppConnectionByUserId(userId)
+  sendJson(res, 200, {
+    configured: isWhatsAppConfigured() && isWhatsAppPersistenceConfigured(),
+    connected: Boolean(connection),
+    connectedAt: connection?.connected_at ?? null,
+    displayName: connection?.display_name ?? null,
+    businessPhoneNumber: getWhatsAppConfig().businessPhoneNumber || null,
+  })
+}
+
+async function handleWhatsAppLinkCode(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  if (!isWhatsAppConfigured() || !isWhatsAppPersistenceConfigured()) throw httpError(503, 'WhatsApp integration is not configured.')
+  const link = await createWhatsAppLinkCode(userId, getWhatsAppConfig().businessPhoneNumber)
+  sendJson(res, 200, link)
+}
+
+async function handleWhatsAppDisconnect(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  await deleteWhatsAppConnectionByUserId(userId)
+  sendJson(res, 200, { connected: false })
+}
+
+async function handleWhatsAppWebhookVerification(url: URL, res: ServerResponse) {
+  const challenge = verifyWebhookChallenge(
+    url.searchParams.get('hub.mode'),
+    url.searchParams.get('hub.verify_token'),
+    url.searchParams.get('hub.challenge'),
+  )
+
+  if (!challenge) {
+    sendJson(res, 403, { error: 'WhatsApp webhook verification failed.' })
+    return
+  }
+
+  res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' })
+  res.end(challenge)
+}
+
+async function handleWhatsAppWebhook(req: IncomingMessage, res: ServerResponse) {
+  if (!isWhatsAppConfigured() || !isWhatsAppPersistenceConfigured()) {
+    sendJson(res, 503, { error: 'WhatsApp integration is not configured.' })
+    return
+  }
+
+  const rawBody = await readRequestBody(req)
+  if (!verifyWhatsAppSignature(rawBody, req.headers['x-hub-signature-256'] as string | undefined)) {
+    sendJson(res, 401, { error: 'Invalid WhatsApp webhook signature.' })
+    return
+  }
+
+  const updateHash = buildWhatsAppUpdateHash(rawBody)
+  if (!(await claimWhatsAppUpdate(updateHash))) {
+    sendJson(res, 200, { ok: true, duplicate: true })
+    return
+  }
+
+  let body: Record<string, unknown>
+  try {
+    body = JSON.parse(rawBody) as Record<string, unknown>
+  } catch {
+    sendJson(res, 400, { error: 'Webhook payload must be valid JSON.' })
+    return
+  }
+
+  const incoming = getWhatsAppMessage(body)
+  if (!incoming.message || incoming.type !== 'text' || !incoming.from) {
+    sendJson(res, 200, { ok: true, ignored: true })
+    return
+  }
+
+  const parsed = parseWhatsAppCommand(incoming.text)
+  if (!parsed) {
+    sendJson(res, 200, { ok: true, ignored: true })
+    return
+  }
+
+  if (parsed.command === 'link') {
+    const result = await redeemWhatsAppLinkCode(parsed.args, incoming.from, incoming.from, incoming.displayName)
+    await sendWhatsAppText(incoming.from, result
+      ? 'WhatsApp connected to your MiD-Daily account.'
+      : 'This link code is invalid, expired, or already used.')
+    sendJson(res, 200, { ok: true })
+    return
+  }
+
+  const connection = await getWhatsAppConnectionByWaId(incoming.from)
+  if (!connection) {
+    await sendWhatsAppText(incoming.from, 'WhatsApp is not linked. Open MiD-Daily and generate a WhatsApp connection link first.')
+    sendJson(res, 200, { ok: true })
+    return
+  }
+
+  if (parsed.command === 'help') {
+    await whatsAppHelp(incoming.from)
+  } else if (parsed.command === 'task') {
+    if (!parsed.args) {
+      await sendWhatsAppText(incoming.from, 'Usage: /task <title>')
+    } else {
+      const task = await createTask(connection.user_id, {
+        title: parsed.args,
+        category: 'WhatsApp',
+        priority: 'medium',
+        status: 'todo',
+        progress: 0,
+      })
+      await sendWhatsAppText(incoming.from, 'Task added: ' + task.title)
+    }
+  } else if (parsed.command === 'expense') {
+    const parts = parsed.args.split(/\\s+/)
+    const amount = Number(parts.shift())
+    const category = parts.shift()
+    const title = parts.join(' ').trim()
+
+    if (!Number.isFinite(amount) || amount <= 0 || !category || !title) {
+      await sendWhatsAppText(incoming.from, 'Usage: /expense <amount> <category> <title>')
+    } else {
+      const entry = await createFinance(connection.user_id, {
+        type: 'expense',
+        title,
+        amount,
+        category,
+        date: dateInTimeZone(),
+      })
+      await sendWhatsAppText(incoming.from, 'Expense added: Rp ' + Math.round(entry.amount).toLocaleString('id-ID') + ' • ' + entry.title)
+    }
+  } else if (parsed.command === 'expenses') {
+    const today = dateInTimeZone()
+    const expenses = (await listFinance(connection.user_id)).filter((entry) => entry.type === 'expense' && entry.date === today)
+    const total = expenses.reduce((sum, entry) => sum + entry.amount, 0)
+    await sendWhatsAppText(incoming.from, "Today's expenses: Rp " + Math.round(total).toLocaleString('id-ID') + '\\n\\n' + formatTelegramExpenses(expenses))
+  } else if (parsed.command === 'schedule') {
+    const targetDate = parsed.args.toLowerCase() === 'tomorrow' ? dateInTimeZone(1) : dateInTimeZone()
+    const items = (await listSchedule(connection.user_id)).filter((item) => item.date === targetDate)
+    await sendWhatsAppText(incoming.from, targetDate + ' schedule:\\n\\n' + formatTelegramSchedule(items))
+  } else if (parsed.command === 'disconnect') {
+    await deleteWhatsAppConnectionByUserId(connection.user_id)
+    await sendWhatsAppText(incoming.from, 'WhatsApp disconnected from MiD-Daily.')
+  } else {
+    await sendWhatsAppText(incoming.from, 'Unknown command. Use /help to see available commands.')
+  }
+
+  sendJson(res, 200, { ok: true })
+}
+
 const APP_TIMEZONE = process.env.APP_TIMEZONE ?? 'Asia/Jakarta'
 
 function dateInTimeZone(daysFromToday = 0) {
@@ -1052,6 +1254,27 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
         dataPersistenceConfigured: isDataPersistenceConfigured(),
         schedulePersistenceConfigured: isSchedulePersistenceConfigured(),
       })
+      return
+    }
+
+    if (req.method === 'GET' && url.pathname === '/api/integrations/whatsapp/status') {
+      await handleWhatsAppStatus(req, res)
+      return
+    }
+    if (req.method === 'POST' && url.pathname === '/api/integrations/whatsapp/link-code') {
+      await handleWhatsAppLinkCode(req, res)
+      return
+    }
+    if (req.method === 'POST' && url.pathname === '/api/integrations/whatsapp/disconnect') {
+      await handleWhatsAppDisconnect(req, res)
+      return
+    }
+    if (req.method === 'GET' && url.pathname === '/webhooks/whatsapp') {
+      await handleWhatsAppWebhookVerification(url, res)
+      return
+    }
+    if (req.method === 'POST' && url.pathname === '/webhooks/whatsapp') {
+      await handleWhatsAppWebhook(req, res)
       return
     }
 
