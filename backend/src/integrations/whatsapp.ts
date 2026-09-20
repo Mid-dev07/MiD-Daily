@@ -56,10 +56,10 @@ export async function sendWhatsAppText(to: string, text: string) {
 
 export function parseWhatsAppCommand(text: string) {
   const value = text.trim()
-  const match = value.match(/^(?:link|\/link)\\s+(.+)$/i)
+  const match = value.match(/^(?:link|\/link)\s+(.+)$/i)
   if (match) return { command: 'link', args: match[1].trim() }
 
-  const command = value.match(/^\\/([a-zA-Z0-9_]+)\\s*([\\s\\S]*)$/)
+  const command = value.match(/^\/([a-zA-Z0-9_]+)\s*([\s\S]*)$/)
   if (!command) return null
   return { command: command[1].toLowerCase(), args: command[2].trim() }
 }
