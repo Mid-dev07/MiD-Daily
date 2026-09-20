@@ -9,6 +9,7 @@ import { ScheduleView } from '../features/schedule/ScheduleView'
 import { TasksView } from '../features/tasks/TasksView'
 import { readStorage, writeStorage } from '../lib/storage'
 import { initialScheduleItems } from '../features/schedule/schedule.data'
+import { normalizeScheduleList } from '../features/schedule/schedule.migration'
 import type { Task, TaskPriority, View } from '../types'
 
 const TASK_STORAGE_KEY = 'mid-daily.tasks'
@@ -17,7 +18,7 @@ const SCHEDULE_STORAGE_KEY = 'mid-daily.schedule'
 export function App() {
   const [activeView, setActiveView] = useState<View>('dashboard')
   const [tasks, setTasks] = useState<Task[]>(() => readStorage(TASK_STORAGE_KEY, initialTasks))
-  const [schedule, setSchedule] = useState(() => readStorage(SCHEDULE_STORAGE_KEY, initialScheduleItems))
+  const [schedule, setSchedule] = useState(() => normalizeScheduleList(readStorage(SCHEDULE_STORAGE_KEY, initialScheduleItems)))
   const [toast, setToast] = useState('')
 
   useEffect(() => writeStorage(TASK_STORAGE_KEY, tasks), [tasks])

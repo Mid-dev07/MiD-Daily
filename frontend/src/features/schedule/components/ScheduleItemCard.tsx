@@ -22,7 +22,7 @@ export function ScheduleItemCard({ item, index, onView, onEdit, onDelete }: Sche
         <p>{item.location || 'No location'}</p>
         <div className="schedule-event-meta">
           <span className={item.reminderEnabled ? 'meta-chip is-enabled' : 'meta-chip'}>{item.reminderEnabled ? `Reminder ${item.reminderOffset === 0 ? 'at start' : `${item.reminderOffset}m`}` : 'Reminder off'}</span>
-          <span className="meta-chip">Google Calendar ready</span>
+          <span className="meta-chip">{item.recurrence.frequency === 'NONE' ? 'One-time' : `Repeats ${item.recurrence.frequency.toLowerCase()}`}</span><span className="meta-chip">Google Calendar ready</span>
         </div>
         <div className="schedule-event-actions">
           <button className="text-button" type="button" onClick={() => onView(item)}>Details</button>

@@ -20,7 +20,7 @@ export function ScheduleDetail({ item, onClose, onEdit }: ScheduleDetailProps) {
           <div><span>When</span><strong>{item.date} · {item.startTime} — {item.endTime}</strong></div>
           <div><span>Location</span><strong>{item.location || 'No location'}</strong></div>
           <div><span>Reminder</span><strong>{item.reminderEnabled ? `${item.reminderOffset === 0 ? 'At start' : `${item.reminderOffset} minutes before`}` : 'Off'}</strong></div>
-          <div><span>Calendar</span><strong>{item.googleCalendarConnected ? 'Connected' : 'Not connected yet'}</strong></div>
+          <div><span>Repeat</span><strong>{item.recurrence.frequency === 'NONE' ? 'One-time' : `${item.recurrence.frequency.toLowerCase()} · every ${item.recurrence.interval}${item.recurrence.until ? ` · until ${item.recurrence.until}` : ''}`}</strong></div><div><span>Calendar</span><strong>{item.googleCalendarConnected ? 'Connected' : 'Not connected yet'}</strong></div>
         </div>
         <div className="detail-notes"><span>Notes</span><p>{item.notes || 'No notes added.'}</p></div>
         <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>Close</button><button className="primary-button" type="button" onClick={() => onEdit(item)}>Edit activity</button></div>

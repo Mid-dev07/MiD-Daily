@@ -1,5 +1,7 @@
 import type { ScheduleItem } from './schedule.types'
 
+const noRepeat = { frequency: 'NONE' as const, interval: 1 }
+
 export const initialScheduleItems: ScheduleItem[] = [
   {
     id: 1,
@@ -12,6 +14,7 @@ export const initialScheduleItems: ScheduleItem[] = [
     notes: 'Review priorities and break down the next development tasks.',
     reminderEnabled: true,
     reminderOffset: 15,
+    recurrence: noRepeat,
     googleCalendarConnected: false,
   },
   {
@@ -25,6 +28,7 @@ export const initialScheduleItems: ScheduleItem[] = [
     notes: 'Continue MiD-Daily feature implementation.',
     reminderEnabled: true,
     reminderOffset: 30,
+    recurrence: { frequency: 'WEEKLY', interval: 1 },
     googleCalendarConnected: false,
   },
   {
@@ -38,6 +42,7 @@ export const initialScheduleItems: ScheduleItem[] = [
     notes: 'Review completed work and plan tomorrow.',
     reminderEnabled: false,
     reminderOffset: 10,
+    recurrence: noRepeat,
     googleCalendarConnected: false,
   },
 ]

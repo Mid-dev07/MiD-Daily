@@ -9,6 +9,13 @@ export type ScheduleType =
   | 'OTHER'
 
 export type ReminderOffset = 0 | 5 | 10 | 15 | 30 | 60
+export type RecurrenceFrequency = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY'
+
+export interface RecurrenceRule {
+  frequency: RecurrenceFrequency
+  interval: number
+  until?: string
+}
 
 export interface ScheduleItem {
   id: number
@@ -21,6 +28,7 @@ export interface ScheduleItem {
   notes: string
   reminderEnabled: boolean
   reminderOffset: ReminderOffset
+  recurrence: RecurrenceRule
   googleCalendarConnected: boolean
 }
 
