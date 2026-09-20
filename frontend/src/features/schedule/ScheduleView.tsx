@@ -50,7 +50,13 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
 
     if (editingId) {
       const next = normalizedSchedule.map((item) => item.id === editingId
-        ? { ...item, ...draft, googleCalendar: item.googleCalendar }
+        ? {
+            ...item,
+            ...draft,
+            googleCalendar: item.googleCalendar.status === 'synced' || item.googleCalendar.status === 'error'
+              ? { ...item.googleCalendar, status: 'pending' as const, error: undefined }
+              : item.googleCalendar,
+          }
         : item)
       await onScheduleChange(next)
     } else {
