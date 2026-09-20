@@ -9,24 +9,29 @@ import { ScheduleView } from '../features/schedule/ScheduleView'
 import { TasksView } from '../features/tasks/TasksView'
 import { normalizeTaskList } from '../features/tasks/task.migration'
 import { validateTaskDraft } from '../features/tasks/task.validation'
+import { normalizeFinanceList } from '../features/finance/finance.migration'
+import { validateFinanceDraft } from '../features/finance/finance.validation'
 import { initialScheduleItems } from '../features/schedule/schedule.data'
 import { normalizeScheduleList } from '../features/schedule/schedule.migration'
 import { useReminderScheduler } from '../features/schedule/hooks/useReminderScheduler'
 import { readStorage, writeStorage } from '../lib/storage'
-import type { Task, TaskDraft, View } from '../types'
+import type { FinanceDraft, FinanceEntry, Task, TaskDraft, View } from '../types'
 
 const TASK_STORAGE_KEY = 'mid-daily.tasks'
+const FINANCE_STORAGE_KEY = 'mid-daily.finance'
 const SCHEDULE_STORAGE_KEY = 'mid-daily.schedule'
 
 export function App() {
   const [activeView, setActiveView] = useState<View>('dashboard')
   const [tasks, setTasks] = useState<Task[]>(() => normalizeTaskList(readStorage(TASK_STORAGE_KEY, initialTasks)))
+  const [finance, setFinance] = useState<FinanceEntry[]>(() => normalizeFinanceList(readStorage(FINANCE_STORAGE_KEY, financeEntries)))
   const [schedule, setSchedule] = useState(() => normalizeScheduleList(readStorage(SCHEDULE_STORAGE_KEY, initialScheduleItems)))
   const [toast, setToast] = useState('')
 
   useReminderScheduler(schedule)
 
   useEffect(() => writeStorage(TASK_STORAGE_KEY, tasks), [tasks])
+  useEffect(() => writeStorage(FINANCE_STORAGE_KEY, finance), [finance])
   useEffect(() => writeStorage(SCHEDULE_STORAGE_KEY, schedule), [schedule])
   useEffect(() => {
     if (!toast) return undefined
@@ -52,7 +57,6 @@ export function App() {
       dueDate: draft.dueDate || undefined,
       progress: draft.status === 'done' ? 100 : draft.progress,
     }
-
     const validation = validateTaskDraft(normalizedDraft, tasks, editingId)
     if (!validation.valid) return validation.message
 
@@ -64,7 +68,6 @@ export function App() {
       setTasks((items) => [...items, { id: Date.now(), ...normalizedDraft }])
       setToast('Task added')
     }
-
     return null
   }
 
@@ -73,16 +76,44 @@ export function App() {
     setToast('Task deleted')
   }
 
+  const saveFinance = (draft: FinanceDraft, editingId?: number) => {
+    const normalizedDraft: FinanceDraft = {
+      ...draft,
+      title: draft.title.trim(),
+      category: draft.category.trim(),
+      amount: Math.abs(draft.amount),
+      date: draft.date,
+      notes: draft.notes?.trim() || undefined,
+    }
+    const validation = validateFinanceDraft(normalizedDraft, finance, editingId)
+    if (!validation.valid) return validation.message
+
+    if (editingId) {
+      if (!finance.some((entry) => entry.id === editingId)) return 'Transaction not found.'
+      setFinance((items) => items.map((entry) => entry.id === editingId ? { ...entry, ...normalizedDraft } : entry))
+      setToast('Transaction updated')
+    } else {
+      setFinance((items) => [...items, { id: Date.now(), ...normalizedDraft }])
+      setToast('Transaction added')
+    }
+    return null
+  }
+
+  const deleteFinance = (id: number) => {
+    setFinance((current) => current.filter((entry) => entry.id !== id))
+    setToast('Transaction deleted')
+  }
+
   return (
     <div className="app-frame">
       <Sidebar activeView={activeView} onNavigate={setActiveView} />
       <main className="main-content">
         <Topbar view={activeView} />
         <div className="view-key">
-          {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={financeEntries} onToggleTask={toggleTask} />}
+          {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={finance} onToggleTask={toggleTask} />}
           {activeView === 'schedule' && <ScheduleView schedule={schedule} onScheduleChange={setSchedule} />}
           {activeView === 'tasks' && <TasksView tasks={tasks} onSaveTask={saveTask} onToggleTask={toggleTask} onDeleteTask={deleteTask} />}
-          {activeView === 'finance' && <FinanceView finance={financeEntries} />}
+          {activeView === 'finance' && <FinanceView finance={finance} onSaveFinance={saveFinance} onDeleteFinance={deleteFinance} />}
         </div>
       </main>
       {toast && <Toast message={toast} />}
