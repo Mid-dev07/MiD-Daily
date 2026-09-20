@@ -3,26 +3,27 @@
 Lightweight daily management web app for schedules, tasks, finance, and future productivity automation.
 
 ## Current phase
-M1.2 — Clean application architecture + interactive local prototype
+M1.3 — UI/UX & Interaction Foundation
 
 ## Stack
-- React
+- React 19
 - TypeScript
 - Vite
+- Native CSS animations (no animation library)
 
-## Project structure
+## Current capabilities
+- Dashboard, Schedule, Tasks, and Finance views
+- Add tasks
+- Toggle task completion
+- Task filtering
+- Local task persistence with `localStorage`
+- Responsive layout
+- Keyboard focus states
+- Lightweight micro-interactions and toast feedback
+- Reduced-motion support
 
-```text
-frontend/src/
-├── app/            # application composition and view switching
-├── components/     # reusable UI and layout components
-├── features/       # domain-specific modules
-├── data/            # local seed/demo data
-├── lib/             # infrastructure helpers
-├── types/           # shared domain types
-├── main.tsx
-└── styles.css
-```
+## Structure
+See [`docs/STRUCTURE.md`](./docs/STRUCTURE.md) for folder rules.
 
 ## Run locally
 
@@ -32,8 +33,11 @@ npm install
 npm run dev
 ```
 
-Build:
+## Build
 
 ```bash
+cd frontend
 npm run build
 ```
+
+The local-storage layer and seed data are prototype infrastructure. They are intentionally isolated so the next data-layer phase can replace them without restructuring the UI.

@@ -11,6 +11,6 @@ export function writeStorage<T>(key: string, value: T): void {
   try {
     localStorage.setItem(key, JSON.stringify(value))
   } catch {
-    // Local prototype: ignore storage failures and keep the UI usable.
+    // Local prototype: keep the UI usable if storage is unavailable.
   }
 }

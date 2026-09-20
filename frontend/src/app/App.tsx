@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Sidebar } from '../components/layout/Sidebar'
+import { Topbar } from '../components/layout/Topbar'
+import { Toast } from '../components/ui/Toast'
 import { initialTasks, financeEntries, scheduleItems } from '../data/seed'
 import { DashboardView } from '../features/dashboard/DashboardView'
 import { FinanceView } from '../features/finance/FinanceView'
@@ -13,15 +15,24 @@ const TASK_STORAGE_KEY = 'mid-daily.tasks'
 function App() {
   const [activeView, setActiveView] = useState<View>('dashboard')
   const [tasks, setTasks] = useState<Task[]>(() => readStorage(TASK_STORAGE_KEY, initialTasks))
+  const [toast, setToast] = useState('')
 
   useEffect(() => writeStorage(TASK_STORAGE_KEY, tasks), [tasks])
 
+  useEffect(() => {
+    if (!toast) return undefined
+    const timeout = window.setTimeout(() => setToast(''), 2200)
+    return () => window.clearTimeout(timeout)
+  }, [toast])
+
+
   const toggleTask = (id: number) => {
-    setTasks((current) => current.map((task) => (
-      task.id === id
-        ? { ...task, status: task.status === 'done' ? 'todo' : 'done' }
-        : task
-    )))
+    setTasks((current) => current.map((task) => {
+      if (task.id !== id) return task
+      const completed = task.status === 'done'
+      setToast(completed ? 'Task reopened' : 'Task completed')
+      return { ...task, status: completed ? 'todo' : 'done' }
+    }))
   }
 
   const addTask = (title: string, priority: TaskPriority) => {
@@ -29,26 +40,26 @@ function App() {
       ...current,
       { id: Date.now(), title, category: 'Personal', priority, status: 'todo' },
     ])
+    setToast('Task added')
   }
-
-  const pageTitle = activeView === 'dashboard'
-    ? 'Dashboard'
-    : `${activeView[0].toUpperCase()}${activeView.slice(1)}`
 
   return (
     <div className="app-frame">
       <Sidebar activeView={activeView} onNavigate={setActiveView} />
-      <main className="main-content">
-        <header className="topbar">
-          <div><span className="topbar-kicker">MI-D DAILY</span><h1>{pageTitle}</h1></div>
-          <div className="profile-chip"><span className="avatar">M</span><span>Personal workspace</span></div>
-        </header>
 
-        {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={scheduleItems} finance={financeEntries} onToggleTask={toggleTask} />}
-        {activeView === 'schedule' && <ScheduleView schedule={scheduleItems} />}
-        {activeView === 'tasks' && <TasksView tasks={tasks} onAddTask={addTask} onToggleTask={toggleTask} />}
-        {activeView === 'finance' && <FinanceView finance={financeEntries} />}
+      <main className="main-content">
+        <Topbar view={activeView} />
+        <div className="view-key">
+          {activeView === 'dashboard' && (
+            <DashboardView tasks={tasks} schedule={scheduleItems} finance={financeEntries} onToggleTask={toggleTask} />
+          )}
+          {activeView === 'schedule' && <ScheduleView schedule={scheduleItems} />}
+          {activeView === 'tasks' && <TasksView tasks={tasks} onAddTask={addTask} onToggleTask={toggleTask} />}
+          {activeView === 'finance' && <FinanceView finance={financeEntries} />}
+        </div>
       </main>
+
+      {toast && <Toast message={toast} />}
     </div>
   )
 }
