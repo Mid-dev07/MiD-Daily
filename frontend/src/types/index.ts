@@ -1,4 +1,4 @@
-export type View = 'dashboard' | 'schedule' | 'tasks' | 'finance' | 'social'
+export type View = 'dashboard' | 'schedule' | 'tasks' | 'finance' | 'social' | 'assistant'
 
 export type TaskStatus = 'todo' | 'in-progress' | 'done'
 export type TaskPriority = 'low' | 'medium' | 'high'
