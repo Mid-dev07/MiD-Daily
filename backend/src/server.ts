@@ -29,7 +29,6 @@ import {
   updateSchedule,
   type ScheduleRecord,
 } from './scheduleStore.js'
-import { createFinance, createTask, listFinance, listTasks } from './dataStore.js'
 
 const PORT = Number(process.env.PORT ?? 8787)
 const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:5173'
