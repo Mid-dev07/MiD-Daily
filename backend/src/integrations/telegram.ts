@@ -73,4 +73,8 @@ export function createAuditId(updateId: number) {
   return createHash('sha256').update(String(updateId)).digest('hex').slice(0, 16)
 }
 
+export function getTelegramConfig() {
+  return { configured: isTelegramConfigured(), botUsername: BOT_USERNAME }
+}
+
 export { BOT_USERNAME }
