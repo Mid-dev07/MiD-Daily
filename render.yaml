@@ -4,7 +4,7 @@ services:
     name: mid-daily-web
     rootDir: frontend
     plan: free
-    buildCommand: npm ci && npm run build
+    buildCommand: npm install && npm run build
     staticPublishPath: dist
     pullRequestPreviewsEnabled: true
     routes:
@@ -24,7 +24,7 @@ services:
     name: mid-daily-api
     rootDir: backend
     plan: free
-    buildCommand: npm ci && npm run build
+    buildCommand: npm install && npm run build
     startCommand: npm start
     healthCheckPath: /health
     envVars:
