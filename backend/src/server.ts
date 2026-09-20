@@ -11,7 +11,9 @@ const COOKIE_NAME = 'mid_daily_google'
 const OAUTH_STATE_COOKIE_NAME = 'mid_daily_google_oauth_state'
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000
+const ACCESS_TOKEN_REFRESH_MARGIN_MS = 60_000
 const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events'
+const GOOGLE_CALENDAR_API = 'https://www.googleapis.com/calendar/v3'
 
 interface OAuthState {
   verifier: string
@@ -29,6 +31,23 @@ interface GoogleTokenSet {
 interface GoogleConnection {
   token: GoogleTokenSet
   connectedAt: string
+}
+
+interface GoogleCalendarEventPayload {
+  summary: string
+  description?: string
+  location?: string
+  start: {
+    dateTime: string
+    timeZone: string
+  }
+  end: {
+    dateTime: string
+    timeZone: string
+  }
+  extendedProperties?: {
+    private?: Record<string, string>
+  }
 }
 
 const oauthStates = new Map<string, OAuthState>()
@@ -69,7 +88,7 @@ function setConnectionCookie(res: ServerResponse, connectionId: string) {
 
 function clearConnectionCookie(res: ServerResponse) {
   const secure = COOKIE_SECURE ? '; Secure' : ''
-  res.setHeader('Set-Cookie', [`${COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secure}`])
+  appendCookie(res, `${COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secure}`)
 }
 
 function setOAuthStateCookie(res: ServerResponse, state: string) {
@@ -104,6 +123,11 @@ function assertGoogleConfigured() {
   }
 }
 
+function getConnection(req: IncomingMessage) {
+  const connectionId = parseCookies(req)[COOKIE_NAME]
+  return connectionId ? connections.get(connectionId) : undefined
+}
+
 async function exchangeCode(code: string, verifier: string): Promise<GoogleTokenSet> {
   const body = new URLSearchParams({
     code,
@@ -134,6 +158,154 @@ async function exchangeCode(code: string, verifier: string): Promise<GoogleToken
   }
 }
 
+async function refreshAccessToken(connection: GoogleConnection) {
+  if (!connection.token.refreshToken) {
+    throw new Error('Google access expired. Reconnect Google Calendar.')
+  }
+
+  const body = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    client_secret: GOOGLE_CLIENT_SECRET,
+    refresh_token: connection.token.refreshToken,
+    grant_type: 'refresh_token',
+  })
+
+  const response = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  })
+  const data = await response.json() as Record<string, unknown>
+
+  if (!response.ok || typeof data.access_token !== 'string') {
+    throw new Error(typeof data.error_description === 'string' ? data.error_description : 'Google access token refresh failed.')
+  }
+
+  connection.token = {
+    ...connection.token,
+    accessToken: data.access_token,
+    expiresAt: Date.now() + Number(data.expires_in ?? 3600) * 1000,
+    tokenType: typeof data.token_type === 'string' ? data.token_type : connection.token.tokenType,
+    scope: typeof data.scope === 'string' ? data.scope : connection.token.scope,
+    refreshToken: connection.token.refreshToken,
+  }
+}
+
+async function getValidAccessToken(connection: GoogleConnection) {
+  if (connection.token.expiresAt - Date.now() <= ACCESS_TOKEN_REFRESH_MARGIN_MS) {
+    await refreshAccessToken(connection)
+  }
+  return connection.token.accessToken
+}
+
+async function readRequestJson(req: IncomingMessage) {
+  return await new Promise<Record<string, unknown>>((resolve, reject) => {
+    let body = ''
+    req.on('data', (chunk: Buffer | string) => {
+      body += chunk.toString()
+      if (body.length > 64 * 1024) {
+        reject(new Error('Request body is too large.'))
+        req.destroy()
+      }
+    })
+    req.on('end', () => {
+      if (!body.trim()) {
+        resolve({})
+        return
+      }
+      try {
+        resolve(JSON.parse(body) as Record<string, unknown>)
+      } catch {
+        reject(new Error('Request body must be valid JSON.'))
+      }
+    })
+    req.on('error', reject)
+  })
+}
+
+function parseEventPayload(value: unknown): GoogleCalendarEventPayload {
+  if (!value || typeof value !== 'object') throw new Error('Calendar event is required.')
+  const event = value as Record<string, unknown>
+  const start = event.start as Record<string, unknown> | undefined
+  const end = event.end as Record<string, unknown> | undefined
+
+  if (typeof event.summary !== 'string' || !event.summary.trim()) throw new Error('Calendar event summary is required.')
+  if (!start || typeof start.dateTime !== 'string' || typeof start.timeZone !== 'string') throw new Error('Calendar event start is invalid.')
+  if (!end || typeof end.dateTime !== 'string' || typeof end.timeZone !== 'string') throw new Error('Calendar event end is invalid.')
+
+  return {
+    summary: event.summary,
+    description: typeof event.description === 'string' ? event.description : undefined,
+    location: typeof event.location === 'string' ? event.location : undefined,
+    start: { dateTime: start.dateTime, timeZone: start.timeZone },
+    end: { dateTime: end.dateTime, timeZone: end.timeZone },
+    extendedProperties: {
+      private: {
+        midDailyScheduleId:
+          typeof (event.extendedProperties as Record<string, unknown> | undefined)?.private === 'object'
+            && typeof ((event.extendedProperties as Record<string, unknown>).private as Record<string, unknown>).midDailyScheduleId === 'string'
+            ? ((event.extendedProperties as Record<string, unknown>).private as Record<string, string>).midDailyScheduleId
+            : '',
+      },
+    },
+  }
+}
+
+function assertCalendarId(value: unknown) {
+  const calendarId = typeof value === 'string' && value.trim() ? value.trim() : 'primary'
+  if (calendarId.length > 256) throw new Error('Calendar ID is invalid.')
+  return calendarId
+}
+
+function assertEventId(value: unknown) {
+  if (typeof value !== 'string' || !/^[a-zA-Z0-9_-]{1,1024}$/.test(value)) {
+    throw new Error('Google Calendar event ID is invalid.')
+  }
+  return value
+}
+
+async function googleCalendarRequest(
+  connection: GoogleConnection,
+  method: string,
+  url: string,
+  body?: unknown,
+) {
+  const execute = async () => {
+    const accessToken = await getValidAccessToken(connection)
+    return fetch(url, {
+      method,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    })
+  }
+
+  let response = await execute()
+
+  if (response.status === 401 && connection.token.refreshToken) {
+    await refreshAccessToken(connection)
+    response = await execute()
+  }
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({})) as Record<string, unknown>
+    const message = typeof data.error_description === 'string'
+      ? data.error_description
+      : typeof (data.error as Record<string, unknown> | undefined)?.message === 'string'
+        ? (data.error as Record<string, unknown>).message
+        : `Google Calendar request failed (${response.status}).`
+
+    const error = new Error(message) as Error & { status?: number }
+    error.status = response.status
+    throw error
+  }
+
+  if (response.status === 204) return null
+  return response.json() as Promise<Record<string, unknown>>
+}
+
 function cleanupOAuthStates() {
   const cutoff = Date.now() - OAUTH_STATE_TTL_MS
   for (const [state, item] of oauthStates) {
@@ -142,8 +314,7 @@ function cleanupOAuthStates() {
 }
 
 function handleStatus(req: IncomingMessage, res: ServerResponse) {
-  const connectionId = parseCookies(req)[COOKIE_NAME]
-  const connection = connectionId ? connections.get(connectionId) : undefined
+  const connection = getConnection(req)
 
   sendJson(res, 200, {
     configured: Boolean(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET),
@@ -183,6 +354,7 @@ function handleStart(res: ServerResponse) {
 async function handleCallback(req: IncomingMessage, url: URL, res: ServerResponse) {
   const error = url.searchParams.get('error')
   if (error) {
+    clearOAuthStateCookie(res)
     sendRedirect(res, `${FRONTEND_URL}/?google=cancelled&reason=${encodeURIComponent(error)}`)
     return
   }
@@ -190,6 +362,7 @@ async function handleCallback(req: IncomingMessage, url: URL, res: ServerRespons
   const code = url.searchParams.get('code')
   const state = url.searchParams.get('state')
   if (!code || !state) {
+    clearOAuthStateCookie(res)
     sendRedirect(res, `${FRONTEND_URL}/?google=error&reason=missing_code_or_state`)
     return
   }
@@ -239,11 +412,71 @@ async function handleDisconnect(req: IncomingMessage, res: ServerResponse) {
   sendJson(res, 200, { connected: false })
 }
 
+async function handleCreateEvent(req: IncomingMessage, res: ServerResponse) {
+  const connection = getConnection(req)
+  if (!connection) {
+    sendJson(res, 401, { error: 'Google Calendar is not connected.' })
+    return
+  }
+
+  const body = await readRequestJson(req)
+  const calendarId = assertCalendarId(body.calendarId)
+  const event = parseEventPayload(body.event)
+  const result = await googleCalendarRequest(connection, 'POST', `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events`, event)
+
+  sendJson(res, 200, {
+    eventId: typeof result?.id === 'string' ? result.id : null,
+    htmlLink: typeof result?.htmlLink === 'string' ? result.htmlLink : null,
+  })
+}
+
+async function handleUpdateEvent(req: IncomingMessage, res: ServerResponse, url: URL) {
+  const connection = getConnection(req)
+  if (!connection) {
+    sendJson(res, 401, { error: 'Google Calendar is not connected.' })
+    return
+  }
+
+  const eventId = assertEventId(decodeURIComponent(url.pathname.split('/').pop() ?? ''))
+  const body = await readRequestJson(req)
+  const calendarId = assertCalendarId(body.calendarId)
+  const event = parseEventPayload(body.event)
+  const result = await googleCalendarRequest(
+    connection,
+    'PUT',
+    `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`,
+    event,
+  )
+
+  sendJson(res, 200, {
+    eventId: typeof result?.id === 'string' ? result.id : eventId,
+    htmlLink: typeof result?.htmlLink === 'string' ? result.htmlLink : null,
+  })
+}
+
+async function handleDeleteEvent(req: IncomingMessage, res: ServerResponse, url: URL) {
+  const connection = getConnection(req)
+  if (!connection) {
+    sendJson(res, 401, { error: 'Google Calendar is not connected.' })
+    return
+  }
+
+  const eventId = assertEventId(decodeURIComponent(url.pathname.split('/').pop() ?? ''))
+  const calendarId = assertCalendarId(url.searchParams.get('calendarId'))
+  await googleCalendarRequest(
+    connection,
+    'DELETE',
+    `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`,
+  )
+
+  sendJson(res, 200, { deleted: true, eventId })
+}
+
 function addCors(res: ServerResponse) {
   res.setHeader('Access-Control-Allow-Origin', FRONTEND_URL)
   res.setHeader('Access-Control-Allow-Credentials', 'true')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
 }
 
 async function handle(req: IncomingMessage, res: ServerResponse) {
@@ -283,9 +516,27 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
       return
     }
 
+    if (req.method === 'POST' && url.pathname === '/api/integrations/google-calendar/events') {
+      await handleCreateEvent(req, res)
+      return
+    }
+
+    if (req.method === 'PUT' && url.pathname.startsWith('/api/integrations/google-calendar/events/')) {
+      await handleUpdateEvent(req, res, url)
+      return
+    }
+
+    if (req.method === 'DELETE' && url.pathname.startsWith('/api/integrations/google-calendar/events/')) {
+      await handleDeleteEvent(req, res, url)
+      return
+    }
+
     sendJson(res, 404, { error: 'Not found' })
   } catch (error) {
-    sendJson(res, 500, { error: error instanceof Error ? error.message : 'Internal server error' })
+    const status = error instanceof Error && 'status' in error && typeof (error as { status?: unknown }).status === 'number'
+      ? Number((error as { status?: unknown }).status)
+      : 500
+    sendJson(res, status, { error: error instanceof Error ? error.message : 'Internal server error' })
   }
 }
 
