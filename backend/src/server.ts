@@ -1,5 +1,12 @@
 import { createHash, randomBytes } from 'node:crypto'
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
+import {
+  deleteGoogleConnection,
+  getGoogleConnection,
+  isGooglePersistenceConfigured,
+  saveGoogleConnection,
+  type GoogleConnection,
+} from './integrations/googleCalendarStore.js'
 
 const PORT = Number(process.env.PORT ?? 8787)
 const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:5173'
@@ -7,9 +14,9 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID ?? ''
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET ?? ''
 const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI ?? `http://localhost:${PORT}/auth/google/callback`
 const COOKIE_SECURE = process.env.COOKIE_SECURE === 'true'
-const COOKIE_NAME = 'mid_daily_google'
+const OWNER_COOKIE_NAME = 'mid_daily_owner'
 const OAUTH_STATE_COOKIE_NAME = 'mid_daily_google_oauth_state'
-const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7
+const OWNER_MAX_AGE_SECONDS = 60 * 60 * 24 * 30
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000
 const ACCESS_TOKEN_REFRESH_MARGIN_MS = 60_000
 const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events'
@@ -18,19 +25,7 @@ const GOOGLE_CALENDAR_API = 'https://www.googleapis.com/calendar/v3'
 interface OAuthState {
   verifier: string
   createdAt: number
-}
-
-interface GoogleTokenSet {
-  accessToken: string
-  refreshToken?: string
-  expiresAt: number
-  scope?: string
-  tokenType: string
-}
-
-interface GoogleConnection {
-  token: GoogleTokenSet
-  connectedAt: string
+  ownerId: string
 }
 
 interface GoogleCalendarEventPayload {
@@ -51,7 +46,6 @@ interface GoogleCalendarEventPayload {
 }
 
 const oauthStates = new Map<string, OAuthState>()
-const connections = new Map<string, GoogleConnection>()
 
 function sendJson(res: ServerResponse, status: number, payload: unknown) {
   const body = JSON.stringify(payload)
@@ -81,24 +75,36 @@ function appendCookie(res: ServerResponse, value: string) {
   res.setHeader('Set-Cookie', [...cookies, value])
 }
 
-function setConnectionCookie(res: ServerResponse, connectionId: string) {
-  const secure = COOKIE_SECURE ? '; Secure' : ''
-  appendCookie(res, `${COOKIE_NAME}=${encodeURIComponent(connectionId)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${SESSION_MAX_AGE_SECONDS}${secure}`)
+function cookieSuffix() {
+  return COOKIE_SECURE ? '; Secure' : ''
 }
 
-function clearConnectionCookie(res: ServerResponse) {
-  const secure = COOKIE_SECURE ? '; Secure' : ''
-  appendCookie(res, `${COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secure}`)
+function setOwnerCookie(res: ServerResponse, ownerId: string) {
+  appendCookie(
+    res,
+    `${OWNER_COOKIE_NAME}=${encodeURIComponent(ownerId)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${OWNER_MAX_AGE_SECONDS}${cookieSuffix()}`,
+  )
+}
+
+function clearOwnerCookie(res: ServerResponse) {
+  appendCookie(
+    res,
+    `${OWNER_COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${cookieSuffix()}`,
+  )
 }
 
 function setOAuthStateCookie(res: ServerResponse, state: string) {
-  const secure = COOKIE_SECURE ? '; Secure' : ''
-  appendCookie(res, `${OAUTH_STATE_COOKIE_NAME}=${encodeURIComponent(state)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=600${secure}`)
+  appendCookie(
+    res,
+    `${OAUTH_STATE_COOKIE_NAME}=${encodeURIComponent(state)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=600${cookieSuffix()}`,
+  )
 }
 
 function clearOAuthStateCookie(res: ServerResponse) {
-  const secure = COOKIE_SECURE ? '; Secure' : ''
-  appendCookie(res, `${OAUTH_STATE_COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secure}`)
+  appendCookie(
+    res,
+    `${OAUTH_STATE_COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${cookieSuffix()}`,
+  )
 }
 
 function base64Url(buffer: Buffer) {
@@ -117,18 +123,36 @@ function createId() {
   return base64Url(randomBytes(24))
 }
 
+function ensureOwnerId(req: IncomingMessage, res: ServerResponse) {
+  const existing = parseCookies(req)[OWNER_COOKIE_NAME]
+  if (existing && /^[A-Za-z0-9_-]{24,128}$/.test(existing)) return existing
+
+  const ownerId = createId()
+  setOwnerCookie(res, ownerId)
+  return ownerId
+}
+
+function readOwnerId(req: IncomingMessage) {
+  const ownerId = parseCookies(req)[OWNER_COOKIE_NAME]
+  if (!ownerId || !/^[A-Za-z0-9_-]{24,128}$/.test(ownerId)) {
+    throw new Error('MiD-Daily owner session is missing. Refresh and try again.')
+  }
+  return ownerId
+}
+
 function assertGoogleConfigured() {
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
-    throw new Error('Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.')
+    throw new Error('Google OAuth is not configured.')
   }
 }
 
-function getConnection(req: IncomingMessage) {
-  const connectionId = parseCookies(req)[COOKIE_NAME]
-  return connectionId ? connections.get(connectionId) : undefined
+function assertPersistenceConfigured() {
+  if (!isGooglePersistenceConfigured()) {
+    throw new Error('Supabase persistence is not configured.')
+  }
 }
 
-async function exchangeCode(code: string, verifier: string): Promise<GoogleTokenSet> {
+async function exchangeCode(code: string, verifier: string): Promise<GoogleConnection['token']> {
   const body = new URLSearchParams({
     code,
     client_id: GOOGLE_CLIENT_ID,
@@ -158,7 +182,7 @@ async function exchangeCode(code: string, verifier: string): Promise<GoogleToken
   }
 }
 
-async function refreshAccessToken(connection: GoogleConnection) {
+async function refreshAccessToken(ownerId: string, connection: GoogleConnection) {
   if (!connection.token.refreshToken) {
     throw new Error('Google access expired. Reconnect Google Calendar.')
   }
@@ -189,11 +213,13 @@ async function refreshAccessToken(connection: GoogleConnection) {
     scope: typeof data.scope === 'string' ? data.scope : connection.token.scope,
     refreshToken: connection.token.refreshToken,
   }
+
+  await saveGoogleConnection(ownerId, connection)
 }
 
-async function getValidAccessToken(connection: GoogleConnection) {
+async function getValidAccessToken(ownerId: string, connection: GoogleConnection) {
   if (connection.token.expiresAt - Date.now() <= ACCESS_TOKEN_REFRESH_MARGIN_MS) {
-    await refreshAccessToken(connection)
+    await refreshAccessToken(ownerId, connection)
   }
   return connection.token.accessToken
 }
@@ -234,20 +260,12 @@ function parseEventPayload(value: unknown): GoogleCalendarEventPayload {
   if (!end || typeof end.dateTime !== 'string' || typeof end.timeZone !== 'string') throw new Error('Calendar event end is invalid.')
 
   return {
-    summary: event.summary,
+    summary: event.summary.trim(),
     description: typeof event.description === 'string' ? event.description : undefined,
     location: typeof event.location === 'string' ? event.location : undefined,
     start: { dateTime: start.dateTime, timeZone: start.timeZone },
     end: { dateTime: end.dateTime, timeZone: end.timeZone },
-    extendedProperties: {
-      private: {
-        midDailyScheduleId:
-          typeof (event.extendedProperties as Record<string, unknown> | undefined)?.private === 'object'
-            && typeof ((event.extendedProperties as Record<string, unknown>).private as Record<string, unknown>).midDailyScheduleId === 'string'
-            ? ((event.extendedProperties as Record<string, unknown>).private as Record<string, string>).midDailyScheduleId
-            : '',
-      },
-    },
+    extendedProperties: event.extendedProperties,
   }
 }
 
@@ -265,13 +283,14 @@ function assertEventId(value: unknown) {
 }
 
 async function googleCalendarRequest(
+  ownerId: string,
   connection: GoogleConnection,
   method: string,
   url: string,
   body?: unknown,
 ) {
   const execute = async () => {
-    const accessToken = await getValidAccessToken(connection)
+    const accessToken = await getValidAccessToken(ownerId, connection)
     return fetch(url, {
       method,
       headers: {
@@ -285,16 +304,17 @@ async function googleCalendarRequest(
   let response = await execute()
 
   if (response.status === 401 && connection.token.refreshToken) {
-    await refreshAccessToken(connection)
+    await refreshAccessToken(ownerId, connection)
     response = await execute()
   }
 
   if (!response.ok) {
     const data = await response.json().catch(() => ({})) as Record<string, unknown>
+    const nestedError = data.error as Record<string, unknown> | undefined
     const message = typeof data.error_description === 'string'
       ? data.error_description
-      : typeof (data.error as Record<string, unknown> | undefined)?.message === 'string'
-        ? (data.error as Record<string, unknown>).message
+      : typeof nestedError?.message === 'string'
+        ? nestedError.message
         : `Google Calendar request failed (${response.status}).`
 
     const error = new Error(message) as Error & { status?: number }
@@ -313,24 +333,27 @@ function cleanupOAuthStates() {
   }
 }
 
-function handleStatus(req: IncomingMessage, res: ServerResponse) {
-  const connection = getConnection(req)
+async function handleStatus(req: IncomingMessage, res: ServerResponse) {
+  const ownerId = ensureOwnerId(req, res)
+  const connection = isGooglePersistenceConfigured() ? await getGoogleConnection(ownerId) : null
 
   sendJson(res, 200, {
-    configured: Boolean(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET),
+    configured: Boolean(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET && isGooglePersistenceConfigured()),
     connected: Boolean(connection),
     connectedAt: connection?.connectedAt ?? null,
   })
 }
 
-function handleStart(res: ServerResponse) {
+function handleStart(req: IncomingMessage, res: ServerResponse) {
   try {
     assertGoogleConfigured()
+    assertPersistenceConfigured()
     cleanupOAuthStates()
 
+    const ownerId = ensureOwnerId(req, res)
     const state = base64Url(randomBytes(24))
     const verifier = createPkceVerifier()
-    oauthStates.set(state, { verifier, createdAt: Date.now() })
+    oauthStates.set(state, { verifier, createdAt: Date.now(), ownerId })
     setOAuthStateCookie(res, state)
 
     const params = new URLSearchParams({
@@ -372,57 +395,68 @@ async function handleCallback(req: IncomingMessage, url: URL, res: ServerRespons
   oauthStates.delete(state)
   clearOAuthStateCookie(res)
 
-  if (requestState !== state || !pending || Date.now() - pending.createdAt > OAUTH_STATE_TTL_MS) {
+  const ownerId = parseCookies(req)[OWNER_COOKIE_NAME]
+  if (requestState !== state || !ownerId || !pending || pending.ownerId !== ownerId || Date.now() - pending.createdAt > OAUTH_STATE_TTL_MS) {
     sendRedirect(res, `${FRONTEND_URL}/?google=error&reason=invalid_or_expired_state`)
     return
   }
 
   try {
     assertGoogleConfigured()
+    assertPersistenceConfigured()
     const token = await exchangeCode(code, pending.verifier)
-    const connectionId = createId()
-    connections.set(connectionId, { token, connectedAt: new Date().toISOString() })
-    setConnectionCookie(res, connectionId)
+    await saveGoogleConnection(ownerId, { token, connectedAt: new Date().toISOString() })
     sendRedirect(res, `${FRONTEND_URL}/?google=connected`)
   } catch (exchangeError) {
     sendRedirect(res, `${FRONTEND_URL}/?google=error&reason=${encodeURIComponent(exchangeError instanceof Error ? exchangeError.message : 'token_exchange_failed')}`)
   }
 }
 
-async function revokeToken(token: GoogleTokenSet) {
+async function revokeToken(token: GoogleConnection['token']) {
   await fetch(`https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(token.refreshToken ?? token.accessToken)}`, {
     method: 'POST',
   })
 }
 
 async function handleDisconnect(req: IncomingMessage, res: ServerResponse) {
-  const connectionId = parseCookies(req)[COOKIE_NAME]
-  if (connectionId) {
-    const connection = connections.get(connectionId)
+  try {
+    const ownerId = readOwnerId(req)
+    const connection = await getGoogleConnection(ownerId)
+
     if (connection) {
       try {
         await revokeToken(connection.token)
       } finally {
-        connections.delete(connectionId)
+        await deleteGoogleConnection(ownerId)
       }
     }
+
+    sendJson(res, 200, { connected: false })
+  } catch (error) {
+    sendJson(res, 500, { error: error instanceof Error ? error.message : 'Unable to disconnect Google Calendar.' })
+  }
+}
+
+async function requireConnection(req: IncomingMessage, res: ServerResponse) {
+  const ownerId = readOwnerId(req)
+  const connection = await getGoogleConnection(ownerId)
+
+  if (!connection) {
+    sendJson(res, 401, { error: 'Google Calendar is not connected.' })
+    return null
   }
 
-  clearConnectionCookie(res)
-  sendJson(res, 200, { connected: false })
+  return { ownerId, connection }
 }
 
 async function handleCreateEvent(req: IncomingMessage, res: ServerResponse) {
-  const connection = getConnection(req)
-  if (!connection) {
-    sendJson(res, 401, { error: 'Google Calendar is not connected.' })
-    return
-  }
+  const context = await requireConnection(req, res)
+  if (!context) return
 
   const body = await readRequestJson(req)
   const calendarId = assertCalendarId(body.calendarId)
   const event = parseEventPayload(body.event)
-  const result = await googleCalendarRequest(connection, 'POST', `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events`, event)
+  const result = await googleCalendarRequest(context.ownerId, context.connection, 'POST', `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events`, event)
 
   sendJson(res, 200, {
     eventId: typeof result?.id === 'string' ? result.id : null,
@@ -431,18 +465,16 @@ async function handleCreateEvent(req: IncomingMessage, res: ServerResponse) {
 }
 
 async function handleUpdateEvent(req: IncomingMessage, res: ServerResponse, url: URL) {
-  const connection = getConnection(req)
-  if (!connection) {
-    sendJson(res, 401, { error: 'Google Calendar is not connected.' })
-    return
-  }
+  const context = await requireConnection(req, res)
+  if (!context) return
 
   const eventId = assertEventId(decodeURIComponent(url.pathname.split('/').pop() ?? ''))
   const body = await readRequestJson(req)
   const calendarId = assertCalendarId(body.calendarId)
   const event = parseEventPayload(body.event)
   const result = await googleCalendarRequest(
-    connection,
+    context.ownerId,
+    context.connection,
     'PUT',
     `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`,
     event,
@@ -455,16 +487,14 @@ async function handleUpdateEvent(req: IncomingMessage, res: ServerResponse, url:
 }
 
 async function handleDeleteEvent(req: IncomingMessage, res: ServerResponse, url: URL) {
-  const connection = getConnection(req)
-  if (!connection) {
-    sendJson(res, 401, { error: 'Google Calendar is not connected.' })
-    return
-  }
+  const context = await requireConnection(req, res)
+  if (!context) return
 
   const eventId = assertEventId(decodeURIComponent(url.pathname.split('/').pop() ?? ''))
   const calendarId = assertCalendarId(url.searchParams.get('calendarId'))
   await googleCalendarRequest(
-    connection,
+    context.ownerId,
+    context.connection,
     'DELETE',
     `${GOOGLE_CALENDAR_API}/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`,
   )
@@ -492,17 +522,21 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
 
   try {
     if (req.method === 'GET' && url.pathname === '/health') {
-      sendJson(res, 200, { ok: true, service: 'mid-daily-backend' })
+      sendJson(res, 200, {
+        ok: true,
+        service: 'mid-daily-backend',
+        persistenceConfigured: isGooglePersistenceConfigured(),
+      })
       return
     }
 
     if (req.method === 'GET' && url.pathname === '/api/integrations/google-calendar/status') {
-      handleStatus(req, res)
+      await handleStatus(req, res)
       return
     }
 
     if (req.method === 'GET' && url.pathname === '/auth/google/start') {
-      handleStart(res)
+      handleStart(req, res)
       return
     }
 
