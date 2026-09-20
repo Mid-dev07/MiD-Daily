@@ -9,7 +9,8 @@ export interface TaskValidationResult {
 export function validateTaskDraft(draft: TaskDraft, existing: Task[], editingId?: number): TaskValidationResult {
   if (!draft.title.trim()) return { valid: false, message: 'Title is required.' }
   if (!draft.category.trim()) return { valid: false, message: 'Category is required.' }
-  if (!Number.isInteger(draft.progress) || draft.progress < 0 || draft.progress > 100) {
+  const progress = draft.progress ?? 0
+  if (!Number.isInteger(progress) || progress < 0 || progress > 100) {
     return { valid: false, message: 'Progress must be between 0 and 100.' }
   }
 
