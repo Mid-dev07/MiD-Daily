@@ -8,6 +8,7 @@ import { FinanceView } from '../features/finance/FinanceView'
 import { ScheduleView } from '../features/schedule/ScheduleView'
 import { TasksView } from '../features/tasks/TasksView'
 import { normalizeTaskList } from '../features/tasks/task.migration'
+import { validateTaskDraft } from '../features/tasks/task.validation'
 import { initialScheduleItems } from '../features/schedule/schedule.data'
 import { normalizeScheduleList } from '../features/schedule/schedule.migration'
 import { useReminderScheduler } from '../features/schedule/hooks/useReminderScheduler'
@@ -52,12 +53,8 @@ export function App() {
       progress: draft.status === 'done' ? 100 : draft.progress,
     }
 
-    if (!normalizedDraft.title) return 'Title is required.'
-    if (!normalizedDraft.category) return 'Category is required.'
-    if (!Number.isInteger(normalizedDraft.progress) || normalizedDraft.progress < 0 || normalizedDraft.progress > 100) return 'Progress must be between 0 and 100.'
-
-    const duplicate = tasks.some((task) => task.id !== editingId && task.title.trim().toLowerCase() === normalizedDraft.title.toLowerCase())
-    if (duplicate) return 'A task with this title already exists.'
+    const validation = validateTaskDraft(normalizedDraft, tasks, editingId)
+    if (!validation.valid) return validation.message
 
     if (editingId) {
       if (!tasks.some((task) => task.id === editingId)) return 'Task not found.'
