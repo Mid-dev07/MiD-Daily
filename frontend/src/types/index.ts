@@ -9,11 +9,9 @@ export interface Task {
   category: string
   priority: TaskPriority
   status: TaskStatus
+  dueDate?: string
+  notes?: string
+  progress?: number
 }
 
-export interface FinanceEntry {
-  id: number
-  type: 'income' | 'expense'
-  title: string
-  amount: number
-}
+export type TaskDraft = Omit<Task, 'id'>
