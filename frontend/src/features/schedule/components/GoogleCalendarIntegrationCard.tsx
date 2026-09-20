@@ -69,10 +69,10 @@ export function GoogleCalendarIntegrationCard() {
           : 'Google Calendar not configured'
 
   const description = status.connected
-    ? 'OAuth is active on the backend. Calendar event creation will use this server-side connection in the next sync step.'
+    ? 'OAuth is active on the backend. Schedule events can now be created, updated, and deleted through the authenticated Calendar connection.'
     : status.configured
       ? 'Connect your Google account to authorize Calendar access. MiD-Daily keeps OAuth tokens on the backend.'
-      : 'Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in the backend environment before connecting.'
+      : 'Configure Google OAuth, Supabase persistence, and TOKEN_ENCRYPTION_KEY_B64 in the backend environment before connecting.'
 
   return (
     <section className="notification-card schedule-integration-card google-calendar-card" aria-label="Google Calendar integration">
