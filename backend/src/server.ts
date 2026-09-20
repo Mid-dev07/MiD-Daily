@@ -8,6 +8,7 @@ const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET ?? ''
 const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI ?? `http://localhost:${PORT}/auth/google/callback`
 const COOKIE_SECURE = process.env.COOKIE_SECURE === 'true'
 const COOKIE_NAME = 'mid_daily_google'
+const OAUTH_STATE_COOKIE_NAME = 'mid_daily_google_oauth_state'
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000
 const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events'
@@ -65,6 +66,20 @@ function setConnectionCookie(res: ServerResponse, connectionId: string) {
 function clearConnectionCookie(res: ServerResponse) {
   const secure = COOKIE_SECURE ? '; Secure' : ''
   res.setHeader('Set-Cookie', [`${COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secure}`])
+}
+
+function setOAuthStateCookie(res: ServerResponse, state: string) {
+  const secure = COOKIE_SECURE ? '; Secure' : ''
+  res.setHeader('Set-Cookie', [
+    `${OAUTH_STATE_COOKIE_NAME}=${encodeURIComponent(state)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=600${secure}`,
+  ])
+}
+
+function clearOAuthStateCookie(res: ServerResponse) {
+  const secure = COOKIE_SECURE ? '; Secure' : ''
+  res.setHeader('Set-Cookie', [
+    `${OAUTH_STATE_COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secure}`,
+  ])
 }
 
 function base64Url(buffer: Buffer) {
@@ -145,6 +160,7 @@ function handleStart(res: ServerResponse) {
     const state = base64Url(randomBytes(24))
     const verifier = createPkceVerifier()
     oauthStates.set(state, { verifier, createdAt: Date.now() })
+    setOAuthStateCookie(res, state)
 
     const params = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
@@ -164,7 +180,7 @@ function handleStart(res: ServerResponse) {
   }
 }
 
-async function handleCallback(url: URL, res: ServerResponse) {
+async function handleCallback(req: IncomingMessage, url: URL, res: ServerResponse) {
   const error = url.searchParams.get('error')
   if (error) {
     sendRedirect(res, `${FRONTEND_URL}/?google=cancelled&reason=${encodeURIComponent(error)}`)
@@ -178,10 +194,12 @@ async function handleCallback(url: URL, res: ServerResponse) {
     return
   }
 
+  const requestState = parseCookies(req)[OAUTH_STATE_COOKIE_NAME]
   const pending = oauthStates.get(state)
   oauthStates.delete(state)
+  clearOAuthStateCookie(res)
 
-  if (!pending || Date.now() - pending.createdAt > OAUTH_STATE_TTL_MS) {
+  if (requestState !== state || !pending || Date.now() - pending.createdAt > OAUTH_STATE_TTL_MS) {
     sendRedirect(res, `${FRONTEND_URL}/?google=error&reason=invalid_or_expired_state`)
     return
   }
@@ -256,7 +274,7 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
     }
 
     if (req.method === 'GET' && url.pathname === '/auth/google/callback') {
-      await handleCallback(url, res)
+      await handleCallback(req, url, res)
       return
     }
 
