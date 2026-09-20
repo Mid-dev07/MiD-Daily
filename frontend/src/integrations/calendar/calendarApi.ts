@@ -71,8 +71,13 @@ export async function updateGoogleCalendarEvent(
 }
 
 export async function deleteGoogleCalendarEvent(item: ScheduleItem, eventId: string) {
-  await request<{ deleted: boolean }>(
-    `${API_BASE_URL}/api/integrations/google-calendar/events/${encodeURIComponent(eventId)}?calendarId=${encodeURIComponent(item.googleCalendar.calendarId)}`,
-    { method: 'DELETE' },
-  )
+  try {
+    await request<{ deleted: boolean }>(
+      `${API_BASE_URL}/api/integrations/google-calendar/events/${encodeURIComponent(eventId)}?calendarId=${encodeURIComponent(item.googleCalendar.calendarId)}`,
+      { method: 'DELETE' },
+    )
+  } catch (reason) {
+    if (reason instanceof CalendarApiError && reason.status === 404) return
+    throw reason
+  }
 }
