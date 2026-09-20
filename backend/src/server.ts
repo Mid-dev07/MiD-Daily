@@ -53,11 +53,6 @@ const supabaseAuthClient = SUPABASE_URL && SUPABASE_SECRET_KEY
   ? createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, { auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false } })
   : null
 
-interface OAuthState {
-  verifier: string
-  createdAt: number
-  ownerId: string
-}
 
 interface GoogleCalendarEventPayload {
   summary: string
@@ -76,7 +71,6 @@ interface GoogleCalendarEventPayload {
   }
 }
 
-const oauthStates = new Map<string, OAuthState>()
 
 function sendJson(res: ServerResponse, status: number, payload: unknown) {
   const body = JSON.stringify(payload)
