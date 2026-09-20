@@ -1,0 +1,84 @@
+import { useEffect, useState, type FormEvent } from 'react'
+import type { FinanceDraft, FinanceEntry, FinanceEntryType } from '../../../types'
+
+interface FinanceFormProps {
+  open: boolean
+  initialEntry?: FinanceEntry
+  defaultDate: string
+  onClose: () => void
+  onSubmit: (draft: FinanceDraft, editingId?: number) => string | null
+}
+
+const getEmptyDraft = (date: string): FinanceDraft => ({
+  type: 'expense',
+  title: '',
+  amount: 0,
+  category: 'General',
+  date,
+  notes: '',
+})
+
+export function FinanceForm({ open, initialEntry, defaultDate, onClose, onSubmit }: FinanceFormProps) {
+  const [draft, setDraft] = useState<FinanceDraft>(() => getEmptyDraft(defaultDate))
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!open) return
+    setDraft(initialEntry ? {
+      type: initialEntry.type,
+      title: initialEntry.title,
+      amount: initialEntry.amount,
+      category: initialEntry.category,
+      date: initialEntry.date,
+      notes: initialEntry.notes ?? '',
+    } : getEmptyDraft(defaultDate))
+    setError('')
+  }, [open, initialEntry, defaultDate])
+
+  if (!open) return null
+
+  const setField = <K extends keyof FinanceDraft>(field: K, value: FinanceDraft[K]) => {
+    setDraft((current) => ({ ...current, [field]: value }))
+    setError('')
+  }
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const result = onSubmit({ ...draft, amount: Math.abs(draft.amount) }, initialEntry?.id)
+    if (result) {
+      setError(result)
+      return
+    }
+    onClose()
+  }
+
+  return (
+    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="finance-form-title">
+        <div className="modal-header">
+          <div><span className="section-kicker">FINANCE</span><h3 id="finance-form-title">{initialEntry ? 'Edit transaction' : 'Add transaction'}</h3></div>
+          <button className="icon-button" type="button" onClick={onClose} aria-label="Close finance form">×</button>
+        </div>
+
+        <form className="schedule-form" onSubmit={submit}>
+          <div className="form-grid two">
+            <label>Type<select value={draft.type} onChange={(event) => setField('type', event.target.value as FinanceEntryType)}><option value="expense">Expense</option><option value="income">Income</option></select></label>
+            <label>Date<input type="date" value={draft.date} onChange={(event) => setField('date', event.target.value)} /></label>
+          </div>
+
+          <label>Title<input value={draft.title} onChange={(event) => setField('title', event.target.value)} placeholder="e.g. Internet bill" autoFocus /></label>
+
+          <div className="form-grid two">
+            <label>Amount<input type="number" min="1" step="1" value={draft.amount || ''} onChange={(event) => setField('amount', Number(event.target.value))} placeholder="0" /></label>
+            <label>Category<input value={draft.category} onChange={(event) => setField('category', event.target.value)} placeholder="e.g. Food" /></label>
+          </div>
+
+          <label>Notes<textarea rows={4} value={draft.notes ?? ''} onChange={(event) => setField('notes', event.target.value)} placeholder="Optional note" /></label>
+
+          {error && <div className="form-error" role="alert">{error}</div>}
+          <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>Cancel</button><button className="primary-button" type="submit">{initialEntry ? 'Save changes' : 'Add transaction'}</button></div>
+        </form>
+      </section>
+    </div>
+  )
+}
