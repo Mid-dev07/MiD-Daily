@@ -11,7 +11,7 @@ M2.6 — Schedule / Google Calendar foundation
 - Vite
 
 ## Structure
-The frontend uses a responsibility-first structure. Feature-specific code stays inside its feature folder; shared layout, UI primitives, utilities, and integrations remain separate.
+The frontend uses a responsibility-first structure. Feature-specific code stays inside its feature folder; shared layout, UI primitives, utilities, and integrations remain separate. The backend is a lightweight TypeScript service for secure integrations.
 
 ## Run locally
 
@@ -21,5 +21,15 @@ npm install
 npm run dev
 ```
 
+## Run backend locally
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+Copy `backend/.env.example` to `backend/.env` and configure the Google OAuth credentials before connecting Calendar.
+
 ## Current focus
-The Schedule module has date navigation, filtering, CRUD, recurrence, reminders, local persistence, browser notifications, and a Google Calendar handoff. The next Calendar step is secure OAuth authorization plus API-backed one-way sync, followed later by two-way synchronization.
+The Schedule module has date navigation, filtering, CRUD, recurrence, reminders, local persistence, browser notifications, a Google Calendar handoff, and a backend OAuth connection layer. The next Calendar step is API-backed one-way event sync, followed later by two-way synchronization.
