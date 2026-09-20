@@ -22,7 +22,8 @@ import { useReminderScheduler } from '../features/schedule/hooks/useReminderSche
 import { readUserStorage, writeUserStorage, hasUserStorage } from '../lib/userStorage'
 import { hasCompletedRemoteSync, markRemoteSyncComplete } from '../lib/dataSync'
 import { useAuth } from '../features/auth/AuthProvider'
-import type { FinanceDraft, FinanceEntry, Task, TaskDraft, ScheduleItem, View } from '../types'
+import type { FinanceDraft, FinanceEntry, Task, TaskDraft, View } from '../types'
+import type { ScheduleItem } from '../features/schedule/schedule.types'
 
 const TASK_STORAGE_KEY = 'mid-daily.tasks'
 const FINANCE_STORAGE_KEY = 'mid-daily.finance'
