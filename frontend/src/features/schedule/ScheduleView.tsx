@@ -75,9 +75,18 @@ export function ScheduleView({ schedule, onScheduleChange }: ScheduleViewProps) 
 
     try {
       const event = toGoogleCalendarEventPayload(item)
-      const result = item.googleCalendar.eventId
-        ? await updateGoogleCalendarEvent(item, item.googleCalendar.eventId, event)
-        : await createGoogleCalendarEvent(item, event)
+      let result
+      try {
+        result = item.googleCalendar.eventId
+          ? await updateGoogleCalendarEvent(item, item.googleCalendar.eventId, event)
+          : await createGoogleCalendarEvent(item, event)
+      } catch (reason) {
+        if (item.googleCalendar.eventId && reason instanceof Error && 'status' in reason && (reason as { status?: unknown }).status === 404) {
+          result = await createGoogleCalendarEvent(item, event)
+        } else {
+          throw reason
+        }
+      }
 
       onScheduleChange(normalizedSchedule.map((entry) => entry.id === item.id ? {
         ...entry,
