@@ -8,6 +8,17 @@ import {
   saveGoogleConnection,
   type GoogleConnection,
 } from './integrations/googleCalendarStore.js'
+import {
+  createFinance,
+  createTask,
+  deleteFinance,
+  deleteTask,
+  isDataPersistenceConfigured,
+  listFinance,
+  listTasks,
+  updateFinance,
+  updateTask,
+} from './dataStore.js'
 
 const PORT = Number(process.env.PORT ?? 8787)
 const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:5173'
@@ -544,6 +555,144 @@ async function handleDeleteEvent(req: IncomingMessage, res: ServerResponse, url:
   sendJson(res, 200, { deleted: true, eventId })
 }
 
+
+function asyncHttpError(status: number, message: string) {
+  return httpError(status, message)
+}
+
+async function requireAuthenticatedUserId(req: IncomingMessage) {
+  const authorization = req.headers.authorization
+  if (!authorization?.startsWith('Bearer ')) throw asyncHttpError(401, 'Authentication is required.')
+  if (!supabaseAuthClient) throw asyncHttpError(503, 'Supabase Auth is not configured.')
+  const token = authorization.slice('Bearer '.length).trim()
+  if (!token) throw asyncHttpError(401, 'Invalid access token.')
+
+  const { data, error } = await supabaseAuthClient.auth.getUser(token)
+  if (error || !data.user) throw asyncHttpError(401, 'Authentication session is invalid.')
+  return data.user.id
+}
+
+function assertTaskId(url: URL) {
+  const raw = url.pathname.split('/').pop() ?? ''
+  const id = Number(raw)
+  if (!Number.isSafeInteger(id) || id <= 0) throw httpError(400, 'Task ID is invalid.')
+  return id
+}
+
+function assertFinanceId(url: URL) {
+  const raw = url.pathname.split('/').pop() ?? ''
+  const id = Number(raw)
+  if (!Number.isSafeInteger(id) || id <= 0) throw httpError(400, 'Finance entry ID is invalid.')
+  return id
+}
+
+function validateTaskInput(body: Record<string, unknown>) {
+  const title = typeof body.title === 'string' ? body.title.trim() : ''
+  const category = typeof body.category === 'string' ? body.category.trim() : ''
+  const priority = body.priority
+  const status = body.status
+  const progress = body.progress
+  const dueDate = body.dueDate
+  const notes = body.notes
+
+  if (!title || !category) throw httpError(400, 'Task title and category are required.')
+  if (!['low', 'medium', 'high'].includes(String(priority))) throw httpError(400, 'Task priority is invalid.')
+  if (!['todo', 'in-progress', 'done'].includes(String(status))) throw httpError(400, 'Task status is invalid.')
+  if (!Number.isInteger(progress) || Number(progress) < 0 || Number(progress) > 100) throw httpError(400, 'Task progress is invalid.')
+  if (dueDate !== undefined && dueDate !== null && (typeof dueDate !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(dueDate))) {
+    throw httpError(400, 'Task due date is invalid.')
+  }
+
+  return {
+    title,
+    category,
+    priority: priority as 'low' | 'medium' | 'high',
+    status: status as 'todo' | 'in-progress' | 'done',
+    progress: Number(progress),
+    dueDate: typeof dueDate === 'string' && dueDate ? dueDate : undefined,
+    notes: typeof notes === 'string' && notes.trim() ? notes.trim() : undefined,
+  }
+}
+
+function validateFinanceInput(body: Record<string, unknown>) {
+  const type = body.type
+  const title = typeof body.title === 'string' ? body.title.trim() : ''
+  const amount = Number(body.amount)
+  const category = typeof body.category === 'string' ? body.category.trim() : ''
+  const date = body.date
+  const notes = body.notes
+
+  if (!['income', 'expense'].includes(String(type))) throw httpError(400, 'Finance type is invalid.')
+  if (!title || !category) throw httpError(400, 'Finance title and category are required.')
+  if (!Number.isFinite(amount) || amount <= 0) throw httpError(400, 'Finance amount must be greater than zero.')
+  if (typeof date !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(date)) throw httpError(400, 'Finance date is invalid.')
+
+  return {
+    type: type as 'income' | 'expense',
+    title,
+    amount,
+    category,
+    date,
+    notes: typeof notes === 'string' && notes.trim() ? notes.trim() : undefined,
+  }
+}
+
+async function handleListTasks(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  sendJson(res, 200, { items: await listTasks(userId) })
+}
+
+async function handleCreateTask(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  const body = await readRequestJson(req)
+  const item = await createTask(userId, validateTaskInput(body) as never)
+  sendJson(res, 201, { item })
+}
+
+async function handleUpdateTask(req: IncomingMessage, res: ServerResponse, url: URL) {
+  const userId = await requireAuthenticatedUserId(req)
+  const id = assertTaskId(url)
+  const body = await readRequestJson(req)
+  const item = await updateTask(userId, id, validateTaskInput(body) as never)
+  if (!item) throw httpError(404, 'Task not found.')
+  sendJson(res, 200, { item })
+}
+
+async function handleDeleteTask(req: IncomingMessage, res: ServerResponse, url: URL) {
+  const userId = await requireAuthenticatedUserId(req)
+  const deleted = await deleteTask(userId, assertTaskId(url))
+  if (!deleted) throw httpError(404, 'Task not found.')
+  sendJson(res, 200, { deleted: true })
+}
+
+async function handleListFinance(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  sendJson(res, 200, { items: await listFinance(userId) })
+}
+
+async function handleCreateFinance(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  const body = await readRequestJson(req)
+  const item = await createFinance(userId, validateFinanceInput(body))
+  sendJson(res, 201, { item })
+}
+
+async function handleUpdateFinance(req: IncomingMessage, res: ServerResponse, url: URL) {
+  const userId = await requireAuthenticatedUserId(req)
+  const id = assertFinanceId(url)
+  const body = await readRequestJson(req)
+  const item = await updateFinance(userId, id, validateFinanceInput(body))
+  if (!item) throw httpError(404, 'Finance entry not found.')
+  sendJson(res, 200, { item })
+}
+
+async function handleDeleteFinance(req: IncomingMessage, res: ServerResponse, url: URL) {
+  const userId = await requireAuthenticatedUserId(req)
+  const deleted = await deleteFinance(userId, assertFinanceId(url))
+  if (!deleted) throw httpError(404, 'Finance entry not found.')
+  sendJson(res, 200, { deleted: true })
+}
+
 function addCors(res: ServerResponse) {
   res.setHeader('Access-Control-Allow-Origin', FRONTEND_URL)
   res.setHeader('Access-Control-Allow-Credentials', 'true')
@@ -568,6 +717,7 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
         ok: true,
         service: 'mid-daily-backend',
         persistenceConfigured: isGooglePersistenceConfigured(),
+        dataPersistenceConfigured: isDataPersistenceConfigured(),
       })
       return
     }
@@ -609,6 +759,40 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
 
     if (req.method === 'DELETE' && url.pathname.startsWith('/api/integrations/google-calendar/events/')) {
       await handleDeleteEvent(req, res, url)
+      return
+    }
+
+    if (req.method === 'GET' && url.pathname === '/api/tasks') {
+      await handleListTasks(req, res)
+      return
+    }
+    if (req.method === 'POST' && url.pathname === '/api/tasks') {
+      await handleCreateTask(req, res)
+      return
+    }
+    if (req.method === 'PUT' && url.pathname.startsWith('/api/tasks/')) {
+      await handleUpdateTask(req, res, url)
+      return
+    }
+    if (req.method === 'DELETE' && url.pathname.startsWith('/api/tasks/')) {
+      await handleDeleteTask(req, res, url)
+      return
+    }
+
+    if (req.method === 'GET' && url.pathname === '/api/finance') {
+      await handleListFinance(req, res)
+      return
+    }
+    if (req.method === 'POST' && url.pathname === '/api/finance') {
+      await handleCreateFinance(req, res)
+      return
+    }
+    if (req.method === 'PUT' && url.pathname.startsWith('/api/finance/')) {
+      await handleUpdateFinance(req, res, url)
+      return
+    }
+    if (req.method === 'DELETE' && url.pathname.startsWith('/api/finance/')) {
+      await handleDeleteFinance(req, res, url)
       return
     }
 
