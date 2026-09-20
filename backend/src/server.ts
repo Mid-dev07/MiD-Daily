@@ -6,6 +6,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:5173'
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID ?? ''
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET ?? ''
 const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI ?? `http://localhost:${PORT}/auth/google/callback`
+const COOKIE_SECURE = process.env.COOKIE_SECURE === 'true'
 const COOKIE_NAME = 'mid_daily_google'
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000
@@ -55,17 +56,19 @@ function parseCookies(req: IncomingMessage) {
 }
 
 function setConnectionCookie(res: ServerResponse, connectionId: string) {
+  const secure = COOKIE_SECURE ? '; Secure' : ''
   res.setHeader('Set-Cookie', [
-    `${COOKIE_NAME}=${encodeURIComponent(connectionId)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${SESSION_MAX_AGE_SECONDS}`,
+    `${COOKIE_NAME}=${encodeURIComponent(connectionId)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${SESSION_MAX_AGE_SECONDS}${secure}`,
   ])
 }
 
 function clearConnectionCookie(res: ServerResponse) {
-  res.setHeader('Set-Cookie', [`${COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0`])
+  const secure = COOKIE_SECURE ? '; Secure' : ''
+  res.setHeader('Set-Cookie', [`${COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secure}`])
 }
 
 function base64Url(buffer: Buffer) {
-  return buffer.toString('base64').replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/g, '')
+  return buffer.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
 }
 
 function createPkceVerifier() {
