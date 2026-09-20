@@ -3,7 +3,7 @@
 Lightweight daily management web app.
 
 ## Current phase
-M7 — Authenticated multi-user data foundation
+M9 — Telegram integration
 
 ## Stack
 - React
@@ -23,6 +23,7 @@ M7 — Authenticated multi-user data foundation
 - Google Calendar OAuth + one-way event sync
 - Supabase Auth
 - Supabase PostgreSQL persistence
+- Telegram account linking + bot commands
 
 ## Run locally
 
