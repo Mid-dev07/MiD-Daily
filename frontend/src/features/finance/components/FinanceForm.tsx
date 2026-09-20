@@ -79,7 +79,7 @@ export function FinanceForm({ open, initialEntry, defaultDate, onClose, onSubmit
           <label>Title<input disabled={saving} value={draft.title} onChange={(event) => setField('title', event.target.value)} placeholder="e.g. Internet bill" autoFocus /></label>
 
           <div className="form-grid two">
-            <label>Amount<input disabled={saving} type="number min="1" step="1" value={draft.amount || ''} onChange={(event) => setField('amount', Number(event.target.value))} placeholder="0" /></label>
+            <label>Amount<input disabled={saving} type="number" min="1" step="1" value={draft.amount || ''} onChange={(event) => setField('amount', Number(event.target.value))} placeholder="0" /></label>
             <label>Category<input disabled={saving} value={draft.category} onChange={(event) => setField('category', event.target.value)} placeholder="e.g. Food" /></label>
           </div>
 
