@@ -1,47 +1,90 @@
 import { useMemo, useState } from 'react'
-import type { Task, TaskPriority } from '../../types'
+import { TaskDetail } from './components/TaskDetail'
+import { TaskForm } from './components/TaskForm'
+import type { Task, TaskDraft, TaskPriority, TaskStatus } from '../../types'
 
 interface TasksViewProps {
   tasks: Task[]
-  onAddTask: (title: string, priority: TaskPriority) => void
+  onSaveTask: (draft: TaskDraft, editingId?: number) => string | null
   onToggleTask: (id: number) => void
+  onDeleteTask: (id: number) => void
 }
 
-export function TasksView({ tasks, onAddTask, onToggleTask }: TasksViewProps) {
-  const [query, setQuery] = useState('')
-  const [priority, setPriority] = useState<TaskPriority>('medium')
-  const filtered = useMemo(() => tasks.filter((task) => task.title.toLowerCase().includes(query.toLowerCase())), [tasks, query])
+const statusOptions: Array<{ value: 'ALL' | TaskStatus; label: string }> = [
+  { value: 'ALL', label: 'All' },
+  { value: 'todo', label: 'To do' },
+  { value: 'in-progress', label: 'In progress' },
+  { value: 'done', label: 'Done' },
+]
 
-  const submit = () => {
-    const title = window.prompt('Task title')?.trim()
-    if (title) onAddTask(title, priority)
+export function TasksView({ tasks, onSaveTask, onToggleTask, onDeleteTask }: TasksViewProps) {
+  const [query, setQuery] = useState('')
+  const [status, setStatus] = useState<'ALL' | TaskStatus>('ALL')
+  const [priority, setPriority] = useState<'ALL' | TaskPriority>('ALL')
+  const [formOpen, setFormOpen] = useState(false)
+  const [editingTask, setEditingTask] = useState<Task>()
+  const [detailTask, setDetailTask] = useState<Task>()
+
+  const filtered = useMemo(() => tasks.filter((task) => {
+    const queryValue = query.toLowerCase()
+    const matchesQuery = task.title.toLowerCase().includes(queryValue) || task.category.toLowerCase().includes(queryValue)
+    const matchesStatus = status === 'ALL' || task.status === status
+    const matchesPriority = priority === 'ALL' || task.priority === priority
+    return matchesQuery && matchesStatus && matchesPriority
+  }), [tasks, query, status, priority])
+
+  const openCreate = () => { setEditingTask(undefined); setFormOpen(true) }
+  const openEdit = (task: Task) => { setDetailTask(undefined); setEditingTask(task); setFormOpen(true) }
+
+  const remove = (id: number) => {
+    const task = tasks.find((entry) => entry.id === id)
+    if (!task || !window.confirm('Delete “' + task.title + '”?')) return
+    onDeleteTask(id)
   }
 
   return (
     <section className="workspace page-enter">
       <div className="page-intro">
-        <span className="section-kicker">MODULE</span>
-        <h2>Tasks</h2>
-        <p>Track work, priorities, and progress without adding unnecessary complexity.</p>
+        <div><span className="section-kicker">FOCUS</span><h2>Tasks</h2><p>Track work, deadlines, priority, and progress without adding unnecessary complexity.</p></div>
+        <button className="primary-button" type="button" onClick={openCreate}>+ Add task</button>
       </div>
-      <div className="composer-row standalone-composer">
-        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search tasks" aria-label="Search tasks" />
-        <select value={priority} onChange={(event) => setPriority(event.target.value as TaskPriority)} aria-label="New task priority">
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
+
+      <div className="task-toolbar content-card">
+        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search title or category" aria-label="Search tasks" />
+        <div className="filter-row">
+          {statusOptions.map((option) => <button key={option.value} className={status === option.value ? 'filter-button is-active' : 'filter-button'} type="button" onClick={() => setStatus(option.value)}>{option.label}</button>)}
+        </div>
+        <select value={priority} onChange={(event) => setPriority(event.target.value as 'ALL' | TaskPriority)} aria-label="Filter by priority">
+          <option value="ALL">All priorities</option><option value="high">High priority</option><option value="medium">Medium priority</option><option value="low">Low priority</option>
         </select>
-        <button className="primary-button" type="button" onClick={submit}>Add task</button>
       </div>
+
       <div className="content-card module-list">
-        {filtered.map((task) => (
-          <button className="task-row" key={task.id} type="button" onClick={() => onToggleTask(task.id)}>
-            <span className={task.status === 'done' ? 'task-check is-done' : 'task-check'}>{task.status === 'done' ? '✓' : ''}</span>
-            <span className="task-copy"><strong className={task.status === 'done' ? 'is-complete' : ''}>{task.title}</strong><small>{task.category}</small></span>
-            <span className={`priority-badge ${task.priority}`}>{task.priority}</span>
-          </button>
-        ))}
+        {filtered.length === 0 ? (
+          <div className="empty-state"><strong>No matching tasks</strong><span>Adjust the filters or create a new task.</span></div>
+        ) : filtered.map((task) => {
+          const progress = task.progress ?? (task.status === 'done' ? 100 : 0)
+          return (
+            <article className="task-item-card" key={task.id}>
+              <button className="task-row" type="button" onClick={() => onToggleTask(task.id)}>
+                <span className={task.status === 'done' ? 'task-check is-done' : 'task-check'}>{task.status === 'done' ? '✓' : ''}</span>
+                <span className="task-copy"><strong className={task.status === 'done' ? 'is-complete' : ''}>{task.title}</strong><small>{task.category}{task.dueDate ? ' · due ' + task.dueDate : ''}</small></span>
+                <span className={'priority-badge ' + task.priority}>{task.priority}</span>
+              </button>
+              <div className="task-item-footer">
+                <div className="task-progress-track" aria-label={'Progress ' + progress + '%'}><span style={{ width: progress + '%' }} /></div>
+                <span className="task-progress-label">{progress}%</span>
+                <button className="text-button" type="button" onClick={() => setDetailTask(task)}>Details</button>
+                <button className="text-button" type="button" onClick={() => openEdit(task)}>Edit</button>
+                <button className="text-button danger" type="button" onClick={() => remove(task.id)}>Delete</button>
+              </div>
+            </article>
+          )
+        })}
       </div>
+
+      <TaskForm open={formOpen} initialTask={editingTask} onClose={() => setFormOpen(false)} onSubmit={onSaveTask} />
+      <TaskDetail task={detailTask} onClose={() => setDetailTask(undefined)} onEdit={openEdit} />
     </section>
   )
 }
