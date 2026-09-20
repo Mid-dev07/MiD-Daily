@@ -15,3 +15,17 @@ export interface Task {
 }
 
 export type TaskDraft = Omit<Task, 'id'>
+
+export type FinanceEntryType = 'income' | 'expense'
+
+export interface FinanceEntry {
+  id: number
+  type: FinanceEntryType
+  title: string
+  amount: number
+  category: string
+  date: string
+  notes?: string
+}
+
+export type FinanceDraft = Omit<FinanceEntry, 'id'>
