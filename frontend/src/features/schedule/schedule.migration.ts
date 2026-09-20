@@ -1,19 +1,37 @@
+import type { GoogleCalendarSyncMeta } from '../../integrations/calendar/calendar.types'
 import type { ScheduleItem, RecurrenceRule } from './schedule.types'
 
 const defaultRecurrence: RecurrenceRule = { frequency: 'NONE', interval: 1 }
+const defaultGoogleCalendar: GoogleCalendarSyncMeta = { status: 'not-synced', calendarId: 'primary' }
 
-export function normalizeScheduleItem(input: ScheduleItem & { recurrence?: Partial<RecurrenceRule> }): ScheduleItem {
-  const recurrence = input.recurrence
-    ? {
-        frequency: input.recurrence.frequency ?? 'NONE',
-        interval: input.recurrence.interval ?? 1,
-        until: input.recurrence.until,
-      }
-    : defaultRecurrence
-
-  return { ...input, recurrence }
+type LegacyScheduleItem = Omit<ScheduleItem, 'recurrence' | 'googleCalendar'> & {
+  recurrence?: Partial<RecurrenceRule>
+  googleCalendar?: Partial<GoogleCalendarSyncMeta>
+  googleCalendarConnected?: boolean
 }
 
-export function normalizeScheduleList(items: ScheduleItem[]) {
+export function normalizeScheduleItem(input: LegacyScheduleItem): ScheduleItem {
+  const recurrence = {
+    frequency: input.recurrence?.frequency ?? defaultRecurrence.frequency,
+    interval: input.recurrence?.interval ?? defaultRecurrence.interval,
+    until: input.recurrence?.until,
+  }
+
+  const legacyConnected = input.googleCalendarConnected
+  const googleCalendar = input.googleCalendar
+    ? {
+        ...defaultGoogleCalendar,
+        ...input.googleCalendar,
+        calendarId: input.googleCalendar.calendarId ?? defaultGoogleCalendar.calendarId,
+        status: input.googleCalendar.status ?? defaultGoogleCalendar.status,
+      }
+    : legacyConnected
+      ? { ...defaultGoogleCalendar, status: 'synced' as const }
+      : defaultGoogleCalendar
+
+  return { ...input, recurrence, googleCalendar }
+}
+
+export function normalizeScheduleList(items: LegacyScheduleItem[]): ScheduleItem[] {
   return items.map(normalizeScheduleItem)
 }
