@@ -1,6 +1,7 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto'
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
 import { createClient } from '@supabase/supabase-js'
+import { runAssistant } from './ai/index.js'
 import {
   deleteGoogleConnection,
   getGoogleConnection,
@@ -395,7 +396,17 @@ function parseEventPayload(value: unknown): GoogleCalendarEventPayload {
     location: typeof event.location === 'string' ? event.location : undefined,
     start: { dateTime: start.dateTime, timeZone: start.timeZone },
     end: { dateTime: end.dateTime, timeZone: end.timeZone },
-    extendedProperties: event.extendedProperties,
+    extendedProperties: event.extendedProperties && typeof event.extendedProperties === 'object'
+      ? {
+          private: (() => {
+            const privateValues = (event.extendedProperties as Record<string, unknown>).private
+            if (!privateValues || typeof privateValues !== 'object') return undefined
+            const entries = Object.entries(privateValues)
+              .filter(([key, value]) => key.length > 0 && key.length <= 128 && typeof value === 'string' && value.length <= 512)
+            return Object.fromEntries(entries)
+          })(),
+        }
+      : undefined,
   }
 }
 
