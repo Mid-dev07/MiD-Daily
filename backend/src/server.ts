@@ -438,7 +438,7 @@ async function handleCallback(req: IncomingMessage, url: URL, res: ServerRespons
   oauthStates.delete(state)
   clearOAuthStateCookie(res)
 
-  if (!pending || pending.ownerId !== (parseCookies(req)[OWNER_COOKIE_NAME] ?? pending.ownerId) && !pending.ownerId || Date.now() - pending.createdAt > OAUTH_STATE_TTL_MS) {
+  if (requestState !== state || !pending || Date.now() - pending.createdAt > OAUTH_STATE_TTL_MS) {
     sendRedirect(res, `${FRONTEND_URL}/?google=error&reason=invalid_or_expired_state`)
     return
   }
@@ -447,7 +447,7 @@ async function handleCallback(req: IncomingMessage, url: URL, res: ServerRespons
     assertGoogleConfigured()
     assertPersistenceConfigured()
     const token = await exchangeCode(code, pending.verifier)
-    await saveGoogleConnection(ownerId, { token, connectedAt: new Date().toISOString() })
+    await saveGoogleConnection(pending.ownerId, { token, connectedAt: new Date().toISOString() })
     sendRedirect(res, `${FRONTEND_URL}/?google=connected`)
   } catch (exchangeError) {
     sendRedirect(res, `${FRONTEND_URL}/?google=error&reason=${encodeURIComponent(exchangeError instanceof Error ? exchangeError.message : 'token_exchange_failed')}`)
