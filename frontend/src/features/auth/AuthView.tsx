@@ -53,6 +53,7 @@ export function AuthView() {
     else {
       setNewPassword('')
       setMessage('Password updated. You are signed in.')
+      window.history.replaceState({}, '', window.location.pathname)
     }
   }
 
