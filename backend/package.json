@@ -8,7 +8,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "telegram:set-webhook": "tsx src/integrations/telegramSetup.ts",
-    "test": "npm run build && node --test test"
+    "test": "npm run build && node --test test/*.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
