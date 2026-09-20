@@ -199,3 +199,17 @@
 /* M2.6 Google Calendar handoff */
 .google-calendar-card { background: linear-gradient(90deg, #0c1722, #0d1924); }
 .google-calendar-card .integration-badge { display: inline-flex; align-items: center; min-height: 28px; padding: 0 9px; border: 1px solid #1d5362; border-radius: 999px; color: #a8eff8; background: #102a35; font-size: 9px; font-weight: 800; letter-spacing: .08em; }
+
+/* M3.1 Task management */
+.task-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto 180px; gap: 10px; align-items: center; }
+.task-toolbar input, .task-toolbar select { min-width: 0; height: 42px; padding: 0 12px; border: 1px solid #253848; border-radius: var(--radius-sm); color: var(--color-text); background: #0b141e; outline: 0; }
+.task-toolbar input:focus, .task-toolbar select:focus { border-color: #4bbecf; box-shadow: 0 0 0 3px rgba(103,232,249,.08); }
+.task-item-card { border-top: 1px solid var(--color-border-soft); padding: 2px 0 10px; }
+.task-item-card:first-child { border-top: 0; }
+.task-item-footer { display: flex; align-items: center; gap: 8px; padding: 0 0 4px 31px; }
+.task-progress-track { flex: 1; height: 5px; overflow: hidden; border-radius: 999px; background: #162633; }
+.task-progress-track span { display: block; height: 100%; border-radius: inherit; background: var(--color-accent); transition: width var(--duration-normal) var(--ease-standard); }
+.task-progress-label { min-width: 32px; color: #65798d; font-size: 9px; text-align: right; }
+.schedule-inline-error { margin: 8px 0 0; }
+@media (max-width: 800px) { .task-toolbar { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .task-item-footer { flex-wrap: wrap; padding-left: 0; } .task-progress-track { min-width: 120px; } }
