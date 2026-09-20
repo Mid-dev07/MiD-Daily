@@ -1,3 +1,5 @@
+import type { GoogleCalendarSyncMeta } from '../../integrations/calendar/calendar.types'
+
 export type ScheduleType =
   | 'CLASS'
   | 'WORK'
@@ -37,7 +39,7 @@ export interface ScheduleItem {
   reminderEnabled: boolean
   reminderOffset: ReminderOffset
   recurrence: RecurrenceRule
-  googleCalendarConnected: boolean
+  googleCalendar: GoogleCalendarSyncMeta
 }
 
-export type ScheduleDraft = Omit<ScheduleItem, 'id' | 'googleCalendarConnected'>
+export type ScheduleDraft = Omit<ScheduleItem, 'id' | 'googleCalendar'>
