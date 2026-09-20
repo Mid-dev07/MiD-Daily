@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { FinanceForm } from './components/FinanceForm'
+import { isInFinancePeriod, type FinancePeriod } from './finance.date'
 import type { FinanceDraft, FinanceEntry, FinanceEntryType } from '../../types'
 import { currency, formatDate } from '../../lib/format'
 
@@ -15,25 +16,43 @@ const typeOptions: Array<{ value: 'ALL' | FinanceEntryType; label: string }> = [
   { value: 'income', label: 'Income' },
 ]
 
+const periodOptions: Array<{ value: FinancePeriod; label: string }> = [
+  { value: 'today', label: 'Today' },
+  { value: 'week', label: 'This week' },
+  { value: 'month', label: 'This month' },
+  { value: 'all', label: 'All time' },
+]
+
 export function FinanceView({ finance, onSaveFinance, onDeleteFinance }: FinanceViewProps) {
   const [query, setQuery] = useState('')
   const [type, setType] = useState<'ALL' | FinanceEntryType>('ALL')
   const [category, setCategory] = useState('ALL')
+  const [period, setPeriod] = useState<FinancePeriod>('month')
   const [formOpen, setFormOpen] = useState(false)
   const [editingEntry, setEditingEntry] = useState<FinanceEntry>()
 
   const categories = useMemo(() => ['ALL', ...Array.from(new Set(finance.map((entry) => entry.category).filter(Boolean))).sort()], [finance])
-  const filtered = useMemo(() => finance
+  const periodFinance = useMemo(() => finance.filter((entry) => isInFinancePeriod(entry.date, period)), [finance, period])
+  const filtered = useMemo(() => periodFinance
     .filter((entry) => {
       const q = query.toLowerCase()
       return (!q || entry.title.toLowerCase().includes(q) || entry.category.toLowerCase().includes(q))
         && (type === 'ALL' || entry.type === type)
         && (category === 'ALL' || entry.category === category)
     })
-    .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id), [finance, query, type, category])
+    .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id), [periodFinance, query, type, category])
 
-  const income = finance.filter((entry) => entry.type === 'income').reduce((sum, entry) => sum + entry.amount, 0)
-  const expense = finance.filter((entry) => entry.type === 'expense').reduce((sum, entry) => sum + entry.amount, 0)
+  const income = periodFinance.filter((entry) => entry.type === 'income').reduce((sum, entry) => sum + entry.amount, 0)
+  const expense = periodFinance.filter((entry) => entry.type === 'expense').reduce((sum, entry) => sum + entry.amount, 0)
+
+  const expenseByCategory = useMemo(() => {
+    const totals = new Map<string, number>()
+    for (const entry of periodFinance) {
+      if (entry.type !== 'expense') continue
+      totals.set(entry.category, (totals.get(entry.category) ?? 0) + entry.amount)
+    }
+    return Array.from(totals.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5)
+  }, [periodFinance])
 
   const openCreate = () => { setEditingEntry(undefined); setFormOpen(true) }
   const openEdit = (entry: FinanceEntry) => { setEditingEntry(entry); setFormOpen(true) }
@@ -47,15 +66,26 @@ export function FinanceView({ finance, onSaveFinance, onDeleteFinance }: Finance
   return (
     <section className="workspace page-enter">
       <div className="page-intro">
-        <div><span className="section-kicker">FINANCE</span><h2>Money, made visible.</h2><p>Track income and expenses by date and category before the real database layer is connected.</p></div>
+        <div><span className="section-kicker">FINANCE</span><h2>Money, made visible.</h2><p>Track income and expenses by period, category, and date before the database layer is connected.</p></div>
         <button className="primary-button" type="button" onClick={openCreate}>+ Add transaction</button>
       </div>
 
-      <div className="stat-row">
-        <article className="stat-card"><span>Income</span><strong className="amount-positive">{currency.format(income)}</strong><small>all recorded income</small></article>
-        <article className="stat-card"><span>Expense</span><strong className="amount-negative">{currency.format(expense)}</strong><small>all recorded expenses</small></article>
-        <article className="stat-card"><span>Balance</span><strong>{currency.format(income - expense)}</strong><small>income minus expense</small></article>
+      <div className="filter-row finance-periods">
+        {periodOptions.map((option) => <button key={option.value} className={period === option.value ? 'filter-button is-active' : 'filter-button'} type="button" onClick={() => setPeriod(option.value)}>{option.label}</button>)}
       </div>
+
+      <div className="stat-row">
+        <article className="stat-card"><span>Income</span><strong className="amount-positive">{currency.format(income)}</strong><small>selected period</small></article>
+        <article className="stat-card"><span>Expense</span><strong className="amount-negative">{currency.format(expense)}</strong><small>selected period</small></article>
+        <article className="stat-card"><span>Balance</span><strong>{currency.format(income - expense)}</strong><small>period net</small></article>
+      </div>
+
+      <section className="content-card finance-insights">
+        <div className="card-heading"><div><span className="section-kicker">BREAKDOWN</span><h3>Top expense categories</h3></div><span className="card-meta">{expenseByCategory.length} categories</span></div>
+        {expenseByCategory.length === 0 ? <div className="empty-state"><strong>No expenses in this period</strong><span>Add an expense to build the breakdown.</span></div> : expenseByCategory.map(([name, amount]) => (
+          <div className="finance-breakdown-row" key={name}><span>{name}</span><div className="finance-breakdown-track"><span style={{ width: expense ? Math.min(100, (amount / expense) * 100) + '%' : '0%' }} /></div><strong>{currency.format(amount)}</strong></div>
+        ))}
+      </section>
 
       <div className="finance-toolbar content-card">
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search title or category" aria-label="Search transactions" />
@@ -72,15 +102,9 @@ export function FinanceView({ finance, onSaveFinance, onDeleteFinance }: Finance
           <div className="empty-state"><strong>No matching transactions</strong><span>Adjust the filters or create a new transaction.</span></div>
         ) : filtered.map((entry) => (
           <article className="finance-row" key={entry.id}>
-            <div className="module-main">
-              <strong>{entry.title}</strong>
-              <span>{entry.category} · {formatDate(entry.date)}{entry.notes ? ' · ' + entry.notes : ''}</span>
-            </div>
+            <div className="module-main"><strong>{entry.title}</strong><span>{entry.category} · {formatDate(entry.date)}{entry.notes ? ' · ' + entry.notes : ''}</span></div>
             <strong className={entry.type === 'income' ? 'amount-positive' : 'amount-negative'}>{entry.type === 'income' ? '+' : '-'}{currency.format(entry.amount)}</strong>
-            <div className="finance-row-actions">
-              <button className="text-button" type="button" onClick={() => openEdit(entry)}>Edit</button>
-              <button className="text-button danger" type="button" onClick={() => remove(entry.id)}>Delete</button>
-            </div>
+            <div className="finance-row-actions"><button className="text-button" type="button" onClick={() => openEdit(entry)}>Edit</button><button className="text-button danger" type="button" onClick={() => remove(entry.id)}>Delete</button></div>
           </article>
         ))}
       </div>
