@@ -6,6 +6,7 @@ import { ScheduleDetail } from './components/ScheduleDetail'
 import { ScheduleForm } from './components/ScheduleForm'
 import { ScheduleItemCard } from './components/ScheduleItemCard'
 import { ScheduleToolbar } from './components/ScheduleToolbar'
+import { GoogleCalendarIntegrationCard } from './components/GoogleCalendarIntegrationCard'
 import { initialScheduleItems } from './schedule.data'
 import { validateScheduleDraft } from './schedule.validation'
 import { getReminderState } from './schedule.reminder'
@@ -43,7 +44,11 @@ export function ScheduleView({ schedule, onScheduleChange }: ScheduleViewProps) 
     if (editingId) {
       onScheduleChange(normalizedSchedule.map((item) => item.id === editingId ? { ...item, ...draft } : item))
     } else {
-      onScheduleChange([...normalizedSchedule, { ...draft, id: Date.now(), googleCalendarConnected: false }])
+      onScheduleChange([...normalizedSchedule, {
+        ...draft,
+        id: Date.now(),
+        googleCalendar: { status: 'not-synced', calendarId: 'primary' },
+      }])
     }
     return null
   }
@@ -98,6 +103,8 @@ export function ScheduleView({ schedule, onScheduleChange }: ScheduleViewProps) 
       </div>
 
       <ScheduleToolbar date={date} filter={filter} onShiftDate={(days) => setDate(shiftDate(date, days))} onResetDate={() => setDate(getToday())} onFilterChange={setFilter} />
+
+      <GoogleCalendarIntegrationCard />
 
       <div className="notification-card schedule-integration-card">
         <div className="notification-copy">
