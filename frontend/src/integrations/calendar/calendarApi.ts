@@ -1,5 +1,6 @@
 import type { ScheduleItem } from '../../features/schedule/schedule.types'
 import type { GoogleCalendarEventPayload } from './calendar.types'
+import { supabase } from '../../lib/supabase'
 
 const API_BASE_URL = ((import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:8787').replace(/\/$/, '')
 
@@ -21,8 +22,24 @@ export class CalendarApiError extends Error {
   }
 }
 
-async function request<T>(input: RequestInfo | URL, init?: RequestInit): Promise<T> {
-  const response = await fetch(input, { ...init, credentials: 'include' })
+async function getAuthHeaders() {
+  if (!supabase) return {}
+  const { data } = await supabase.auth.getSession()
+  return data.session?.access_token
+    ? { Authorization: `Bearer ${data.session.access_token}` }
+    : {}
+}
+
+async function request<T>(input: RequestInfo | URL, init: RequestInit = {}): Promise<T> {
+  const headers = new Headers(init.headers)
+  const authHeaders = await getAuthHeaders()
+  Object.entries(authHeaders).forEach(([key, value]) => headers.set(key, value))
+
+  const response = await fetch(input, {
+    ...init,
+    headers,
+    credentials: 'include',
+  })
   const data = await response.json().catch(() => ({}))
 
   if (!response.ok) {
@@ -37,8 +54,9 @@ export async function getGoogleCalendarConnectionStatus(): Promise<GoogleCalenda
   return request<GoogleCalendarConnectionStatus>(`${API_BASE_URL}/api/integrations/google-calendar/status`)
 }
 
-export function startGoogleCalendarOAuth() {
-  window.location.assign(`${API_BASE_URL}/auth/google/start`)
+export async function startGoogleCalendarOAuth() {
+  const data = await request<{ url: string }>(`${API_BASE_URL}/auth/google/start`, { method: 'POST' })
+  window.location.assign(data.url)
 }
 
 export async function disconnectGoogleCalendar() {
