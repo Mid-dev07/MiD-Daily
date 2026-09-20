@@ -1,3 +1,4 @@
+import { isValidDateString } from '../schedule/schedule.date'
 import type { FinanceDraft, FinanceEntry } from '../../types'
 
 export interface FinanceValidationResult {
@@ -9,7 +10,7 @@ export function validateFinanceDraft(draft: FinanceDraft, existing: FinanceEntry
   if (!draft.title.trim()) return { valid: false, message: 'Title is required.' }
   if (!draft.category.trim()) return { valid: false, message: 'Category is required.' }
   if (!Number.isFinite(draft.amount) || draft.amount <= 0) return { valid: false, message: 'Amount must be greater than zero.' }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(draft.date)) return { valid: false, message: 'Date is invalid.' }
+  if (!isValidDateString(draft.date)) return { valid: false, message: 'Date is invalid.' }
 
   const duplicate = existing.some((entry) =>
     entry.id !== editingId &&
