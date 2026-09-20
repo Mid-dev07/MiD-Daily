@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto'
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
+import { createClient } from '@supabase/supabase-js'
 import {
   deleteGoogleConnection,
   getGoogleConnection,
@@ -21,6 +22,11 @@ const OAUTH_STATE_TTL_MS = 10 * 60 * 1000
 const ACCESS_TOKEN_REFRESH_MARGIN_MS = 60_000
 const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events'
 const GOOGLE_CALENDAR_API = 'https://www.googleapis.com/calendar/v3'
+const SUPABASE_URL = process.env.SUPABASE_URL ?? ''
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY ?? ''
+const supabaseAuthClient = SUPABASE_URL && SUPABASE_SECRET_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, { auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false } })
+  : null
 
 interface OAuthState {
   verifier: string
@@ -144,6 +150,28 @@ function assertGoogleConfigured() {
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
     throw new Error('Google OAuth is not configured.')
   }
+}
+
+function httpError(status: number, message: string) {
+  const error = new Error(message) as Error & { status?: number }
+  error.status = status
+  return error
+}
+
+async function resolveOwnerId(req: IncomingMessage, res: ServerResponse) {
+  const authorization = req.headers.authorization
+  if (authorization) {
+    if (!authorization.startsWith('Bearer ')) throw httpError(401, 'Invalid authorization header.')
+    if (!supabaseAuthClient) throw httpError(503, 'Supabase Auth is not configured.')
+    const token = authorization.slice('Bearer '.length).trim()
+    if (!token) throw httpError(401, 'Invalid access token.')
+
+    const { data, error } = await supabaseAuthClient.auth.getUser(token)
+    if (error || !data.user) throw httpError(401, 'Authentication session is invalid.')
+    return data.user.id
+  }
+
+  return ensureOwnerId(req, res)
 }
 
 function assertPersistenceConfigured() {
@@ -334,7 +362,7 @@ function cleanupOAuthStates() {
 }
 
 async function handleStatus(req: IncomingMessage, res: ServerResponse) {
-  const ownerId = ensureOwnerId(req, res)
+  const ownerId = await resolveOwnerId(req, res)
   const connection = isGooglePersistenceConfigured() ? await getGoogleConnection(ownerId) : null
 
   sendJson(res, 200, {
@@ -344,13 +372,12 @@ async function handleStatus(req: IncomingMessage, res: ServerResponse) {
   })
 }
 
-function handleStart(req: IncomingMessage, res: ServerResponse) {
-  try {
+async function createGoogleAuthUrl(req: IncomingMessage, res: ServerResponse) {
     assertGoogleConfigured()
     assertPersistenceConfigured()
     cleanupOAuthStates()
 
-    const ownerId = ensureOwnerId(req, res)
+    const ownerId = await resolveOwnerId(req, res)
     const state = base64Url(randomBytes(24))
     const verifier = createPkceVerifier()
     oauthStates.set(state, { verifier, createdAt: Date.now(), ownerId })
@@ -368,9 +395,25 @@ function handleStart(req: IncomingMessage, res: ServerResponse) {
       code_challenge_method: 'S256',
     })
 
-    sendRedirect(res, `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`)
+    return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
+}
+
+async function handleStart(req: IncomingMessage, res: ServerResponse) {
+  try {
+    const url = await createGoogleAuthUrl(req, res)
+    sendRedirect(res, url)
   } catch (error) {
     sendRedirect(res, `${FRONTEND_URL}/?google=error&reason=${encodeURIComponent(error instanceof Error ? error.message : 'oauth_not_configured')}`)
+  }
+}
+
+async function handleStartApi(req: IncomingMessage, res: ServerResponse) {
+  try {
+    const url = await createGoogleAuthUrl(req, res)
+    sendJson(res, 200, { url })
+  } catch (error) {
+    const status = error instanceof Error && 'status' in error && typeof (error as { status?: unknown }).status === 'number' ? Number((error as { status?: unknown }).status) : 500
+    sendJson(res, status, { error: error instanceof Error ? error.message : 'Unable to start Google authorization.' })
   }
 }
 
@@ -395,8 +438,7 @@ async function handleCallback(req: IncomingMessage, url: URL, res: ServerRespons
   oauthStates.delete(state)
   clearOAuthStateCookie(res)
 
-  const ownerId = parseCookies(req)[OWNER_COOKIE_NAME]
-  if (requestState !== state || !ownerId || !pending || pending.ownerId !== ownerId || Date.now() - pending.createdAt > OAUTH_STATE_TTL_MS) {
+  if (!pending || pending.ownerId !== (parseCookies(req)[OWNER_COOKIE_NAME] ?? pending.ownerId) && !pending.ownerId || Date.now() - pending.createdAt > OAUTH_STATE_TTL_MS) {
     sendRedirect(res, `${FRONTEND_URL}/?google=error&reason=invalid_or_expired_state`)
     return
   }
@@ -420,7 +462,7 @@ async function revokeToken(token: GoogleConnection['token']) {
 
 async function handleDisconnect(req: IncomingMessage, res: ServerResponse) {
   try {
-    const ownerId = readOwnerId(req)
+    const ownerId = await resolveOwnerId(req, res)
     const connection = await getGoogleConnection(ownerId)
 
     if (connection) {
@@ -438,7 +480,7 @@ async function handleDisconnect(req: IncomingMessage, res: ServerResponse) {
 }
 
 async function requireConnection(req: IncomingMessage, res: ServerResponse) {
-  const ownerId = readOwnerId(req)
+  const ownerId = await resolveOwnerId(req, res)
   const connection = await getGoogleConnection(ownerId)
 
   if (!connection) {
@@ -505,7 +547,7 @@ async function handleDeleteEvent(req: IncomingMessage, res: ServerResponse, url:
 function addCors(res: ServerResponse) {
   res.setHeader('Access-Control-Allow-Origin', FRONTEND_URL)
   res.setHeader('Access-Control-Allow-Credentials', 'true')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
 }
 
@@ -536,7 +578,12 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
     }
 
     if (req.method === 'GET' && url.pathname === '/auth/google/start') {
-      handleStart(req, res)
+      await handleStart(req, res)
+      return
+    }
+
+    if (req.method === 'POST' && url.pathname === '/auth/google/start') {
+      await handleStartApi(req, res)
       return
     }
 
