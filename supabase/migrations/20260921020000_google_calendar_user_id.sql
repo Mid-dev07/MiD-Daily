@@ -1,10 +1,5 @@
-create table if not exists public.google_calendar_connections (
-  owner_id text primary key,
-  user_id uuid references auth.users(id) on delete cascade,
-  encrypted_token text not null,
-  connected_at timestamptz not null,
-  updated_at timestamptz not null default now()
-);
+alter table public.google_calendar_connections
+  add column if not exists user_id uuid references auth.users(id) on delete cascade;
 
 create unique index if not exists google_calendar_connections_user_id_unique_idx
   on public.google_calendar_connections (user_id)
