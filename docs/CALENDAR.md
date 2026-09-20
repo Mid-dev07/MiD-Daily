@@ -20,6 +20,12 @@ The API-backed connection should use OAuth authorization code flow with PKCE rat
 
 The backend now provides OAuth start, callback, connection status, and disconnect endpoints. Authorization uses PKCE, state is bound to an HttpOnly browser cookie, and access/refresh tokens remain server-side. The current connection store is in memory for local single-instance development only.
 
+### M2.6.3 — API sync
+
+The backend now exposes create, update, and delete event operations. Access tokens are refreshed automatically when close to expiry, and a single retry is made after an HTTP 401 when a refresh token is available. The frontend persists the returned Google event ID and last-sync timestamp in the Schedule item.
+
+If an existing external event has been deleted in Google Calendar, an update returning 404 falls back to creating a new event instead of leaving the Schedule permanently broken. A delete returning 404 can be treated as already removed by the remote calendar.
+
 ### Next step
 
 M2.6.2 should introduce the application backend OAuth callback and token exchange, then M2.6.3 can implement:
