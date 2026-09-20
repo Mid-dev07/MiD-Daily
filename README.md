@@ -3,7 +3,7 @@
 Lightweight daily management web app.
 
 ## Current phase
-M2.3 — Schedule / Agenda UI
+M2.3 — Schedule / Agenda
 
 ## Stack
 - React
@@ -22,7 +22,4 @@ npm run dev
 ```
 
 ## Current focus
-The Schedule module now has a dedicated UI foundation for date navigation, agenda filtering, reminder controls, and future Google Calendar integration.
-
-## Current implementation
-M2.3 — Schedule CRUD foundation with local persistence and time-overlap validation.
+The Schedule module has date navigation, filtering, CRUD, recurrence, reminder data, and local persistence. Native device notifications and Google Calendar remain provider adapters for a later phase.

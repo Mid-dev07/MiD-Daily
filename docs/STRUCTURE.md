@@ -13,7 +13,10 @@ frontend/src/
 │   ├── schedule/
 │   │   ├── components/      # Schedule-specific UI
 │   │   ├── schedule.data.ts
+│   │   ├── schedule.date.ts
+│   │   ├── schedule.migration.ts
 │   │   ├── schedule.types.ts
+│   │   ├── schedule.validation.ts
 │   │   └── ScheduleView.tsx
 │   └── tasks/
 ├── lib/                     # Generic utilities
@@ -22,13 +25,14 @@ frontend/src/
 ```
 
 ## Rules
+
 1. No legacy duplicate root-level `App.tsx`, `data.ts`, or `types.ts` implementations.
-2. Feature-specific UI and types stay inside their feature.
+2. Feature-specific UI, data, validation, and domain types stay inside their feature.
 3. Shared UI primitives stay in `components/ui`.
 4. Layout components never own business logic.
 5. Provider-specific integrations are implemented as adapters outside feature presentation code.
 6. Do not add a dependency for an effect that can be handled by native CSS or the platform.
 
+## Schedule boundary
 
-## M2.2 Schedule CRUD
-The schedule domain now owns its types, seed data, validation, form, detail view, and item card. Schedule state is composed in `app/App.tsx` and persisted through the generic storage utility. Native reminder and Google Calendar integrations remain separate future infrastructure layers.
+Schedule owns event intent, recurrence, and reminder intent. Native notification and Google Calendar implementations should consume this domain model through separate adapters.

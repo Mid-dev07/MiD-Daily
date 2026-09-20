@@ -47,7 +47,7 @@ export function ScheduleView({ schedule, onScheduleChange }: ScheduleViewProps) 
   const deleteSchedule = (id: number) => {
     const item = normalizedSchedule.find((entry) => entry.id === id)
     if (!item) return
-    if (!window.confirm(`Delete “${item.title}”?`)) return
+    if (!window.confirm(`Delete “${item.title}”? `)) return
     onScheduleChange(normalizedSchedule.filter((entry) => entry.id !== id))
   }
 

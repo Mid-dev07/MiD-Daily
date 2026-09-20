@@ -168,3 +168,17 @@
 .detail-notes { margin-top: 10px; }
 .detail-notes p { margin: 8px 0 0; color: #91a4b4; font-size: 11px; line-height: 1.65; }
 @media (max-width: 640px) { .schedule-header-actions { width: 100%; } .schedule-header-actions .primary-button, .schedule-header-actions .secondary-button { flex: 1; } .form-grid.two, .detail-grid { grid-template-columns: 1fr; } .reminder-row { align-items: stretch; flex-direction: column; } .reminder-row select { width: 100%; } }
+
+/* M2.3 Schedule presentation */
+.schedule-intro { display: flex; justify-content: space-between; align-items: end; gap: 20px; }
+.schedule-header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.schedule-date-caption { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; color: var(--color-text-muted); font-size: 12px; }
+.schedule-date-caption strong { color: var(--color-text); font-size: 15px; }
+.schedule-summary { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; color: var(--color-text-faint); font-size: 11px; }
+@media (max-width: 640px) {
+  .schedule-intro { align-items: stretch; flex-direction: column; }
+  .schedule-header-actions { width: 100%; }
+  .schedule-header-actions .primary-button,
+  .schedule-header-actions .secondary-button { flex: 1; }
+  .schedule-date-caption { align-items: flex-start; flex-direction: column; gap: 3px; }
+}
