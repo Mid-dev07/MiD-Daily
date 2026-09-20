@@ -1,0 +1,76 @@
+import { useMemo, useState } from 'react'
+import { sendAIMessage, type AIMessage } from '../../integrations/aiApi'
+
+const starterMessages: AIMessage[] = [
+  { role: 'assistant', content: 'Hi. I can read your MiD-Daily data and help you plan the day. Actions are off by default.' },
+]
+
+export function AssistantView() {
+  const [messages, setMessages] = useState<AIMessage[]>(starterMessages)
+  const [input, setInput] = useState('')
+  const [allowWrites, setAllowWrites] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const canSend = useMemo(() => input.trim().length > 0 && !loading, [input, loading])
+
+  const send = async () => {
+    const content = input.trim()
+    if (!content || loading) return
+
+    const nextMessages = [...messages, { role: 'user' as const, content }]
+    setMessages(nextMessages)
+    setInput('')
+    setError('')
+    setLoading(true)
+
+    try {
+      const result = await sendAIMessage(nextMessages.slice(-10), allowWrites)
+      setMessages((current) => [...current, { role: 'assistant', content: result.text }].slice(-10))
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Assistant request failed.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <section className="workspace page-enter">
+      <div className="page-intro">
+        <div><span className="section-kicker">ASSISTANT</span><h2>Work with your day.</h2><p>MiD-Daily Assistant reads only scoped tools. It cannot query the database directly.</p></div>
+      </div>
+
+      <section className="content-card ai-shell-card">
+        <div className="ai-toolbar">
+          <label className="ai-action-toggle">
+            <input type="checkbox" checked={allowWrites} onChange={(event) => setAllowWrites(event.target.checked)} />
+            <span>Allow actions</span>
+          </label>
+          <span className="card-meta">{allowWrites ? 'Task and expense creation enabled' : 'Read-only mode'}</span>
+        </div>
+
+        <div className="ai-message-list" aria-live="polite">
+          {messages.map((message, index) => (
+            <div className={'ai-message ' + message.role} key={index}>
+              <span className="ai-message-role">{message.role === 'assistant' ? 'MiD' : 'You'}</span>
+              <p>{message.content}</p>
+            </div>
+          ))}
+          {loading && <div className="ai-message assistant"><span className="ai-message-role">MiD</span><p>Thinking…</p></div>}
+        </div>
+
+        {error && <div className="form-error" role="alert">{error}</div>}
+
+        <div className="ai-composer">
+          <textarea value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+              event.preventDefault()
+              void send()
+            }
+          }} rows={3} placeholder="Ask about today's schedule, open tasks, or expenses…" aria-label="Message MiD-Daily Assistant" />
+          <button className="primary-button" disabled={!canSend} type="button" onClick={() => void send()}>{loading ? 'Working…' : 'Send'}</button>
+        </div>
+      </section>
+    </section>
+  )
+}
