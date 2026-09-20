@@ -73,6 +73,13 @@ export async function redeemTelegramLinkCode(
   return { userId: data.user_id }
 }
 
+export async function claimTelegramUpdate(updateId: number) {
+  const { error } = await db().from('telegram_updates').insert({ update_id: updateId })
+  if (!error) return true
+  if (error.code === '23505') return false
+  throw new Error(`Telegram update dedupe failed: ${error.message}`)
+}
+
 export async function getTelegramConnectionByUserId(userId: string) {
   const { data, error } = await db().from('telegram_connections')
     .select('chat_id,telegram_user_id,telegram_username,connected_at,updated_at')
@@ -80,6 +87,16 @@ export async function getTelegramConnectionByUserId(userId: string) {
     .maybeSingle()
 
   if (error) throw new Error(`Telegram connection read failed: ${error.message}`)
+  return data
+}
+
+export async function getTelegramConnectionByChatId(chatId: number) {
+  const { data, error } = await db().from('telegram_connections')
+    .select('user_id,chat_id,telegram_user_id,telegram_username,connected_at,updated_at')
+    .eq('chat_id', chatId)
+    .maybeSingle()
+
+  if (error) throw new Error(`Telegram connection lookup failed: ${error.message}`)
   return data
 }
 
