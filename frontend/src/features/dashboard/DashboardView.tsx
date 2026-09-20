@@ -2,6 +2,7 @@ import type { FinanceEntry, Task } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
 import { currency, formatDate } from '../../lib/format'
 import { StatCard } from '../../components/ui/StatCard'
+import { TelegramIntegrationCard } from './components/TelegramIntegrationCard'
 
 interface DashboardViewProps { tasks: Task[]; schedule: ScheduleItem[]; finance: FinanceEntry[]; onToggleTask: (id: number) => void }
 const getToday = () => new Intl.DateTimeFormat('sv-SE').format(new Date())
@@ -32,6 +33,8 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask }: Dashbo
           {todaySchedule.length === 0 ? <div className="empty-state"><strong>No activities planned</strong><span>Your Schedule is empty for today.</span></div> : todaySchedule.map((item) => <div className="schedule-item" key={item.id}><div className="schedule-time"><strong>{item.startTime}</strong><span>{item.endTime}</span></div><div className="timeline-dot" /><div className="schedule-copy"><strong>{item.title}</strong><span>{item.type} · {item.location || 'No location'}</span></div></div>)}
         </div>
       </section>
+
+      <TelegramIntegrationCard />
 
       <section className="content-card task-card motion-card">
         <div className="card-heading"><div><span className="section-kicker">FOCUS</span><h3>Task queue</h3></div><span className="card-meta">{openTasks} open</span></div>
