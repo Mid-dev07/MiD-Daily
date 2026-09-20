@@ -1227,6 +1227,36 @@ async function handleTelegramUpdate(req: IncomingMessage, res: ServerResponse) {
   sendJson(res, 200, { ok: true })
 }
 
+
+async function handleAiChat(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  const body = await readRequestJson(req)
+  const messagesValue = body.messages
+  const allowWrites = body.allowWrites === true
+
+  if (!Array.isArray(messagesValue) || messagesValue.length === 0) throw httpError(400, 'At least one AI message is required.')
+
+  const messages = messagesValue.map((value) => {
+    if (!value || typeof value !== 'object') throw httpError(400, 'AI message is invalid.')
+    const item = value as Record<string, unknown>
+    const role = item.role
+    const content = item.content
+    if (role !== 'user' && role !== 'assistant') throw httpError(400, 'AI message role is invalid.')
+    if (typeof content !== 'string') throw httpError(400, 'AI message content is invalid.')
+    return { role, content } as { role: 'user' | 'assistant'; content: string }
+  })
+
+  try {
+    const result = await runAssistant(userId, messages, allowWrites)
+    sendJson(res, 200, result)
+  } catch (error) {
+    const status = error instanceof Error && 'status' in error && typeof (error as { status?: unknown }).status === 'number'
+      ? Number((error as { status?: unknown }).status)
+      : 500
+    sendJson(res, status, { error: error instanceof Error ? error.message : 'AI request failed.' })
+  }
+}
+
 function addCors(res: ServerResponse) {
   res.setHeader('Access-Control-Allow-Origin', FRONTEND_URL)
   res.setHeader('Access-Control-Allow-Credentials', 'true')
@@ -1246,6 +1276,11 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
   const url = new URL(req.url ?? '/', `http://localhost:${PORT}`)
 
   try {
+    if (req.method === 'POST' && url.pathname === '/api/ai/chat') {
+      await handleAiChat(req, res)
+      return
+    }
+
     if (req.method === 'GET' && url.pathname === '/health') {
       sendJson(res, 200, {
         ok: true,
