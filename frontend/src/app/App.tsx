@@ -14,7 +14,8 @@ import { validateFinanceDraft } from '../features/finance/finance.validation'
 import { initialScheduleItems } from '../features/schedule/schedule.data'
 import { normalizeScheduleList } from '../features/schedule/schedule.migration'
 import { useReminderScheduler } from '../features/schedule/hooks/useReminderScheduler'
-import { readStorage, writeStorage } from '../lib/storage'
+import { readUserStorage, writeUserStorage } from '../lib/userStorage'
+import { useAuth } from '../features/auth/AuthProvider'
 import type { FinanceDraft, FinanceEntry, Task, TaskDraft, View } from '../types'
 
 const TASK_STORAGE_KEY = 'mid-daily.tasks'
@@ -22,17 +23,19 @@ const FINANCE_STORAGE_KEY = 'mid-daily.finance'
 const SCHEDULE_STORAGE_KEY = 'mid-daily.schedule'
 
 export function App() {
+  const { user } = useAuth()
+  const userId = user?.id
   const [activeView, setActiveView] = useState<View>('dashboard')
-  const [tasks, setTasks] = useState<Task[]>(() => normalizeTaskList(readStorage(TASK_STORAGE_KEY, initialTasks)))
-  const [finance, setFinance] = useState<FinanceEntry[]>(() => normalizeFinanceList(readStorage(FINANCE_STORAGE_KEY, financeEntries)))
-  const [schedule, setSchedule] = useState(() => normalizeScheduleList(readStorage(SCHEDULE_STORAGE_KEY, initialScheduleItems)))
+  const [tasks, setTasks] = useState<Task[]>(() => normalizeTaskList(readUserStorage(TASK_STORAGE_KEY, userId, initialTasks)))
+  const [finance, setFinance] = useState<FinanceEntry[]>(() => normalizeFinanceList(readUserStorage(FINANCE_STORAGE_KEY, userId, financeEntries)))
+  const [schedule, setSchedule] = useState(() => normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, initialScheduleItems)))
   const [toast, setToast] = useState('')
 
   useReminderScheduler(schedule)
 
-  useEffect(() => writeStorage(TASK_STORAGE_KEY, tasks), [tasks])
-  useEffect(() => writeStorage(FINANCE_STORAGE_KEY, finance), [finance])
-  useEffect(() => writeStorage(SCHEDULE_STORAGE_KEY, schedule), [schedule])
+  useEffect(() => writeUserStorage(TASK_STORAGE_KEY, userId, tasks), [tasks, userId])
+  useEffect(() => writeUserStorage(FINANCE_STORAGE_KEY, userId, finance), [finance, userId])
+  useEffect(() => writeUserStorage(SCHEDULE_STORAGE_KEY, userId, schedule), [schedule, userId])
   useEffect(() => {
     if (!toast) return undefined
     const timeout = window.setTimeout(() => setToast(''), 2200)
