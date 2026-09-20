@@ -1,8 +1,8 @@
 # MiD-Daily — Authentication
 
-## M6 scope
+## M6–M7 scope
 
-MiD-Daily now has a Supabase Auth boundary for the SPA.
+MiD-Daily now has a Supabase Auth boundary for the SPA and authenticated server-side ownership for core data.
 
 ### Supported flows
 
@@ -15,33 +15,45 @@ MiD-Daily now has a Supabase Auth boundary for the SPA.
 - Automatic session/token refresh through the Supabase browser client
 - Local sign out for the current browser session
 
-Supabase recommends listening to auth events with `onAuthStateChange`. The browser client also supports automatic session persistence and refresh. For server-side identity checks, the backend uses the authenticated access token to resolve the current user. 
+Supabase documents `onAuthStateChange` for reacting to auth events and supports automatic session persistence/refresh in the browser client. Server-side identity is verified from the access token rather than trusting client-provided user IDs. citeturn757768search4turn757768search1
 
-### Demo compatibility
+### Data ownership
 
-When `VITE_SUPABASE_URL` or `VITE_SUPABASE_PUBLISHABLE_KEY` is missing, MiD-Daily intentionally stays in demo mode. This keeps the existing local development workflow functional.
+Task, Finance, and Schedule database records carry a `user_id` foreign key to `auth.users(id)`.
 
-When both values are configured, the app is gated by authentication.
+Their database policies enforce:
 
-### Local data isolation
+```text
+authenticated user
+      ↓
+auth.uid()
+      ↓
+resource.user_id
+      ↓
+RLS
+```
+
+The backend additionally filters every data query by the verified authenticated user ID.
+
+### Local cache isolation
 
 Task, Finance, and Schedule localStorage keys are namespaced by authenticated `user.id`.
 
-Example:
+When the first authenticated session is created on an existing demo browser, legacy unscoped data is migrated once into that user's scoped storage.
 
-```
-mid-daily.tasks:<user-id>
-mid-daily.finance:<user-id>
-mid-daily.schedule:<user-id>
-```
+### Backend token handling
 
-When the first authenticated session is created on an existing demo browser, legacy unscoped data is migrated once into that user's scoped storage and the legacy key is removed.
+The browser sends the current Supabase access token as a Bearer token for protected API calls.
 
-### Calendar ownership
+The backend verifies the token and uses the verified user ID for Task/Finance/Schedule ownership and Google Calendar connection ownership.
 
-Calendar API calls send the Supabase access token as a Bearer token. The backend verifies the token and uses the verified Supabase user ID as the Calendar connection owner.
+The Supabase secret/service-role key is never exposed to the frontend.
 
-The pre-auth anonymous owner-cookie fallback remains only for demo mode and legacy compatibility.
+### Demo compatibility
+
+When Supabase frontend variables are missing, MiD-Daily runs in local demo mode.
+
+When Supabase Auth is configured, the authenticated application becomes the source of truth and localStorage is treated as a cache.
 
 ### Frontend environment
 
@@ -51,14 +63,16 @@ VITE_SUPABASE_PUBLISHABLE_KEY=
 VITE_API_BASE_URL=http://localhost:8787
 ```
 
-Configure Email, password recovery, and Google provider settings in the Supabase Auth dashboard. Configure the frontend redirect URL to the MiD-Daily origin used during development/deployment.
+Configure Email/password and Google provider settings in the Supabase Auth dashboard. Configure the application redirect URL to the exact frontend origin used in development/deployment.
 
-### Security rules
+### Security notes
 
-Never put the Supabase secret/service-role key in frontend environment variables.
+Use the publishable key only in the browser. Keep `SUPABASE_SECRET_KEY` server-side.
 
-The frontend receives only the publishable key. The backend may use the server-side secret key to verify incoming user tokens and access protected server operations.
+Password recovery uses Supabase Auth. The application never stores raw passwords.
+
+The current backend is intentionally lightweight and does not implement application-level rate limiting yet; deployment should place the API behind a provider/CDN rate limiter before exposing it publicly.
 
 ### Next step
 
-The next persistence milestone is to add authenticated `user_id` ownership to Task and Finance database tables, then move Schedule/Task/Finance off localStorage while retaining local cache support.
+Deployment should move secrets to the platform secret manager, force HTTPS, set `COOKIE_SECURE=true`, configure production redirect URLs, and verify Auth/Calendar flows against the deployed origin.
