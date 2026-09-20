@@ -26,3 +26,7 @@ export function readUserStorage<T>(baseKey: string, userId: string | undefined, 
 export function writeUserStorage<T>(baseKey: string, userId: string | undefined, value: T) {
   writeStorage(scopedKey(baseKey, userId), value)
 }
+
+export function hasUserStorage(baseKey: string, userId?: string) {
+  return Boolean(userId && localStorage.getItem(`${baseKey}:${userId}`))
+}
