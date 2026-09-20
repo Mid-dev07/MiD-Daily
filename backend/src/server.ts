@@ -192,9 +192,9 @@ function httpError(status: number, message: string) {
 
 async function resolveOwnerId(req: IncomingMessage, res: ServerResponse) {
   const authorization = req.headers.authorization
-  if (authorization) {
-    if (!authorization.startsWith('Bearer ')) throw httpError(401, 'Invalid authorization header.')
-    if (!supabaseAuthClient) throw httpError(503, 'Supabase Auth is not configured.')
+
+  if (supabaseAuthClient) {
+    if (!authorization?.startsWith('Bearer ')) throw httpError(401, 'Authentication is required.')
     const token = authorization.slice('Bearer '.length).trim()
     if (!token) throw httpError(401, 'Invalid access token.')
 
