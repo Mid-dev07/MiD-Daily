@@ -2,7 +2,7 @@
 
 ## M2.6 scope
 
-M2.6 establishes the Calendar integration boundary and a safe first user-facing handoff from a MiD-Daily Schedule item to Google Calendar.
+M2.6 establishes the Calendar integration boundary and a safe first connection flow from MiD-Daily to Google Calendar.
 
 ### Current capabilities
 
@@ -15,6 +15,10 @@ M2.6 establishes the Calendar integration boundary and a safe first user-facing 
 ### Security decision
 
 The API-backed connection should use OAuth authorization code flow with PKCE rather than the legacy implicit flow. Google currently recommends the authorization-code approach for browser applications, and server-side web apps can securely exchange the code for access and refresh tokens. The requested Calendar scope should stay narrow; `https://www.googleapis.com/auth/calendar.events` is intended for viewing and editing events on calendars the user can access.
+
+### Current OAuth implementation
+
+The backend now provides OAuth start, callback, connection status, and disconnect endpoints. Authorization uses PKCE, state is bound to an HttpOnly browser cookie, and access/refresh tokens remain server-side. The current connection store is in memory for local single-instance development only.
 
 ### Next step
 
