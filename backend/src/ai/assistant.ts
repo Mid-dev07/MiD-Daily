@@ -257,6 +257,7 @@ export async function runAssistant(
 
   let input: unknown[] = sanitized
   const tools = buildAssistantTools(allowWrites)
+  const actions: Array<{ tool: string; ok: boolean }> = []
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round += 1) {
     const response = await client.responses.create({
@@ -279,7 +280,7 @@ export async function runAssistant(
     if (calls.length === 0) {
       return {
         text: response.output_text || 'I could not produce a response.',
-        actions: [],
+        actions,
         model: OPENAI_MODEL,
       }
     }
@@ -291,6 +292,7 @@ export async function runAssistant(
       try {
         const result = await executeTool(userId, call.name, call.arguments)
         actionResults.push({ tool: call.name, ok: true })
+        actions.push({ tool: call.name, ok: true })
         input.push({
           type: 'function_call_output',
           call_id: call.call_id,
@@ -299,6 +301,7 @@ export async function runAssistant(
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Tool failed.'
         actionResults.push({ tool: call.name, ok: false })
+        actions.push({ tool: call.name, ok: false })
         input.push({
           type: 'function_call_output',
           call_id: call.call_id,
