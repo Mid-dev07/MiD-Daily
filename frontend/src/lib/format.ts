@@ -4,12 +4,18 @@ export const currency = new Intl.NumberFormat('id-ID', {
   maximumFractionDigits: 0,
 })
 
-export const dateFormatter = new Intl.DateTimeFormat('id-ID', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-})
+export function formatDate(date: string) {
+  return new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(`${date}T00:00:00`))
+}
 
-export const weekdayFormatter = new Intl.DateTimeFormat('en-US', {
-  weekday: 'long',
-})
+export function formatShortDate(date: string) {
+  return new Intl.DateTimeFormat('en-US', {
+    day: '2-digit',
+    month: 'short',
+  }).format(new Date(`${date}T00:00:00`))
+}

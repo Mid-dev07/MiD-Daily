@@ -1,29 +1,17 @@
 # MiD-Daily
 
-Lightweight daily management web app for schedules, tasks, finance, and future productivity automation.
+Lightweight daily management web app.
 
 ## Current phase
-M1.3 — UI/UX & Interaction Foundation
+M2.1 — Schedule / Agenda UI
 
 ## Stack
-- React 19
+- React
 - TypeScript
 - Vite
-- Native CSS animations (no animation library)
-
-## Current capabilities
-- Dashboard, Schedule, Tasks, and Finance views
-- Add tasks
-- Toggle task completion
-- Task filtering
-- Local task persistence with `localStorage`
-- Responsive layout
-- Keyboard focus states
-- Lightweight micro-interactions and toast feedback
-- Reduced-motion support
 
 ## Structure
-See [`docs/STRUCTURE.md`](./docs/STRUCTURE.md) for folder rules.
+The frontend uses a responsibility-first structure. Feature-specific code stays inside its feature folder; shared layout, UI primitives, utilities, and types remain separate.
 
 ## Run locally
 
@@ -33,11 +21,5 @@ npm install
 npm run dev
 ```
 
-## Build
-
-```bash
-cd frontend
-npm run build
-```
-
-The local-storage layer and seed data are prototype infrastructure. They are intentionally isolated so the next data-layer phase can replace them without restructuring the UI.
+## Current focus
+The Schedule module now has a dedicated UI foundation for date navigation, agenda filtering, reminder controls, and future Google Calendar integration.

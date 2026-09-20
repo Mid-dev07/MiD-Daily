@@ -1,46 +1,38 @@
 # MiD-Daily — Architecture Baseline
 
-Initial direction: modular monolith with a lightweight React frontend.
+MiD-Daily starts as a modular monolith.
 
 ```text
 Frontend / PWA
       |
-Application Shell
+Authenticated Session
       |
-Feature Modules
-  |       |       |       |
-Dashboard Schedule Tasks Finance
+Application API
       |
-Application API (future)
+Business Modules
+  |    |    |    |
+Schedule Tasks Finance Dashboard
       |
-PostgreSQL / Supabase (future)
+PostgreSQL / Supabase
       |
-External Integrations (future)
-  |        |        |
-Google  Telegram  WhatsApp
+External Integrations
+  |        |         |
+Google  Telegram   WhatsApp (future)
 ```
 
-## Principles
-- Keep deployment lightweight.
-- Separate modules by responsibility.
-- Avoid premature microservices.
-- Keep authentication and authorization explicit.
-- Keep local prototype concerns isolated so they can be replaced by API/database layers later.
-- Enforce user data isolation at application and database levels when multi-user support is introduced.
+## Schedule integration boundary
+The Schedule domain owns the event and reminder intent. External adapters will be added later without putting provider-specific code inside Schedule UI components.
 
-## Frontend state
-M1 uses local component state for navigation and a small storage adapter for task persistence. This is intentionally temporary; it is not the final data architecture.
+```text
+Schedule Event
+   |
+   +--> Reminder intent
+   |      |
+   |      +--> Native notification adapter (future)
+   |
+   +--> Calendar sync intent
+          |
+          +--> Google Calendar adapter (future)
+```
 
-## UI architecture
-- `app/`: composition and root state
-- `features/`: domain-oriented UI
-- `components/layout/`: application shell pieces
-- `components/ui/`: reusable primitives
-- `lib/`: framework-agnostic helpers
-- `styles/`: design tokens and global application styles
-
-## Change management
-- NOW: foundation, UI/UX consistency, core feature behavior
-- NEXT: persistent Schedule / Tasks / Finance data layer
-- LATER: authentication, integrations, multi-user hardening
-- REJECT / REDESIGN: unnecessary infrastructure and premature complexity
+The initial UI exposes these concepts without requiring external credentials.

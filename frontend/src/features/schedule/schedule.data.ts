@@ -1,0 +1,43 @@
+import type { ScheduleItem } from './schedule.types'
+
+export const scheduleItems: ScheduleItem[] = [
+  {
+    id: 1,
+    title: 'Project planning',
+    type: 'WORK',
+    date: '2026-09-20',
+    startTime: '09:00',
+    endTime: '10:00',
+    location: 'Workspace',
+    notes: 'Review priorities and break down the next development tasks.',
+    reminderEnabled: true,
+    reminderOffset: 15,
+    googleCalendarConnected: false,
+  },
+  {
+    id: 2,
+    title: 'Coding session',
+    type: 'STUDY',
+    date: '2026-09-20',
+    startTime: '13:00',
+    endTime: '15:00',
+    location: 'Home',
+    notes: 'Continue MiD-Daily feature implementation.',
+    reminderEnabled: true,
+    reminderOffset: 30,
+    googleCalendarConnected: false,
+  },
+  {
+    id: 3,
+    title: 'Evening review',
+    type: 'PERSONAL',
+    date: '2026-09-20',
+    startTime: '20:00',
+    endTime: '20:30',
+    location: 'Home',
+    notes: 'Review completed work and plan tomorrow.',
+    reminderEnabled: false,
+    reminderOffset: 10,
+    googleCalendarConnected: false,
+  },
+]

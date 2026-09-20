@@ -1,15 +1,15 @@
 interface StatCardProps {
   label: string
   value: string
-  helper: string
+  hint: string
 }
 
-export function StatCard({ label, value, helper }: StatCardProps) {
+export function StatCard({ label, value, hint }: StatCardProps) {
   return (
     <article className="stat-card">
       <span>{label}</span>
       <strong>{value}</strong>
-      <small>{helper}</small>
+      <small>{hint}</small>
     </article>
   )
 }

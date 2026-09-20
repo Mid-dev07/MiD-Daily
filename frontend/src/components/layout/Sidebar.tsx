@@ -28,8 +28,8 @@ export function Sidebar({ activeView, onNavigate }: SidebarProps) {
           <button
             key={item.id}
             className={activeView === item.id ? 'nav-item is-active' : 'nav-item'}
-            onClick={() => onNavigate(item.id)}
             type="button"
+            onClick={() => onNavigate(item.id)}
           >
             <span className="nav-icon" aria-hidden="true">{item.icon}</span>
             <span>{item.label}</span>
@@ -39,7 +39,7 @@ export function Sidebar({ activeView, onNavigate }: SidebarProps) {
 
       <div className="sidebar-footer">
         <span className="status-dot" aria-hidden="true" />
-        <span>Local foundation mode</span>
+        <span>Foundation mode</span>
       </div>
     </aside>
   )
