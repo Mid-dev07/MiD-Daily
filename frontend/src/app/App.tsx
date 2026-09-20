@@ -8,6 +8,7 @@ import { FinanceView } from '../features/finance/FinanceView'
 import { ScheduleView } from '../features/schedule/ScheduleView'
 import { TasksView } from '../features/tasks/TasksView'
 import { SocialAnalyticsView } from '../features/social/SocialAnalyticsView'
+import { AssistantView } from '../features/ai/AssistantView'
 import { normalizeTaskList } from '../features/tasks/task.migration'
 import { validateTaskDraft } from '../features/tasks/task.validation'
 import { listRemoteTasks, createRemoteTask, updateRemoteTask, deleteRemoteTask } from '../features/tasks/tasksApi'
@@ -250,6 +251,7 @@ export function App() {
           {activeView === 'tasks' && <TasksView tasks={tasks} onSaveTask={saveTask} onToggleTask={(id) => void toggleTask(id)} onDeleteTask={(id) => void deleteTask(id)} />}
           {activeView === 'finance' && <FinanceView finance={finance} onSaveFinance={saveFinance} onDeleteFinance={(id) => void deleteFinance(id)} />}
           {activeView === 'social' && <SocialAnalyticsView />}
+          {activeView === 'assistant' && <AssistantView />}
         </div>
       </main>
       {toast && <Toast message={toast} />}
