@@ -645,7 +645,7 @@ async function handleListTasks(req: IncomingMessage, res: ServerResponse) {
 async function handleCreateTask(req: IncomingMessage, res: ServerResponse) {
   const userId = await requireAuthenticatedUserId(req)
   const body = await readRequestJson(req)
-  const item = await createTask(userId, validateTaskInput(body) as never)
+  const item = await createTask(userId, validateTaskInput(body))
   sendJson(res, 201, { item })
 }
 
