@@ -5,7 +5,7 @@ import { createFinance, createTask, listFinance, listTasks } from '../dataStore.
 import { listSchedule } from '../scheduleStore.js'
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY ?? ''
-const OPENAI_MODEL = process.env.OPENAI_MODEL ?? 'gpt-5.6-luna'
+const OPENAI_MODEL = process.env.OPENAI_MODEL ?? 'gpt-5.6'
 const APP_TIMEZONE = process.env.APP_TIMEZONE ?? 'Asia/Jakarta'
 const MAX_TOOL_ROUNDS = 4
 const MAX_ITEMS = 20
