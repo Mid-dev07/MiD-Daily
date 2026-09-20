@@ -1,24 +1,32 @@
+import { buildGoogleCalendarTemplateUrl } from '../../../integrations/calendar/googleCalendar'
 import { formatDateLong } from '../schedule.date'
 import { formatReminderTime, getReminderState } from '../schedule.reminder'
-import { buildGoogleCalendarTemplateUrl } from '../../../integrations/calendar/googleCalendar'
 import type { ScheduleItem } from '../schedule.types'
 
 interface ScheduleDetailProps {
   item?: ScheduleItem
   onClose: () => void
   onEdit: (item: ScheduleItem) => void
+  onSync: (item: ScheduleItem) => Promise<void>
 }
 
-export function ScheduleDetail({ item, onClose, onEdit }: ScheduleDetailProps) {
+export function ScheduleDetail({ item, onClose, onEdit, onSync }: ScheduleDetailProps) {
   if (!item) return null
 
   const reminder = getReminderState(item)
-  const openGoogleCalendar = () => window.open(buildGoogleCalendarTemplateUrl(item), '_blank', 'noopener,noreferrer')
   const calendarStatus = item.googleCalendar.status === 'synced'
     ? 'Synced'
     : item.googleCalendar.status === 'error'
       ? 'Sync error'
-      : 'Not synced'
+      : item.googleCalendar.status === 'pending'
+        ? 'Pending sync'
+        : 'Not synced'
+
+  const syncLabel = item.googleCalendar.status === 'synced' ? 'Update Google' : 'Sync to Google'
+  const sync = async () => {
+    await onSync(item)
+    onClose()
+  }
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
@@ -41,7 +49,8 @@ export function ScheduleDetail({ item, onClose, onEdit }: ScheduleDetailProps) {
 
         <div className="modal-actions">
           <button className="secondary-button" type="button" onClick={onClose}>Close</button>
-          <button className="secondary-button" type="button" onClick={openGoogleCalendar}>Add to Google Calendar</button>
+          <button className="secondary-button" type="button" onClick={() => void sync()}>{syncLabel}</button>
+          <button className="secondary-button" type="button" onClick={() => window.open(buildGoogleCalendarTemplateUrl(item), '_blank', 'noopener,noreferrer')}>Open Calendar</button>
           <button className="primary-button" type="button" onClick={() => { onClose(); onEdit(item) }}>Edit activity</button>
         </div>
       </section>
