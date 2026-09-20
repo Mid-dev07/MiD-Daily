@@ -1,6 +1,7 @@
 import type { ScheduleItem } from './schedule.types'
 
 const noRepeat = { frequency: 'NONE' as const, interval: 1 }
+const notSynced = { status: 'not-synced' as const, calendarId: 'primary' }
 
 export const initialScheduleItems: ScheduleItem[] = [
   {
@@ -15,7 +16,7 @@ export const initialScheduleItems: ScheduleItem[] = [
     reminderEnabled: true,
     reminderOffset: 15,
     recurrence: noRepeat,
-    googleCalendarConnected: false,
+    googleCalendar: notSynced,
   },
   {
     id: 2,
@@ -29,7 +30,7 @@ export const initialScheduleItems: ScheduleItem[] = [
     reminderEnabled: true,
     reminderOffset: 30,
     recurrence: { frequency: 'WEEKLY', interval: 1 },
-    googleCalendarConnected: false,
+    googleCalendar: notSynced,
   },
   {
     id: 3,
@@ -43,6 +44,6 @@ export const initialScheduleItems: ScheduleItem[] = [
     reminderEnabled: false,
     reminderOffset: 10,
     recurrence: noRepeat,
-    googleCalendarConnected: false,
+    googleCalendar: notSynced,
   },
 ]
