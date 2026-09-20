@@ -3,7 +3,7 @@
 Lightweight daily management web app.
 
 ## Current phase
-M9 — Telegram integration
+M10 — External messaging integrations
 
 ## Stack
 - React
@@ -24,6 +24,7 @@ M9 — Telegram integration
 - Supabase Auth
 - Supabase PostgreSQL persistence
 - Telegram account linking + bot commands
+- WhatsApp Cloud API adapter + account linking foundation
 
 ## Run locally
 
