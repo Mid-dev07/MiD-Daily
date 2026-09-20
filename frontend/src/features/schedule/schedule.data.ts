@@ -1,6 +1,6 @@
 import type { ScheduleItem } from './schedule.types'
 
-export const scheduleItems: ScheduleItem[] = [
+export const initialScheduleItems: ScheduleItem[] = [
   {
     id: 1,
     title: 'Project planning',

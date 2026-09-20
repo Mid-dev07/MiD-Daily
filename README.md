@@ -23,3 +23,6 @@ npm run dev
 
 ## Current focus
 The Schedule module now has a dedicated UI foundation for date navigation, agenda filtering, reminder controls, and future Google Calendar integration.
+
+## Current implementation
+M2.2 — Schedule CRUD foundation with local persistence and time-overlap validation.

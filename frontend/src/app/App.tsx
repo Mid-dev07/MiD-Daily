@@ -8,17 +8,20 @@ import { FinanceView } from '../features/finance/FinanceView'
 import { ScheduleView } from '../features/schedule/ScheduleView'
 import { TasksView } from '../features/tasks/TasksView'
 import { readStorage, writeStorage } from '../lib/storage'
-import { scheduleItems } from '../features/schedule/schedule.data'
+import { initialScheduleItems } from '../features/schedule/schedule.data'
 import type { Task, TaskPriority, View } from '../types'
 
 const TASK_STORAGE_KEY = 'mid-daily.tasks'
+const SCHEDULE_STORAGE_KEY = 'mid-daily.schedule'
 
 export function App() {
   const [activeView, setActiveView] = useState<View>('dashboard')
   const [tasks, setTasks] = useState<Task[]>(() => readStorage(TASK_STORAGE_KEY, initialTasks))
+  const [schedule, setSchedule] = useState(() => readStorage(SCHEDULE_STORAGE_KEY, initialScheduleItems))
   const [toast, setToast] = useState('')
 
   useEffect(() => writeStorage(TASK_STORAGE_KEY, tasks), [tasks])
+  useEffect(() => writeStorage(SCHEDULE_STORAGE_KEY, schedule), [schedule])
   useEffect(() => {
     if (!toast) return undefined
     const timeout = window.setTimeout(() => setToast(''), 2200)
@@ -45,8 +48,8 @@ export function App() {
       <main className="main-content">
         <Topbar view={activeView} />
         <div className="view-key">
-          {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={scheduleItems} finance={financeEntries} onToggleTask={toggleTask} />}
-          {activeView === 'schedule' && <ScheduleView />}
+          {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={financeEntries} onToggleTask={toggleTask} />}
+          {activeView === 'schedule' && <ScheduleView schedule={schedule} onScheduleChange={setSchedule} />}
           {activeView === 'tasks' && <TasksView tasks={tasks} onAddTask={addTask} onToggleTask={toggleTask} />}
           {activeView === 'finance' && <FinanceView finance={financeEntries} />}
         </div>

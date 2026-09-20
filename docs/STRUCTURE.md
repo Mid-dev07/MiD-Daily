@@ -28,3 +28,7 @@ frontend/src/
 4. Layout components never own business logic.
 5. Provider-specific integrations are implemented as adapters outside feature presentation code.
 6. Do not add a dependency for an effect that can be handled by native CSS or the platform.
+
+
+## M2.2 Schedule CRUD
+The schedule domain now owns its types, seed data, validation, form, detail view, and item card. Schedule state is composed in `app/App.tsx` and persisted through the generic storage utility. Native reminder and Google Calendar integrations remain separate future infrastructure layers.

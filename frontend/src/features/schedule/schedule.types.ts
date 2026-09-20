@@ -23,3 +23,5 @@ export interface ScheduleItem {
   reminderOffset: ReminderOffset
   googleCalendarConnected: boolean
 }
+
+export type ScheduleDraft = Omit<ScheduleItem, 'id' | 'googleCalendarConnected'>
