@@ -34,9 +34,15 @@ export function GoogleCalendarIntegrationCard() {
     return () => { active = false }
   }, [])
 
-  const connect = () => {
+  const connect = async () => {
     setError('')
-    startGoogleCalendarOAuth()
+    setLoading(true)
+    try {
+      await startGoogleCalendarOAuth()
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Unable to start Google Calendar authorization.')
+      setLoading(false)
+    }
   }
 
   const disconnect = async () => {
@@ -82,7 +88,7 @@ export function GoogleCalendarIntegrationCard() {
             <button className="secondary-button" type="button" disabled={loading} onClick={() => void disconnect()}>Disconnect</button>
           </>
         ) : (
-          <button className="secondary-button" type="button" disabled={loading || !status.configured} onClick={connect}>
+          <button className="secondary-button" type="button" disabled={loading || !status.configured} onClick={() => void connect()}>
             Connect Google
           </button>
         )}
