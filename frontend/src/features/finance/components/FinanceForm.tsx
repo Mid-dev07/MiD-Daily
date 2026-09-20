@@ -6,7 +6,7 @@ interface FinanceFormProps {
   initialEntry?: FinanceEntry
   defaultDate: string
   onClose: () => void
-  onSubmit: (draft: FinanceDraft, editingId?: number) => string | null
+  onSubmit: (draft: FinanceDraft, editingId?: number) => string | null | Promise<string | null>
 }
 
 const getEmptyDraft = (date: string): FinanceDraft => ({
@@ -21,6 +21,7 @@ const getEmptyDraft = (date: string): FinanceDraft => ({
 export function FinanceForm({ open, initialEntry, defaultDate, onClose, onSubmit }: FinanceFormProps) {
   const [draft, setDraft] = useState<FinanceDraft>(() => getEmptyDraft(defaultDate))
   const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -33,6 +34,7 @@ export function FinanceForm({ open, initialEntry, defaultDate, onClose, onSubmit
       notes: initialEntry.notes ?? '',
     } : getEmptyDraft(defaultDate))
     setError('')
+    setSaving(false)
   }, [open, initialEntry, defaultDate])
 
   if (!open) return null
@@ -42,18 +44,26 @@ export function FinanceForm({ open, initialEntry, defaultDate, onClose, onSubmit
     setError('')
   }
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const result = onSubmit({ ...draft, amount: Math.abs(draft.amount) }, initialEntry?.id)
-    if (result) {
-      setError(result)
-      return
+    setSaving(true)
+    setError('')
+    try {
+      const result = await onSubmit({ ...draft, amount: Math.abs(draft.amount) }, initialEntry?.id)
+      if (result) {
+        setError(result)
+        return
+      }
+      onClose()
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Unable to save transaction.')
+    } finally {
+      setSaving(false)
     }
-    onClose()
   }
 
   return (
-    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !saving && onClose()}>
       <section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="finance-form-title">
         <div className="modal-header">
           <div><span className="section-kicker">FINANCE</span><h3 id="finance-form-title">{initialEntry ? 'Edit transaction' : 'Add transaction'}</h3></div>
