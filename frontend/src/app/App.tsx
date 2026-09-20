@@ -15,15 +15,18 @@ import { validateFinanceDraft } from '../features/finance/finance.validation'
 import { listRemoteFinance, createRemoteFinance, updateRemoteFinance, deleteRemoteFinance } from '../features/finance/financeApi'
 import { initialScheduleItems } from '../features/schedule/schedule.data'
 import { normalizeScheduleList } from '../features/schedule/schedule.migration'
+import { listRemoteSchedule, createRemoteSchedule, updateRemoteSchedule, deleteRemoteSchedule } from '../features/schedule/scheduleApi'
 import { useReminderScheduler } from '../features/schedule/hooks/useReminderScheduler'
 import { readUserStorage, writeUserStorage, hasUserStorage } from '../lib/userStorage'
 import { hasCompletedRemoteSync, markRemoteSyncComplete } from '../lib/dataSync'
 import { useAuth } from '../features/auth/AuthProvider'
-import type { FinanceDraft, FinanceEntry, Task, TaskDraft, View } from '../types'
+import type { FinanceDraft, FinanceEntry, Task, TaskDraft, ScheduleItem, View } from '../types'
 
 const TASK_STORAGE_KEY = 'mid-daily.tasks'
 const FINANCE_STORAGE_KEY = 'mid-daily.finance'
 const SCHEDULE_STORAGE_KEY = 'mid-daily.schedule'
+
+const reportError = (reason: unknown) => reason instanceof Error ? reason.message : 'Remote data sync failed.'
 
 export function App() {
   const { user } = useAuth()
@@ -31,7 +34,7 @@ export function App() {
   const [activeView, setActiveView] = useState<View>('dashboard')
   const [tasks, setTasks] = useState<Task[]>(() => normalizeTaskList(readUserStorage(TASK_STORAGE_KEY, userId, userId ? [] : initialTasks)))
   const [finance, setFinance] = useState<FinanceEntry[]>(() => normalizeFinanceList(readUserStorage(FINANCE_STORAGE_KEY, userId, userId ? [] : financeEntries)))
-  const [schedule, setSchedule] = useState(() => normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, initialScheduleItems)))
+  const [schedule, setSchedule] = useState<ScheduleItem[]>(() => normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, userId ? [] : initialScheduleItems)))
   const [toast, setToast] = useState('')
 
   useReminderScheduler(schedule)
@@ -44,48 +47,76 @@ export function App() {
     if (!userId) return
     let active = true
 
-    const loadRemoteData = async () => {
+    const hydrateTasks = async () => {
       try {
-        const [remoteTasks, remoteFinance] = await Promise.all([listRemoteTasks(), listRemoteFinance()])
+        const remote = normalizeTaskList(await listRemoteTasks())
+        const cacheExists = hasUserStorage(TASK_STORAGE_KEY, userId)
 
-        if (!active) return
-
-        const taskCacheExists = hasUserStorage(TASK_STORAGE_KEY, userId)
-        const financeCacheExists = hasUserStorage(FINANCE_STORAGE_KEY, userId)
-
-        if (remoteTasks.length > 0 || hasCompletedRemoteSync(TASK_STORAGE_KEY, userId)) {
-          setTasks(normalizeTaskList(remoteTasks))
-        } else if (taskCacheExists && tasks.length > 0) {
-          const migrated = []
+        if (remote.length > 0 || hasCompletedRemoteSync(TASK_STORAGE_KEY, userId)) {
+          if (active) setTasks(remote)
+        } else if (cacheExists && tasks.length > 0) {
+          const migrated: Task[] = []
           for (const task of tasks) migrated.push(await createRemoteTask(task))
           if (active) setTasks(normalizeTaskList(migrated))
-        } else {
+        } else if (active) {
           setTasks([])
         }
         markRemoteSyncComplete(TASK_STORAGE_KEY, userId)
+      } catch (reason) {
+        if (active) setToast('Tasks: ' + reportError(reason))
+      }
+    }
 
-        if (remoteFinance.length > 0 || hasCompletedRemoteSync(FINANCE_STORAGE_KEY, userId)) {
-          setFinance(normalizeFinanceList(remoteFinance))
-        } else if (financeCacheExists && finance.length > 0) {
-          const migrated = []
+    const hydrateFinance = async () => {
+      try {
+        const remote = normalizeFinanceList(await listRemoteFinance())
+        const cacheExists = hasUserStorage(FINANCE_STORAGE_KEY, userId)
+
+        if (remote.length > 0 || hasCompletedRemoteSync(FINANCE_STORAGE_KEY, userId)) {
+          if (active) setFinance(remote)
+        } else if (cacheExists && finance.length > 0) {
+          const migrated: FinanceEntry[] = []
           for (const entry of finance) migrated.push(await createRemoteFinance(entry))
           if (active) setFinance(normalizeFinanceList(migrated))
-        } else {
+        } else if (active) {
           setFinance([])
         }
         markRemoteSyncComplete(FINANCE_STORAGE_KEY, userId)
       } catch (reason) {
-        if (active) setToast(reason instanceof Error ? `Cloud sync unavailable: ${reason.message}` : 'Cloud sync unavailable; using local cache.')
+        if (active) setToast('Finance: ' + reportError(reason))
       }
     }
 
-    void loadRemoteData()
+    const hydrateSchedule = async () => {
+      try {
+        const remote = normalizeScheduleList(await listRemoteSchedule())
+        const cacheExists = hasUserStorage(SCHEDULE_STORAGE_KEY, userId)
+
+        if (remote.length > 0 || hasCompletedRemoteSync(SCHEDULE_STORAGE_KEY, userId)) {
+          if (active) setSchedule(remote)
+        } else if (cacheExists && schedule.length > 0) {
+          const migrated: ScheduleItem[] = []
+          for (const item of schedule) migrated.push(await createRemoteSchedule(item))
+          if (active) setSchedule(normalizeScheduleList(migrated))
+        } else if (active) {
+          setSchedule([])
+        }
+        markRemoteSyncComplete(SCHEDULE_STORAGE_KEY, userId)
+      } catch (reason) {
+        if (active) setToast('Schedule: ' + reportError(reason))
+      }
+    }
+
+    void hydrateTasks()
+    void hydrateFinance()
+    void hydrateSchedule()
+
     return () => { active = false }
   }, [userId])
 
   useEffect(() => {
     if (!toast) return undefined
-    const timeout = window.setTimeout(() => setToast(''), 3000)
+    const timeout = window.setTimeout(() => setToast(''), 3200)
     return () => window.clearTimeout(timeout)
   }, [toast])
 
@@ -105,7 +136,7 @@ export function App() {
       }
       setToast(completed ? 'Task reopened' : 'Task completed')
     } catch (reason) {
-      setToast(reason instanceof Error ? reason.message : 'Task update failed.')
+      setToast(reportError(reason))
     }
   }
 
@@ -123,20 +154,12 @@ export function App() {
 
     if (editingId) {
       if (!tasks.some((task) => task.id === editingId)) return 'Task not found.'
-      if (userId) {
-        const remote = await updateRemoteTask(editingId, normalizedDraft)
-        setTasks((items) => items.map((task) => task.id === editingId ? remote : task))
-      } else {
-        setTasks((items) => items.map((task) => task.id === editingId ? { ...task, ...normalizedDraft } : task))
-      }
+      const next = userId ? await updateRemoteTask(editingId, normalizedDraft) : { ...tasks.find((task) => task.id === editingId)!, ...normalizedDraft }
+      setTasks((items) => items.map((task) => task.id === editingId ? next : task))
       setToast('Task updated')
     } else {
-      if (userId) {
-        const remote = await createRemoteTask(normalizedDraft)
-        setTasks((items) => [...items, remote])
-      } else {
-        setTasks((items) => [...items, { id: Date.now(), ...normalizedDraft }])
-      }
+      const next = userId ? await createRemoteTask(normalizedDraft) : { id: Date.now(), ...normalizedDraft }
+      setTasks((items) => [...items, next])
       setToast('Task added')
     }
     return null
@@ -148,7 +171,7 @@ export function App() {
       setTasks((current) => current.filter((task) => task.id !== id))
       setToast('Task deleted')
     } catch (reason) {
-      setToast(reason instanceof Error ? reason.message : 'Task deletion failed.')
+      setToast(reportError(reason))
     }
   }
 
@@ -166,20 +189,12 @@ export function App() {
 
     if (editingId) {
       if (!finance.some((entry) => entry.id === editingId)) return 'Transaction not found.'
-      if (userId) {
-        const remote = await updateRemoteFinance(editingId, normalizedDraft)
-        setFinance((items) => items.map((entry) => entry.id === editingId ? remote : entry))
-      } else {
-        setFinance((items) => items.map((entry) => entry.id === editingId ? { ...entry, ...normalizedDraft } : entry))
-      }
+      const next = userId ? await updateRemoteFinance(editingId, normalizedDraft) : { ...finance.find((entry) => entry.id === editingId)!, ...normalizedDraft }
+      setFinance((items) => items.map((entry) => entry.id === editingId ? next : entry))
       setToast('Transaction updated')
     } else {
-      if (userId) {
-        const remote = await createRemoteFinance(normalizedDraft)
-        setFinance((items) => [...items, remote])
-      } else {
-        setFinance((items) => [...items, { id: Date.now(), ...normalizedDraft }])
-      }
+      const next = userId ? await createRemoteFinance(normalizedDraft) : { id: Date.now(), ...normalizedDraft }
+      setFinance((items) => [...items, next])
       setToast('Transaction added')
     }
     return null
@@ -191,8 +206,36 @@ export function App() {
       setFinance((current) => current.filter((entry) => entry.id !== id))
       setToast('Transaction deleted')
     } catch (reason) {
-      setToast(reason instanceof Error ? reason.message : 'Transaction deletion failed.')
+      setToast(reportError(reason))
     }
+  }
+
+  const handleScheduleChange = async (next: ScheduleItem[]) => {
+    if (!userId) {
+      setSchedule(next)
+      return
+    }
+
+    const currentById = new Map(schedule.map((item) => [item.id, item]))
+    const nextById = new Map(next.map((item) => [item.id, item]))
+
+    for (const item of schedule) {
+      if (!nextById.has(item.id)) await deleteRemoteSchedule(item.id)
+    }
+
+    const resolved = [...next]
+    for (let index = 0; index < resolved.length; index += 1) {
+      const item = resolved[index]
+      const previous = currentById.get(item.id)
+
+      if (!previous) {
+        resolved[index] = await createRemoteSchedule(item)
+      } else if (JSON.stringify(previous) !== JSON.stringify(item)) {
+        resolved[index] = await updateRemoteSchedule(item.id, item)
+      }
+    }
+
+    setSchedule(normalizeScheduleList(resolved))
   }
 
   return (
@@ -202,7 +245,7 @@ export function App() {
         <Topbar view={activeView} />
         <div className="view-key">
           {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={finance} onToggleTask={(id) => void toggleTask(id)} />}
-          {activeView === 'schedule' && <ScheduleView schedule={schedule} onScheduleChange={setSchedule} />}
+          {activeView === 'schedule' && <ScheduleView schedule={schedule} onScheduleChange={handleScheduleChange} demoMode={!userId} />}
           {activeView === 'tasks' && <TasksView tasks={tasks} onSaveTask={saveTask} onToggleTask={(id) => void toggleTask(id)} onDeleteTask={(id) => void deleteTask(id)} />}
           {activeView === 'finance' && <FinanceView finance={finance} onSaveFinance={saveFinance} onDeleteFinance={(id) => void deleteFinance(id)} />}
         </div>
