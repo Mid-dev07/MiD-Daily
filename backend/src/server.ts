@@ -958,6 +958,6 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
   }
 }
 
-createServer((req, res) => void handle(req, res)).listen(PORT, () => {
+createServer((req, res) => void handle(req, res)).listen(PORT, '0.0.0.0', () => {
   console.log(`MiD-Daily backend listening on http://localhost:${PORT}`)
 })
