@@ -5,7 +5,7 @@ import type { Task, TaskDraft, TaskPriority, TaskStatus } from '../../types'
 
 interface TasksViewProps {
   tasks: Task[]
-  onSaveTask: (draft: TaskDraft, editingId?: number) => string | null
+  onSaveTask: (draft: TaskDraft, editingId?: number) => string | null | Promise<string | null>
   onToggleTask: (id: number) => void
   onDeleteTask: (id: number) => void
 }
