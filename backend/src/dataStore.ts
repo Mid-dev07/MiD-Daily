@@ -62,7 +62,7 @@ export async function listTasks(userId: string) {
   return (data ?? []).map(taskFromRow)
 }
 
-export async function createTask(userId: string, task: TaskRecord) {
+export async function createTask(userId: string, task: Omit<TaskRecord, 'id'>) {
   const { data, error } = await db().from('tasks').insert({
     user_id: userId,
     title: task.title,
@@ -106,7 +106,7 @@ export async function listFinance(userId: string) {
   return (data ?? []).map(financeFromRow)
 }
 
-export async function createFinance(userId: string, entry: FinanceRecord) {
+export async function createFinance(userId: string, entry: Omit<FinanceRecord, 'id'>) {
   const { data, error } = await db().from('finance_entries').insert({
     user_id: userId,
     type: entry.type,
