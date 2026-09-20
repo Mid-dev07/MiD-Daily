@@ -3,8 +3,7 @@ import { AuthView } from './AuthView'
 import { useAuth } from './AuthProvider'
 
 export function AuthGate({ children }: PropsWithChildren) {
-  const { configured, loading, user } = useAuth()
-  const recovery = new URLSearchParams(window.location.search).get('type') === 'recovery'
+  const { configured, loading, user, recovery } = useAuth()
 
   if (!configured) return children
   if (loading) {
