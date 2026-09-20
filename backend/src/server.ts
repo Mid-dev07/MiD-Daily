@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'node:crypto'
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto'
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
 import { createClient } from '@supabase/supabase-js'
 import {
@@ -43,6 +43,7 @@ const OAUTH_STATE_COOKIE_NAME = 'mid_daily_google_oauth_state'
 const OWNER_MAX_AGE_SECONDS = 60 * 60 * 24 * 30
 const OAUTH_STATE_TTL_MS = 10 * 60 * 1000
 const ACCESS_TOKEN_REFRESH_MARGIN_MS = 60_000
+const OAUTH_STATE_AAD = 'mid-daily-google-oauth-state'
 const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events'
 const GOOGLE_CALENDAR_API = 'https://www.googleapis.com/calendar/v3'
 const SUPABASE_URL = process.env.SUPABASE_URL ?? ''
@@ -131,10 +132,63 @@ function clearOwnerCookie(res: ServerResponse) {
   )
 }
 
-function setOAuthStateCookie(res: ServerResponse, state: string) {
+function encryptionKey() {
+  const raw = Buffer.from(process.env.TOKEN_ENCRYPTION_KEY_B64 ?? '', 'base64')
+  if (raw.length !== 32) throw new Error('TOKEN_ENCRYPTION_KEY_B64 must decode to exactly 32 bytes.')
+  return raw
+}
+
+function encodeBase64Url(buffer: Buffer) {
+  return buffer.toString('base64url')
+}
+
+function decodeBase64Url(value: string) {
+  return Buffer.from(value, 'base64url')
+}
+
+function encryptOAuthState(payload: { state: string; verifier: string; ownerId: string; createdAt: number }) {
+  const iv = randomBytes(12)
+  const cipher = createCipheriv('aes-256-gcm', encryptionKey(), iv)
+  cipher.setAAD(Buffer.from(OAUTH_STATE_AAD, 'utf8'))
+  const ciphertext = Buffer.concat([cipher.update(JSON.stringify(payload), 'utf8'), cipher.final()])
+  return 'v1.' + encodeBase64Url(iv) + '.' + encodeBase64Url(cipher.getAuthTag()) + '.' + encodeBase64Url(ciphertext)
+}
+
+function decryptOAuthState(value: string) {
+  const [version, iv, tag, ciphertext] = value.split('.')
+  if (version !== 'v1' || !iv || !tag || !ciphertext) return null
+
+  try {
+    const decipher = createDecipheriv('aes-256-gcm', encryptionKey(), decodeBase64Url(iv))
+    decipher.setAAD(Buffer.from(OAUTH_STATE_AAD, 'utf8'))
+    decipher.setAuthTag(decodeBase64Url(tag))
+    const payload = JSON.parse(Buffer.concat([
+      decipher.update(decodeBase64Url(ciphertext)),
+      decipher.final(),
+    ]).toString('utf8')) as Record<string, unknown>
+
+    if (
+      typeof payload.state !== 'string' ||
+      typeof payload.verifier !== 'string' ||
+      typeof payload.ownerId !== 'string' ||
+      typeof payload.createdAt !== 'number'
+    ) return null
+
+    return {
+      state: payload.state,
+      verifier: payload.verifier,
+      ownerId: payload.ownerId,
+      createdAt: payload.createdAt,
+    }
+  } catch {
+    return null
+  }
+}
+
+function setOAuthStateCookie(res: ServerResponse, value: string) {
   appendCookie(
     res,
-    `${OAUTH_STATE_COOKIE_NAME}=${encodeURIComponent(state)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=600${cookieSuffix()}`,
+    `${OAUTH_STATE_COOKIE_NAME}=${encodeURIComponent(value)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=600${cookieSuffix()}`,
   )
 }
 
@@ -402,13 +456,6 @@ async function googleCalendarRequest(
   return response.json() as Promise<Record<string, unknown>>
 }
 
-function cleanupOAuthStates() {
-  const cutoff = Date.now() - OAUTH_STATE_TTL_MS
-  for (const [state, item] of oauthStates) {
-    if (item.createdAt < cutoff) oauthStates.delete(state)
-  }
-}
-
 async function handleStatus(req: IncomingMessage, res: ServerResponse) {
   const ownerId = await resolveOwnerId(req, res)
   const connection = isGooglePersistenceConfigured() ? await getGoogleConnection(ownerId) : null
@@ -423,13 +470,12 @@ async function handleStatus(req: IncomingMessage, res: ServerResponse) {
 async function createGoogleAuthUrl(req: IncomingMessage, res: ServerResponse) {
     assertGoogleConfigured()
     assertPersistenceConfigured()
-    cleanupOAuthStates()
 
     const ownerId = await resolveOwnerId(req, res)
     const state = base64Url(randomBytes(24))
     const verifier = createPkceVerifier()
-    oauthStates.set(state, { verifier, createdAt: Date.now(), ownerId })
-    setOAuthStateCookie(res, state)
+    const stateCookie = encryptOAuthState({ state, verifier, createdAt: Date.now(), ownerId })
+    setOAuthStateCookie(res, stateCookie)
 
     const params = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID,
@@ -481,12 +527,11 @@ async function handleCallback(req: IncomingMessage, url: URL, res: ServerRespons
     return
   }
 
-  const requestState = parseCookies(req)[OAUTH_STATE_COOKIE_NAME]
-  const pending = oauthStates.get(state)
-  oauthStates.delete(state)
+  const stateCookie = parseCookies(req)[OAUTH_STATE_COOKIE_NAME]
+  const pending = stateCookie ? decryptOAuthState(stateCookie) : null
   clearOAuthStateCookie(res)
 
-  if (requestState !== state || !pending || Date.now() - pending.createdAt > OAUTH_STATE_TTL_MS) {
+  if (!pending || pending.state !== state || Date.now() - pending.createdAt > OAUTH_STATE_TTL_MS) {
     sendRedirect(res, `${FRONTEND_URL}/?google=error&reason=invalid_or_expired_state`)
     return
   }
