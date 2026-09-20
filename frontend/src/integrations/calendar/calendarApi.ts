@@ -1,13 +1,9 @@
-const API_BASE_URL = ((import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:8787').replace(/\\/$/, '')
+const API_BASE_URL = ((import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:8787').replace(/\/$/, '')
 
 export interface GoogleCalendarConnectionStatus {
   configured: boolean
   connected: boolean
   connectedAt: string | null
-}
-
-export function getGoogleCalendarApiBaseUrl() {
-  return API_BASE_URL
 }
 
 export async function getGoogleCalendarConnectionStatus(): Promise<GoogleCalendarConnectionStatus> {
