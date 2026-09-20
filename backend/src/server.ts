@@ -25,6 +25,7 @@ import {
   isSchedulePersistenceConfigured,
   listSchedule,
   updateSchedule,
+  type ScheduleRecord,
 } from './scheduleStore.js'
 
 const PORT = Number(process.env.PORT ?? 8787)
@@ -698,27 +699,36 @@ function validateScheduleInput(body: Record<string, unknown>) {
     ? googleCalendar.calendarId.trim()
     : 'primary'
 
-  return {
+  const syncStatusValue = String(googleCalendar.status)
+  const syncStatus: ScheduleRecord['googleCalendar']['status'] = ['not-synced','pending','synced','error'].includes(syncStatusValue)
+    ? syncStatusValue as ScheduleRecord['googleCalendar']['status']
+    : 'not-synced'
+
+  const candidate: Omit<ScheduleRecord, 'id'> = {
     title,
-    type: type as 'CLASS' | 'WORK' | 'MEETING' | 'STUDY' | 'PERSONAL' | 'APPOINTMENT' | 'EVENT' | 'OTHER',
+    type: type as ScheduleRecord['type'],
     date: String(date),
     startTime,
     endTime,
     location,
     notes,
     reminderEnabled,
-    reminderOffset: reminderOffset as 0 | 5 | 10 | 15 | 30 | 60,
+    reminderOffset: reminderOffset as ScheduleRecord['reminderOffset'],
     recurrence: {
-      frequency: recurrence.frequency as 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY',
+      frequency: recurrence.frequency as ScheduleRecord['recurrence']['frequency'],
       interval,
       ...(typeof recurrence.until === 'string' ? { until: recurrence.until } : {}),
     },
     googleCalendar: {
-      ...googleCalendar,
-      status: ['not-synced','pending','synced','error'].includes(String(googleCalendar.status)) ? googleCalendar.status : 'not-synced',
+      status: syncStatus,
       calendarId,
+      ...(typeof googleCalendar.eventId === 'string' ? { eventId: googleCalendar.eventId } : {}),
+      ...(typeof googleCalendar.lastSyncedAt === 'string' ? { lastSyncedAt: googleCalendar.lastSyncedAt } : {}),
+      ...(typeof googleCalendar.error === 'string' ? { error: googleCalendar.error } : {}),
     },
   }
+
+  return candidate
 }
 
 function assertNoScheduleOverlap(items: Array<{ id: number; date: string; startTime: string; endTime: string }>, candidate: { id?: number; date: string; startTime: string; endTime: string }) {
