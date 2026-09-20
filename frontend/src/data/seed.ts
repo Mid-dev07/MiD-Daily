@@ -8,7 +8,7 @@ export const initialTasks: Task[] = [
 ]
 
 export const financeEntries: FinanceEntry[] = [
-  { id: 1, type: 'expense', title: 'Lunch', amount: 25000 },
-  { id: 2, type: 'expense', title: 'Transport', amount: 15000 },
-  { id: 3, type: 'income', title: 'Allowance', amount: 150000 },
+  { id: 1, type: 'expense', title: 'Lunch', amount: 25000, category: 'Food', date: '2026-09-20', notes: 'Campus lunch' },
+  { id: 2, type: 'expense', title: 'Transport', amount: 15000, category: 'Transport', date: '2026-09-20' },
+  { id: 3, type: 'income', title: 'Allowance', amount: 150000, category: 'Allowance', date: '2026-09-20' },
 ]
