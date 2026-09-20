@@ -222,3 +222,12 @@
 .finance-row:first-child { border-top: 0; }
 .finance-row-actions { display: flex; gap: 4px; }
 @media (max-width: 800px) { .finance-toolbar { grid-template-columns: 1fr; } .finance-row { grid-template-columns: minmax(0, 1fr) auto; } .finance-row-actions { grid-column: 1 / -1; justify-content: flex-end; } }
+
+/* M4.2 Finance insights */
+.finance-periods { margin-bottom: -2px; }
+.finance-insights { display: grid; gap: 11px; }
+.finance-breakdown-row { display: grid; grid-template-columns: 100px minmax(80px, 1fr) auto; gap: 10px; align-items: center; padding: 7px 0; color: #93a5b4; font-size: 11px; }
+.finance-breakdown-track { height: 6px; overflow: hidden; border-radius: 999px; background: #162633; }
+.finance-breakdown-track span { display: block; height: 100%; border-radius: inherit; background: var(--color-accent); }
+.finance-breakdown-row strong { color: #cbd9e2; font-size: 11px; }
+@media (max-width: 640px) { .finance-breakdown-row { grid-template-columns: 86px minmax(50px, 1fr) auto; } }
