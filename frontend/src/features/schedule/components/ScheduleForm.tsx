@@ -100,7 +100,7 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
             <div className="form-section-heading"><strong>Repeat</strong><span>Stored locally; sync-safe model.</span></div>
             <div className="form-grid two">
               <label>Frequency<select disabled={saving} value={draft.recurrence.frequency} onChange={(e) => updateRecurrence('frequency', e.target.value as RecurrenceFrequency)}>{recurrenceOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
-              <label>Every<input disabled={saving} type="number" min="1" max="30" value={draft.recurrence.interval} disabled={draft.recurrence.frequency === 'NONE'} onChange={(e) => updateRecurrence('interval', Number(e.target.value))} /></label>
+              <label>Every<input disabled={saving || draft.recurrence.frequency === 'NONE'} type="number" min="1" max="30" value={draft.recurrence.interval} onChange={(e) => updateRecurrence('interval', Number(e.target.value))} /></label>
             </div>
             {draft.recurrence.frequency !== 'NONE' && (
               <label>Repeat until<input type="date" value={draft.recurrence.until ?? ''} onChange={(e) => updateRecurrence('until', e.target.value || undefined)} /></label>
