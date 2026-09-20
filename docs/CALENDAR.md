@@ -2,38 +2,80 @@
 
 ## M2.6 scope
 
-M2.6 establishes the Calendar integration boundary and a safe first connection flow from MiD-Daily to Google Calendar.
+M2.6 establishes the Calendar integration boundary and a safe connection + one-way synchronization path from MiD-Daily to Google Calendar.
 
 ### Current capabilities
 
-- Schedule items now carry Google Calendar sync metadata.
+- Schedule items carry Google Calendar sync metadata.
 - Legacy `googleCalendarConnected` data is migrated without claiming that an API sync actually occurred.
 - A Schedule item can be opened in Google Calendar through a prefilled event template.
-- The event mapping includes title, notes, location, local timezone, and a private MiD-Daily schedule ID for the future API adapter.
-- The integration reads `VITE_GOOGLE_CLIENT_ID` only as configuration metadata; no client secret is stored in the frontend.
+- The event mapping includes title, notes, location, local timezone, and a private MiD-Daily schedule ID.
+- The backend provides OAuth start, callback, connection status, and disconnect endpoints.
+- OAuth uses authorization code + PKCE.
+- OAuth state is bound to an HttpOnly browser cookie.
+- Google access and refresh tokens are persisted in Supabase after AES-256-GCM encryption.
+- Create, update, and delete event operations are exposed through the backend.
+- Access tokens are refreshed automatically when close to expiry, with one retry after HTTP 401.
+- Schedule metadata stores the Google event ID, sync status, last-sync time, and any sync error.
+- A remote event that no longer exists is recreated on update; a remote 404 on delete is treated as already deleted.
 
-### Security decision
+### Storage model
 
-The API-backed connection should use OAuth authorization code flow with PKCE rather than the legacy implicit flow. Google currently recommends the authorization-code approach for browser applications, and server-side web apps can securely exchange the code for access and refresh tokens. The requested Calendar scope should stay narrow; `https://www.googleapis.com/auth/calendar.events` is intended for viewing and editing events on calendars the user can access.
+`supabase/migrations/20260920000000_create_google_calendar_connections.sql` creates the protected connection table.
 
-### Current OAuth implementation
+The table has:
+- `owner_id`: opaque browser owner key for the current pre-Auth stage
+- `encrypted_token`: encrypted OAuth token payload
+- `connected_at`
+- `updated_at`
 
-The backend now provides OAuth start, callback, connection status, and disconnect endpoints. Authorization uses PKCE, state is bound to an HttpOnly browser cookie, and access/refresh tokens remain server-side. The current connection store is in memory for local single-instance development only.
+RLS is enabled, access for `anon` and `authenticated` is revoked, and backend administrative access is isolated to the server-side Supabase secret. Supabase documents RLS as the database authorization layer and warns that secret/service-role keys must never be exposed to browsers. 
 
-### M2.6.3 — API sync
+### Important ownership limitation
 
-The backend now exposes create, update, and delete event operations. Access tokens are refreshed automatically when close to expiry, and a single retry is made after an HTTP 401 when a refresh token is available. The frontend persists the returned Google event ID and last-sync timestamp in the Schedule item.
+The current `owner_id` is intentionally an opaque browser-session identity, not a real application account. It gives us a persistent one-browser-to-one-Google-connection boundary while Auth is still pending.
 
-If an existing external event has been deleted in Google Calendar, an update returning 404 falls back to creating a new event instead of leaving the Schedule permanently broken. A delete returning 404 can be treated as already removed by the remote calendar.
+When MiD-Daily Auth is introduced, `owner_id` must be replaced or linked to the authenticated `user_id`, and all Schedule/Task/Finance resources must use the same user ownership chain.
+
+### Required environment
+
+Backend:
+
+```env
+PORT=8787
+FRONTEND_URL=http://localhost:5173
+COOKIE_SECURE=false
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=http://localhost:8787/auth/google/callback
+SUPABASE_URL=
+SUPABASE_SECRET_KEY=
+TOKEN_ENCRYPTION_KEY_B64=
+```
+
+Generate the 32-byte encryption key with:
+
+```bash
+openssl rand -base64 32
+```
+
+Never commit the resulting key.
+
+### Local setup
+
+1. Create a Supabase project.
+2. Apply the migration under `supabase/migrations/`.
+3. Copy `backend/.env.example` to `backend/.env`.
+4. Fill the Google OAuth credentials and Supabase values.
+5. Generate `TOKEN_ENCRYPTION_KEY_B64`.
+6. Add `http://localhost:8787/auth/google/callback` as the Google OAuth redirect URI.
+7. Run the backend with `npm install` and `npm run dev`.
+8. Run the frontend with `npm install` and `npm run dev`.
+
+### Deployment note
+
+The current storage design is for a single backend service and is already persistent across process restarts because the token record lives in Supabase. It is not yet the final multi-user authorization model. Before public multi-user deployment, Auth must provide the user identity and calendar records must be bound to that user.
 
 ### Next step
 
-M2.6.2 should introduce the application backend OAuth callback and token exchange, then M2.6.3 can implement:
-
-1. create event
-2. update event
-3. delete event
-4. persist the external Google event ID and sync status
-5. retry and error handling
-
-Two-way synchronization should remain later because it adds conflict resolution, external-change detection, and ownership rules.
+M2.6.5 should add authenticated user ownership and calendar selection, then Schedule sync can become fully user-scoped. Two-way synchronization remains later because it requires external-change detection and conflict resolution.
