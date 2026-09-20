@@ -36,3 +36,10 @@ frontend/src/
 ## Schedule boundary
 
 Schedule owns event intent, recurrence, and reminder intent. Native notification and Google Calendar implementations should consume this domain model through separate adapters.
+
+
+## M2.5 notification additions
+
+- `features/schedule/hooks/`: Schedule-side orchestration hooks.
+- `integrations/notifications/`: provider-specific notification adapters and service worker registration.
+- `public/sw.js`: browser service worker used for notification presentation.

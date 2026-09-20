@@ -2,37 +2,17 @@
 
 MiD-Daily starts as a modular monolith.
 
-```text
-Frontend / PWA
-      |
-Authenticated Session
-      |
-Application API
-      |
-Business Modules
-  |    |    |    |
-Schedule Tasks Finance Dashboard
-      |
-PostgreSQL / Supabase
-      |
-External Integrations
-  |        |         |
-Google  Telegram   WhatsApp (future)
-```
+The Schedule domain owns event intent, recurrence, and reminder intent. Provider-specific delivery stays outside Schedule presentation components.
 
-## Schedule integration boundary
-The Schedule domain owns the event and reminder intent. External adapters will be added later without putting provider-specific code inside Schedule UI components.
+Current boundary:
+Schedule event -> Reminder engine -> Notification adapter -> Browser notification / Service worker
 
-```text
-Schedule Event
-   |
-   +--> Reminder intent
-   |      |
-   |      +--> Native notification adapter (future)
-   |
-   +--> Calendar sync intent
-          |
-          +--> Google Calendar adapter (future)
-```
+Future:
+Schedule event -> Calendar adapter -> Google Calendar
 
-The initial UI exposes these concepts without requiring external credentials.
+Notification adapters:
+- Browser / PWA
+- Android native
+- iOS native
+
+The initial application remains lightweight and dependency-free beyond React tooling.

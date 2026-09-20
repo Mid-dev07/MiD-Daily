@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { formatDateLong, shiftDate } from './schedule.date'
 import { normalizeScheduleList } from './schedule.migration'
@@ -9,6 +9,7 @@ import { ScheduleToolbar } from './components/ScheduleToolbar'
 import { initialScheduleItems } from './schedule.data'
 import { validateScheduleDraft } from './schedule.validation'
 import { getReminderState } from './schedule.reminder'
+import { getNotificationSupport, requestNotificationPermission, showNotification } from '../../integrations/notifications/browserNotification'
 import type { ScheduleDraft, ScheduleItem, ScheduleType } from './schedule.types'
 
 const getToday = () => new Intl.DateTimeFormat('sv-SE').format(new Date())
@@ -24,12 +25,7 @@ export function ScheduleView({ schedule, onScheduleChange }: ScheduleViewProps) 
   const [formOpen, setFormOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<ScheduleItem>()
   const [detailItem, setDetailItem] = useState<ScheduleItem>()
-  const [clock, setClock] = useState(() => Date.now())
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setClock(Date.now()), 30_000)
-    return () => window.clearInterval(timer)
-  }, [])
+  const [notificationSupport, setNotificationSupport] = useState(getNotificationSupport)
 
   const normalizedSchedule = useMemo(() => normalizeScheduleList(schedule), [schedule])
   const visibleItems = useMemo(() => normalizedSchedule
@@ -54,7 +50,7 @@ export function ScheduleView({ schedule, onScheduleChange }: ScheduleViewProps) 
 
   const deleteSchedule = (id: number) => {
     const item = normalizedSchedule.find((entry) => entry.id === id)
-    if (!item || !window.confirm(`Delete “${item.title}”?`)) return
+    if (!item || !window.confirm('Delete “' + item.title + '”?')) return
     onScheduleChange(normalizedSchedule.filter((entry) => entry.id !== id))
   }
 
@@ -63,7 +59,36 @@ export function ScheduleView({ schedule, onScheduleChange }: ScheduleViewProps) 
     onScheduleChange(initialScheduleItems)
   }
 
-  const reminderCount = visibleItems.filter((item) => getReminderState(item, new Date(clock)).status === 'scheduled').length
+  const enableNotifications = async () => {
+    const permission = await requestNotificationPermission()
+    setNotificationSupport(permission)
+
+    if (permission === 'granted') {
+      await showNotification('MiD-Daily • Notifications enabled', {
+        body: 'Schedule reminders are ready.',
+        tag: 'mid-daily.notification-test',
+        data: { type: 'notification-test', url: '/' },
+      })
+    }
+  }
+
+  const reminderCount = visibleItems.filter((item) => getReminderState(item, new Date()).status === 'scheduled').length
+
+  const notificationLabel = notificationSupport === 'granted'
+    ? 'Notifications enabled'
+    : notificationSupport === 'denied'
+      ? 'Notifications blocked'
+      : notificationSupport === 'unsupported'
+        ? 'Notifications unavailable'
+        : 'Notifications not enabled'
+
+  const notificationDescription = notificationSupport === 'granted'
+    ? 'Browser/device notifications are active. Background delivery will be strengthened by the PWA/native layer later.'
+    : notificationSupport === 'denied'
+      ? 'Permission is blocked. Enable notifications in the browser or device settings.'
+      : notificationSupport === 'unsupported'
+        ? 'This browser does not expose the required notification API.'
+        : 'Allow notifications to receive Schedule reminders while MiD-Daily is running.'
 
   return (
     <section className="workspace page-enter">
@@ -73,6 +98,21 @@ export function ScheduleView({ schedule, onScheduleChange }: ScheduleViewProps) 
       </div>
 
       <ScheduleToolbar date={date} filter={filter} onShiftDate={(days) => setDate(shiftDate(date, days))} onResetDate={() => setDate(getToday())} onFilterChange={setFilter} />
+
+      <div className="notification-card schedule-integration-card">
+        <div className="notification-copy">
+          <span className="integration-label">DEVICE NOTIFICATIONS</span>
+          <strong className={notificationSupport === 'granted' ? 'notification-status' : ''}>{notificationLabel}</strong>
+          <span>{notificationDescription}</span>
+        </div>
+        <div className="notification-actions">
+          {notificationSupport === 'granted' ? (
+            <button className="secondary-button" type="button" onClick={() => void showNotification('MiD-Daily • Test reminder', { body: 'Your notification channel is working.', tag: 'mid-daily.notification-test', data: { url: '/' } })}>Test</button>
+          ) : (
+            <button className="secondary-button" type="button" disabled={notificationSupport === 'unsupported' || notificationSupport === 'denied'} onClick={() => void enableNotifications()}>Enable</button>
+          )}
+        </div>
+      </div>
 
       <div className="schedule-date-caption"><strong>{formatDateLong(date)}</strong><span>{visibleItems.length} {visibleItems.length === 1 ? 'activity' : 'activities'} visible</span></div>
       <div className="schedule-summary"><span>Reminder engine active.</span><span>•</span><span>{reminderCount} reminder {reminderCount === 1 ? 'is' : 'are'} scheduled for this date.</span></div>

@@ -182,3 +182,16 @@
   .schedule-header-actions .secondary-button { flex: 1; }
   .schedule-date-caption { align-items: flex-start; flex-direction: column; gap: 3px; }
 }
+
+/* M2.5 notification layer */
+.notification-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.notification-copy { min-width: 0; }
+.notification-copy > strong, .notification-copy > span { display: block; }
+.notification-copy > strong { color: #c7d7e1; font-size: 12px; }
+.notification-copy > span { margin-top: 3px; color: #63778b; font-size: 10px; line-height: 1.5; }
+.notification-actions { display: flex; gap: 7px; flex: 0 0 auto; }
+.notification-status { color: var(--color-accent) !important; }
+@media (max-width: 640px) {
+  .notification-card { align-items: stretch; flex-direction: column; }
+  .notification-actions .secondary-button { flex: 1; }
+}

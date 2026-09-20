@@ -7,9 +7,10 @@ import { DashboardView } from '../features/dashboard/DashboardView'
 import { FinanceView } from '../features/finance/FinanceView'
 import { ScheduleView } from '../features/schedule/ScheduleView'
 import { TasksView } from '../features/tasks/TasksView'
-import { readStorage, writeStorage } from '../lib/storage'
 import { initialScheduleItems } from '../features/schedule/schedule.data'
 import { normalizeScheduleList } from '../features/schedule/schedule.migration'
+import { useReminderScheduler } from '../features/schedule/hooks/useReminderScheduler'
+import { readStorage, writeStorage } from '../lib/storage'
 import type { Task, TaskPriority, View } from '../types'
 
 const TASK_STORAGE_KEY = 'mid-daily.tasks'
@@ -20,6 +21,8 @@ export function App() {
   const [tasks, setTasks] = useState<Task[]>(() => readStorage(TASK_STORAGE_KEY, initialTasks))
   const [schedule, setSchedule] = useState(() => normalizeScheduleList(readStorage(SCHEDULE_STORAGE_KEY, initialScheduleItems)))
   const [toast, setToast] = useState('')
+
+  useReminderScheduler(schedule)
 
   useEffect(() => writeStorage(TASK_STORAGE_KEY, tasks), [tasks])
   useEffect(() => writeStorage(SCHEDULE_STORAGE_KEY, schedule), [schedule])
