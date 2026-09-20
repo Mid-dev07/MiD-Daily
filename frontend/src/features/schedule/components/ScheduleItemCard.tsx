@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import { formatReminderTime, getReminderState } from '../schedule.reminder'
+import { buildGoogleCalendarTemplateUrl } from '../../../integrations/calendar/googleCalendar'
 import type { ScheduleItem } from '../schedule.types'
 
 interface ScheduleItemCardProps {
@@ -12,6 +13,16 @@ interface ScheduleItemCardProps {
 
 export function ScheduleItemCard({ item, index, onView, onEdit, onDelete }: ScheduleItemCardProps) {
   const reminder = getReminderState(item)
+
+  const openGoogleCalendar = () => {
+    window.open(buildGoogleCalendarTemplateUrl(item), '_blank', 'noopener,noreferrer')
+  }
+
+  const calendarLabel = item.googleCalendar.status === 'synced'
+    ? 'Google Calendar synced'
+    : item.googleCalendar.status === 'error'
+      ? 'Google Calendar error'
+      : 'Google Calendar not synced'
 
   return (
     <article className="schedule-event list-reveal" style={{ '--item-index': index } as CSSProperties}>
@@ -31,12 +42,13 @@ export function ScheduleItemCard({ item, index, onView, onEdit, onDelete }: Sche
             {item.reminderEnabled ? `Reminder ${item.reminderOffset === 0 ? 'at start' : `${item.reminderOffset}m`}` : 'Reminder off'}
           </span>
           <span className="meta-chip">{item.recurrence.frequency === 'NONE' ? 'One-time' : `Repeats ${item.recurrence.frequency.toLowerCase()}`}</span>
-          <span className="meta-chip">Google Calendar ready</span>
+          <span className={item.googleCalendar.status === 'synced' ? 'meta-chip is-enabled' : 'meta-chip'}>{calendarLabel}</span>
         </div>
 
         <div className="schedule-event-actions">
           <button className="text-button" type="button" onClick={() => onView(item)}>Details</button>
           <button className="text-button" type="button" onClick={() => onEdit(item)}>Edit</button>
+          <button className="text-button" type="button" onClick={openGoogleCalendar}>Add to Google Calendar</button>
           <button className="text-button danger" type="button" onClick={() => onDelete(item.id)}>Delete</button>
         </div>
       </div>
