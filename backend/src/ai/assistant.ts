@@ -1,4 +1,6 @@
 import OpenAI from 'openai'
+import { toResponseInputItems } from 'openai/lib/responses/ResponseInputItems'
+import type { ResponseInputItem } from 'openai/resources/responses/responses'
 import { createFinance, createTask, listFinance, listTasks } from '../dataStore.js'
 import { listSchedule } from '../scheduleStore.js'
 
@@ -255,7 +257,7 @@ export async function runAssistant(
       content: assertString(message.content, 'Message', 4000),
     }))
 
-  let input: unknown[] = sanitized
+  let input: ResponseInputItem[] = sanitized
   const tools = buildAssistantTools(allowWrites)
   const actions: Array<{ tool: string; ok: boolean }> = []
 
@@ -285,7 +287,7 @@ export async function runAssistant(
       }
     }
 
-    input = [...input, ...response.output]
+    input.push(...toResponseInputItems(response.output))
 
     const actionResults: Array<Record<string, unknown>> = []
     for (const call of calls) {
