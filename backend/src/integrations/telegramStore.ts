@@ -100,16 +100,6 @@ export async function getTelegramConnectionByChatId(chatId: number) {
   return data
 }
 
-export async function getTelegramConnectionByChatId(chatId: number) {
-  const { data, error } = await db().from('telegram_connections')
-    .select('user_id,chat_id,telegram_user_id,telegram_username,connected_at,updated_at')
-    .eq('chat_id', chatId)
-    .maybeSingle()
-
-  if (error) throw new Error(`Telegram connection lookup failed: ${error.message}`)
-  return data
-}
-
 export async function deleteTelegramConnectionByUserId(userId: string) {
   const { error } = await db().from('telegram_connections').delete().eq('user_id', userId)
   if (error) throw new Error(`Telegram disconnect failed: ${error.message}`)
