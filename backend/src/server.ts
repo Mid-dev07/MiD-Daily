@@ -77,12 +77,21 @@ function sendJson(res: ServerResponse, status: number, payload: unknown) {
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'no-referrer',
   })
   res.end(body)
 }
 
 function sendRedirect(res: ServerResponse, location: string) {
-  res.writeHead(302, { Location: location, 'Cache-Control': 'no-store' })
+  res.writeHead(302, {
+    Location: location,
+    'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'no-referrer',
+  })
   res.end()
 }
 
