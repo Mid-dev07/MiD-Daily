@@ -53,12 +53,15 @@ export async function redeemTelegramLinkCode(
   if (error) throw new Error(`Telegram link-code lookup failed: ${error.message}`)
   if (!data || data.used_at || new Date(data.expires_at).getTime() <= Date.now()) return null
 
-  const { error: markUsedError } = await db().from('telegram_link_codes')
+  const { data: marked, error: markUsedError } = await db().from('telegram_link_codes')
     .update({ used_at: new Date().toISOString() })
     .eq('code_hash', data.code_hash)
     .is('used_at', null)
+    .select('user_id')
+    .maybeSingle()
 
   if (markUsedError) throw new Error(`Telegram link-code consume failed: ${markUsedError.message}`)
+  if (!marked) return null
 
   const { error: connectionError } = await db().from('telegram_connections').upsert({
     user_id: data.user_id,
@@ -68,7 +71,11 @@ export async function redeemTelegramLinkCode(
     updated_at: new Date().toISOString(),
   }, { onConflict: 'user_id' })
 
-  if (connectionError) throw new Error(`Telegram connection save failed: ${connectionError.message}`)
+  if (connectionError) {
+    await db().from('telegram_link_codes').update({ used_at: null }).eq('code_hash', data.code_hash)
+    if (connectionError.code === '23505') throw new Error('This Telegram chat is already linked to another MiD-Daily account.')
+    throw new Error(`Telegram connection save failed: ${connectionError.message}`)
+  }
 
   return { userId: data.user_id }
 }
