@@ -19,6 +19,13 @@ import {
   updateFinance,
   updateTask,
 } from './dataStore.js'
+import {
+  createSchedule,
+  deleteSchedule,
+  isSchedulePersistenceConfigured,
+  listSchedule,
+  updateSchedule,
+} from './scheduleStore.js'
 
 const PORT = Number(process.env.PORT ?? 8787)
 const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:5173'
@@ -637,6 +644,124 @@ function validateFinanceInput(body: Record<string, unknown>) {
   }
 }
 
+
+function scheduleTimeMinutes(value: string) {
+  if (!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(value)) throw httpError(400, 'Schedule time is invalid.')
+  const [hours, minutes] = value.split(':').map(Number)
+  return hours * 60 + minutes
+}
+
+function isIsoDate(value: unknown) {
+  if (typeof value !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return false
+  const [year, month, day] = value.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day))
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
+}
+
+function validateScheduleInput(body: Record<string, unknown>) {
+  const title = typeof body.title === 'string' ? body.title.trim() : ''
+  const type = body.type
+  const date = body.date
+  const startTime = body.startTime
+  const endTime = body.endTime
+  const location = typeof body.location === 'string' ? body.location.trim() : ''
+  const notes = typeof body.notes === 'string' ? body.notes.trim() : ''
+  const reminderEnabled = Boolean(body.reminderEnabled)
+  const reminderOffset = Number(body.reminderOffset)
+  const recurrenceValue = body.recurrence
+  const googleCalendarValue = body.googleCalendar
+
+  if (!title) throw httpError(400, 'Schedule title is required.')
+  if (!['CLASS','WORK','MEETING','STUDY','PERSONAL','APPOINTMENT','EVENT','OTHER'].includes(String(type))) throw httpError(400, 'Schedule type is invalid.')
+  if (!isIsoDate(date)) throw httpError(400, 'Schedule date is invalid.')
+  if (typeof startTime !== 'string' || typeof endTime !== 'string') throw httpError(400, 'Schedule time is required.')
+  const start = scheduleTimeMinutes(startTime)
+  const end = scheduleTimeMinutes(endTime)
+  if (start >= end) throw httpError(400, 'Schedule end time must be after start time.')
+  if (![0,5,10,15,30,60].includes(reminderOffset)) throw httpError(400, 'Schedule reminder offset is invalid.')
+
+  const recurrence = recurrenceValue && typeof recurrenceValue === 'object'
+    ? recurrenceValue as Record<string, unknown>
+    : { frequency: 'NONE', interval: 1 }
+
+  if (!['NONE','DAILY','WEEKLY','MONTHLY'].includes(String(recurrence.frequency))) throw httpError(400, 'Schedule recurrence is invalid.')
+  const interval = Number(recurrence.interval ?? 1)
+  if (!Number.isInteger(interval) || interval < 1 || interval > 30) throw httpError(400, 'Schedule recurrence interval is invalid.')
+  if (recurrence.until !== undefined && recurrence.until !== null && !isIsoDate(recurrence.until)) throw httpError(400, 'Schedule recurrence end date is invalid.')
+  if (recurrence.until && String(recurrence.until) < String(date)) throw httpError(400, 'Schedule recurrence end date cannot be before the activity date.')
+
+  const googleCalendar = googleCalendarValue && typeof googleCalendarValue === 'object'
+    ? googleCalendarValue as Record<string, unknown>
+    : { status: 'not-synced', calendarId: 'primary' }
+
+  const calendarId = typeof googleCalendar.calendarId === 'string' && googleCalendar.calendarId.trim()
+    ? googleCalendar.calendarId.trim()
+    : 'primary'
+
+  return {
+    title,
+    type: type as 'CLASS' | 'WORK' | 'MEETING' | 'STUDY' | 'PERSONAL' | 'APPOINTMENT' | 'EVENT' | 'OTHER',
+    date: String(date),
+    startTime,
+    endTime,
+    location,
+    notes,
+    reminderEnabled,
+    reminderOffset: reminderOffset as 0 | 5 | 10 | 15 | 30 | 60,
+    recurrence: {
+      frequency: recurrence.frequency as 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY',
+      interval,
+      ...(typeof recurrence.until === 'string' ? { until: recurrence.until } : {}),
+    },
+    googleCalendar: {
+      ...googleCalendar,
+      status: ['not-synced','pending','synced','error'].includes(String(googleCalendar.status)) ? googleCalendar.status : 'not-synced',
+      calendarId,
+    },
+  }
+}
+
+function assertNoScheduleOverlap(items: Array<{ id: number; date: string; startTime: string; endTime: string }>, candidate: { id?: number; date: string; startTime: string; endTime: string }) {
+  const start = scheduleTimeMinutes(candidate.startTime)
+  const end = scheduleTimeMinutes(candidate.endTime)
+  const conflict = items.some((item) => item.id !== candidate.id && item.date === candidate.date && start < scheduleTimeMinutes(item.endTime) && end > scheduleTimeMinutes(item.startTime))
+  if (conflict) throw httpError(409, 'This time overlaps another activity.')
+}
+
+async function handleListSchedule(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  sendJson(res, 200, { items: await listSchedule(userId) })
+}
+
+async function handleCreateSchedule(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  const body = await readRequestJson(req)
+  const candidate = validateScheduleInput(body)
+  const existing = await listSchedule(userId)
+  assertNoScheduleOverlap(existing, candidate)
+  sendJson(res, 201, { item: await createSchedule(userId, candidate) })
+}
+
+async function handleUpdateSchedule(req: IncomingMessage, res: ServerResponse, url: URL) {
+  const userId = await requireAuthenticatedUserId(req)
+  const id = assertTaskId(url)
+  const body = await readRequestJson(req)
+  const candidate = validateScheduleInput(body)
+  const existing = await listSchedule(userId)
+  if (!existing.some((item) => item.id === id)) throw httpError(404, 'Schedule item not found.')
+  assertNoScheduleOverlap(existing, { ...candidate, id })
+  const item = await updateSchedule(userId, id, candidate)
+  if (!item) throw httpError(404, 'Schedule item not found.')
+  sendJson(res, 200, { item })
+}
+
+async function handleDeleteSchedule(req: IncomingMessage, res: ServerResponse, url: URL) {
+  const userId = await requireAuthenticatedUserId(req)
+  const deleted = await deleteSchedule(userId, assertTaskId(url))
+  if (!deleted) throw httpError(404, 'Schedule item not found.')
+  sendJson(res, 200, { deleted: true })
+}
+
 async function handleListTasks(req: IncomingMessage, res: ServerResponse) {
   const userId = await requireAuthenticatedUserId(req)
   sendJson(res, 200, { items: await listTasks(userId) })
@@ -718,6 +843,7 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
         service: 'mid-daily-backend',
         persistenceConfigured: isGooglePersistenceConfigured(),
         dataPersistenceConfigured: isDataPersistenceConfigured(),
+        schedulePersistenceConfigured: isSchedulePersistenceConfigured(),
       })
       return
     }
@@ -776,6 +902,23 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
     }
     if (req.method === 'DELETE' && url.pathname.startsWith('/api/tasks/')) {
       await handleDeleteTask(req, res, url)
+      return
+    }
+
+    if (req.method === 'GET' && url.pathname === '/api/schedule') {
+      await handleListSchedule(req, res)
+      return
+    }
+    if (req.method === 'POST' && url.pathname === '/api/schedule') {
+      await handleCreateSchedule(req, res)
+      return
+    }
+    if (req.method === 'PUT' && url.pathname.startsWith('/api/schedule/')) {
+      await handleUpdateSchedule(req, res, url)
+      return
+    }
+    if (req.method === 'DELETE' && url.pathname.startsWith('/api/schedule/')) {
+      await handleDeleteSchedule(req, res, url)
       return
     }
 
