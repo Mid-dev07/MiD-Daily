@@ -8,7 +8,7 @@ function normalizeEmail(value: string) {
 }
 
 export function AuthView() {
-  const { signInWithPassword, signUp, signInWithGoogle, resetPassword, updatePassword, session } = useAuth()
+  const { signInWithPassword, signUp, signInWithGoogle, resetPassword, updatePassword, session, recovery, clearRecovery } = useAuth()
   const [mode, setMode] = useState<Mode>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -17,9 +17,8 @@ export function AuthView() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const type = new URLSearchParams(window.location.search).get('type')
-    if (type === 'recovery' && session) setMode('recovery')
-  }, [session])
+    if (recovery && session) setMode('recovery')
+  }, [recovery, session])
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -53,7 +52,7 @@ export function AuthView() {
     else {
       setNewPassword('')
       setMessage('Password updated. You are signed in.')
-      window.history.replaceState({}, '', window.location.pathname)
+      clearRecovery()
     }
   }
 
