@@ -56,11 +56,15 @@ function parseCookies(req: IncomingMessage) {
   }).filter(([key]) => key))
 }
 
+function appendCookie(res: ServerResponse, value: string) {
+  const existing = res.getHeader('Set-Cookie')
+  const cookies = Array.isArray(existing) ? existing.map(String) : existing ? [String(existing)] : []
+  res.setHeader('Set-Cookie', [...cookies, value])
+}
+
 function setConnectionCookie(res: ServerResponse, connectionId: string) {
   const secure = COOKIE_SECURE ? '; Secure' : ''
-  res.setHeader('Set-Cookie', [
-    `${COOKIE_NAME}=${encodeURIComponent(connectionId)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${SESSION_MAX_AGE_SECONDS}${secure}`,
-  ])
+  appendCookie(res, `${COOKIE_NAME}=${encodeURIComponent(connectionId)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${SESSION_MAX_AGE_SECONDS}${secure}`)
 }
 
 function clearConnectionCookie(res: ServerResponse) {
@@ -70,16 +74,12 @@ function clearConnectionCookie(res: ServerResponse) {
 
 function setOAuthStateCookie(res: ServerResponse, state: string) {
   const secure = COOKIE_SECURE ? '; Secure' : ''
-  res.setHeader('Set-Cookie', [
-    `${OAUTH_STATE_COOKIE_NAME}=${encodeURIComponent(state)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=600${secure}`,
-  ])
+  appendCookie(res, `${OAUTH_STATE_COOKIE_NAME}=${encodeURIComponent(state)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=600${secure}`)
 }
 
 function clearOAuthStateCookie(res: ServerResponse) {
   const secure = COOKIE_SECURE ? '; Secure' : ''
-  res.setHeader('Set-Cookie', [
-    `${OAUTH_STATE_COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secure}`,
-  ])
+  appendCookie(res, `${OAUTH_STATE_COOKIE_NAME}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0${secure}`)
 }
 
 function base64Url(buffer: Buffer) {
