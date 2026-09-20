@@ -99,7 +99,13 @@ function parseCookies(req: IncomingMessage) {
   const raw = req.headers.cookie ?? ''
   return Object.fromEntries(raw.split(';').map((part) => {
     const [key, ...value] = part.trim().split('=')
-    return [key, decodeURIComponent(value.join('='))]
+    if (!key) return ['', '']
+    const encodedValue = value.join('=')
+    try {
+      return [key, decodeURIComponent(encodedValue)]
+    } catch {
+      return [key, encodedValue]
+    }
   }).filter(([key]) => key))
 }
 
@@ -659,11 +665,15 @@ async function requireAuthenticatedUserId(req: IncomingMessage) {
   return data.user.id
 }
 
-function assertTaskId(url: URL) {
+function assertPositiveId(url: URL, label: string) {
   const raw = url.pathname.split('/').pop() ?? ''
   const id = Number(raw)
-  if (!Number.isSafeInteger(id) || id <= 0) throw httpError(400, 'Task ID is invalid.')
+  if (!Number.isSafeInteger(id) || id <= 0) throw httpError(400, label + ' ID is invalid.')
   return id
+}
+
+function assertTaskId(url: URL) {
+  return assertPositiveId(url, 'Task')
 }
 
 function assertFinanceId(url: URL) {
@@ -833,7 +843,7 @@ async function handleCreateSchedule(req: IncomingMessage, res: ServerResponse) {
 
 async function handleUpdateSchedule(req: IncomingMessage, res: ServerResponse, url: URL) {
   const userId = await requireAuthenticatedUserId(req)
-  const id = assertTaskId(url)
+  const id = assertPositiveId(url, 'Schedule')
   const body = await readRequestJson(req)
   const candidate = validateScheduleInput(body)
   const existing = await listSchedule(userId)
@@ -846,7 +856,7 @@ async function handleUpdateSchedule(req: IncomingMessage, res: ServerResponse, u
 
 async function handleDeleteSchedule(req: IncomingMessage, res: ServerResponse, url: URL) {
   const userId = await requireAuthenticatedUserId(req)
-  const deleted = await deleteSchedule(userId, assertTaskId(url))
+  const deleted = await deleteSchedule(userId, assertPositiveId(url, 'Schedule'))
   if (!deleted) throw httpError(404, 'Schedule item not found.')
   sendJson(res, 200, { deleted: true })
 }
