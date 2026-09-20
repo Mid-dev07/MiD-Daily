@@ -19,6 +19,8 @@ import {
   updateFinance,
   updateTask,
 } from './dataStore.js'
+import { claimTelegramUpdate, createTelegramLinkCode, deleteTelegramConnectionByUserId, getTelegramConnectionByChatId, getTelegramConnectionByUserId, redeemTelegramLinkCode, isTelegramPersistenceConfigured } from './integrations/telegramStore.js'
+import { isTelegramConfigured, parseCommand, sendTelegramMessage, verifyWebhookSecret } from './integrations/telegram.js'
 import {
   createSchedule,
   deleteSchedule,
@@ -27,6 +29,7 @@ import {
   updateSchedule,
   type ScheduleRecord,
 } from './scheduleStore.js'
+import { createFinance, createTask, listFinance, listTasks } from './dataStore.js'
 
 const PORT = Number(process.env.PORT ?? 8787)
 const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:5173'
@@ -837,6 +840,192 @@ async function handleDeleteFinance(req: IncomingMessage, res: ServerResponse, ur
   sendJson(res, 200, { deleted: true })
 }
 
+const APP_TIMEZONE = process.env.APP_TIMEZONE ?? 'Asia/Jakarta'
+
+function dateInTimeZone(daysFromToday = 0) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: APP_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date())
+
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  const base = new Date(Date.UTC(Number(values.year), Number(values.month) - 1, Number(values.day) + daysFromToday))
+  return base.toISOString().slice(0, 10)
+}
+
+function formatTelegramSchedule(items: Array<{ title: string; startTime: string; endTime: string; location: string }>) {
+  if (items.length === 0) return 'No schedule found for this date.'
+  return items.slice(0, 10).map((item, index) =>
+    `${index + 1}. ${item.startTime}–${item.endTime} • ${item.title}${item.location ? ' • ' + item.location : ''}`
+  ).join('\\n')
+}
+
+function formatTelegramExpenses(items: Array<{ title: string; amount: number; category: string }>) {
+  if (items.length === 0) return 'No expenses recorded today.'
+  return items.slice(0, 10).map((item, index) =>
+    `${index + 1}. ${item.title} • Rp ${Math.round(item.amount).toLocaleString('id-ID')} • ${item.category}`
+  ).join('\\n')
+}
+
+async function handleTelegramStatus(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  const connection = await getTelegramConnectionByUserId(userId)
+  sendJson(res, 200, {
+    configured: isTelegramConfigured() && isTelegramPersistenceConfigured(),
+    connected: Boolean(connection),
+    connectedAt: connection?.connected_at ?? null,
+    username: connection?.telegram_username ?? null,
+  })
+}
+
+async function handleTelegramLinkCode(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  if (!isTelegramConfigured() || !isTelegramPersistenceConfigured()) {
+    throw httpError(503, 'Telegram integration is not configured.')
+  }
+  const link = await createTelegramLinkCode(userId, process.env.TELEGRAM_BOT_USERNAME ?? '')
+  sendJson(res, 200, link)
+}
+
+async function handleTelegramDisconnect(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  await deleteTelegramConnectionByUserId(userId)
+  sendJson(res, 200, { connected: false })
+}
+
+async function telegramHelp(chatId: number) {
+  await sendTelegramMessage(chatId, [
+    'MiD-Daily Telegram commands:',
+    '/task <title>',
+    '/expense <amount> <category> <title>',
+    '/expenses',
+    '/schedule',
+    '/schedule tomorrow',
+    '/disconnect',
+  ].join('\\n'))
+}
+
+async function handleTelegramUpdate(req: IncomingMessage, res: ServerResponse) {
+  if (!isTelegramConfigured() || !isTelegramPersistenceConfigured()) {
+    sendJson(res, 503, { error: 'Telegram integration is not configured.' })
+    return
+  }
+
+  if (!verifyWebhookSecret(req.headers['x-telegram-bot-api-secret-token'] as string | undefined)) {
+    sendJson(res, 401, { error: 'Invalid Telegram webhook secret.' })
+    return
+  }
+
+  const body = await readRequestJson(req)
+  const updateId = typeof body.update_id === 'number' ? body.update_id : NaN
+  if (!Number.isSafeInteger(updateId)) {
+    sendJson(res, 400, { error: 'Telegram update_id is required.' })
+    return
+  }
+
+  if (!(await claimTelegramUpdate(updateId))) {
+    sendJson(res, 200, { ok: true, duplicate: true })
+    return
+  }
+
+  const message = body.message && typeof body.message === 'object' ? body.message as Record<string, unknown> : null
+  const chat = message?.chat && typeof message.chat === 'object' ? message.chat as Record<string, unknown> : null
+  const from = message?.from && typeof message.from === 'object' ? message.from as Record<string, unknown> : null
+  const textValue = typeof message?.text === 'string' ? message.text : ''
+
+  const chatId = Number(chat?.id)
+  const telegramUserId = Number(from?.id)
+  if (!Number.isSafeInteger(chatId) || !Number.isSafeInteger(telegramUserId)) {
+    sendJson(res, 200, { ok: true, ignored: true })
+    return
+  }
+
+  if (chat?.type !== 'private') {
+    await sendTelegramMessage(chatId, 'MiD-Daily commands are currently available only in private chats.')
+    sendJson(res, 200, { ok: true })
+    return
+  }
+
+  const parsed = parseCommand(textValue)
+  if (!parsed) {
+    sendJson(res, 200, { ok: true, ignored: true })
+    return
+  }
+
+  if (parsed.command === 'start' || parsed.command === 'link') {
+    if (!parsed.args) {
+      await telegramHelp(chatId)
+      sendJson(res, 200, { ok: true })
+      return
+    }
+
+    const result = await redeemTelegramLinkCode(parsed.args, chatId, telegramUserId, typeof from?.username === 'string' ? from.username : undefined)
+    await sendTelegramMessage(chatId, result ? 'Telegram connected to your MiD-Daily account.' : 'This link code is invalid, expired, or already used.')
+    sendJson(res, 200, { ok: true })
+    return
+  }
+
+  const connection = await getTelegramConnectionByChatId(chatId)
+  if (!connection) {
+    await sendTelegramMessage(chatId, 'Telegram is not linked. Open MiD-Daily and generate a Telegram connection link first.')
+    sendJson(res, 200, { ok: true })
+    return
+  }
+
+  if (parsed.command === 'help') {
+    await telegramHelp(chatId)
+  } else if (parsed.command === 'task') {
+    if (!parsed.args) {
+      await sendTelegramMessage(chatId, 'Usage: /task <title>')
+    } else {
+      const task = await createTask(connection.user_id, {
+        title: parsed.args,
+        category: 'Telegram',
+        priority: 'medium',
+        status: 'todo',
+        progress: 0,
+      })
+      await sendTelegramMessage(chatId, `Task added: ${task.title}`)
+    }
+  } else if (parsed.command === 'expense') {
+    const parts = parsed.args.split(/\\s+/)
+    const amount = Number(parts.shift())
+    const category = parts.shift()
+    const title = parts.join(' ').trim()
+
+    if (!Number.isFinite(amount) || amount <= 0 || !category || !title) {
+      await sendTelegramMessage(chatId, 'Usage: /expense <amount> <category> <title>')
+    } else {
+      const entry = await createFinance(connection.user_id, {
+        type: 'expense',
+        title,
+        amount,
+        category,
+        date: dateInTimeZone(),
+      })
+      await sendTelegramMessage(chatId, `Expense added: Rp ${Math.round(entry.amount).toLocaleString('id-ID')} • ${entry.title}`)
+    }
+  } else if (parsed.command === 'expenses') {
+    const today = dateInTimeZone()
+    const expenses = (await listFinance(connection.user_id)).filter((entry) => entry.type === 'expense' && entry.date === today)
+    const total = expenses.reduce((sum, entry) => sum + entry.amount, 0)
+    await sendTelegramMessage(chatId, `Today's expenses: Rp ${Math.round(total).toLocaleString('id-ID')}\\n\\n${formatTelegramExpenses(expenses)}`)
+  } else if (parsed.command === 'schedule') {
+    const targetDate = parsed.args.toLowerCase() === 'tomorrow' ? dateInTimeZone(1) : dateInTimeZone()
+    const items = (await listSchedule(connection.user_id)).filter((item) => item.date === targetDate)
+    await sendTelegramMessage(chatId, `${targetDate} schedule:\\n\\n${formatTelegramSchedule(items)}`)
+  } else if (parsed.command === 'disconnect') {
+    await deleteTelegramConnectionByUserId(connection.user_id)
+    await sendTelegramMessage(chatId, 'Telegram disconnected from MiD-Daily.')
+  } else {
+    await sendTelegramMessage(chatId, 'Unknown command. Use /help to see available commands.')
+  }
+
+  sendJson(res, 200, { ok: true })
+}
+
 function addCors(res: ServerResponse) {
   res.setHeader('Access-Control-Allow-Origin', FRONTEND_URL)
   res.setHeader('Access-Control-Allow-Credentials', 'true')
@@ -864,6 +1053,23 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
         dataPersistenceConfigured: isDataPersistenceConfigured(),
         schedulePersistenceConfigured: isSchedulePersistenceConfigured(),
       })
+      return
+    }
+
+    if (req.method === 'GET' && url.pathname === '/api/integrations/telegram/status') {
+      await handleTelegramStatus(req, res)
+      return
+    }
+    if (req.method === 'POST' && url.pathname === '/api/integrations/telegram/link-code') {
+      await handleTelegramLinkCode(req, res)
+      return
+    }
+    if (req.method === 'POST' && url.pathname === '/api/integrations/telegram/disconnect') {
+      await handleTelegramDisconnect(req, res)
+      return
+    }
+    if (req.method === 'POST' && url.pathname === '/webhooks/telegram') {
+      await handleTelegramUpdate(req, res)
       return
     }
 
