@@ -17,7 +17,6 @@ export function normalizeScheduleItem(input: LegacyScheduleItem): ScheduleItem {
     until: input.recurrence?.until,
   }
 
-  const legacyConnected = input.googleCalendarConnected
   const googleCalendar = input.googleCalendar
     ? {
         ...defaultGoogleCalendar,
@@ -25,9 +24,7 @@ export function normalizeScheduleItem(input: LegacyScheduleItem): ScheduleItem {
         calendarId: input.googleCalendar.calendarId ?? defaultGoogleCalendar.calendarId,
         status: input.googleCalendar.status ?? defaultGoogleCalendar.status,
       }
-    : legacyConnected
-      ? { ...defaultGoogleCalendar, status: 'synced' as const }
-      : defaultGoogleCalendar
+    : defaultGoogleCalendar
 
   return { ...input, recurrence, googleCalendar }
 }
