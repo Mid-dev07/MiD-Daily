@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from 'react'
 import { formatReminderTime, getReminderState } from '../schedule.reminder'
-import { buildGoogleCalendarTemplateUrl, toGoogleCalendarEventPayload } from '../../../integrations/calendar/googleCalendar'
+import { buildGoogleCalendarTemplateUrl } from '../../../integrations/calendar/googleCalendar'
 import type { ScheduleItem } from '../schedule.types'
 
 interface ScheduleItemCardProps {
@@ -53,8 +53,6 @@ export function ScheduleItemCard({ item, index, onView, onEdit, onSync, onDelete
       setBusy(false)
     }
   }
-
-  void toGoogleCalendarEventPayload
 
   return (
     <article className="schedule-event list-reveal" style={{ '--item-index': index } as CSSProperties}>
