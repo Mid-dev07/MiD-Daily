@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { buildGoogleCalendarTemplateUrl } from '../../../integrations/calendar/googleCalendar'
 import { formatDateLong } from '../schedule.date'
 import { formatReminderTime, getReminderState } from '../schedule.reminder'
@@ -11,6 +12,9 @@ interface ScheduleDetailProps {
 }
 
 export function ScheduleDetail({ item, onClose, onEdit, onSync }: ScheduleDetailProps) {
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+
   if (!item) return null
 
   const reminder = getReminderState(item)
@@ -23,17 +27,26 @@ export function ScheduleDetail({ item, onClose, onEdit, onSync }: ScheduleDetail
         : 'Not synced'
 
   const syncLabel = item.googleCalendar.status === 'synced' ? 'Update Google' : 'Sync to Google'
+
   const sync = async () => {
-    await onSync(item)
-    onClose()
+    setError('')
+    setBusy(true)
+    try {
+      await onSync(item)
+      onClose()
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Calendar sync failed.')
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
-    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !busy && onClose()}>
       <section className="modal-card detail-card" role="dialog" aria-modal="true" aria-labelledby="schedule-detail-title">
         <div className="modal-header">
           <div><span className="section-kicker">{item.type}</span><h3 id="schedule-detail-title">{item.title}</h3></div>
-          <button className="icon-button" type="button" onClick={onClose} aria-label="Close details">×</button>
+          <button className="icon-button" type="button" disabled={busy} onClick={onClose} aria-label="Close details">×</button>
         </div>
 
         <div className="detail-grid">
@@ -46,12 +59,13 @@ export function ScheduleDetail({ item, onClose, onEdit, onSync }: ScheduleDetail
         </div>
 
         {item.notes && <div className="detail-notes"><span>Notes</span><p>{item.notes}</p></div>}
+        {error && <div className="form-error" role="alert">{error}</div>}
 
         <div className="modal-actions">
-          <button className="secondary-button" type="button" onClick={onClose}>Close</button>
-          <button className="secondary-button" type="button" onClick={() => void sync()}>{syncLabel}</button>
-          <button className="secondary-button" type="button" onClick={() => window.open(buildGoogleCalendarTemplateUrl(item), '_blank', 'noopener,noreferrer')}>Open Calendar</button>
-          <button className="primary-button" type="button" onClick={() => { onClose(); onEdit(item) }}>Edit activity</button>
+          <button className="secondary-button" type="button" disabled={busy} onClick={onClose}>Close</button>
+          <button className="secondary-button" type="button" disabled={busy} onClick={() => void sync()}>{busy ? 'Working…' : syncLabel}</button>
+          <button className="secondary-button" type="button" disabled={busy} onClick={() => window.open(buildGoogleCalendarTemplateUrl(item), '_blank', 'noopener,noreferrer')}>Open Calendar</button>
+          <button className="primary-button" type="button" disabled={busy} onClick={() => { onClose(); onEdit(item) }}>Edit activity</button>
         </div>
       </section>
     </div>
