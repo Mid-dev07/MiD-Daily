@@ -253,3 +253,11 @@
 .auth-links { display: flex; justify-content: space-between; gap: 10px; margin-top: 14px; }
 .auth-link { border: 0; padding: 0; color: #7fabb8; background: transparent; cursor: pointer; font-size: 10px; }
 .auth-link:hover { color: var(--color-accent); }
+
+/* M9 Telegram */
+.integration-panel { display: grid; gap: 7px; }
+.integration-panel .card-heading { margin-bottom: 3px; }
+.integration-badge { display: inline-flex; align-items: center; min-height: 26px; padding: 0 9px; border: 1px solid #1d5362; border-radius: 999px; color: #a8eff8; background: #102a35; font-size: 9px; font-weight: 800; letter-spacing: .08em; }
+.integration-description { margin: 0; color: #71869a; font-size: 11px; line-height: 1.6; }
+.integration-actions { display: flex; justify-content: flex-end; gap: 7px; }
+.integration-link-button { width: fit-content; }
