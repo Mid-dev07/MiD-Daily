@@ -10,11 +10,19 @@ export type ScheduleType =
 
 export type ReminderOffset = 0 | 5 | 10 | 15 | 30 | 60
 export type RecurrenceFrequency = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY'
+export type ReminderStatus = 'disabled' | 'scheduled' | 'due' | 'expired'
 
 export interface RecurrenceRule {
   frequency: RecurrenceFrequency
   interval: number
   until?: string
+}
+
+export interface ReminderState {
+  status: ReminderStatus
+  eventAt: Date
+  triggerAt: Date | null
+  label: string
 }
 
 export interface ScheduleItem {
