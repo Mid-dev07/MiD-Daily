@@ -14,20 +14,20 @@ import {
   createGoogleCalendarEvent,
   deleteGoogleCalendarEvent,
   updateGoogleCalendarEvent,
-  type GoogleCalendarSyncResponse,
 } from '../../integrations/calendar/calendarApi'
-import { getNotificationSupport, requestNotificationPermission, showNotification } from '../../integrations/notifications/browserNotification'
 import { toGoogleCalendarEventPayload } from '../../integrations/calendar/googleCalendar'
+import { getNotificationSupport, requestNotificationPermission, showNotification } from '../../integrations/notifications/browserNotification'
 import type { ScheduleDraft, ScheduleItem, ScheduleType } from './schedule.types'
 
 const getToday = () => new Intl.DateTimeFormat('sv-SE').format(new Date())
 
 interface ScheduleViewProps {
   schedule: ScheduleItem[]
-  onScheduleChange: (next: ScheduleItem[]) => void
+  onScheduleChange: (next: ScheduleItem[]) => void | Promise<void>
+  demoMode?: boolean
 }
 
-export function ScheduleView({ schedule, onScheduleChange }: ScheduleViewProps) {
+export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: ScheduleViewProps) {
   const [date, setDate] = useState(getToday)
   const [filter, setFilter] = useState<ScheduleType | 'ALL'>('ALL')
   const [formOpen, setFormOpen] = useState(false)
@@ -44,85 +44,39 @@ export function ScheduleView({ schedule, onScheduleChange }: ScheduleViewProps) 
   const openCreate = () => { setEditingItem(undefined); setFormOpen(true) }
   const openEdit = (item: ScheduleItem) => { setDetailItem(undefined); setEditingItem(item); setFormOpen(true) }
 
-  const saveSchedule = (draft: ScheduleDraft, editingId?: number) => {
+  const saveSchedule = async (draft: ScheduleDraft, editingId?: number) => {
     const result = validateScheduleDraft(draft, normalizedSchedule, editingId)
     if (!result.valid) return result.message
 
     if (editingId) {
-      onScheduleChange(normalizedSchedule.map((item) => {
-        if (item.id !== editingId) return item
-        const nextCalendarState = item.googleCalendar.status === 'synced' || item.googleCalendar.status === 'error'
-          ? { ...item.googleCalendar, status: 'pending' as const, error: undefined }
-          : item.googleCalendar
-        return { ...item, ...draft, googleCalendar: nextCalendarState }
-      }))
+      const next = normalizedSchedule.map((item) => item.id === editingId
+        ? { ...item, ...draft, googleCalendar: item.googleCalendar }
+        : item)
+      await onScheduleChange(next)
     } else {
-      onScheduleChange([...normalizedSchedule, {
+      await onScheduleChange([...normalizedSchedule, {
         ...draft,
         id: Date.now(),
         googleCalendar: { status: 'not-synced', calendarId: 'primary' },
       }])
     }
+
     return null
   }
 
-  const syncSchedule = async (item: ScheduleItem) => {
-    const pending = {
-      ...item.googleCalendar,
-      status: 'pending' as const,
-      error: undefined,
-    }
-    onScheduleChange(normalizedSchedule.map((entry) => entry.id === item.id ? { ...entry, googleCalendar: pending } : entry))
-
-    try {
-      const event = toGoogleCalendarEventPayload(item)
-      let result: GoogleCalendarSyncResponse
-      try {
-        result = item.googleCalendar.eventId
-          ? await updateGoogleCalendarEvent(item, item.googleCalendar.eventId, event)
-          : await createGoogleCalendarEvent(item, event)
-      } catch (reason) {
-        if (item.googleCalendar.eventId && reason instanceof Error && 'status' in reason && (reason as { status?: unknown }).status === 404) {
-          result = await createGoogleCalendarEvent(item, event)
-        } else {
-          throw reason
-        }
-      }
-
-      onScheduleChange(normalizedSchedule.map((entry) => entry.id === item.id ? {
-        ...entry,
-        googleCalendar: {
-          ...entry.googleCalendar,
-          status: 'synced',
-          eventId: result.eventId,
-          lastSyncedAt: new Date().toISOString(),
-          error: undefined,
-        },
-      } : entry))
-    } catch (reason) {
-      const message = reason instanceof Error ? reason.message : 'Calendar sync failed.'
-      onScheduleChange(normalizedSchedule.map((entry) => entry.id === item.id ? {
-        ...entry,
-        googleCalendar: {
-          ...entry.googleCalendar,
-          status: 'error',
-          error: message,
-        },
-      } : entry))
-      throw reason
-    }
-  }
-
   const deleteSchedule = async (item: ScheduleItem) => {
+    if (!window.confirm('Delete “' + item.title + '”?')) return
+
     if (item.googleCalendar.eventId) {
       await deleteGoogleCalendarEvent(item, item.googleCalendar.eventId)
     }
-    onScheduleChange(normalizedSchedule.filter((entry) => entry.id !== item.id))
+    await onScheduleChange(normalizedSchedule.filter((entry) => entry.id !== item.id))
   }
 
-  const resetToSeed = () => {
+  const resetToSeed = async () => {
+    if (!demoMode) return
     if (!window.confirm('Reset schedule to the starter activities?')) return
-    onScheduleChange(initialScheduleItems)
+    await onScheduleChange(initialScheduleItems)
   }
 
   const enableNotifications = async () => {
@@ -156,11 +110,57 @@ export function ScheduleView({ schedule, onScheduleChange }: ScheduleViewProps) 
         ? 'This browser does not expose the required notification API.'
         : 'Allow notifications to receive Schedule reminders while MiD-Daily is running.'
 
+  const syncSchedule = async (item: ScheduleItem) => {
+    const pending = { ...item.googleCalendar, status: 'pending' as const, error: undefined }
+    await onScheduleChange(normalizedSchedule.map((entry) => entry.id === item.id ? { ...entry, googleCalendar: pending } : entry))
+
+    try {
+      const event = toGoogleCalendarEventPayload(item)
+      let result
+      try {
+        result = item.googleCalendar.eventId
+          ? await updateGoogleCalendarEvent(item, item.googleCalendar.eventId, event)
+          : await createGoogleCalendarEvent(item, event)
+      } catch (reason) {
+        if (item.googleCalendar.eventId && reason instanceof Error && 'status' in reason && (reason as { status?: unknown }).status === 404) {
+          result = await createGoogleCalendarEvent(item, event)
+        } else {
+          throw reason
+        }
+      }
+
+      await onScheduleChange(normalizedSchedule.map((entry) => entry.id === item.id ? {
+        ...entry,
+        googleCalendar: {
+          ...entry.googleCalendar,
+          status: 'synced',
+          eventId: result.eventId,
+          lastSyncedAt: new Date().toISOString(),
+          error: undefined,
+        },
+      } : entry))
+    } catch (reason) {
+      const message = reason instanceof Error ? reason.message : 'Calendar sync failed.'
+      await onScheduleChange(normalizedSchedule.map((entry) => entry.id === item.id ? {
+        ...entry,
+        googleCalendar: {
+          ...entry.googleCalendar,
+          status: 'error',
+          error: message,
+        },
+      } : entry))
+      throw reason
+    }
+  }
+
   return (
     <section className="workspace page-enter">
       <div className="page-intro schedule-intro">
         <div><span className="section-kicker">AGENDA</span><h2>Make time visible.</h2><p>One flexible schedule for classes, work, study, appointments, and everything in between.</p></div>
-        <div className="schedule-header-actions"><button className="secondary-button" type="button" onClick={resetToSeed}>Reset demo</button><button className="primary-button" type="button" onClick={openCreate}>+ Add activity</button></div>
+        <div className="schedule-header-actions">
+          {demoMode && <button className="secondary-button" type="button" onClick={() => void resetToSeed()}>Reset demo</button>}
+          <button className="primary-button" type="button" onClick={openCreate}>+ Add activity</button>
+        </div>
       </div>
 
       <ScheduleToolbar date={date} filter={filter} onShiftDate={(days) => setDate(shiftDate(date, days))} onResetDate={() => setDate(getToday())} onFilterChange={setFilter} />
