@@ -197,3 +197,18 @@ button { font: inherit; }
   .module-row { grid-template-columns: 1fr auto; }
   .module-leading { grid-column: 1 / -1; }
 }
+
+.composer-card { padding: 14px; }
+.composer-row { display: grid; grid-template-columns: minmax(0, 1fr) 130px auto; gap: 10px; }
+.composer-row input, .composer-row select { width: 100%; padding: 11px 12px; border: 1px solid #263746; border-radius: 10px; color: #e8f0f7; background: #0a1119; outline: none; }
+.composer-row input:focus, .composer-row select:focus { border-color: #4f8f9f; }
+.primary-button { padding: 11px 16px; border: 0; border-radius: 10px; color: #06232b; background: #67e8f9; font-weight: 800; cursor: pointer; }
+.primary-button:hover { filter: brightness(1.04); }
+.filter-row { display: flex; gap: 8px; }
+.filter-button { padding: 8px 12px; border: 1px solid #1c2a38; border-radius: 999px; color: #71859a; background: #0d1721; cursor: pointer; }
+.filter-button.is-active { color: #dffcff; border-color: #2b6574; background: #102a35; }
+.empty-state { padding: 18px 0; margin: 0; color: #687c90; }
+
+@media (max-width: 640px) {
+  .composer-row { grid-template-columns: 1fr; }
+}

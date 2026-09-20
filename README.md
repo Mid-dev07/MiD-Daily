@@ -1,26 +1,28 @@
 # MiD-Daily
 
-Lightweight daily management web app.
+Lightweight daily management web app for schedules, tasks, finance, and future productivity automation.
 
 ## Current phase
-M1 — Project Foundation
+M1.2 — Clean application architecture + interactive local prototype
 
 ## Stack
 - React
 - TypeScript
 - Vite
 
-## Direction
-MiD-Daily starts as a personal productivity app and is structured for future small-scale multi-user support.
+## Project structure
 
-## Planned core modules
-- Schedule / Agenda
-- Tasks
-- Finance
-- Dashboard
-- Authentication
-- Telegram integration
-- WhatsApp integration (future)
+```text
+frontend/src/
+├── app/            # application composition and view switching
+├── components/     # reusable UI and layout components
+├── features/       # domain-specific modules
+├── data/            # local seed/demo data
+├── lib/             # infrastructure helpers
+├── types/           # shared domain types
+├── main.tsx
+└── styles.css
+```
 
 ## Run locally
 
@@ -28,4 +30,10 @@ MiD-Daily starts as a personal productivity app and is structured for future sma
 cd frontend
 npm install
 npm run dev
+```
+
+Build:
+
+```bash
+npm run build
 ```

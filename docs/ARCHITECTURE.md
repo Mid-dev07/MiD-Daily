@@ -20,15 +20,4 @@ External Integrations
 Google  Telegram  WhatsApp (future)
 ```
 
-## Principles
-- Keep deployment lightweight.
-- Separate modules by responsibility.
-- Avoid premature microservices.
-- Make authentication and authorization explicit.
-- Enforce user data isolation at application and database levels when multi-user support is introduced.
-
-## Change management
-- NOW: foundation and core stability
-- NEXT: core productivity modules
-- LATER: integrations and advanced features
-- REJECT / REDESIGN: unnecessary complexity
+The current frontend is a local prototype. Persistence is isolated behind `lib/storage.ts` so it can later be replaced with an API-backed repository without moving UI responsibilities into components.
