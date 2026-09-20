@@ -5,7 +5,7 @@ interface TaskFormProps {
   open: boolean
   initialTask?: Task
   onClose: () => void
-  onSubmit: (draft: TaskDraft, editingId?: number) => string | null
+  onSubmit: (draft: TaskDraft, editingId?: number) => string | null | Promise<string | null>
 }
 
 const emptyDraft: TaskDraft = {
@@ -21,6 +21,7 @@ const emptyDraft: TaskDraft = {
 export function TaskForm({ open, initialTask, onClose, onSubmit }: TaskFormProps) {
   const [draft, setDraft] = useState<TaskDraft>(emptyDraft)
   const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -34,6 +35,7 @@ export function TaskForm({ open, initialTask, onClose, onSubmit }: TaskFormProps
       progress: initialTask.progress ?? (initialTask.status === 'done' ? 100 : 0),
     } : emptyDraft)
     setError('')
+    setSaving(false)
   }, [open, initialTask])
 
   if (!open) return null
@@ -43,37 +45,45 @@ export function TaskForm({ open, initialTask, onClose, onSubmit }: TaskFormProps
     setError('')
   }
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const result = onSubmit(draft, initialTask?.id)
-    if (result) {
-      setError(result)
-      return
+    setSaving(true)
+    setError('')
+    try {
+      const result = await onSubmit(draft, initialTask?.id)
+      if (result) {
+        setError(result)
+        return
+      }
+      onClose()
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Unable to save task.')
+    } finally {
+      setSaving(false)
     }
-    onClose()
   }
 
   return (
-    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !saving && onClose()}>
       <section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="task-form-title">
         <div className="modal-header">
           <div><span className="section-kicker">TASK</span><h3 id="task-form-title">{initialTask ? 'Edit task' : 'Add task'}</h3></div>
-          <button className="icon-button" type="button" onClick={onClose} aria-label="Close task form">×</button>
+          <button className="icon-button" type="button" disabled={saving} onClick={onClose} aria-label="Close task form">×</button>
         </div>
 
         <form className="schedule-form" onSubmit={submit}>
-          <label>Title<input value={draft.title} onChange={(event) => setField('title', event.target.value)} placeholder="e.g. Finish API documentation" autoFocus /></label>
+          <label>Title<input disabled={saving} value={draft.title} onChange={(event) => setField('title', event.target.value)} placeholder="e.g. Finish API documentation" autoFocus /></label>
 
           <div className="form-grid two">
-            <label>Category<input value={draft.category} onChange={(event) => setField('category', event.target.value)} /></label>
-            <label>Due date<input type="date" value={draft.dueDate ?? ''} onChange={(event) => setField('dueDate', event.target.value)} /></label>
+            <label>Category<input disabled={saving} value={draft.category} onChange={(event) => setField('category', event.target.value)} /></label>
+            <label>Due date<input disabled={saving} type="date" value={draft.dueDate ?? ''} onChange={(event) => setField('dueDate', event.target.value)} /></label>
           </div>
 
           <div className="form-grid two">
-            <label>Priority<select value={draft.priority} onChange={(event) => setField('priority', event.target.value as TaskPriority)}>
+            <label>Priority<select disabled={saving} value={draft.priority} onChange={(event) => setField('priority', event.target.value as TaskPriority)}>
               <option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option>
             </select></label>
-            <label>Status<select value={draft.status} onChange={(event) => {
+            <label>Status<select disabled={saving} value={draft.status} onChange={(event) => {
               const next = event.target.value as TaskStatus
               setDraft((current) => ({ ...current, status: next, progress: next === 'done' ? 100 : current.progress }))
               setError('')
@@ -82,11 +92,11 @@ export function TaskForm({ open, initialTask, onClose, onSubmit }: TaskFormProps
             </select></label>
           </div>
 
-          <label>Progress<input type="number" min="0" max="100" value={draft.progress} onChange={(event) => setField('progress', Number(event.target.value))} /></label>
-          <label>Notes<textarea value={draft.notes ?? ''} onChange={(event) => setField('notes', event.target.value)} rows={4} placeholder="Optional context, acceptance criteria, or next step" /></label>
+          <label>Progress<input disabled={saving} type="number" min="0" max="100" value={draft.progress} onChange={(event) => setField('progress', Number(event.target.value))} /></label>
+          <label>Notes<textarea disabled={saving} value={draft.notes ?? ''} onChange={(event) => setField('notes', event.target.value)} rows={4} placeholder="Optional context, acceptance criteria, or next step" /></label>
 
           {error && <div className="form-error" role="alert">{error}</div>}
-          <div className="modal-actions"><button className="secondary-button" type="button" onClick={onClose}>Cancel</button><button className="primary-button" type="submit">{initialTask ? 'Save changes' : 'Add task'}</button></div>
+          <div className="modal-actions"><button className="secondary-button" type="button" disabled={saving} onClick={onClose}>Cancel</button><button className="primary-button" disabled={saving} type="submit">{saving ? 'Saving…' : initialTask ? 'Save changes' : 'Add task'}</button></div>
         </form>
       </section>
     </div>
