@@ -26,7 +26,7 @@ export function AssistantView() {
 
     try {
       const result = await sendAIMessage(nextMessages.slice(-10), allowWrites)
-      setMessages((current) => [...current, { role: 'assistant', content: result.text }].slice(-10))
+      setMessages((current) => [...current, { role: 'assistant' as const, content: result.text }].slice(-10))
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Assistant request failed.')
     } finally {
