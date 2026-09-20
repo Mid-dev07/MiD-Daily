@@ -7,18 +7,19 @@ import { DashboardView } from '../features/dashboard/DashboardView'
 import { FinanceView } from '../features/finance/FinanceView'
 import { ScheduleView } from '../features/schedule/ScheduleView'
 import { TasksView } from '../features/tasks/TasksView'
+import { normalizeTaskList } from '../features/tasks/task.migration'
 import { initialScheduleItems } from '../features/schedule/schedule.data'
 import { normalizeScheduleList } from '../features/schedule/schedule.migration'
 import { useReminderScheduler } from '../features/schedule/hooks/useReminderScheduler'
 import { readStorage, writeStorage } from '../lib/storage'
-import type { Task, TaskPriority, View } from '../types'
+import type { Task, TaskDraft, View } from '../types'
 
 const TASK_STORAGE_KEY = 'mid-daily.tasks'
 const SCHEDULE_STORAGE_KEY = 'mid-daily.schedule'
 
 export function App() {
   const [activeView, setActiveView] = useState<View>('dashboard')
-  const [tasks, setTasks] = useState<Task[]>(() => readStorage(TASK_STORAGE_KEY, initialTasks))
+  const [tasks, setTasks] = useState<Task[]>(() => normalizeTaskList(readStorage(TASK_STORAGE_KEY, initialTasks)))
   const [schedule, setSchedule] = useState(() => normalizeScheduleList(readStorage(SCHEDULE_STORAGE_KEY, initialScheduleItems)))
   const [toast, setToast] = useState('')
 
@@ -37,13 +38,42 @@ export function App() {
       if (task.id !== id) return task
       const completed = task.status === 'done'
       setToast(completed ? 'Task reopened' : 'Task completed')
-      return { ...task, status: completed ? 'todo' : 'done' }
+      return { ...task, status: completed ? 'todo' : 'done', progress: completed ? Math.min(task.progress ?? 0, 99) : 100 }
     }))
   }
 
-  const addTask = (title: string, priority: TaskPriority) => {
-    setTasks((current) => [...current, { id: Date.now(), title, category: 'Personal', priority, status: 'todo' }])
-    setToast('Task added')
+  const saveTask = (draft: TaskDraft, editingId?: number) => {
+    const normalizedDraft: TaskDraft = {
+      ...draft,
+      title: draft.title.trim(),
+      category: draft.category.trim(),
+      notes: draft.notes?.trim() || undefined,
+      dueDate: draft.dueDate || undefined,
+      progress: draft.status === 'done' ? 100 : draft.progress,
+    }
+
+    if (!normalizedDraft.title) return 'Title is required.'
+    if (!normalizedDraft.category) return 'Category is required.'
+    if (!Number.isInteger(normalizedDraft.progress) || normalizedDraft.progress < 0 || normalizedDraft.progress > 100) return 'Progress must be between 0 and 100.'
+
+    const duplicate = tasks.some((task) => task.id !== editingId && task.title.trim().toLowerCase() === normalizedDraft.title.toLowerCase())
+    if (duplicate) return 'A task with this title already exists.'
+
+    if (editingId) {
+      if (!tasks.some((task) => task.id === editingId)) return 'Task not found.'
+      setTasks((items) => items.map((task) => task.id === editingId ? { ...task, ...normalizedDraft } : task))
+      setToast('Task updated')
+    } else {
+      setTasks((items) => [...items, { id: Date.now(), ...normalizedDraft }])
+      setToast('Task added')
+    }
+
+    return null
+  }
+
+  const deleteTask = (id: number) => {
+    setTasks((current) => current.filter((task) => task.id !== id))
+    setToast('Task deleted')
   }
 
   return (
@@ -54,7 +84,7 @@ export function App() {
         <div className="view-key">
           {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={financeEntries} onToggleTask={toggleTask} />}
           {activeView === 'schedule' && <ScheduleView schedule={schedule} onScheduleChange={setSchedule} />}
-          {activeView === 'tasks' && <TasksView tasks={tasks} onAddTask={addTask} onToggleTask={toggleTask} />}
+          {activeView === 'tasks' && <TasksView tasks={tasks} onSaveTask={saveTask} onToggleTask={toggleTask} onDeleteTask={deleteTask} />}
           {activeView === 'finance' && <FinanceView finance={financeEntries} />}
         </div>
       </main>
