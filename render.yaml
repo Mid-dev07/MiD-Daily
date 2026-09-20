@@ -44,3 +44,13 @@ services:
         sync: false
       - key: TOKEN_ENCRYPTION_KEY_B64
         generateValue: true
+      - key: APP_TIMEZONE
+        value: Asia/Jakarta
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_BOT_USERNAME
+        sync: false
+      - key: TELEGRAM_WEBHOOK_SECRET
+        generateValue: true
+      - key: TELEGRAM_WEBHOOK_URL
+        sync: false
