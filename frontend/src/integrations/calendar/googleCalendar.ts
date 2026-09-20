@@ -3,19 +3,6 @@ import type { GoogleCalendarEventPayload } from './calendar.types'
 
 export const GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events'
 
-export function getGoogleCalendarConfig() {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined
-
-  return {
-    clientId: clientId?.trim() || '',
-    configured: Boolean(clientId?.trim()),
-  }
-}
-
-function toCalendarDateTime(date: string, time: string) {
-  return `${date.replaceAll('-', '')}T${time.replace(':', '')}00`
-}
-
 function buildDetails(item: ScheduleItem) {
   const lines = [`MiD-Daily • ${item.type}`]
 
@@ -52,8 +39,8 @@ export function toGoogleCalendarEventPayload(item: ScheduleItem): GoogleCalendar
 
 export function buildGoogleCalendarTemplateUrl(item: ScheduleItem) {
   const payload = toGoogleCalendarEventPayload(item)
-  const start = toCalendarDateTime(item.date, item.startTime)
-  const end = toCalendarDateTime(item.date, item.endTime)
+  const start = `${item.date.replaceAll('-', '')}T${item.startTime.replace(':', '')}00`
+  const end = `${item.date.replaceAll('-', '')}T${item.endTime.replace(':', '')}00`
 
   const params = new URLSearchParams({
     action: 'TEMPLATE',
