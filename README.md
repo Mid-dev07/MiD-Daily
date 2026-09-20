@@ -32,4 +32,4 @@ npm run dev
 Copy `backend/.env.example` to `backend/.env` and configure the Google OAuth credentials before connecting Calendar.
 
 ## Current focus
-The Schedule module has date navigation, filtering, CRUD, recurrence, reminders, local persistence, browser notifications, Google Calendar OAuth, and API-backed one-way event sync. Task Management now has search, status/priority filters, CRUD, deadlines, notes, and progress tracking. The next step is authenticated user ownership and calendar selection, followed later by two-way synchronization.
+The Schedule module has date navigation, filtering, CRUD, recurrence, reminders, local persistence, browser notifications, Google Calendar OAuth, and API-backed one-way event sync. Task Management has search, filters, CRUD, deadlines, notes, and progress tracking. Finance has transaction CRUD, period reporting, category breakdowns, and local persistence. Supabase Auth now gates configured deployments and isolates local data by user. The next step is authenticated user ownership and calendar selection, followed later by two-way synchronization.
