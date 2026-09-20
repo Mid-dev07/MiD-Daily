@@ -3,6 +3,7 @@ import type { ScheduleItem } from '../schedule/schedule.types'
 import { currency, formatDate } from '../../lib/format'
 import { StatCard } from '../../components/ui/StatCard'
 import { TelegramIntegrationCard } from './components/TelegramIntegrationCard'
+import { WhatsAppIntegrationCard } from './components/WhatsAppIntegrationCard'
 
 interface DashboardViewProps { tasks: Task[]; schedule: ScheduleItem[]; finance: FinanceEntry[]; onToggleTask: (id: number) => void }
 const getToday = () => new Intl.DateTimeFormat('sv-SE').format(new Date())
@@ -35,6 +36,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask }: Dashbo
       </section>
 
       <TelegramIntegrationCard />
+      <WhatsAppIntegrationCard />
 
       <section className="content-card task-card motion-card">
         <div className="card-heading"><div><span className="section-kicker">FOCUS</span><h3>Task queue</h3></div><span className="card-meta">{openTasks} open</span></div>
