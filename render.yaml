@@ -66,3 +66,11 @@ services:
         sync: false
       - key: WHATSAPP_BUSINESS_PHONE_NUMBER
         sync: false
+      - key: INSTAGRAM_ACCESS_TOKEN
+        sync: false
+      - key: INSTAGRAM_GRAPH_VERSION
+        sync: false
+      - key: INSTAGRAM_ACCOUNT_ID
+        sync: false
+      - key: INSTAGRAM_GRAPH_HOST
+        value: https://graph.instagram.com
