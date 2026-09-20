@@ -39,6 +39,43 @@ Authorized redirect URI:
 
 After deploy: sign in → connect Google Calendar → create Schedule item → Sync to Google → verify the event → edit → Update Google → delete → verify remote deletion.
 
+## External integrations
+
+For Telegram:
+```env
+TELEGRAM_BOT_TOKEN=<bot-token>
+TELEGRAM_BOT_USERNAME=<bot-username>
+TELEGRAM_WEBHOOK_SECRET=<secret>
+TELEGRAM_WEBHOOK_URL=https://<backend-url>/webhooks/telegram
+APP_TIMEZONE=Asia/Jakarta
+```
+
+For WhatsApp Cloud API:
+```env
+WHATSAPP_ACCESS_TOKEN=<access-token>
+WHATSAPP_PHONE_NUMBER_ID=<phone-number-id>
+WHATSAPP_GRAPH_VERSION=<graph-version>
+WHATSAPP_APP_SECRET=<app-secret>
+WHATSAPP_VERIFY_TOKEN=<verify-token>
+WHATSAPP_BUSINESS_PHONE_NUMBER=<business-number>
+```
+
+For Instagram analytics foundation:
+```env
+INSTAGRAM_ACCESS_TOKEN=<access-token>
+INSTAGRAM_GRAPH_VERSION=<graph-version>
+INSTAGRAM_ACCOUNT_ID=<professional-account-id>
+INSTAGRAM_GRAPH_HOST=https://graph.instagram.com
+```
+
+For MiD-Daily Assistant:
+```env
+OPENAI_API_KEY=<server-side-api-key>
+OPENAI_MODEL=gpt-5.6
+```
+
+These credentials remain backend-only except the Supabase publishable key and Vite public variables described above. Configure each provider only after the deployed backend URL is known.
+
 ## Health
 `GET /health` should return HTTP 200 and identify `mid-daily-backend`.
 
