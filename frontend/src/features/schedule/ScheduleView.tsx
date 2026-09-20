@@ -14,6 +14,7 @@ import {
   createGoogleCalendarEvent,
   deleteGoogleCalendarEvent,
   updateGoogleCalendarEvent,
+  type GoogleCalendarSyncResponse,
 } from '../../integrations/calendar/calendarApi'
 import { getNotificationSupport, requestNotificationPermission, showNotification } from '../../integrations/notifications/browserNotification'
 import { toGoogleCalendarEventPayload } from '../../integrations/calendar/googleCalendar'
@@ -75,7 +76,7 @@ export function ScheduleView({ schedule, onScheduleChange }: ScheduleViewProps) 
 
     try {
       const event = toGoogleCalendarEventPayload(item)
-      let result
+      let result: GoogleCalendarSyncResponse
       try {
         result = item.googleCalendar.eventId
           ? await updateGoogleCalendarEvent(item, item.googleCalendar.eventId, event)
