@@ -6,7 +6,7 @@ import { currency, formatDate } from '../../lib/format'
 
 interface FinanceViewProps {
   finance: FinanceEntry[]
-  onSaveFinance: (draft: FinanceDraft, editingId?: number) => string | null
+  onSaveFinance: (draft: FinanceDraft, editingId?: number) => string | null | Promise<string | null>
   onDeleteFinance: (id: number) => void
 }
 
