@@ -32,4 +32,4 @@ npm run dev
 Copy `backend/.env.example` to `backend/.env` and configure the Google OAuth credentials before connecting Calendar.
 
 ## Current focus
-The Schedule module has date navigation, filtering, CRUD, recurrence, reminders, local persistence, browser notifications, a Google Calendar handoff, and a backend OAuth connection layer. The next Calendar step is API-backed one-way event sync, followed later by two-way synchronization.
+The Schedule module has date navigation, filtering, CRUD, recurrence, reminders, local persistence, browser notifications, Google Calendar OAuth, and API-backed one-way event sync. The next step is authenticated user ownership and calendar selection, followed later by two-way synchronization.
