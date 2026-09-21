@@ -14,7 +14,7 @@ const pathViews = Object.fromEntries(
 ) as Record<string, View>
 
 export function viewFromPath(pathname: string): View {
-  return pathViews[pathname.replace(/\\/$/, '') || '/'] ?? 'dashboard'
+  return pathViews[pathname.replace(/\/$/, '') || '/'] ?? 'dashboard'
 }
 
 export function pathForView(view: View) {
