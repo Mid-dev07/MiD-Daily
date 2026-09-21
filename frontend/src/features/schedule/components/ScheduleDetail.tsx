@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useModalBehavior } from '../../../lib/useModalBehavior'
 import { buildGoogleCalendarTemplateUrl } from '../../../integrations/calendar/googleCalendar'
 import { formatDateLong } from '../schedule.date'
 import { formatReminderTime, getReminderState } from '../schedule.reminder'
@@ -16,6 +17,7 @@ export function ScheduleDetail({ item, onClose, onEdit, onSync }: ScheduleDetail
   const [error, setError] = useState('')
 
   if (!item) return null
+  useModalBehavior(Boolean(item), onClose, busy)
 
   const reminder = getReminderState(item)
   const calendarStatus = item.googleCalendar.status === 'synced'
