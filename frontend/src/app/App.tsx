@@ -141,29 +141,6 @@ export function App() {
     return () => window.clearTimeout(timeout)
   }, [toast])
 
-  useEffect(() => {
-    let frame = 0
-    const onPointerMove = (event: PointerEvent) => {
-      if (frame) return
-      frame = window.requestAnimationFrame(() => {
-        frame = 0
-        const target = event.target as HTMLElement | null
-        const surface = target?.closest<HTMLElement>('.sidebar, .profile-chip, .welcome-card, .stat-card, .content-card, .schedule-event, .schedule-integration-card, .primary-button, .secondary-button, .icon-button, .filter-button, .task-row, .text-button, .modal-card, .feature-landscape, .feature-node')
-        if (!surface) return
-        const rect = surface.getBoundingClientRect()
-        const x = ((event.clientX - rect.left) / Math.max(rect.width, 1)) * 100
-        const y = ((event.clientY - rect.top) / Math.max(rect.height, 1)) * 100
-        surface.style.setProperty('--spec-x', x.toFixed(2) + '%')
-        surface.style.setProperty('--spec-y', y.toFixed(2) + '%')
-      })
-    }
-
-    document.addEventListener('pointermove', onPointerMove, { passive: true })
-    return () => {
-      document.removeEventListener('pointermove', onPointerMove)
-      if (frame) window.cancelAnimationFrame(frame)
-    }
-  }, [])
 
   const toggleTask = async (id: number) => {
     const currentTask = tasks.find((task) => task.id === id)
@@ -288,10 +265,6 @@ export function App() {
   return (
     <div className="app-frame" data-view={activeView} data-time-period={timePeriod}>
       <div className="atmosphere" aria-hidden="true" />
-      <svg className="grain-noise" aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <filter id="mid-grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" /></filter>
-        <rect width="100%" height="100%" filter="url(#mid-grain)" />
-      </svg>
       <Sidebar activeView={activeView} onNavigate={setActiveView} />
       <main className="main-content">
         <Topbar view={activeView} />
