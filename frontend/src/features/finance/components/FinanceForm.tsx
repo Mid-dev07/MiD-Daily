@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { useModalBehavior } from '../../../lib/useModalBehavior'
 import type { FinanceDraft, FinanceEntry, FinanceEntryType } from '../../../types'
 
 interface FinanceFormProps {
@@ -38,6 +39,7 @@ export function FinanceForm({ open, initialEntry, defaultDate, onClose, onSubmit
   }, [open, initialEntry, defaultDate])
 
   if (!open) return null
+  useModalBehavior(open, onClose, saving)
 
   const setField = <K extends keyof FinanceDraft>(field: K, value: FinanceDraft[K]) => {
     setDraft((current) => ({ ...current, [field]: value }))
