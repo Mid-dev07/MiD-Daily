@@ -1,7 +1,6 @@
 import type { CSSProperties } from 'react'
-import type { FinanceEntry, Task } from '../../types'
+import type { FinanceEntry, Task, View } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
-import type { View } from '../../types'
 import { currency, formatDate } from '../../lib/format'
 import { StatCard } from '../../components/ui/StatCard'
 import { TelegramIntegrationCard } from './components/TelegramIntegrationCard'
