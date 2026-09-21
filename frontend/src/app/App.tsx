@@ -24,6 +24,7 @@ import { useReminderScheduler } from '../features/schedule/hooks/useReminderSche
 import { registerBrowserServiceWorker } from '../integrations/notifications/serviceWorker'
 import { readUserStorage, writeUserStorage, hasUserStorage } from '../lib/userStorage'
 import { hasCompletedRemoteSync, markRemoteSyncComplete } from '../lib/dataSync'
+import { useWorkspaceRealtime } from '../features/workspace/useWorkspaceRealtime'
 import { useAuth } from '../features/auth/AuthProvider'
 import { navigateToView, viewFromPath } from './routing'
 import type { FinanceDraft, FinanceEntry, Task, TaskDraft, View } from '../types'
@@ -65,6 +66,7 @@ export function App() {
   const [workspaceReady, setWorkspaceReady] = useState(() => !userId)
 
   useReminderScheduler(schedule)
+  useWorkspaceRealtime(userId, setTasks, setFinance, setSchedule)
 
   useEffect(() => {
     void registerBrowserServiceWorker()
