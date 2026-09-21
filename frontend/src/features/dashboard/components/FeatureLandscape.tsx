@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react'
 import type { View } from '../../../types'
 
 interface FeatureLandscapeProps {
@@ -36,14 +35,12 @@ export function FeatureLandscape({ activeView, onNavigate }: FeatureLandscapePro
         </div>
 
         {features.map((feature) => {
-          const style = {} as CSSProperties
           return (
             <button
               key={feature.id}
               type="button"
               className={activeView === feature.id ? 'feature-node is-active' : 'feature-node'}
               data-feature={feature.id}
-              style={style}
               aria-current={activeView === feature.id ? 'page' : undefined}
               onClick={() => onNavigate(feature.id)}
             >
