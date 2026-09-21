@@ -20,10 +20,11 @@ const getEmptyDraft = (date: string): FinanceDraft => ({
 })
 
 export function FinanceForm({ open, initialEntry, defaultDate, onClose, onSubmit }: FinanceFormProps) {
-  useModalBehavior(open, onClose, saving)
   const [draft, setDraft] = useState<FinanceDraft>(() => getEmptyDraft(defaultDate))
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+
+  useModalBehavior(open, onClose, saving)
 
   useEffect(() => {
     if (!open) return
@@ -40,7 +41,6 @@ export function FinanceForm({ open, initialEntry, defaultDate, onClose, onSubmit
   }, [open, initialEntry, defaultDate])
 
   if (!open) return null
-  useModalBehavior(open, onClose, saving)
 
   const setField = <K extends keyof FinanceDraft>(field: K, value: FinanceDraft[K]) => {
     setDraft((current) => ({ ...current, [field]: value }))
