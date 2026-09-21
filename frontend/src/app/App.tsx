@@ -31,6 +31,13 @@ const SCHEDULE_STORAGE_KEY = 'mid-daily.schedule'
 
 const reportError = (reason: unknown) => reason instanceof Error ? reason.message : 'Remote data sync failed.'
 
+function getTimePeriod(hour = new Date().getHours()) {
+  if (hour >= 5 && hour < 11) return 'morning'
+  if (hour >= 11 && hour < 17) return 'day'
+  if (hour >= 17 && hour < 21) return 'evening'
+  return 'night'
+}
+
 export function App() {
   const { user } = useAuth()
   const userId = user?.id
@@ -39,8 +46,14 @@ export function App() {
   const [finance, setFinance] = useState<FinanceEntry[]>(() => normalizeFinanceList(readUserStorage(FINANCE_STORAGE_KEY, userId, userId ? [] : financeEntries)))
   const [schedule, setSchedule] = useState<ScheduleItem[]>(() => normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, userId ? [] : initialScheduleItems)))
   const [toast, setToast] = useState('')
+  const [timePeriod, setTimePeriod] = useState(getTimePeriod)
 
   useReminderScheduler(schedule)
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setTimePeriod(getTimePeriod()), 60_000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   useEffect(() => writeUserStorage(TASK_STORAGE_KEY, userId, tasks), [tasks, userId])
   useEffect(() => writeUserStorage(FINANCE_STORAGE_KEY, userId, finance), [finance, userId])
@@ -268,7 +281,7 @@ export function App() {
   }
 
   return (
-    <div className="app-frame" data-view={activeView}>
+    <div className="app-frame" data-view={activeView} data-time-period={timePeriod}>
       <div className="atmosphere" aria-hidden="true" />
       <svg className="grain-noise" aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none">
         <filter id="mid-grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" /></filter>
