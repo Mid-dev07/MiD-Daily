@@ -18,7 +18,6 @@ export function ScheduleDetail({ item, onClose, onEdit, onSync }: ScheduleDetail
   useModalBehavior(Boolean(item), onClose, busy)
 
   if (!item) return null
-  useModalBehavior(Boolean(item), onClose, busy)
 
   const reminder = getReminderState(item)
   const calendarStatus = item.googleCalendar.status === 'synced'
