@@ -1,60 +1,78 @@
-# MiD Daily — Unreal-Grade UI/UX Direction
+# MiD Daily — Nature Cinematic UI/UX Direction
 
-Single source of truth untuk redesign visual MiD Daily.
+## North star
+MiD Daily should feel like a calm digital place inspired by cinematic nature photography: forest shade, fog, moss, wet stone, soft daylight, and warm natural light.
 
-## Philosophy
-- Physically-based surfaces, bukan flat UI.
-- Satu arah cahaya global: `--light-angle: 145deg`.
-- Depth hierarchy: atmosphere → content plane → floating panel → modal → toast.
-- Efek harus tersebar secara sistematis ke seluruh komponen, bukan hanya hero.
+The goal is not to place a forest image behind a conventional dashboard. Nature is the visual environment in which the interface exists.
 
-## Three materials
-1. **Glass panel** — card, modal, nav rail, dropdown, nested panel. Blur + translucent surface + top rim light + ambient shadow.
-2. **Emissive surface** — primary action, active filter/state, progress, status indicator. Gradient + glow proporsional.
-3. **Recessed surface** — input, search, textarea, empty state. Inner shadow; hanya menyala saat focus.
+## Visual ratio
+- Cinematic forest: ~70%
+- Natural luxury: ~30%
 
-## Tokens
-- Background: `#0a1119`, `#0d151f`
-- Surfaces: `#0f1a26`, `#142130`, `#1b2b3d`, `#24384e`
-- Accent: `#4fd1ff`
-- Status: `#4ade80`, `#fbbf24`, `#fb7185`
-- Lines: translucent white
-- Light angle: `145deg`
+Cinematic forest carries the default dark, immersive mood. Natural luxury appears through warm stone, sage, linen-like softness, and sunlight during calmer or more premium moments.
 
-## Typography
-- UI/body: neutral sans (Inter/system)
-- Readouts: JetBrains Mono/system mono
-- Labels: uppercase + tracking
-- Active/live values: very subtle accent glow
+## Material language
+1. **Dew glass**
+   - restrained translucency
+   - soft blur
+   - subtle specular catch
+   - no cyan neon glow
+
+2. **Natural stone / wood surface**
+   - matte body
+   - warm edge light
+   - deep ambient shadow
+   - tactile borders
+
+3. **Recessed earth**
+   - used for inputs, empty slots, and quiet controls
+   - inward shadow
+   - minimal highlight until focus
+
+## Lighting
+One consistent natural key light should inform surface gradients, highlights, borders, active states, and hover response.
+Light should feel like sunlight or diffused canopy light rather than an artificial neon emitter.
+
+## Color direction
+Primary: deep forest, moss, muted sage, stone, fog, warm sunlight.
+Semantic states: muted green success, warm ochre warning, muted clay-red danger.
+Avoid bright cyan as a primary visual identity.
+
+## Environmental photography
+Use a small number of carefully selected nature photographs with dark overlays so text remains legible.
+Photography should contain no distracting UI-like shapes, work when heavily darkened, remain recognizable at low opacity, and be optimized for performance.
+Unsplash images are broadly licensed for personal and most commercial use, but third-party trademark/person/property rights still need review for individual images.
+
+## Feature landscape
+Feature navigation should behave as part of the environment:
+- feature nodes are material objects, not floating labels
+- hover catches light and shifts depth
+- active state uses warm natural light, not glow
+- metadata reveals slightly on interaction
+- click navigates to the real feature
+- desktop uses spatial grouping
+- tablet uses a tighter grid
+- mobile uses stacked/two-column touch targets
+
+Never depend on absolute pixel coordinates for critical navigation.
 
 ## Motion
-- Primary easing: `cubic-bezier(.2,.8,.2,1)`
-- Entry: scale + blur + settle
-- Press: `scale(.97)`
-- Hover: small lift, not bounce
-- Respect `prefers-reduced-motion`
+Preferred: soft lift, subtle rotation, light catch, fog/atmosphere drift, short spring-like easing.
+Avoid constant floating, large parallax, aggressive scale, repeated glow pulses, and generic ease-in-out everywhere.
+Respect reduced-motion preferences.
 
-## Component mapping
-| Surface | Material |
-|---|---|
-| Sidebar / nav | Glass + emissive active indicator |
-| Cards / stats / integrations | Glass |
-| Primary buttons | Emissive |
-| Secondary / icon / filters | Thin glass |
-| Inputs / selects / textareas / search | Recessed |
-| Checked task / progress | Emissive |
-| Empty states | Recessed |
-| Modal | Highest glass |
-| Toast | Emissive glass |
+## Responsive contract
+Desktop: persistent sidebar, wide landscape modules, spacious composition.
+Tablet: compact sidebar, single-column content when required, feature scene collapses gracefully.
+Mobile: floating bottom navigation, touch-friendly controls, stacked forms, bottom-sheet style modal presentation, and sufficient content padding above fixed navigation.
 
-## Anti AI-slop checklist
-- Jangan taruh glow hanya di background.
-- Jangan bikin tiap komponen punya shadow/glow berbeda.
-- Jangan tambah warna accent per fitur.
-- Jangan membuat neon berlebihan.
-- Jangan pakai ease-in-out generik untuk semua motion.
-- Setiap surface interaktif harus menjawab: **material apa, arah cahaya mana, depth level berapa?**
-- UI harus tetap terasa premium saat atmosphere dimatikan.
+## Accessibility
+- visible focus states
+- semantic labels
+- state not communicated by color alone
+- keyboard Escape for modal dismissal
+- background scroll lock while modal is open
+- reduced-motion preference support
 
-## Constraint
-Pertahankan auth, data flow, API, persistence, integration, dan deployment. Redesign fokus pada presentation dan interaction layer.
+## Anti-slop checklist
+Reject a change when it looks like a generic AI dashboard, introduces unexplained gradients or blobs, uses neon cyan to signal importance, adds glass everywhere without hierarchy, sacrifices readability for visual drama, breaks mobile layout, or adds motion without meaningful interaction feedback.
