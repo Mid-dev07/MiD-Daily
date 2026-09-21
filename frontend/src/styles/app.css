@@ -2186,3 +2186,49 @@ textarea {
     opacity: .25;
   }
 }
+
+
+.social-foundation-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.social-foundation-grid > div {
+  display: grid;
+  gap: 4px;
+  padding: 13px;
+  border: 1px solid rgba(232, 239, 221, .07);
+  border-radius: 14px;
+  background: rgba(11, 18, 12, .48);
+}
+
+.social-foundation-grid span {
+  color: #788476;
+  font-size: 8px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.social-foundation-grid strong {
+  color: #d3dbc9;
+  font-size: 12px;
+}
+
+.social-foundation-grid small {
+  color: #879182;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.social-empty-state {
+  min-height: 150px;
+  border-style: dashed;
+}
+
+@media (max-width: 720px) {
+  .social-foundation-grid {
+    grid-template-columns: 1fr;
+  }
+}
