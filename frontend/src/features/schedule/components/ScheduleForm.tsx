@@ -33,6 +33,7 @@ const emptyDraft = (date: string): ScheduleDraft => ({
 })
 
 export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit }: ScheduleFormProps) {
+  useModalBehavior(open, onClose, saving)
   const [draft, setDraft] = useState<ScheduleDraft>(() => emptyDraft(defaultDate))
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
