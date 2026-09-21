@@ -1,15 +1,17 @@
 import type { CSSProperties } from 'react'
 import type { FinanceEntry, Task } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
+import type { View } from '../../types'
 import { currency, formatDate } from '../../lib/format'
 import { StatCard } from '../../components/ui/StatCard'
 import { TelegramIntegrationCard } from './components/TelegramIntegrationCard'
 import { WhatsAppIntegrationCard } from './components/WhatsAppIntegrationCard'
+import { FeatureLandscape } from './components/FeatureLandscape'
 
-interface DashboardViewProps { tasks: Task[]; schedule: ScheduleItem[]; finance: FinanceEntry[]; onToggleTask: (id: number) => void }
+interface DashboardViewProps { tasks: Task[]; schedule: ScheduleItem[]; finance: FinanceEntry[]; onToggleTask: (id: number) => void; activeView: View; onNavigate: (view: View) => void }
 const getToday = () => new Intl.DateTimeFormat('sv-SE').format(new Date())
 
-export function DashboardView({ tasks, schedule, finance, onToggleTask }: DashboardViewProps) {
+export function DashboardView({ tasks, schedule, finance, onToggleTask, activeView, onNavigate }: DashboardViewProps) {
   const today = getToday()
   const todaySchedule = schedule.filter((item) => item.date === today).sort((a, b) => a.startTime.localeCompare(b.startTime))
   const completed = tasks.filter((task) => task.status === 'done').length
@@ -28,6 +30,8 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask }: Dashbo
           <div className="welcome-date"><strong>Today</strong><span>{formatDate(today)}</span></div>
         </div>
       </div>
+
+      <FeatureLandscape activeView={activeView} onNavigate={onNavigate} />
 
       <div className="stat-row">
         <StatCard label="Schedule" value={String(todaySchedule.length)} hint="planned today" />
