@@ -25,7 +25,8 @@ export interface TelegramUpdate {
 }
 
 export function verifyWebhookSecret(value: string | undefined) {
-  return Boolean(WEBHOOK_SECRET && value === WEBHOOK_SECRET)
+  const secret = process.env.TELEGRAM_WEBHOOK_SECRET ?? WEBHOOK_SECRET
+  return Boolean(secret && value === secret)
 }
 
 async function telegramRequest<T>(method: string, body: Record<string, unknown>) {
