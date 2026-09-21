@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { EmptyState } from '../../components/ui/EmptyState'
-import { formatDateLong, shiftDate } from './schedule.date'
+import { formatDateLong, scheduleOccursOnDate, shiftDate } from './schedule.date'
 import { normalizeScheduleList } from './schedule.migration'
 import { ScheduleDetail } from './components/ScheduleDetail'
 import { ScheduleForm } from './components/ScheduleForm'
@@ -37,9 +37,10 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
 
   const normalizedSchedule = useMemo(() => normalizeScheduleList(schedule), [schedule])
   const visibleItems = useMemo(() => normalizedSchedule
-    .filter((item) => item.date === date)
+    .filter((item) => scheduleOccursOnDate(item, date))
     .filter((item) => filter === 'ALL' || item.type === filter)
-    .sort((a, b) => a.startTime.localeCompare(b.startTime)), [date, filter, normalizedSchedule])
+    .map((item) => ({ item: { ...item, date }, source: item }))
+    .sort((a, b) => a.item.startTime.localeCompare(b.item.startTime)), [date, filter, normalizedSchedule])
 
   const openCreate = () => { setEditingItem(undefined); setFormOpen(true) }
   const openEdit = (item: ScheduleItem) => { setDetailItem(undefined); setEditingItem(item); setFormOpen(true) }
@@ -98,7 +99,7 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
     }
   }
 
-  const reminderCount = visibleItems.filter((item) => getReminderState(item, new Date()).status === 'scheduled').length
+  const reminderCount = visibleItems.filter(({ item }) => item.reminderEnabled).length
 
   const notificationLabel = notificationSupport === 'granted'
     ? 'Notifications enabled'
@@ -189,10 +190,20 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
       </div>
 
       <div className="schedule-date-caption"><strong>{formatDateLong(date)}</strong><span>{visibleItems.length} {visibleItems.length === 1 ? 'activity' : 'activities'} visible</span></div>
-      <div className="schedule-summary"><span>Reminder engine active.</span><span>•</span><span>{reminderCount} reminder {reminderCount === 1 ? 'is' : 'are'} scheduled for this date.</span></div>
+      <div className="schedule-summary"><span>Reminder engine active.</span><span>•</span><span>{reminderCount} reminder {reminderCount === 1 ? 'is' : 'are'} configured for this date.</span></div>
 
       <div className="content-card schedule-events-card">
-        {visibleItems.length === 0 ? <EmptyState title="Nothing scheduled" description="Choose another date, clear the filter, or add a new activity." /> : <div className="schedule-events">{visibleItems.map((item, index) => <ScheduleItemCard key={item.id} item={item} index={index} onView={setDetailItem} onEdit={openEdit} onSync={syncSchedule} onDelete={deleteSchedule} />)}</div>}
+        {visibleItems.length === 0 ? <EmptyState title="Nothing scheduled" description="Choose another date, clear the filter, or add a new activity." /> : <div className="schedule-events">{visibleItems.map(({ item, source }, index) => (
+          <ScheduleItemCard
+            key={source.id + '-' + item.date}
+            item={item}
+            index={index}
+            onView={() => setDetailItem(source)}
+            onEdit={() => openEdit(source)}
+            onSync={() => syncSchedule(source)}
+            onDelete={() => deleteSchedule(source)}
+          />
+        ))}</div>}
       </div>
 
       <ScheduleForm open={formOpen} initialItem={editingItem} defaultDate={date} onClose={() => setFormOpen(false)} onSubmit={saveSchedule} />
