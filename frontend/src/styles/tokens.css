@@ -1,22 +1,42 @@
 :root {
-  --color-bg: #0a1119;
-  --color-surface: #0d1721;
-  --color-surface-strong: #0e1924;
-  --color-border: #1c2a38;
-  --color-border-soft: #162431;
-  --color-text: #e8f0f7;
-  --color-text-muted: #8498ab;
+  /* MiD Daily — Unreal-grade material system */
+  --bg-void: #0a1119;
+  --bg-deep: #0d151f;
+  --surface-0: #0f1a26;
+  --surface-1: #142130;
+  --surface-2: #1b2b3d;
+  --surface-3: #24384e;
+  --line: rgba(255,255,255,.08);
+  --line-strong: rgba(255,255,255,.16);
+  --accent: #4fd1ff;
+  --accent-soft: rgba(79,209,255,.20);
+  --accent-glow: rgba(79,209,255,.40);
+  --state-success: #4ade80;
+  --state-warning: #fbbf24;
+  --state-danger: #fb7185;
+  --light-angle: 145deg;
+  --spec-highlight: rgba(255,255,255,.14);
+  --ao-shadow: rgba(0,0,0,.55);
+
+  /* Compatibility aliases for the existing component layer */
+  --color-bg: var(--bg-void);
+  --color-surface: var(--surface-1);
+  --color-surface-strong: var(--surface-0);
+  --color-border: var(--line);
+  --color-border-soft: rgba(255,255,255,.055);
+  --color-text: #eaf5fb;
+  --color-text-muted: #8ca2b4;
   --color-text-faint: #5e768c;
-  --color-accent: #67e8f9;
-  --color-accent-soft: #102a35;
-  --color-success: #8fe0b4;
-  --color-warning: #f2ce8b;
-  --color-danger: #ffb4b4;
+  --color-accent: var(--accent);
+  --color-accent-soft: rgba(79,209,255,.12);
+  --color-success: var(--state-success);
+  --color-warning: var(--state-warning);
+  --color-danger: var(--state-danger);
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 20px;
-  --shadow-soft: 0 18px 50px rgba(0, 0, 0, .18);
+  --shadow-soft: 0 18px 50px rgba(0,0,0,.22);
   --duration-fast: 160ms;
-  --duration-normal: 240ms;
-  --ease-standard: cubic-bezier(.2, .75, .2, 1);
+  --duration-normal: 260ms;
+  --ease-standard: cubic-bezier(.2,.8,.2,1);
 }
