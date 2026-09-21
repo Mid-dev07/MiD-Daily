@@ -81,6 +81,14 @@
 - [ ] Error boundary prevents full-app blank screens.
 - [ ] PWA manifest loads.
 - [ ] Production smoke tests pass after the latest deployment.
+- [ ] Frontend performance budget remains within the documented CI thresholds.
+- [ ] Core dashboard does not eagerly load optional integration UI.
+
+## Performance gate
+- Largest frontend JavaScript asset must remain below 160 KiB gzip.
+- Total generated CSS must remain below 18 KiB gzip.
+- Optional provider UI must remain code-split from the initial Dashboard route.
+- Continuous polling in the idle shell should be avoided unless the feature explicitly requires it.
 
 ## Final state
 Do not call the release final until every applicable production gate passes. Optional provider features may remain disabled when credentials or provider approval are unavailable, but the UI must state that boundary clearly.
