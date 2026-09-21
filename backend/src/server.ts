@@ -696,7 +696,7 @@ function validateTaskInput(body: Record<string, unknown>) {
   if (!['low', 'medium', 'high'].includes(String(priority))) throw httpError(400, 'Task priority is invalid.')
   if (!['todo', 'in-progress', 'done'].includes(String(status))) throw httpError(400, 'Task status is invalid.')
   if (!Number.isInteger(progress) || Number(progress) < 0 || Number(progress) > 100) throw httpError(400, 'Task progress is invalid.')
-  if (dueDate !== undefined && dueDate !== null && (typeof dueDate !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(dueDate))) {
+  if (dueDate !== undefined && dueDate !== null && (typeof dueDate !== 'string' || !isIsoDate(dueDate))) {
     throw httpError(400, 'Task due date is invalid.')
   }
 
@@ -711,6 +711,46 @@ function validateTaskInput(body: Record<string, unknown>) {
   }
 }
 
+function validateTaskPatch(body: Record<string, unknown>) {
+  const patch: Partial<import('./dataStore.js').TaskRecord> = {}
+
+  if (Object.prototype.hasOwnProperty.call(body, 'title')) {
+    if (typeof body.title !== 'string' || !body.title.trim()) throw httpError(400, 'Task title is invalid.')
+    patch.title = body.title.trim()
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'category')) {
+    if (typeof body.category !== 'string' || !body.category.trim()) throw httpError(400, 'Task category is invalid.')
+    patch.category = body.category.trim()
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'priority')) {
+    if (!['low', 'medium', 'high'].includes(String(body.priority))) throw httpError(400, 'Task priority is invalid.')
+    patch.priority = body.priority as 'low' | 'medium' | 'high'
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'status')) {
+    if (!['todo', 'in-progress', 'done'].includes(String(body.status))) throw httpError(400, 'Task status is invalid.')
+    patch.status = body.status as 'todo' | 'in-progress' | 'done'
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'progress')) {
+    if (!Number.isInteger(body.progress) || Number(body.progress) < 0 || Number(body.progress) > 100) {
+      throw httpError(400, 'Task progress is invalid.')
+    }
+    patch.progress = Number(body.progress)
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'dueDate')) {
+    if (body.dueDate !== null && (typeof body.dueDate !== 'string' || !isIsoDate(body.dueDate))) {
+      throw httpError(400, 'Task due date is invalid.')
+    }
+    patch.dueDate = typeof body.dueDate === 'string' && body.dueDate ? body.dueDate : undefined
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'notes')) {
+    if (body.notes !== null && typeof body.notes !== 'string') throw httpError(400, 'Task notes are invalid.')
+    patch.notes = typeof body.notes === 'string' && body.notes.trim() ? body.notes.trim() : undefined
+  }
+
+  if (Object.keys(patch).length === 0) throw httpError(400, 'No task fields were provided.')
+  return patch
+}
+
 function validateFinanceInput(body: Record<string, unknown>) {
   const type = body.type
   const title = typeof body.title === 'string' ? body.title.trim() : ''
@@ -722,7 +762,7 @@ function validateFinanceInput(body: Record<string, unknown>) {
   if (!['income', 'expense'].includes(String(type))) throw httpError(400, 'Finance type is invalid.')
   if (!title || !category) throw httpError(400, 'Finance title and category are required.')
   if (!Number.isFinite(amount) || amount <= 0) throw httpError(400, 'Finance amount must be greater than zero.')
-  if (typeof date !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(date)) throw httpError(400, 'Finance date is invalid.')
+  if (typeof date !== 'string' || !isIsoDate(date)) throw httpError(400, 'Finance date is invalid.')
 
   return {
     type: type as 'income' | 'expense',
@@ -734,15 +774,48 @@ function validateFinanceInput(body: Record<string, unknown>) {
   }
 }
 
+function validateFinancePatch(body: Record<string, unknown>) {
+  const patch: Partial<import('./dataStore.js').FinanceRecord> = {}
+
+  if (Object.prototype.hasOwnProperty.call(body, 'type')) {
+    if (!['income', 'expense'].includes(String(body.type))) throw httpError(400, 'Finance type is invalid.')
+    patch.type = body.type as 'income' | 'expense'
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'title')) {
+    if (typeof body.title !== 'string' || !body.title.trim()) throw httpError(400, 'Finance title is invalid.')
+    patch.title = body.title.trim()
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'amount')) {
+    const amount = Number(body.amount)
+    if (!Number.isFinite(amount) || amount <= 0) throw httpError(400, 'Finance amount must be greater than zero.')
+    patch.amount = amount
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'category')) {
+    if (typeof body.category !== 'string' || !body.category.trim()) throw httpError(400, 'Finance category is invalid.')
+    patch.category = body.category.trim()
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'date')) {
+    if (typeof body.date !== 'string' || !isIsoDate(body.date)) throw httpError(400, 'Finance date is invalid.')
+    patch.date = body.date
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'notes')) {
+    if (body.notes !== null && typeof body.notes !== 'string') throw httpError(400, 'Finance notes are invalid.')
+    patch.notes = typeof body.notes === 'string' && body.notes.trim() ? body.notes.trim() : undefined
+  }
+
+  if (Object.keys(patch).length === 0) throw httpError(400, 'No finance fields were provided.')
+  return patch
+}
+
 
 function scheduleTimeMinutes(value: string) {
-  if (!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(value)) throw httpError(400, 'Schedule time is invalid.')
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(value)) throw httpError(400, 'Schedule time is invalid.')
   const [hours, minutes] = value.split(':').map(Number)
   return hours * 60 + minutes
 }
 
 function isIsoDate(value: unknown) {
-  if (typeof value !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return false
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
   const [year, month, day] = value.split('-').map(Number)
   const date = new Date(Date.UTC(year, month - 1, day))
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
@@ -877,7 +950,7 @@ async function handleUpdateTask(req: IncomingMessage, res: ServerResponse, url: 
   const userId = await requireAuthenticatedUserId(req)
   const id = assertTaskId(url)
   const body = await readRequestJson(req)
-  const item = await updateTask(userId, id, validateTaskInput(body) as never)
+  const item = await updateTask(userId, id, validateTaskPatch(body))
   if (!item) throw httpError(404, 'Task not found.')
   sendJson(res, 200, { item })
 }
@@ -905,7 +978,7 @@ async function handleUpdateFinance(req: IncomingMessage, res: ServerResponse, ur
   const userId = await requireAuthenticatedUserId(req)
   const id = assertFinanceId(url)
   const body = await readRequestJson(req)
-  const item = await updateFinance(userId, id, validateFinanceInput(body))
+  const item = await updateFinance(userId, id, validateFinancePatch(body))
   if (!item) throw httpError(404, 'Finance entry not found.')
   sendJson(res, 200, { item })
 }
@@ -951,7 +1024,7 @@ async function whatsAppHelp(to: string) {
     '/schedule',
     '/schedule tomorrow',
     '/disconnect',
-  ].join('\\n'))
+  ].join('\n'))
 }
 
 async function handleWhatsAppStatus(req: IncomingMessage, res: ServerResponse) {
@@ -1065,7 +1138,7 @@ async function handleWhatsAppWebhook(req: IncomingMessage, res: ServerResponse) 
       await sendWhatsAppText(incoming.from, 'Task added: ' + task.title)
     }
   } else if (parsed.command === 'expense') {
-    const parts = parsed.args.split(/\\s+/)
+    const parts = parsed.args.split(/\s+/)
     const amount = Number(parts.shift())
     const category = parts.shift()
     const title = parts.join(' ').trim()
@@ -1086,11 +1159,11 @@ async function handleWhatsAppWebhook(req: IncomingMessage, res: ServerResponse) 
     const today = dateInTimeZone()
     const expenses = (await listFinance(connection.user_id)).filter((entry) => entry.type === 'expense' && entry.date === today)
     const total = expenses.reduce((sum, entry) => sum + entry.amount, 0)
-    await sendWhatsAppText(incoming.from, "Today's expenses: Rp " + Math.round(total).toLocaleString('id-ID') + '\\n\\n' + formatTelegramExpenses(expenses))
+    await sendWhatsAppText(incoming.from, "Today's expenses: Rp " + Math.round(total).toLocaleString('id-ID') + '\n\n' + formatTelegramExpenses(expenses))
   } else if (parsed.command === 'schedule') {
     const targetDate = parsed.args.toLowerCase() === 'tomorrow' ? dateInTimeZone(1) : dateInTimeZone()
     const items = (await listSchedule(connection.user_id)).filter((item) => item.date === targetDate)
-    await sendWhatsAppText(incoming.from, targetDate + ' schedule:\\n\\n' + formatTelegramSchedule(items))
+    await sendWhatsAppText(incoming.from, targetDate + ' schedule:\n\n' + formatTelegramSchedule(items))
   } else if (parsed.command === 'disconnect') {
     await deleteWhatsAppConnectionByUserId(connection.user_id)
     await sendWhatsAppText(incoming.from, 'WhatsApp disconnected from MiD-Daily.')
@@ -1120,14 +1193,14 @@ function formatTelegramSchedule(items: Array<{ title: string; startTime: string;
   if (items.length === 0) return 'No schedule found for this date.'
   return items.slice(0, 10).map((item, index) =>
     `${index + 1}. ${item.startTime}–${item.endTime} • ${item.title}${item.location ? ' • ' + item.location : ''}`
-  ).join('\\n')
+  ).join('\n')
 }
 
 function formatTelegramExpenses(items: Array<{ title: string; amount: number; category: string }>) {
   if (items.length === 0) return 'No expenses recorded today.'
   return items.slice(0, 10).map((item, index) =>
     `${index + 1}. ${item.title} • Rp ${Math.round(item.amount).toLocaleString('id-ID')} • ${item.category}`
-  ).join('\\n')
+  ).join('\n')
 }
 
 async function handleTelegramStatus(req: IncomingMessage, res: ServerResponse) {
@@ -1165,7 +1238,7 @@ async function telegramHelp(chatId: number) {
     '/schedule',
     '/schedule tomorrow',
     '/disconnect',
-  ].join('\\n'))
+  ].join('\n'))
 }
 
 async function handleTelegramUpdate(req: IncomingMessage, res: ServerResponse) {
@@ -1251,7 +1324,7 @@ async function handleTelegramUpdate(req: IncomingMessage, res: ServerResponse) {
       await sendTelegramMessage(chatId, `Task added: ${task.title}`)
     }
   } else if (parsed.command === 'expense') {
-    const parts = parsed.args.split(/\\s+/)
+    const parts = parsed.args.split(/\s+/)
     const amount = Number(parts.shift())
     const category = parts.shift()
     const title = parts.join(' ').trim()
@@ -1272,11 +1345,11 @@ async function handleTelegramUpdate(req: IncomingMessage, res: ServerResponse) {
     const today = dateInTimeZone()
     const expenses = (await listFinance(connection.user_id)).filter((entry) => entry.type === 'expense' && entry.date === today)
     const total = expenses.reduce((sum, entry) => sum + entry.amount, 0)
-    await sendTelegramMessage(chatId, `Today's expenses: Rp ${Math.round(total).toLocaleString('id-ID')}\\n\\n${formatTelegramExpenses(expenses)}`)
+    await sendTelegramMessage(chatId, `Today's expenses: Rp ${Math.round(total).toLocaleString('id-ID')}\n\n${formatTelegramExpenses(expenses)}`)
   } else if (parsed.command === 'schedule') {
     const targetDate = parsed.args.toLowerCase() === 'tomorrow' ? dateInTimeZone(1) : dateInTimeZone()
     const items = (await listSchedule(connection.user_id)).filter((item) => item.date === targetDate)
-    await sendTelegramMessage(chatId, `${targetDate} schedule:\\n\\n${formatTelegramSchedule(items)}`)
+    await sendTelegramMessage(chatId, `${targetDate} schedule:\n\n${formatTelegramSchedule(items)}`)
   } else if (parsed.command === 'disconnect') {
     await deleteTelegramConnectionByUserId(connection.user_id)
     await sendTelegramMessage(chatId, 'Telegram disconnected from MiD-Daily.')
