@@ -48,7 +48,7 @@ const fetchHandler = httpServerHandler({ port: 8787 })
 
 export default {
   fetch: fetchHandler,
-  async scheduled(controller: ScheduledController) {
+  async scheduled(controller: { scheduledTime: number }) {
     syncWorkerEnv()
     const { runBackgroundReminderDispatch } = await import('../src/backgroundReminders.js')
     await runBackgroundReminderDispatch(new Date(controller.scheduledTime))
