@@ -53,7 +53,8 @@ jobs:
           html=$(curl --fail --silent --show-error --location https://mid-daily.e41262272.workers.dev/)
           asset=$(printf '%s' "$html" | grep -oE 'src="/assets/[^"]+\.js"' | head -n 1 | cut -d'"' -f2)
           test -n "$asset"
-          curl --fail --silent --show-error --location "https://mid-daily.e41262272.workers.dev$asset" | grep -q 'ywpvwxhfzgxwmxrwcfsf'
+          curl --fail --silent --show-error --location "https://mid-daily.e41262272.workers.dev$asset" -o /tmp/mid-daily-app.js
+          grep -q 'ywpvwxhfzgxwmxrwcfsf' /tmp/mid-daily-app.js
           echo "Frontend smoke test passed."
 
   deploy-backend:
@@ -84,8 +85,16 @@ jobs:
           workingDirectory: backend
           command: deploy
 
+      - name: Verify backend secrets
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          npx wrangler secret list --format json > /tmp/mid-daily-secrets.json
+          node -e 'const fs=require("fs"); const names=JSON.parse(fs.readFileSync("/tmp/mid-daily-secrets.json","utf8")).map(x=>x.name); for (const name of ["SUPABASE_SECRET_KEY","TOKEN_ENCRYPTION_KEY_B64"]) if (!names.includes(name)) { console.error("Missing required Worker secret:", name); process.exit(1) }'
+          echo "Required backend secrets are present."
+
       - name: Smoke test backend
-        working-directory: .
+        working-directory: . 
         run: |
           set -euo pipefail
           response=$(curl --fail --silent --show-error --location https://mid-daily-api.e41262272.workers.dev/health)
