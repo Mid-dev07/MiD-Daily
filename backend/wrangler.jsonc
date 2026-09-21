@@ -8,5 +8,11 @@
   ],
   "observability": {
     "enabled": true
+  },
+  "secrets": {
+    "required": [
+      "SUPABASE_SECRET_KEY",
+      "TOKEN_ENCRYPTION_KEY_B64"
+    ]
   }
 }
