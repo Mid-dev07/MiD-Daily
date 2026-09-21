@@ -20,6 +20,7 @@ const getEmptyDraft = (date: string): FinanceDraft => ({
 })
 
 export function FinanceForm({ open, initialEntry, defaultDate, onClose, onSubmit }: FinanceFormProps) {
+  useModalBehavior(open, onClose, saving)
   const [draft, setDraft] = useState<FinanceDraft>(() => getEmptyDraft(defaultDate))
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
