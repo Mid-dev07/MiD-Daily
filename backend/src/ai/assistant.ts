@@ -1,4 +1,3 @@
-import { runWithTools } from '@cloudflare/ai-utils'
 import { createFinance, createFinanceBudget, createTask, listFinance, listFinanceBudgets, listTasks } from '../dataStore.js'
 import { createSchedule, listSchedule, type ScheduleRecord } from '../scheduleStore.js'
 
@@ -547,37 +546,154 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
   throw new Error('Unknown AI tool.')
 }
 
+type WorkersAiToolCall = {
+  name: string
+  arguments: Record<string, unknown>
+}
+
+type WorkersAiResponse = {
+  response?: string
+  choices?: Array<{
+    message?: { content?: unknown }
+  }>
+  tool_calls?: unknown
+}
+
 function assistantResponseText(value: unknown) {
   if (!value || typeof value !== 'object') return ''
-  const response = value as Record<string, unknown>
+  const response = value as WorkersAiResponse
   if (typeof response.response === 'string') return response.response
 
-  const choices = Array.isArray(response.choices) ? response.choices : []
-  const first = choices[0]
-  if (!first || typeof first !== 'object') return ''
-  const message = (first as Record<string, unknown>).message
-  if (!message || typeof message !== 'object') return ''
-  const content = (message as Record<string, unknown>).content
+  const first = Array.isArray(response.choices) ? response.choices[0] : undefined
+  const content = first?.message?.content
   return typeof content === 'string' ? content : ''
 }
 
-function workersAiTools(userId: string, allowWrites: boolean, actions: Array<{ tool: string; ok: boolean }>) {
+function assistantToolCalls(value: unknown): WorkersAiToolCall[] {
+  if (!value || typeof value !== 'object') return []
+  const response = value as WorkersAiResponse
+  if (!Array.isArray(response.tool_calls)) return []
+
+  const calls: WorkersAiToolCall[] = []
+  for (const raw of response.tool_calls) {
+    if (!raw || typeof raw !== 'object') continue
+    const item = raw as Record<string, unknown>
+    const nestedFunction = item.function && typeof item.function === 'object'
+      ? item.function as Record<string, unknown>
+      : null
+    const nameValue = typeof item.name === 'string'
+      ? item.name
+      : typeof nestedFunction?.name === 'string'
+        ? nestedFunction.name
+        : ''
+    const argumentsValue = item.arguments ?? nestedFunction?.arguments
+    if (!nameValue || argumentsValue === undefined) continue
+
+    if (argumentsValue && typeof argumentsValue === 'object') {
+      calls.push({ name: nameValue, arguments: argumentsValue as Record<string, unknown> })
+      continue
+    }
+
+    if (typeof argumentsValue === 'string') {
+      try {
+        const parsed = JSON.parse(argumentsValue) as unknown
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          calls.push({ name: nameValue, arguments: parsed as Record<string, unknown> })
+        }
+      } catch {
+        // The model returned malformed tool arguments; ignore the call and let the next round continue safely.
+      }
+    }
+  }
+
+  return calls
+}
+
+function workersAiTools(allowWrites: boolean) {
   return buildAssistantTools(allowWrites).map((tool) => ({
     name: tool.name,
     description: tool.description,
     parameters: tool.parameters,
-    function: async (args: Record<string, unknown>) => {
+  }))
+}
+
+async function runWorkersAi(
+  ai: WorkersAiBinding,
+  userId: string,
+  messages: AssistantMessage[],
+  allowWrites: boolean,
+) {
+  const actions: Array<{ tool: string; ok: boolean }> = []
+  const systemMessage = [
+    'You are MiD-Daily Assistant.',
+    'Use only the tools provided. Never claim data that was not returned by a tool.',
+    'The authenticated user owns all tool data. Never ask for or invent a user id.',
+    'Current app timezone: ' + APP_TIMEZONE + '.',
+    'Current date in the app timezone: ' + todayInTimeZone() + '.',
+    'When creating an activity, inspect the relevant schedule range first so you do not silently create a time conflict.',
+    'Do not claim a time slot is free unless the schedule range tool was checked for that date.',
+    allowWrites
+      ? 'Write actions are enabled because the user explicitly allowed actions. Only create data when the user explicitly requests it.'
+      : 'Write actions are disabled. Do not create or modify anything.',
+    'Answer in the same language as the user when practical.',
+  ].join(' ')
+
+  const modelMessages: Array<Record<string, unknown>> = [
+    { role: 'system', content: systemMessage },
+    ...messages,
+  ]
+  const tools = workersAiTools(allowWrites)
+
+  for (let round = 0; round < MAX_TOOL_ROUNDS; round += 1) {
+    const rawResponse = await ai.run(WORKERS_AI_MODEL, {
+      messages: modelMessages,
+      tools,
+      tool_choice: 'auto',
+      temperature: 0.2,
+      store: false,
+      user: userId,
+    })
+
+    const calls = assistantToolCalls(rawResponse)
+    if (calls.length === 0) {
+      return {
+        text: assistantResponseText(rawResponse) || 'I could not produce a response.',
+        actions,
+        model: WORKERS_AI_MODEL,
+      }
+    }
+
+    modelMessages.push({
+      role: 'assistant',
+      content: JSON.stringify(rawResponse && typeof rawResponse === 'object'
+        ? (rawResponse as Record<string, unknown>).tool_calls
+        : calls),
+    })
+
+    for (const call of calls) {
       try {
-        const result = await executeTool(userId, tool.name, JSON.stringify(args))
-        actions.push({ tool: tool.name, ok: true })
-        return JSON.stringify(result)
+        const result = await executeTool(userId, call.name, JSON.stringify(call.arguments))
+        actions.push({ tool: call.name, ok: true })
+        modelMessages.push({
+          role: 'tool',
+          content: JSON.stringify({ name: call.name, result }),
+        })
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Tool failed.'
-        actions.push({ tool: tool.name, ok: false })
-        return JSON.stringify({ error: message })
+        actions.push({ tool: call.name, ok: false })
+        modelMessages.push({
+          role: 'tool',
+          content: JSON.stringify({ name: call.name, error: message }),
+        })
       }
-    },
-  }))
+    }
+
+    if (round === MAX_TOOL_ROUNDS - 1) {
+      throw new Error('AI tool execution exceeded the safety limit.')
+    }
+  }
+
+  throw new Error('AI request failed.')
 }
 
 export async function runAssistant(
@@ -594,42 +710,5 @@ export async function runAssistant(
       content: assertString(message.content, 'Message', 4000),
     }))
 
-  const actions: Array<{ tool: string; ok: boolean }> = []
-  const systemMessage = [
-    'You are MiD-Daily Assistant.',
-    'Use only the tools provided. Never claim data that was not returned by a tool.',
-    'The authenticated user owns all tool data. Never ask for or invent a user id.',
-    'Current app timezone: ' + APP_TIMEZONE + '.',
-    'Current date in the app timezone: ' + todayInTimeZone() + '.',
-    'When creating an activity, inspect the relevant schedule range first so you do not silently create a time conflict.',
-    'Do not claim a time slot is free unless the schedule range tool was checked for that date.',
-    allowWrites
-      ? 'Write actions are enabled because the user explicitly allowed actions. Only create data when the user explicitly requests it.'
-      : 'Write actions are disabled. Do not create or modify anything.',
-    'Answer in the same language as the user when practical.',
-  ].join(' ')
-
-  const result = await runWithTools(
-    assistantAi,
-    WORKERS_AI_MODEL,
-    {
-      messages: [
-        { role: 'system', content: systemMessage },
-        ...sanitized,
-      ],
-      tools: workersAiTools(userId, allowWrites, actions),
-    },
-    {
-      strictValidation: true,
-      maxRecursiveToolRuns: MAX_TOOL_ROUNDS,
-      streamFinalResponse: false,
-    },
-  )
-
-  const text = assistantResponseText(result) || 'I could not produce a response.'
-  return {
-    text,
-    actions,
-    model: WORKERS_AI_MODEL,
-  }
+  return runWorkersAi(assistantAi, userId, sanitized, allowWrites)
 }
