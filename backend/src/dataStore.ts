@@ -24,11 +24,15 @@ export interface FinanceRecord {
 const SUPABASE_URL = process.env.SUPABASE_URL ?? ''
 const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY ?? ''
 
+const databaseClient = SUPABASE_URL && SUPABASE_SECRET_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
+      auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
+    })
+  : null
+
 function db() {
-  if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) throw new Error('Supabase persistence is not configured.')
-  return createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
-    auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
-  })
+  if (!databaseClient) throw new Error('Supabase persistence is not configured.')
+  return databaseClient
 }
 
 function taskFromRow(row: Record<string, unknown>): TaskRecord {
