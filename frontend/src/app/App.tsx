@@ -87,7 +87,7 @@ export function App() {
     writeUserStorage(FINANCE_STORAGE_KEY, userId, finance)
   }, [finance, workspaceScope, readyScope])
   useEffect(() => {
-    if (!userId || !workspaceReady) return
+    if (readyScope !== workspaceScope) return
     writeUserStorage(SCHEDULE_STORAGE_KEY, userId, schedule)
   }, [schedule, workspaceScope, readyScope])
 
