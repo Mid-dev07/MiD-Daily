@@ -4,6 +4,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-bottom: 112px;
   color-scheme: dark;
 }
 
