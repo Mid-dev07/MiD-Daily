@@ -18,8 +18,37 @@ export function validateScheduleDraft(
   editingId?: number,
 ): ScheduleValidationResult {
   if (!draft.title.trim()) return { valid: false, message: 'Title is required.' }
-  if (!isValidDateString(draft.date)) return { valid: false, message: 'Choose a valid date.' }
+  if (!isValidDateString(draft.date)) return { valid: false, message: 'Choose a valid planning date.' }
 
+  if (draft.activityMode === 'FLEXIBLE') {
+    if (!Number.isInteger(draft.targetCount) || (draft.targetCount ?? 0) < 1 || (draft.targetCount ?? 0) > 100) {
+      return { valid: false, message: 'Choose a target between 1 and 100.' }
+    }
+    if (!draft.targetPeriod) return { valid: false, message: 'Choose a target period.' }
+    if (!Number.isInteger(draft.durationMinutes) || (draft.durationMinutes ?? 0) < 5 || (draft.durationMinutes ?? 0) > 1440) {
+      return { valid: false, message: 'Duration must be between 5 and 1440 minutes.' }
+    }
+
+    const preferredStart = draft.preferredStartTime ? toMinutes(draft.preferredStartTime) : null
+    const preferredEnd = draft.preferredEndTime ? toMinutes(draft.preferredEndTime) : null
+    if (preferredStart !== null && Number.isNaN(preferredStart)) return { valid: false, message: 'Preferred start time is invalid.' }
+    if (preferredEnd !== null && Number.isNaN(preferredEnd)) return { valid: false, message: 'Preferred end time is invalid.' }
+    if ((preferredStart === null) !== (preferredEnd === null)) return { valid: false, message: 'Choose both preferred start and end times.' }
+    if (preferredStart !== null && preferredEnd !== null && preferredStart >= preferredEnd) {
+      return { valid: false, message: 'Preferred end time must be after start time.' }
+    }
+
+    if (draft.activityDeadline && !isValidDateString(draft.activityDeadline)) {
+      return { valid: false, message: 'Choose a valid deadline.' }
+    }
+    if (draft.activityDeadline && draft.activityDeadline < draft.date) {
+      return { valid: false, message: 'Deadline cannot be before the planning date.' }
+    }
+
+    return { valid: true, message: '' }
+  }
+
+  if (!draft.startTime || !draft.endTime) return { valid: false, message: 'Choose valid start and end times.' }
   const start = toMinutes(draft.startTime)
   const end = toMinutes(draft.endTime)
   if (Number.isNaN(start) || Number.isNaN(end)) {
@@ -39,7 +68,8 @@ export function validateScheduleDraft(
   }
 
   const conflict = existing.some((item) => {
-    if (item.id === editingId || !scheduleOccursOnDate(item, draft.date)) return false
+    if (item.id === editingId || item.activityMode === 'FLEXIBLE' || !scheduleOccursOnDate(item, draft.date)) return false
+    if (!item.startTime || !item.endTime) return false
     const itemStart = toMinutes(item.startTime)
     const itemEnd = toMinutes(item.endTime)
     return start < itemEnd && end > itemStart
