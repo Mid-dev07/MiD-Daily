@@ -29,3 +29,19 @@ export interface FinanceEntry {
 }
 
 export type FinanceDraft = Omit<FinanceEntry, 'id'>
+
+
+export type FinanceBudgetPeriod = 'WEEK' | 'MONTH'
+
+export interface FinanceBudget {
+  id: number
+  name: string
+  category: string
+  amount: number
+  period: FinanceBudgetPeriod
+  startsOn: string
+  endsOn?: string
+  notes?: string
+}
+
+export type FinanceBudgetDraft = Omit<FinanceBudget, 'id'>
