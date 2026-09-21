@@ -62,6 +62,7 @@ export function App() {
   const [schedule, setSchedule] = useState<ScheduleItem[]>(() => normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, userId ? [] : initialScheduleItems)))
   const [toast, setToast] = useState('')
   const [timePeriod, setTimePeriod] = useState(getTimePeriod)
+  const [workspaceReady, setWorkspaceReady] = useState(() => !userId)
 
   useReminderScheduler(schedule)
 
@@ -74,9 +75,30 @@ export function App() {
     return () => window.clearInterval(timer)
   }, [])
 
-  useEffect(() => writeUserStorage(TASK_STORAGE_KEY, userId, tasks), [tasks, userId])
-  useEffect(() => writeUserStorage(FINANCE_STORAGE_KEY, userId, finance), [finance, userId])
-  useEffect(() => writeUserStorage(SCHEDULE_STORAGE_KEY, userId, schedule), [schedule, userId])
+  useEffect(() => {
+    if (!userId || !workspaceReady) return
+    writeUserStorage(TASK_STORAGE_KEY, userId, tasks)
+  }, [tasks, userId, workspaceReady])
+  useEffect(() => {
+    if (!userId || !workspaceReady) return
+    writeUserStorage(FINANCE_STORAGE_KEY, userId, finance)
+  }, [finance, userId, workspaceReady])
+  useEffect(() => {
+    if (!userId || !workspaceReady) return
+    writeUserStorage(SCHEDULE_STORAGE_KEY, userId, schedule)
+  }, [schedule, userId, workspaceReady])
+
+  useEffect(() => {
+    if (!userId) {
+      setWorkspaceReady(true)
+      return
+    }
+
+    setWorkspaceReady(false)
+    setTasks(normalizeTaskList(readUserStorage(TASK_STORAGE_KEY, userId, [])))
+    setFinance(normalizeFinanceList(readUserStorage(FINANCE_STORAGE_KEY, userId, [])))
+    setSchedule(normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, [])))
+  }, [userId])
 
   useEffect(() => {
     if (!userId) return
@@ -118,8 +140,12 @@ export function App() {
         markRemoteSyncComplete(TASK_STORAGE_KEY, userId)
         markRemoteSyncComplete(FINANCE_STORAGE_KEY, userId)
         markRemoteSyncComplete(SCHEDULE_STORAGE_KEY, userId)
+        setWorkspaceReady(true)
       } catch (reason) {
-        if (active) setToast(reportError(reason))
+        if (active) {
+          setWorkspaceReady(true)
+          setToast(reportError(reason))
+        }
       }
     }
 
