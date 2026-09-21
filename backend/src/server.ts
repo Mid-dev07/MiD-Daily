@@ -1746,6 +1746,12 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
         dataPersistenceConfigured: isDataPersistenceConfigured(),
         schedulePersistenceConfigured: isSchedulePersistenceConfigured(),
         authConfigured: Boolean(supabaseAuthClient),
+        integrations: {
+          ai: isAssistantConfigured(),
+          telegram: isTelegramConfigured() && isTelegramPersistenceConfigured(),
+          whatsapp: isWhatsAppConfigured() && isWhatsAppPersistenceConfigured(),
+          instagram: isInstagramAnalyticsConfigured(),
+        },
       })
       return
     }

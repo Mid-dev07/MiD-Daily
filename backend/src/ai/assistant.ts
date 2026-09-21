@@ -111,10 +111,13 @@ const writeTools = [
         preferredStartTime: { type: ['string','null'], description: 'Optional preferred window start HH:MM.' },
         preferredEndTime: { type: ['string','null'], description: 'Optional preferred window end HH:MM.' },
         activityDeadline: { type: ['string','null'], description: 'Optional flexible deadline YYYY-MM-DD.' },
+        recurrenceFrequency: { type: 'string', enum: ['NONE','DAILY','WEEKLY','MONTHLY'] },
+        recurrenceInterval: { type: 'integer', description: 'Repeat interval from 1 to 30.' },
+        recurrenceUntil: { type: ['string','null'], description: 'Optional repeat end date YYYY-MM-DD.' },
         location: { type: ['string','null'], description: 'Optional location.' },
         notes: { type: ['string','null'], description: 'Optional notes.' },
       },
-      required: ['title','type','mode','date','startTime','endTime','targetCount','targetPeriod','durationMinutes','preferredStartTime','preferredEndTime','activityDeadline','location','notes'],
+      required: ['title','type','mode','date','startTime','endTime','targetCount','targetPeriod','durationMinutes','preferredStartTime','preferredEndTime','activityDeadline','recurrenceFrequency','recurrenceInterval','recurrenceUntil','location','notes'],
       additionalProperties: false,
     },
     strict: true,
@@ -425,6 +428,14 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
     const preferredStartTime = args.preferredStartTime === null ? null : assertString(args.preferredStartTime, 'Preferred start time', 5)
     const preferredEndTime = args.preferredEndTime === null ? null : assertString(args.preferredEndTime, 'Preferred end time', 5)
     const activityDeadline = args.activityDeadline === null ? null : assertOptionalDate(args.activityDeadline, 'Activity deadline') ?? null
+    const recurrenceFrequency = assertString(args.recurrenceFrequency, 'Recurrence frequency', 10) as 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY'
+    const recurrenceInterval = Number(args.recurrenceInterval)
+    const recurrenceUntil = args.recurrenceUntil === null ? null : assertOptionalDate(args.recurrenceUntil, 'Recurrence end') ?? null
+
+    if (!['NONE','DAILY','WEEKLY','MONTHLY'].includes(recurrenceFrequency)) throw new Error('Recurrence frequency is invalid.')
+    if (!Number.isInteger(recurrenceInterval) || recurrenceInterval < 1 || recurrenceInterval > 30) throw new Error('Recurrence interval is invalid.')
+    if (recurrenceUntil && recurrenceUntil < date) throw new Error('Recurrence end cannot be before the activity date.')
+    if (mode === 'FLEXIBLE' && recurrenceFrequency !== 'NONE') throw new Error('Flexible activities cannot use recurrence.')
 
     if (mode === 'FLEXIBLE') {
       if (!Number.isInteger(targetCount) || targetCount < 1 || targetCount > 100) throw new Error('Flexible target count is invalid.')
@@ -447,7 +458,11 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
         notes,
         reminderEnabled: false,
         reminderOffset: 0,
-        recurrence: { frequency: 'NONE', interval: 1 },
+        recurrence: {
+          frequency: mode === 'FLEXIBLE' ? 'NONE' : recurrenceFrequency,
+          interval: mode === 'FLEXIBLE' ? 1 : recurrenceInterval,
+          ...(mode === 'FLEXIBLE' || !recurrenceUntil ? {} : { until: recurrenceUntil }),
+        },
         targetCount,
         targetPeriod,
         durationMinutes,
