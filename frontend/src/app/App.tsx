@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { Sidebar } from '../components/layout/Sidebar'
 import { Topbar } from '../components/layout/Topbar'
 import { Toast } from '../components/ui/Toast'
 import { initialTasks, financeEntries } from '../data/seed'
-import { DashboardView } from '../features/dashboard/DashboardView'
-import { FinanceView } from '../features/finance/FinanceView'
-import { ScheduleView } from '../features/schedule/ScheduleView'
-import { TasksView } from '../features/tasks/TasksView'
-import { SocialAnalyticsView } from '../features/social/SocialAnalyticsView'
-import { AssistantView } from '../features/ai/AssistantView'
+
+const DashboardView = lazy(() => import('../features/dashboard/DashboardView').then((module) => ({ default: module.DashboardView })))
+const FinanceView = lazy(() => import('../features/finance/FinanceView').then((module) => ({ default: module.FinanceView })))
+const ScheduleView = lazy(() => import('../features/schedule/ScheduleView').then((module) => ({ default: module.ScheduleView })))
+const TasksView = lazy(() => import('../features/tasks/TasksView').then((module) => ({ default: module.TasksView })))
+const SocialAnalyticsView = lazy(() => import('../features/social/SocialAnalyticsView').then((module) => ({ default: module.SocialAnalyticsView })))
+const AssistantView = lazy(() => import('../features/ai/AssistantView').then((module) => ({ default: module.AssistantView })))
 import { normalizeTaskList } from '../features/tasks/task.migration'
 import { validateTaskDraft } from '../features/tasks/task.validation'
 import { listRemoteTasks, createRemoteTask, updateRemoteTask, deleteRemoteTask } from '../features/tasks/tasksApi'
@@ -268,14 +269,16 @@ export function App() {
       <Sidebar activeView={activeView} onNavigate={setActiveView} />
       <main className="main-content">
         <Topbar view={activeView} />
-        <div className="view-key">
-          {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={finance} onToggleTask={(id) => void toggleTask(id)} activeView={activeView} onNavigate={setActiveView} />}
-          {activeView === 'schedule' && <ScheduleView schedule={schedule} onScheduleChange={handleScheduleChange} demoMode={!userId} />}
-          {activeView === 'tasks' && <TasksView tasks={tasks} onSaveTask={saveTask} onToggleTask={(id) => void toggleTask(id)} onDeleteTask={(id) => void deleteTask(id)} />}
-          {activeView === 'finance' && <FinanceView finance={finance} onSaveFinance={saveFinance} onDeleteFinance={(id) => void deleteFinance(id)} />}
-          {activeView === 'social' && <SocialAnalyticsView />}
-          {activeView === 'assistant' && <AssistantView />}
-        </div>
+        <Suspense fallback={<section className="workspace view-loading" aria-live="polite"><span className="section-kicker">LOADING</span><h2>Opening your workspace…</h2></section>}>
+          <div className="view-key">
+            {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={finance} onToggleTask={(id) => void toggleTask(id)} activeView={activeView} onNavigate={setActiveView} />}
+            {activeView === 'schedule' && <ScheduleView schedule={schedule} onScheduleChange={handleScheduleChange} demoMode={!userId} />}
+            {activeView === 'tasks' && <TasksView tasks={tasks} onSaveTask={saveTask} onToggleTask={(id) => void toggleTask(id)} onDeleteTask={(id) => void deleteTask(id)} />}
+            {activeView === 'finance' && <FinanceView finance={finance} onSaveFinance={saveFinance} onDeleteFinance={(id) => void deleteFinance(id)} />}
+            {activeView === 'social' && <SocialAnalyticsView />}
+            {activeView === 'assistant' && <AssistantView />}
+          </div>
+        </Suspense>
       </main>
       {toast && <Toast message={toast} />}
     </div>
