@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import type { FinanceEntry, Task, View } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
-import { scheduleOccursOnDate } from '../schedule/schedule.date'
+import { scheduleOccursOnDate, shiftDate } from '../schedule/schedule.date'
 import { currency, formatDate } from '../../lib/format'
 
 interface DashboardViewProps {
@@ -18,7 +18,6 @@ const TelegramIntegrationCard = lazy(() => import('./components/TelegramIntegrat
 const WhatsAppIntegrationCard = lazy(() => import('./components/WhatsAppIntegrationCard').then((module) => ({ default: module.WhatsAppIntegrationCard })))
 
 export function DashboardView({ tasks, schedule, finance, onToggleTask, onNavigate }: DashboardViewProps) {
-  const [connectionsOpen, setConnectionsOpen] = useState(false)
   const [now, setNow] = useState(() => new Date())
   const today = getToday()
 
@@ -33,9 +32,17 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
 
   const completed = tasks.filter((task) => task.status === 'done').length
   const openTasks = tasks.filter((task) => task.status !== 'done').length
-  const expense = finance
+  const completionPercent = tasks.length ? Math.round((completed / tasks.length) * 100) : 0
+
+  const todayExpense = finance
     .filter((entry) => entry.type === 'expense' && entry.date === today)
     .reduce((sum, entry) => sum + entry.amount, 0)
+
+  const monthKey = today.slice(0, 7)
+  const monthFinance = useMemo(() => finance.filter((entry) => entry.date.startsWith(monthKey)), [finance, monthKey])
+  const monthIncome = monthFinance.filter((entry) => entry.type === 'income').reduce((sum, entry) => sum + entry.amount, 0)
+  const monthExpense = monthFinance.filter((entry) => entry.type === 'expense').reduce((sum, entry) => sum + entry.amount, 0)
+  const monthBalance = monthIncome - monthExpense
 
   const focusTasks = useMemo(() => [...tasks]
     .filter((task) => task.status !== 'done')
@@ -50,7 +57,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
   const overdueTasks = useMemo(() => [...tasks]
     .filter((task) => task.status !== 'done' && task.dueDate && task.dueDate < today)
     .sort((a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? ''))
-    .slice(0, 2), [tasks, today])
+    .slice(0, 3), [tasks, today])
 
   const currentMinutes = now.getHours() * 60 + now.getMinutes()
   const currentSchedule = todaySchedule.find((item) => {
@@ -58,10 +65,31 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
     const end = Number(item.endTime.slice(0, 2)) * 60 + Number(item.endTime.slice(3, 5))
     return currentMinutes >= start && currentMinutes < end
   })
+
   const nextSchedule = todaySchedule.find((item) => {
     const start = Number(item.startTime.slice(0, 2)) * 60 + Number(item.startTime.slice(3, 5))
     return start >= currentMinutes
   })
+
+  const upcomingSchedule = useMemo(() => {
+    const results: Array<{ item: ScheduleItem; date: string }> = []
+    for (let days = 1; days <= 3 && results.length < 4; days += 1) {
+      const date = shiftDate(today, days)
+      schedule
+        .filter((item) => scheduleOccursOnDate(item, date))
+        .sort((a, b) => a.startTime.localeCompare(b.startTime))
+        .slice(0, 4 - results.length)
+        .forEach((item) => results.push({ item, date }))
+    }
+    return results
+  }, [schedule, today])
+
+  const upcomingDateLabel = new Intl.DateTimeFormat('id-ID', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  })
+
   const currentTimeLabel = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now)
 
   return (
@@ -69,26 +97,53 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
       <div className="page-intro">
         <div>
           <h2>Today</h2>
-          <p>{formatDate(today)} · your day at a glance.</p>
+          <p>{formatDate(today)} · everything important, in one view.</p>
         </div>
         <button className="primary-button" type="button" onClick={() => onNavigate('schedule')}>Open schedule</button>
       </div>
+
+      <section className="dashboard-signal-grid" aria-label="Daily overview">
+        <article className="dashboard-signal-card">
+          <span>Now</span>
+          <strong>{currentTimeLabel}</strong>
+          <small>{currentSchedule ? currentSchedule.title : nextSchedule ? `Next: ${nextSchedule.title}` : 'Free time'}</small>
+        </article>
+
+        <article className="dashboard-signal-card">
+          <span>Tasks</span>
+          <strong>{completed}/{tasks.length}</strong>
+          <div className="dashboard-signal-progress" aria-label={completionPercent + '% of tasks completed'}>
+            <span style={{ width: completionPercent + '%' }} />
+          </div>
+          <small>{openTasks} open · {completionPercent}% complete</small>
+        </article>
+
+        <article className={overdueTasks.length ? 'dashboard-signal-card is-alert' : 'dashboard-signal-card'}>
+          <span>Attention</span>
+          <strong>{overdueTasks.length}</strong>
+          <small>{overdueTasks.length ? 'overdue task' + (overdueTasks.length === 1 ? '' : 's') : 'nothing overdue'}</small>
+        </article>
+
+        <article className="dashboard-signal-card">
+          <span>Money</span>
+          <strong className={monthBalance < 0 ? 'amount-negative' : 'amount-positive'}>{currency.format(monthBalance)}</strong>
+          <small>month balance · {currency.format(todayExpense)} spent today</small>
+        </article>
+      </section>
 
       <div className="dashboard-overview">
         <section className="content-card dashboard-agenda">
           <div className="card-heading">
             <div>
-              <span className="section-kicker">Schedule</span>
-              <h3>Today&apos;s agenda</h3>
+              <span className="section-kicker">Today</span>
+              <h3>Agenda</h3>
             </div>
-            <span className="card-meta">
-              {nextSchedule ? `Next ${nextSchedule.startTime}` : 'No more today'}
-            </span>
+            <span className="card-meta">{todaySchedule.length} {todaySchedule.length === 1 ? 'activity' : 'activities'}</span>
           </div>
 
           <div className="dashboard-context">
-            <strong>{currentTimeLabel}</strong>
-            <span>{currentSchedule ? currentSchedule.title : nextSchedule ? `Next: ${nextSchedule.title}` : 'Free time'}</span>
+            <strong>{nextSchedule ? nextSchedule.startTime : '—'}</strong>
+            <span>{nextSchedule ? `Next: ${nextSchedule.title}` : 'No more scheduled today'}</span>
           </div>
 
           <div className="schedule-list">
@@ -148,40 +203,79 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
         </section>
       </div>
 
-      <section className="content-card dashboard-finance">
-        <div>
+      <div className="dashboard-context-grid">
+        <section className="content-card dashboard-finance">
           <div className="card-heading">
             <div>
               <span className="section-kicker">Finance</span>
-              <h3>Today&apos;s money</h3>
+              <h3>This month</h3>
             </div>
-            <span className="card-meta">{formatDate(today)}</span>
+            <button className="text-button" type="button" onClick={() => onNavigate('finance')}>Open finance</button>
           </div>
 
           <div className="dashboard-finance-values">
             <div className="dashboard-finance-value">
+              <span>Income</span>
+              <strong className="amount-positive">{currency.format(monthIncome)}</strong>
+            </div>
+            <div className="dashboard-finance-value">
               <span>Spent</span>
-              <strong className="amount-negative">{currency.format(expense)}</strong>
-              <small>expenses today</small>
+              <strong className="amount-negative">{currency.format(monthExpense)}</strong>
             </div>
             <div className="dashboard-finance-value">
-              <span>Tasks</span>
-              <strong>{completed}/{tasks.length}</strong>
-              <small>completed</small>
-            </div>
-            <div className="dashboard-finance-value">
-              <span>Agenda</span>
-              <strong>{todaySchedule.length}</strong>
-              <small>activities</small>
+              <span>Balance</span>
+              <strong className={monthBalance < 0 ? 'amount-negative' : 'amount-positive'}>{currency.format(monthBalance)}</strong>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="dashboard-risk">
-          <span>Attention</span>
-          <strong>{overdueTasks.length ? `${overdueTasks.length} overdue task${overdueTasks.length > 1 ? 's' : ''}` : 'Nothing overdue'}</strong>
-        </div>
-      </section>
+        <section className="content-card dashboard-upcoming">
+          <div className="card-heading">
+            <div>
+              <span className="section-kicker">Next</span>
+              <h3>Upcoming</h3>
+            </div>
+            <span className="card-meta">next 3 days</span>
+          </div>
+
+          {upcomingSchedule.length === 0 ? (
+            <div className="empty-state">
+              <strong>No upcoming activities.</strong>
+              <span>Your next few days are open.</span>
+            </div>
+          ) : (
+            <div className="upcoming-list">
+              {upcomingSchedule.map(({ item, date }) => (
+                <button className="upcoming-item" key={item.id + '-' + date} type="button" onClick={() => onNavigate('schedule')}>
+                  <span>{upcomingDateLabel.format(new Date(date + 'T12:00:00'))}</span>
+                  <strong>{item.startTime}</strong>
+                  <div><b>{item.title}</b><small>{item.type}{item.location ? ` · ${item.location}` : ''}</small></div>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+
+      {overdueTasks.length > 0 && (
+        <section className="content-card dashboard-attention">
+          <div className="card-heading">
+            <div>
+              <span className="section-kicker">Attention</span>
+              <h3>Overdue tasks</h3>
+            </div>
+            <span className="card-meta">{overdueTasks.length} shown</span>
+          </div>
+          <div className="attention-list">
+            {overdueTasks.map((task) => (
+              <button className="attention-item" key={task.id} type="button" onClick={() => onNavigate('tasks')}>
+                <strong>{task.title}</strong>
+                <span>{task.category} · due {task.dueDate}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       <details className="dashboard-connections">
         <summary className="connections-toggle">
