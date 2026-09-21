@@ -5,7 +5,7 @@ import { getReminderState } from '../schedule.reminder'
 import type { ScheduleItem } from '../schedule.types'
 
 const DISPATCHED_KEY = 'mid-daily.notification-dispatched'
-const PERMISSION_RECHECK_MS = 60_000
+const RECHECK_MS = 15_000
 
 function readDispatched() {
   try {
@@ -31,10 +31,10 @@ export function useReminderScheduler(schedule: ScheduleItem[]) {
     let running = false
     const normalized = normalizeScheduleList(schedule)
 
-    const scheduleNext = (targetAt?: number, fallbackDelay = PERMISSION_RECHECK_MS) => {
+    const scheduleNext = (targetAt?: number) => {
       if (cancelled) return
       const delay = targetAt === undefined
-        ? fallbackDelay
+        ? RECHECK_MS
         : Math.max(1000, targetAt - Date.now() + 50)
       timer = window.setTimeout(() => {
         void tick()
@@ -45,7 +45,7 @@ export function useReminderScheduler(schedule: ScheduleItem[]) {
       if (cancelled || running) return
 
       if (getNotificationSupport() !== 'granted') {
-        scheduleNext(undefined)
+        scheduleNext()
         return
       }
 
@@ -54,6 +54,7 @@ export function useReminderScheduler(schedule: ScheduleItem[]) {
         const dispatched = readDispatched()
         const now = new Date()
         let nextTriggerAt: number | undefined
+        let deliveredReminder = false
 
         for (const item of normalized) {
           const reminder = getReminderState(item, now)
@@ -63,6 +64,7 @@ export function useReminderScheduler(schedule: ScheduleItem[]) {
             if (!dispatched.has(key) && await showScheduleReminder(item, reminder)) {
               dispatched.add(key)
               writeDispatched(dispatched)
+              deliveredReminder = true
             }
             continue
           }
@@ -73,7 +75,13 @@ export function useReminderScheduler(schedule: ScheduleItem[]) {
           }
         }
 
-        if (nextTriggerAt !== undefined) scheduleNext(nextTriggerAt)
+        if (nextTriggerAt !== undefined) {
+          scheduleNext(nextTriggerAt)
+        } else if (deliveredReminder) {
+          // A due reminder can advance a recurring schedule. Recheck so the
+          // scheduler never becomes idle after its first delivery.
+          scheduleNext()
+        }
       } finally {
         running = false
       }
