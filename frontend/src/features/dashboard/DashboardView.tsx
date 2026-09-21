@@ -1,6 +1,7 @@
 import { lazy, Suspense, useMemo, useState, type CSSProperties } from 'react'
 import type { FinanceEntry, Task, View } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
+import { scheduleOccursOnDate } from '../schedule/schedule.date'
 import { currency, formatDate } from '../../lib/format'
 import { StatCard } from '../../components/ui/StatCard'
 import { FeatureLandscape } from './components/FeatureLandscape'
@@ -23,9 +24,9 @@ const WhatsAppIntegrationCard = lazy(() => import('./components/WhatsAppIntegrat
 export function DashboardView({ tasks, schedule, finance, onToggleTask, activeView, onNavigate }: DashboardViewProps) {
   const [connectionsOpen, setConnectionsOpen] = useState(false)
   const today = getToday()
-  const todayScheduleCount = useMemo(() => schedule.filter((item) => item.date === today).length, [schedule, today])
+  const todayScheduleCount = useMemo(() => schedule.filter((item) => scheduleOccursOnDate(item, today)).length, [schedule, today])
   const todaySchedule = useMemo(() => schedule
-    .filter((item) => item.date === today)
+    .filter((item) => scheduleOccursOnDate(item, today))
     .sort((a, b) => a.startTime.localeCompare(b.startTime))
     .slice(0, 5), [schedule, today])
   const completed = tasks.filter((task) => task.status === 'done').length
