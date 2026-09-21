@@ -1322,8 +1322,9 @@ function isAllowedFrontendOrigin(origin: string) {
 
   try {
     const url = new URL(origin)
+    const hostname = url.hostname.toLowerCase()
     return url.protocol === 'https:'
-      && /^(?:[A-Za-z0-9]+-)?mid-daily\\.e41262272\\.workers\\.dev$/i.test(url.hostname)
+      && (hostname === 'mid-daily.e41262272.workers.dev' || hostname.endsWith('-mid-daily.e41262272.workers.dev'))
   } catch {
     return false
   }
