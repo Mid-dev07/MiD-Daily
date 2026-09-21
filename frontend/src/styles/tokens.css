@@ -1,19 +1,17 @@
 :root {
-  /* MiD Daily — Nature Cinematic material system */
   --bg-void: #0b100c;
-  --bg-deep: #111812;
-  --surface-0: #151d16;
-  --surface-1: #1b251d;
-  --surface-2: #253126;
-  --surface-3: #303d30;
+  --bg-deep: #111711;
+  --surface-0: #141b15;
+  --surface-1: #1a231a;
+  --surface-2: #202b20;
+  --surface-3: #29352a;
 
-  --line: rgba(232, 239, 221, .09);
-  --line-strong: rgba(244, 239, 216, .17);
+  --line: rgba(226, 235, 216, .10);
+  --line-strong: rgba(226, 235, 216, .17);
 
-  /* Nature-led identity: moss + sage + warm sunlight */
   --accent: #b7c98a;
-  --accent-soft: rgba(183, 201, 138, .18);
-  --accent-glow: rgba(183, 201, 138, .32);
+  --accent-soft: rgba(183, 201, 138, .12);
+  --accent-glow: rgba(183, 201, 138, .22);
 
   --nature-moss: #71885e;
   --nature-sage: #9dad7b;
@@ -26,37 +24,33 @@
   --state-warning: #d8b56c;
   --state-danger: #cf897b;
 
-  /* One consistent, natural key light */
   --light-angle: 142deg;
-  --spec-highlight: rgba(255, 250, 225, .15);
-  --ao-shadow: rgba(0, 0, 0, .56);
+  --spec-highlight: rgba(255, 250, 225, .08);
+  --ao-shadow: rgba(0, 0, 0, .40);
 
-  /* Compatibility aliases for the existing component layer */
   --color-bg: var(--bg-void);
   --color-surface: var(--surface-1);
   --color-surface-strong: var(--surface-0);
   --color-border: var(--line);
-  --color-border-soft: rgba(232, 239, 221, .055);
-  --color-text: #edf1e6;
-  --color-text-muted: #a9b3a1;
-  --color-text-faint: #778273;
+  --color-border-soft: rgba(226, 235, 216, .055);
+  --color-text: #eef2e9;
+  --color-text-muted: #b7c0b3;
+  --color-text-faint: #7f8a7b;
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-success: var(--state-success);
   --color-warning: var(--state-warning);
   --color-danger: var(--state-danger);
 
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 22px;
-  --shadow-soft: 0 22px 56px rgba(0, 0, 0, .24);
+  --radius-sm: 9px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-soft: 0 14px 40px rgba(0, 0, 0, .18);
 
-  --duration-fast: 170ms;
-  --duration-normal: 320ms;
+  --duration-fast: 160ms;
+  --duration-normal: 240ms;
   --ease-standard: cubic-bezier(.2, .8, .2, 1);
 
-
-  /* Spatial / typography system — 4/8pt rhythm */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -68,20 +62,20 @@
   --space-9: 48px;
   --space-10: 64px;
 
-  --content-max: 1240px;
-  --content-gutter: clamp(18px, 3.2vw, 48px);
+  --content-max: 1160px;
+  --content-gutter: clamp(14px, 3vw, 44px);
 
   --text-xs: 10px;
   --text-sm: 12px;
   --text-md: 14px;
   --text-lg: 18px;
   --text-xl: 24px;
-  --text-display: clamp(32px, 4.2vw, 46px);
+  --text-display: clamp(30px, 4vw, 42px);
 
   --control-h: 42px;
   --touch-target: 44px;
 
-  --surface-card: rgba(27, 37, 29, .82);
-  --surface-raised: rgba(32, 44, 34, .9);
-  --surface-recessed: rgba(12, 19, 13, .72);
+  --surface-card: rgba(20, 27, 21, .96);
+  --surface-raised: rgba(26, 35, 26, .98);
+  --surface-recessed: rgba(12, 18, 13, .86);
 }

@@ -6,7 +6,7 @@ interface SidebarProps {
 }
 
 const navigation: Array<{ id: View; label: string; icon: string }> = [
-  { id: 'dashboard', label: 'Dashboard', icon: '⌂' },
+  { id: 'dashboard', label: 'Today', icon: '⌂' },
   { id: 'schedule', label: 'Schedule', icon: '◷' },
   { id: 'tasks', label: 'Tasks', icon: '✓' },
   { id: 'finance', label: 'Finance', icon: 'Rp' },
@@ -16,12 +16,12 @@ const navigation: Array<{ id: View; label: string; icon: string }> = [
 
 export function Sidebar({ activeView, onNavigate }: SidebarProps) {
   return (
-    <aside className="sidebar glass-panel">
+    <aside className="sidebar">
       <div className="brand">
         <div className="brand-mark">M</div>
         <div className="brand-copy">
           <strong>MiD-Daily</strong>
-          <span>Daily management</span>
+          <span>Daily workspace</span>
         </div>
       </div>
 
@@ -39,11 +39,6 @@ export function Sidebar({ activeView, onNavigate }: SidebarProps) {
           </button>
         ))}
       </nav>
-
-      <div className="sidebar-footer">
-        <span className="status-dot" aria-hidden="true" />
-        <span>Foundation mode</span>
-      </div>
     </aside>
   )
 }
