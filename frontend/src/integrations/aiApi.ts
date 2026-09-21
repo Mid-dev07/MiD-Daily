@@ -18,3 +18,7 @@ export async function sendAIMessage(messages: AIMessage[], allowWrites: boolean)
     body: JSON.stringify({ messages, allowWrites }),
   })
 }
+
+export async function getAIStatus() {
+  return apiRequest<{ configured: boolean }>('/api/ai/status')
+}
