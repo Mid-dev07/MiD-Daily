@@ -839,6 +839,36 @@ function isIsoDate(value: unknown) {
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
 }
 
+function scheduleOccursOnDate(item: Pick<ScheduleRecord, 'date' | 'recurrence'>, targetDate: string) {
+  if (!isIsoDate(targetDate) || targetDate < item.date) return false
+  if (item.recurrence.frequency === 'NONE') return targetDate === item.date
+  if (item.recurrence.until && targetDate > item.recurrence.until) return false
+
+  const start = new Date(item.date + 'T00:00:00Z')
+  const target = new Date(targetDate + 'T00:00:00Z')
+  const interval = Math.max(1, item.recurrence.interval)
+
+  if (item.recurrence.frequency === 'DAILY') {
+    const days = Math.round((target.getTime() - start.getTime()) / 86_400_000)
+    return days >= 0 && days % interval === 0
+  }
+
+  if (item.recurrence.frequency === 'WEEKLY') {
+    const days = Math.round((target.getTime() - start.getTime()) / 86_400_000)
+    return days >= 0 && days % (7 * interval) === 0
+  }
+
+  const months = (target.getUTCFullYear() - start.getUTCFullYear()) * 12 + (target.getUTCMonth() - start.getUTCMonth())
+  if (months < 0 || months % interval !== 0) return false
+
+  const occurrence = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1))
+  occurrence.setUTCMonth(occurrence.getUTCMonth() + months)
+  const lastDay = new Date(Date.UTC(occurrence.getUTCFullYear(), occurrence.getUTCMonth() + 1, 0)).getUTCDate()
+  occurrence.setUTCDate(Math.min(start.getUTCDate(), lastDay))
+
+  return occurrence.toISOString().slice(0, 10) === targetDate
+}
+
 function validateScheduleInput(body: Record<string, unknown>) {
   const title = typeof body.title === 'string' ? body.title.trim() : ''
   const type = body.type
@@ -912,10 +942,15 @@ function validateScheduleInput(body: Record<string, unknown>) {
   return candidate
 }
 
-function assertNoScheduleOverlap(items: Array<{ id: number; date: string; startTime: string; endTime: string }>, candidate: { id?: number; date: string; startTime: string; endTime: string }) {
+function assertNoScheduleOverlap(items: ScheduleRecord[], candidate: { id?: number; date: string; startTime: string; endTime: string }) {
   const start = scheduleTimeMinutes(candidate.startTime)
   const end = scheduleTimeMinutes(candidate.endTime)
-  const conflict = items.some((item) => item.id !== candidate.id && item.date === candidate.date && start < scheduleTimeMinutes(item.endTime) && end > scheduleTimeMinutes(item.startTime))
+  const conflict = items.some((item) =>
+    item.id !== candidate.id &&
+    scheduleOccursOnDate(item, candidate.date) &&
+    start < scheduleTimeMinutes(item.endTime) &&
+    end > scheduleTimeMinutes(item.startTime),
+  )
   if (conflict) throw httpError(409, 'This time overlaps another activity.')
 }
 
