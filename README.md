@@ -1,35 +1,49 @@
 # MiD-Daily
 
-Lightweight daily management web app.
+Lightweight daily management workspace built around schedule, tasks, finance, and connected assistants.
 
-## Current phase
-M10 — External messaging integrations
+## Product
+MiD-Daily is designed as a calm, nature-led daily workspace.
 
-## Stack
-- React
-- TypeScript
-- Vite
-- Node.js backend
-- Supabase Auth + PostgreSQL
-
-## Core modules
+Core:
+- Dashboard
 - Schedule / Agenda
 - Tasks
 - Finance
-- Dashboard
+- Authentication
 
-## Integrations
-- Browser notifications
-- Google Calendar OAuth + one-way event sync
-- Supabase Auth
-- Supabase PostgreSQL persistence
-- Telegram account linking + bot commands
-- WhatsApp Cloud API adapter + account linking foundation
+Connected:
+- Browser/device reminders
+- Google Calendar
+- Telegram
+- WhatsApp
+- Assistant
+- Instagram analytics foundation
 
-## Run locally
+The optional provider modules are designed to fail gracefully when credentials or provider permissions are not configured.
+
+## Visual direction
+Nature Cinematic + Natural Luxury:
+- cinematic forest atmosphere
+- moss, sage, stone, fog, and warm sunlight
+- restrained dew-glass surfaces
+- responsive feature landscape
+- desktop sidebar and mobile bottom navigation
+- reduced-motion support
+- keyboard-friendly modal interactions
+
+## Architecture
+Browser → Cloudflare Workers frontend → Cloudflare Worker API → Supabase Auth/PostgreSQL
+
+Optional providers are connected through the backend so provider secrets remain server-side.
+
+Production:
+- Frontend: https://mid-daily.e41262272.workers.dev
+- Backend health: https://mid-daily-api.e41262272.workers.dev/health
+
+## Local development
 
 Frontend:
-
 ```bash
 cd frontend
 npm install
@@ -37,29 +51,50 @@ npm run dev
 ```
 
 Backend:
-
 ```bash
 cd backend
 npm install
 npm run dev
 ```
 
-Copy `frontend/.env.example` and `backend/.env.example` into local `.env` files and configure the services you enable.
+Copy the relevant `.env.example` files into local `.env` files and configure only the services you need.
 
-Apply Supabase SQL migrations in `supabase/migrations/` before using authenticated cloud persistence.
+## Data behavior
+With Supabase Auth configured:
+- Task, Finance, and Schedule data is owned by the authenticated user.
+- Core CRUD is persisted in Supabase.
+- LocalStorage is used as a local cache/demo compatibility layer.
 
-## Current behavior
+Without Supabase Auth configuration:
+- The frontend can run in demo mode with local persistence.
 
-With Supabase Auth configured, MiD-Daily gates the application behind authentication and scopes Task, Finance, and Schedule data by the authenticated user. LocalStorage remains as a cache and demo compatibility layer.
+## Integrations
 
-Without Supabase Auth configuration, the application runs in demo mode using local persistence.
+### Google Calendar
+OAuth uses PKCE and server-side token encryption. Schedule items can be created, updated, and deleted in Google Calendar.
 
-Google Calendar uses a separate OAuth connection stored server-side and never exposes Google client secrets to the browser.
+### Telegram
+Account linking uses one-time codes. Webhooks verify a configured secret and deduplicate updates.
 
-## CI
+### WhatsApp
+Account linking uses one-time codes. Webhooks verify Meta HMAC signatures and deduplicate updates.
 
-GitHub Actions builds both frontend and backend on pushes and pull requests targeting `main`.
+### Assistant
+The Assistant is backend-mediated. Read tools are available by default. Task/expense writes are only exposed after the user explicitly enables actions.
 
-## Roadmap
+### Instagram
+The analytics adapter and UI foundation are present, but live metrics remain disabled until an Instagram Professional connection and required provider permissions are configured.
 
-Core management → authenticated persistence → deployment → Telegram → WhatsApp → social analytics → AI assistance.
+## Quality gates
+GitHub Actions verifies:
+- frontend TypeScript + Vite build
+- backend TypeScript build + tests
+- Cloudflare Worker dry-run
+- frontend deployment and smoke test
+- backend deployment, secret presence, and health check
+
+See:
+- `docs/PRODUCT.md`
+- `docs/UI_UX_UNREAL.md`
+- `docs/DEPLOYMENT.md`
+- `docs/RELEASE_CHECKLIST.md`
