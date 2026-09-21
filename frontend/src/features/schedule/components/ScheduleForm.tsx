@@ -111,7 +111,7 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
           </div>
 
           <div className="form-section">
-            <div className="form-section-heading"><strong>Reminder</strong><span>Engine active; device delivery comes next.</span></div>
+            <div className="form-section-heading"><strong>Reminder</strong><span>Active while MiD-Daily is open; browser/device delivery uses your notification permission.</span></div>
             <div className="reminder-row">
               <label className="switch-field"><input disabled={saving} type="checkbox" checked={draft.reminderEnabled} onChange={(e) => setField('reminderEnabled', e.target.checked)} /><span>Enable reminder</span></label>
               <select value={draft.reminderOffset} disabled={!draft.reminderEnabled} onChange={(e) => setField('reminderOffset', Number(e.target.value) as ReminderOffset)} aria-label="Reminder offset">
