@@ -712,7 +712,7 @@ function validateTaskInput(body: Record<string, unknown>) {
 }
 
 function validateTaskPatch(body: Record<string, unknown>) {
-  const patch: Partial<import('./dataStore.js').TaskRecord> = {}
+  const patch: Partial<import('./dataStore.js').TaskRecord> & { dueDate?: string | null; notes?: string | null } = {}
 
   if (Object.prototype.hasOwnProperty.call(body, 'title')) {
     if (typeof body.title !== 'string' || !body.title.trim()) throw httpError(400, 'Task title is invalid.')
@@ -740,11 +740,11 @@ function validateTaskPatch(body: Record<string, unknown>) {
     if (body.dueDate !== null && (typeof body.dueDate !== 'string' || !isIsoDate(body.dueDate))) {
       throw httpError(400, 'Task due date is invalid.')
     }
-    patch.dueDate = typeof body.dueDate === 'string' && body.dueDate ? body.dueDate : undefined
+    patch.dueDate = body.dueDate === null ? null : body.dueDate
   }
   if (Object.prototype.hasOwnProperty.call(body, 'notes')) {
     if (body.notes !== null && typeof body.notes !== 'string') throw httpError(400, 'Task notes are invalid.')
-    patch.notes = typeof body.notes === 'string' && body.notes.trim() ? body.notes.trim() : undefined
+    patch.notes = body.notes === null ? null : body.notes.trim() || null
   }
 
   if (Object.keys(patch).length === 0) throw httpError(400, 'No task fields were provided.')
