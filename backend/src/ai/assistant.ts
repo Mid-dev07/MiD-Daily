@@ -245,6 +245,28 @@ function scheduleOccursOnDate(
   return occurrence.toISOString().slice(0, 10) === targetDate
 }
 
+function scheduleTimeMinutes(value: string) {
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(value)) throw new Error('Schedule time is invalid.')
+  const [hours, minutes] = value.split(':').map(Number)
+  return hours * 60 + minutes
+}
+
+export function hasScheduleConflict(
+  items: ScheduleRecord[],
+  candidate: { date: string; startTime: string; endTime: string },
+) {
+  const start = scheduleTimeMinutes(candidate.startTime)
+  const end = scheduleTimeMinutes(candidate.endTime)
+  return items.some((item) =>
+    item.activityMode !== 'FLEXIBLE' &&
+    item.startTime &&
+    item.endTime &&
+    scheduleOccursOnDate(item, candidate.date) &&
+    start < scheduleTimeMinutes(item.endTime) &&
+    end > scheduleTimeMinutes(item.startTime),
+  )
+}
+
 async function executeTool(userId: string, name: string, rawArguments: string) {
   let args: Record<string, unknown>
   try {
@@ -388,6 +410,10 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
     if (mode !== 'FLEXIBLE') {
       if (!timePattern.test(startTime) || !timePattern.test(endTime)) throw new Error('Fixed activities require valid start and end times.')
       if (startTime >= endTime) throw new Error('Activity end time must be after start time.')
+      const existing = await listSchedule(userId)
+      if (hasScheduleConflict(existing, { date, startTime, endTime })) {
+        throw new Error('This time overlaps another activity.')
+      }
     }
 
     const targetCount = args.targetCount === null ? null : Number(args.targetCount)
@@ -536,7 +562,7 @@ export async function runAssistant(
         'Current app timezone: ' + APP_TIMEZONE + '.',
         'Current date in the app timezone: ' + todayInTimeZone() + '.',
         'When creating an activity, inspect the relevant schedule range first so you do not silently create a time conflict.',
-        'Do not claim a time slot is free unless the schedule range tool was checked for that date.'
+        'Do not claim a time slot is free unless the schedule range tool was checked for that date.',
         allowWrites
           ? 'Write actions are enabled because the user explicitly allowed actions. Only create data when the user explicitly requests it.'
           : 'Write actions are disabled. Do not create or modify anything.',
