@@ -8,6 +8,7 @@ const defaultApiUrl = import.meta.env.DEV
 // Never let a production build accidentally call a local development server.
 const isLocalApiUrl = /^(https?:\/\/)?(localhost|127\.0\.0\.1)(:\d+)?(?:\/|$)/i.test(configuredApiUrl)
 const API_BASE_URL = (configuredApiUrl && !isLocalApiUrl ? configuredApiUrl : defaultApiUrl).replace(/\/$/, '')
+const API_TIMEOUT_MS = 15_000
 
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number) {
@@ -27,15 +28,32 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
   const auth = await authHeaders()
   Object.entries(auth).forEach(([key, value]) => headers.set(key, value))
 
+  const controller = new AbortController()
+  const timeout = window.setTimeout(() => controller.abort(), API_TIMEOUT_MS)
+  const upstreamSignal = init.signal
+
+  const abortFromUpstream = () => controller.abort()
+  if (upstreamSignal) {
+    if (upstreamSignal.aborted) controller.abort()
+    else upstreamSignal.addEventListener('abort', abortFromUpstream, { once: true })
+  }
+
   let response: Response
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
       ...init,
       headers,
       credentials: 'include',
+      signal: controller.signal,
     })
-  } catch {
+  } catch (reason) {
+    if (reason instanceof DOMException && reason.name === 'AbortError') {
+      throw new Error('MiD-Daily API timed out. Check your connection and try again.')
+    }
     throw new Error(`Unable to reach MiD-Daily API at ${API_BASE_URL}.`)
+  } finally {
+    window.clearTimeout(timeout)
+    upstreamSignal?.removeEventListener('abort', abortFromUpstream)
   }
 
   const data = await response.json().catch(() => ({}))
