@@ -1415,6 +1415,17 @@ async function handleTelegramUpdate(req: IncomingMessage, res: ServerResponse) {
 }
 
 
+async function handleWorkspaceBootstrap(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  const [tasks, finance, schedule] = await Promise.all([
+    listTasks(userId),
+    listFinance(userId),
+    listSchedule(userId),
+  ])
+
+  sendJson(res, 200, { tasks, finance, schedule })
+}
+
 function handleAiStatus(req: IncomingMessage, res: ServerResponse) {
   sendJson(res, 200, { configured: isAssistantConfigured() })
 }
@@ -1484,6 +1495,11 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
   const url = new URL(req.url ?? '/', `http://localhost:${PORT}`)
 
   try {
+    if (req.method === 'GET' && url.pathname === '/api/workspace/bootstrap') {
+      await handleWorkspaceBootstrap(req, res)
+      return
+    }
+
     if (req.method === 'GET' && url.pathname === '/api/ai/status') {
       await requireAuthenticatedUserId(req)
       handleAiStatus(req, res)
