@@ -21,6 +21,17 @@ export interface FinanceRecord {
   notes?: string | null
 }
 
+export interface FinanceBudgetRecord {
+  id: number
+  name: string
+  category: string
+  amount: number
+  period: 'WEEK' | 'MONTH'
+  startsOn: string
+  endsOn?: string | null
+  notes?: string | null
+}
+
 const SUPABASE_URL = process.env.SUPABASE_URL ?? ''
 const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY ?? ''
 
@@ -148,4 +159,81 @@ export async function deleteFinance(userId: string, id: number) {
 
 export function isDataPersistenceConfigured() {
   return Boolean(SUPABASE_URL && SUPABASE_SECRET_KEY)
+}
+
+
+function budgetFromRow(row: Record<string, unknown>): FinanceBudgetRecord {
+  return {
+    id: Number(row.id),
+    name: String(row.name),
+    category: String(row.category ?? ''),
+    amount: Number(row.amount),
+    period: row.period as FinanceBudgetRecord['period'],
+    startsOn: String(row.starts_on),
+    endsOn: typeof row.ends_on === 'string' ? row.ends_on : undefined,
+    notes: typeof row.notes === 'string' ? row.notes : undefined,
+  }
+}
+
+export async function listFinanceBudgets(userId: string) {
+  const { data, error } = await db()
+    .from('finance_budgets')
+    .select('id,name,category,amount,period,starts_on,ends_on,notes')
+    .eq('user_id', userId)
+    .order('starts_on', { ascending: false })
+    .order('id', { ascending: false })
+  if (error) throw new Error(`Finance budget read failed: ${error.message}`)
+  return (data ?? []).map(budgetFromRow)
+}
+
+export async function createFinanceBudget(userId: string, budget: Omit<FinanceBudgetRecord, 'id'>) {
+  const { data, error } = await db()
+    .from('finance_budgets')
+    .insert({
+      user_id: userId,
+      name: budget.name,
+      category: budget.category,
+      amount: budget.amount,
+      period: budget.period,
+      starts_on: budget.startsOn,
+      ends_on: budget.endsOn ?? null,
+      notes: budget.notes ?? null,
+    })
+    .select('id,name,category,amount,period,starts_on,ends_on,notes')
+    .single()
+  if (error) throw new Error(`Finance budget create failed: ${error.message}`)
+  return budgetFromRow(data)
+}
+
+export async function updateFinanceBudget(userId: string, id: number, budget: Partial<Omit<FinanceBudgetRecord, 'id'>>) {
+  const { data, error } = await db()
+    .from('finance_budgets')
+    .update({
+      ...(budget.name === undefined ? {} : { name: budget.name }),
+      ...(budget.category === undefined ? {} : { category: budget.category }),
+      ...(budget.amount === undefined ? {} : { amount: budget.amount }),
+      ...(budget.period === undefined ? {} : { period: budget.period }),
+      ...(budget.startsOn === undefined ? {} : { starts_on: budget.startsOn }),
+      ...(budget.endsOn === undefined ? {} : { ends_on: budget.endsOn ?? null }),
+      ...(budget.notes === undefined ? {} : { notes: budget.notes ?? null }),
+    })
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select('id,name,category,amount,period,starts_on,ends_on,notes')
+    .maybeSingle()
+  if (error) throw new Error(`Finance budget update failed: ${error.message}`)
+  if (!data) return null
+  return budgetFromRow(data)
+}
+
+export async function deleteFinanceBudget(userId: string, id: number) {
+  const { data, error } = await db()
+    .from('finance_budgets')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select('id')
+    .maybeSingle()
+  if (error) throw new Error(`Finance budget delete failed: ${error.message}`)
+  return Boolean(data)
 }
