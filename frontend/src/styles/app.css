@@ -1486,7 +1486,7 @@
   background-size: 100% 100%;
   box-shadow:
     inset 0 1px 0 rgba(255, 252, 229, .07),
-    0 30px 72px -36px rgba(0, 0, 0, .82);
+    0 24px 54px -34px rgba(0, 0, 0, .76);
 }
 
 .feature-landscape::before {
@@ -1553,9 +1553,9 @@
   z-index: 3;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-rows: repeat(3, minmax(92px, 1fr));
+  grid-template-rows: repeat(3, minmax(78px, 1fr));
   gap: 12px;
-  min-height: 356px;
+  min-height: 304px;
   align-items: center;
 }
 
@@ -1591,7 +1591,7 @@
   grid-column: 2 / 4;
   grid-row: 2;
   position: relative;
-  width: min(164px, 100%);
+  width: min(144px, 100%);
   aspect-ratio: 1;
   justify-self: center;
   align-self: center;
@@ -1604,7 +1604,7 @@
     linear-gradient(145deg, rgba(78, 94, 67, .85), rgba(17, 25, 18, .92));
   box-shadow:
     0 1px 0 rgba(255, 250, 225, .08) inset,
-    0 28px 48px -28px rgba(0, 0, 0, .88),
+    0 20px 40px -26px rgba(0, 0, 0, .80),
     0 0 54px -26px rgba(183, 201, 138, .32);
   transform: rotate(-2deg);
   transition: transform .45s var(--ease-standard), box-shadow .4s ease, border-color .4s ease;
@@ -1630,7 +1630,7 @@
 
 .feature-core-label strong {
   color: #f0f2e8;
-  font-size: 29px;
+  font-size: 25px;
   line-height: 1;
   letter-spacing: -.06em;
 }
@@ -2314,7 +2314,7 @@ textarea {
 
 .editorial-topbar h1 {
   margin: 0;
-  font-size: clamp(34px, 4.8vw, 64px);
+  font-size: clamp(30px, 3.7vw, 50px);
   line-height: .93;
   font-weight: 650;
   letter-spacing: -.065em;
@@ -2351,7 +2351,7 @@ textarea {
 
 .welcome-card {
   position: relative;
-  min-height: 330px;
+  min-height: 286px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
@@ -2406,7 +2406,7 @@ textarea {
 .welcome-content h2 {
   display: block;
   max-width: 760px;
-  font-size: clamp(42px, 7.1vw, 92px);
+  font-size: clamp(38px, 6vw, 76px);
   line-height: .86;
   font-weight: 560;
   letter-spacing: -.075em;
@@ -2522,7 +2522,7 @@ textarea {
 
 .feature-landscape-heading h3 {
   max-width: 760px;
-  font-size: clamp(32px, 5.2vw, 68px);
+  font-size: clamp(30px, 4.3vw, 56px);
   line-height: .9;
   font-weight: 500;
   letter-spacing: -.07em;
