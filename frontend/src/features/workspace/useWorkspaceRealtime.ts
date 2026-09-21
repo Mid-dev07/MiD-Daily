@@ -63,14 +63,15 @@ export function useWorkspaceRealtime(
   onSchedule: (updater: (current: ScheduleItem[]) => ScheduleItem[]) => void,
 ) {
   useEffect(() => {
-    if (!userId || !enabled || !supabase) return
+    const client = supabase
+    if (!userId || !enabled || !client) return
 
     const upsertById = <T extends { id: number }>(items: T[], next: T) => {
       const existing = items.some((item) => item.id === next.id)
       return existing ? items.map((item) => item.id === next.id ? next : item) : [...items, next]
     }
 
-    const channel = supabase
+    const channel = client
       .channel('workspace:' + userId)
       .on(
         'postgres_changes',
@@ -121,7 +122,7 @@ export function useWorkspaceRealtime(
       })
 
     return () => {
-      void supabase.removeChannel(channel)
+      void client.removeChannel(channel)
     }
   }, [userId, enabled, onTasks, onFinance, onSchedule])
 }
