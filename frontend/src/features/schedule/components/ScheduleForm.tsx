@@ -106,7 +106,7 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
               <label>Every<input disabled={saving || draft.recurrence.frequency === 'NONE'} type="number" min="1" max="30" value={draft.recurrence.interval} onChange={(e) => updateRecurrence('interval', Number(e.target.value))} /></label>
             </div>
             {draft.recurrence.frequency !== 'NONE' && (
-              <label>Repeat until<input type="date" value={draft.recurrence.until ?? ''} onChange={(e) => updateRecurrence('until', e.target.value || undefined)} /></label>
+              <label>Repeat until<input disabled={saving} type="date" value={draft.recurrence.until ?? ''} onChange={(e) => updateRecurrence('until', e.target.value || undefined)} /></label>
             )}
           </div>
 
@@ -114,7 +114,7 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
             <div className="form-section-heading"><strong>Reminder</strong><span>Active while MiD-Daily is open; browser/device delivery uses your notification permission.</span></div>
             <div className="reminder-row">
               <label className="switch-field"><input disabled={saving} type="checkbox" checked={draft.reminderEnabled} onChange={(e) => setField('reminderEnabled', e.target.checked)} /><span>Enable reminder</span></label>
-              <select value={draft.reminderOffset} disabled={!draft.reminderEnabled} onChange={(e) => setField('reminderOffset', Number(e.target.value) as ReminderOffset)} aria-label="Reminder offset">
+              <select value={draft.reminderOffset} disabled={saving || !draft.reminderEnabled} onChange={(e) => setField('reminderOffset', Number(e.target.value) as ReminderOffset)} aria-label="Reminder offset">
                 {reminders.map((value) => <option key={value} value={value}>{value === 0 ? 'At start' : `${value} minutes before`}</option>)}
               </select>
             </div>
