@@ -27,7 +27,6 @@ export class AppErrorBoundary extends Component<PropsWithChildren, AppErrorBound
           <span className="section-kicker">RECOVERY</span>
           <h1>MiD-Daily hit a runtime error.</h1>
           <p className="auth-subtitle">Your saved remote data is not deleted. Reload the app to restore the workspace.</p>
-          {this.state.message && <div className="form-error auth-message" role="alert">{this.state.message}</div>}
           <button className="primary-button" type="button" onClick={this.reload}>Reload MiD-Daily</button>
         </section>
       </main>
