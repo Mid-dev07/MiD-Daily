@@ -15,7 +15,9 @@ export async function createRemoteFinance(draft: FinanceDraft) {
   return data.item
 }
 
-export async function updateRemoteFinance(id: number, draft: Partial<FinanceDraft>) {
+export type FinanceUpdate = Partial<Omit<FinanceDraft, 'notes'>> & { notes?: string | null }
+
+export async function updateRemoteFinance(id: number, draft: FinanceUpdate) {
   const data = await apiRequest<{ item: FinanceEntry }>(`/api/finance/${encodeURIComponent(id)}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
