@@ -82,7 +82,7 @@ export function App() {
     writeUserStorage(TASK_STORAGE_KEY, userId, tasks)
   }, [tasks, userId, readyUserId])
   useEffect(() => {
-    if (!userId || !workspaceReady) return
+    if (readyUserId !== userId) return
     writeUserStorage(FINANCE_STORAGE_KEY, userId, finance)
   }, [finance, userId, readyUserId])
   useEffect(() => {
