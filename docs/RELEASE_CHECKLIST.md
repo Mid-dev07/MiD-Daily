@@ -4,69 +4,83 @@
 - [ ] `main` CI has a successful frontend build.
 - [ ] `main` CI has a successful backend build and test run.
 - [ ] No secrets are committed to the repository.
-- [ ] Supabase migrations are in timestamp order.
+- [ ] Frontend and backend lockfiles are tracked.
 
 ## Gate B — Supabase
-- [ ] Apply every migration in `supabase/migrations/`.
-- [ ] Confirm Auth providers and redirect URLs.
-- [ ] Confirm RLS is enabled on user data tables.
-- [ ] Confirm backups/restore expectations for the selected Supabase plan.
+- [ ] Live core tables exist.
+- [ ] RLS is enabled on user data tables.
+- [ ] Task, Finance, and Schedule own-row policies are present.
+- [ ] Integration tables remain service-only.
+- [ ] Security and performance advisors reviewed.
+- [ ] Leaked-password protection enabled.
 
-## Gate C — Render
-- [ ] Deploy `mid-daily-web` from `frontend`.
-- [ ] Deploy `mid-daily-api` from `backend`.
-- [ ] Set all required environment variables.
-- [ ] Verify `GET /health` returns HTTP 200.
-- [ ] Verify frontend can reach the deployed API.
+## Gate C — Cloudflare
+- [ ] Frontend Worker deploy succeeds.
+- [ ] Backend Worker deploy succeeds.
+- [ ] Frontend smoke test passes.
+- [ ] `GET /health` returns HTTP 200.
+- [ ] Backend secrets are present.
+- [ ] Frontend reaches the production API.
 
 ## Gate D — Authentication
 - [ ] Register with email/password.
 - [ ] Sign in and refresh the browser.
 - [ ] Sign in with Google.
-- [ ] Request password reset and complete recovery.
-- [ ] Sign out and confirm protected API access is rejected without a token.
+- [ ] Request password reset.
+- [ ] Complete password recovery.
+- [ ] Sign out.
+- [ ] Protected API calls reject unauthenticated access.
 
 ## Gate E — Core data
 - [ ] Create, edit, complete, and delete a Task.
 - [ ] Create, edit, and delete Finance entries.
 - [ ] Create, edit, and delete Schedule items.
-- [ ] Confirm data remains isolated to the signed-in user.
-- [ ] Refresh and confirm remote data hydrates correctly.
+- [ ] Invalid dates/times are rejected.
+- [ ] Overlapping Schedule items are rejected.
+- [ ] Data remains isolated per authenticated user.
+- [ ] Refresh rehydrates remote data correctly.
 
 ## Gate F — Google Calendar
-- [ ] Connect Google Calendar with the production redirect URI.
+- [ ] Connect Google Calendar.
 - [ ] Sync a Schedule item.
-- [ ] Edit the item and verify remote update.
-- [ ] Delete the item and verify remote deletion.
-- [ ] Re-test after an API token refresh/restart boundary.
+- [ ] Edit and update the remote event.
+- [ ] Delete the remote event.
+- [ ] Recover from a remote 404.
+- [ ] Verify access-token refresh behavior.
 
 ## Gate G — Telegram
-- [ ] Configure bot username/token and webhook secret.
-- [ ] Run the webhook setup command against the production backend URL.
-- [ ] Generate a link code in MiD-Daily.
-- [ ] Complete account linking in a private chat.
+- [ ] Configure bot + webhook secret.
+- [ ] Set the production webhook.
+- [ ] Generate a one-time link code.
+- [ ] Complete private-chat linking.
 - [ ] Verify supported commands.
-- [ ] Verify duplicate webhook delivery does not duplicate writes.
+- [ ] Verify duplicate delivery does not duplicate writes.
 
 ## Gate H — WhatsApp
-- [ ] Configure Cloud API credentials and webhook verification values.
-- [ ] Register the production webhook URL in Meta.
+- [ ] Configure Cloud API credentials.
+- [ ] Register the production webhook.
 - [ ] Complete account linking.
-- [ ] Verify supported commands and duplicate-event handling.
+- [ ] Verify supported commands.
+- [ ] Verify duplicate-event handling.
 - [ ] Verify invalid signatures/challenges are rejected.
 
 ## Gate I — Assistant
-- [ ] Confirm `OPENAI_API_KEY` is backend-only.
-- [ ] Test read-only queries against schedule, tasks, and expenses.
-- [ ] Confirm write tools are unavailable when actions are disabled.
-- [ ] Enable actions and explicitly create one test Task and one test Expense.
-- [ ] Confirm the UI shows returned action status.
+- [ ] Configure the backend OpenAI key.
+- [ ] Test read-only schedule/task/expense queries.
+- [ ] Confirm writes are unavailable in read-only mode.
+- [ ] Enable actions explicitly.
+- [ ] Test one Task write and one Expense write.
+- [ ] Confirm the UI reports action results.
 
-## Gate J — Observability and limits
-- [ ] Add provider/CDN rate limiting before public exposure.
-- [ ] Review Render/Supabase logs after smoke tests.
-- [ ] Record provider failures with enough context to diagnose without logging secrets.
-- [ ] Re-test after a service restart/cold start.
+## Gate J — UX and reliability
+- [ ] Dashboard remains usable at desktop, tablet, and mobile widths.
+- [ ] Mobile navigation remains reachable while scrolling.
+- [ ] Modals support Escape and do not scroll the page behind them.
+- [ ] Keyboard focus is visible.
+- [ ] Reduced-motion preference is respected.
+- [ ] Error boundary prevents full-app blank screens.
+- [ ] PWA manifest loads.
+- [ ] Production smoke tests pass after the latest deployment.
 
 ## Final state
-Do not mark the release complete until the production smoke tests above pass against the deployed URLs. The repository CI gate is necessary but does not replace live-provider verification.
+Do not call the release final until every applicable production gate passes. Optional provider features may remain disabled when credentials or provider approval are unavailable, but the UI must state that boundary clearly.
