@@ -9,6 +9,7 @@ interface TaskDetailProps {
 }
 
 export function TaskDetail({ task, onClose, onEdit }: TaskDetailProps) {
+  useModalBehavior(Boolean(task), onClose)
   if (!task) return null
   useModalBehavior(Boolean(task), onClose)
 
