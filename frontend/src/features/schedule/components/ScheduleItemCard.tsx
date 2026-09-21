@@ -80,9 +80,15 @@ export function ScheduleItemCard({ item, index, onView, onEdit, onSync, onDelete
         <div className="schedule-event-actions">
           <button className="text-button" type="button" disabled={busy} onClick={() => onView(item)}>Details</button>
           <button className="text-button" type="button" disabled={busy} onClick={() => onEdit(item)}>Edit</button>
-          <button className="text-button" type="button" disabled={busy} onClick={() => void sync()}>{busy ? 'Working…' : syncLabel}</button>
-          <button className="text-button" type="button" disabled={busy} onClick={openGoogleCalendar}>Open Calendar</button>
-          <button className="text-button danger" type="button" disabled={busy} onClick={() => void remove()}>Delete</button>
+
+          <details className="schedule-more">
+            <summary className="text-button" aria-label={'More actions for ' + item.title}>More</summary>
+            <div className="schedule-more-menu">
+              <button className="text-button" type="button" disabled={busy} onClick={() => void sync()}>{busy ? 'Working…' : syncLabel}</button>
+              <button className="text-button" type="button" disabled={busy} onClick={openGoogleCalendar}>Open Calendar</button>
+              <button className="text-button danger" type="button" disabled={busy} onClick={() => void remove()}>Delete</button>
+            </div>
+          </details>
         </div>
       </div>
     </article>
