@@ -2038,3 +2038,49 @@
     transition-duration: 1ms !important;
   }
 }
+
+
+/* Layout stability on wide and touch-first screens */
+.view-key {
+  width: min(100%, 1360px);
+  margin-inline: auto;
+}
+
+.feature-landscape,
+.content-card,
+.stat-card,
+.schedule-integration-card,
+.modal-card {
+  contain: paint;
+}
+
+button,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+@media (min-width: 1440px) {
+  .main-content {
+    padding-inline: clamp(32px, 5vw, 72px);
+  }
+}
+
+@media (max-width: 640px) {
+  .view-key {
+    width: 100%;
+  }
+
+  .modal-backdrop {
+    align-items: end;
+    padding: 10px;
+  }
+
+  .modal-card {
+    width: 100%;
+    max-height: min(88vh, 760px);
+    border-radius: 22px 22px 16px 16px;
+    padding: 18px;
+  }
+}
