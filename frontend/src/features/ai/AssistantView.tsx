@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { sendAIMessage, type AIMessage } from '../../integrations/aiApi'
+import { useEffect, useMemo, useState } from 'react'
+import { getAIStatus, sendAIMessage, type AIMessage } from '../../integrations/aiApi'
 
 const starterMessages: AIMessage[] = [
   { role: 'assistant', content: 'Hi. I can read your MiD-Daily data and help you plan the day. Actions are off by default.' },
@@ -12,8 +12,17 @@ export function AssistantView() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [lastActions, setLastActions] = useState<Array<{ tool: string; ok: boolean }>>([])
+  const [aiAvailable, setAiAvailable] = useState<boolean | null>(null)
 
-  const canSend = useMemo(() => input.trim().length > 0 && !loading, [input, loading])
+  useEffect(() => {
+    let active = true
+    void getAIStatus()
+      .then((status) => { if (active) setAiAvailable(status.configured) })
+      .catch(() => { if (active) setAiAvailable(false) })
+    return () => { active = false }
+  }, [])
+
+  const canSend = useMemo(() => input.trim().length > 0 && !loading && aiAvailable === true, [input, loading, aiAvailable])
 
   const send = async () => {
     const content = input.trim()
@@ -48,6 +57,7 @@ export function AssistantView() {
           <label className="ai-action-toggle">
             <input
               type="checkbox"
+              disabled={aiAvailable !== true}
               checked={allowWrites}
               onChange={(event) => {
                 if (event.target.checked && !window.confirm('Allow MiD-Daily Assistant to create Tasks and Expenses only when you explicitly ask it to?')) {
@@ -58,8 +68,15 @@ export function AssistantView() {
             />
             <span>Allow actions</span>
           </label>
-          <span className="card-meta">{allowWrites ? 'Task and expense creation enabled' : 'Read-only mode'}</span>
+          <span className="card-meta">{aiAvailable === null ? 'Checking AI service…' : aiAvailable ? (allowWrites ? 'Task and expense creation enabled' : 'Read-only mode') : 'AI service not configured'}</span>
         </div>
+
+        {aiAvailable === false && (
+          <div className="ai-availability-note" role="status">
+            <strong>Assistant is not configured on this deployment.</strong>
+            <span>The core MiD-Daily workspace remains fully usable without AI. Add the server-side OpenAI configuration to enable this module.</span>
+          </div>
+        )}
 
         <div className="ai-message-list" aria-live="polite">
           {messages.map((message, index) => (
@@ -84,7 +101,7 @@ export function AssistantView() {
         )}
 
         <div className="ai-composer">
-          <textarea value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => {
+          <textarea disabled={aiAvailable !== true} value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => {
             if (event.key === 'Enter' && !event.shiftKey) {
               event.preventDefault()
               void send()
