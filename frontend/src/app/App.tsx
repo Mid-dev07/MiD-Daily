@@ -291,7 +291,7 @@ export function App() {
   return (
     <div className="app-frame" data-view={activeView} data-time-period={timePeriod}>
       <div className="atmosphere" aria-hidden="true" />
-      <Sidebar activeView={activeView} onNavigate={navigate} />
+      <Sidebar onNavigate={navigate} />
       <main className="main-content">
         <Topbar view={activeView} />
         <Suspense fallback={<section className="workspace view-loading" aria-live="polite"><span className="section-kicker">LOADING</span><h2>Opening your workspace…</h2></section>}>
