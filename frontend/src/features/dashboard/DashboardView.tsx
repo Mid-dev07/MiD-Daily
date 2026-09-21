@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import { lazy, Suspense, useMemo, useState, type CSSProperties } from 'react'
 import type { FinanceEntry, Task, View } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
 import { currency, formatDate } from '../../lib/format'
@@ -18,12 +18,29 @@ interface DashboardViewProps {
 
 const getToday = () => new Intl.DateTimeFormat('sv-SE').format(new Date())
 
+const TelegramIntegrationCard = lazy(() => import('./components/TelegramIntegrationCard').then((module) => ({ default: module.TelegramIntegrationCard })))
+const WhatsAppIntegrationCard = lazy(() => import('./components/WhatsAppIntegrationCard').then((module) => ({ default: module.WhatsAppIntegrationCard })))
+
+
 export function DashboardView({ tasks, schedule, finance, onToggleTask, activeView, onNavigate }: DashboardViewProps) {
+  const [connectionsOpen, setConnectionsOpen] = useState(false)
   const today = getToday()
-  const todaySchedule = schedule.filter((item) => item.date === today).sort((a, b) => a.startTime.localeCompare(b.startTime))
+  const todaySchedule = useMemo(() => schedule
+    .filter((item) => item.date === today)
+    .sort((a, b) => a.startTime.localeCompare(b.startTime))
+    .slice(0, 5), [schedule, today])
   const completed = tasks.filter((task) => task.status === 'done').length
   const expense = finance.filter((entry) => entry.type === 'expense' && entry.date === today).reduce((sum, entry) => sum + entry.amount, 0)
   const openTasks = tasks.filter((task) => task.status !== 'done').length
+  const focusTasks = useMemo(() => [...tasks]
+    .filter((task) => task.status !== 'done')
+    .sort((a, b) => {
+      const priorityRank = { high: 0, medium: 1, low: 2 } as const
+      const priorityDelta = priorityRank[a.priority] - priorityRank[b.priority]
+      if (priorityDelta !== 0) return priorityDelta
+      return (a.dueDate ?? '9999-12-31').localeCompare(b.dueDate ?? '9999-12-31')
+    })
+    .slice(0, 5), [tasks])
   const completionPercent = tasks.length ? Math.round((completed / tasks.length) * 100) : 0
 
   return (
@@ -67,10 +84,10 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, activeVi
         <section className="content-card task-card motion-card">
           <div className="card-heading"><div><span className="section-kicker">FOCUS</span><h3>Task queue</h3></div><span className="card-meta">{openTasks} open</span></div>
           <div className="task-list">
-            {tasks.length === 0 ? <div className="empty-state"><strong>No tasks yet</strong><span>Add a task to start your focus queue.</span></div> : tasks.map((task) => (
+            {openTasks === 0 ? <div className="empty-state"><strong>All tasks complete</strong><span>Your focus queue is clear for now.</span></div> : focusTasks.map((task) => (
               <button className="task-row" key={task.id} type="button" onClick={() => onToggleTask(task.id)}>
-                <span className={task.status === 'done' ? 'task-check is-done' : 'task-check'}>{task.status === 'done' ? '✓' : ''}</span>
-                <span className="task-copy"><strong className={task.status === 'done' ? 'is-complete' : ''}>{task.title}</strong><small>{task.category}</small></span>
+                <span className="task-check">{''}</span>
+                <span className="task-copy"><strong>{task.title}</strong><small>{task.category}{task.dueDate ? ' · due ' + task.dueDate : ''}</small></span>
                 <span className={'priority-badge ' + task.priority}>{task.priority}</span>
               </button>
             ))}
@@ -80,10 +97,30 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, activeVi
 
       <FeatureLandscape activeView={activeView} onNavigate={onNavigate} />
 
-      <div className="dashboard-integration-grid">
-        <TelegramIntegrationCard />
-        <WhatsAppIntegrationCard />
-      </div>
+      <section className="dashboard-connections">
+        <button
+          className="connections-toggle"
+          type="button"
+          aria-expanded={connectionsOpen}
+          aria-controls="dashboard-connections-content"
+          onClick={() => setConnectionsOpen((open) => !open)}
+        >
+          <span>
+            <span className="section-kicker">CONNECTIONS</span>
+            <strong>External channels</strong>
+          </span>
+          <span className="connections-toggle-icon" aria-hidden="true">{connectionsOpen ? '−' : '+'}</span>
+        </button>
+
+        {connectionsOpen && (
+          <div id="dashboard-connections-content" className="dashboard-integration-grid">
+            <Suspense fallback={<div className="content-card connection-loading">Opening connections…</div>}>
+              <TelegramIntegrationCard />
+              <WhatsAppIntegrationCard />
+            </Suspense>
+          </div>
+        )}
+      </section>
     </section>
   )
 }
