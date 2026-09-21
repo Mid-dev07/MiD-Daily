@@ -10,6 +10,8 @@ export type ScheduleType =
   | 'EVENT'
   | 'OTHER'
 
+export type ActivityMode = 'FIXED' | 'FLEXIBLE' | 'ONE_TIME'
+export type TargetPeriod = 'DAY' | 'WEEK' | 'MONTH'
 export type ReminderOffset = 0 | 5 | 10 | 15 | 30 | 60
 export type RecurrenceFrequency = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY'
 export type ReminderStatus = 'disabled' | 'scheduled' | 'due' | 'expired'
@@ -31,6 +33,7 @@ export interface ScheduleItem {
   id: number
   title: string
   type: ScheduleType
+  activityMode: ActivityMode
   date: string
   startTime: string
   endTime: string
@@ -39,6 +42,12 @@ export interface ScheduleItem {
   reminderEnabled: boolean
   reminderOffset: ReminderOffset
   recurrence: RecurrenceRule
+  targetCount?: number | null
+  targetPeriod?: TargetPeriod | null
+  durationMinutes?: number | null
+  preferredStartTime?: string | null
+  preferredEndTime?: string | null
+  activityDeadline?: string | null
   googleCalendar: GoogleCalendarSyncMeta
 }
 
