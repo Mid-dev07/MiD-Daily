@@ -1,4 +1,4 @@
-import { isValidDateString } from './schedule.date'
+import { isValidDateString, scheduleOccursOnDate } from './schedule.date'
 import type { ScheduleDraft, ScheduleItem } from './schedule.types'
 
 export interface ScheduleValidationResult {
@@ -39,7 +39,7 @@ export function validateScheduleDraft(
   }
 
   const conflict = existing.some((item) => {
-    if (item.id === editingId || item.date !== draft.date) return false
+    if (item.id === editingId || !scheduleOccursOnDate(item, draft.date)) return false
     const itemStart = toMinutes(item.startTime)
     const itemEnd = toMinutes(item.endTime)
     return start < itemEnd && end > itemStart
