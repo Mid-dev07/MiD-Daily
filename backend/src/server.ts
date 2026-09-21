@@ -249,6 +249,19 @@ function httpError(status: number, message: string) {
   return error
 }
 
+async function authenticateAccessToken(token: string) {
+  if (!supabaseAuthClient) throw httpError(503, 'Supabase Auth is not configured.')
+
+  const { data, error } = await supabaseAuthClient.auth.getClaims(token)
+  const subject = data?.claims?.sub
+
+  if (error || typeof subject !== 'string' || !subject) {
+    throw httpError(401, 'Authentication session is invalid.')
+  }
+
+  return subject
+}
+
 async function resolveOwnerId(req: IncomingMessage, res: ServerResponse) {
   const authorization = req.headers.authorization
 
@@ -256,10 +269,7 @@ async function resolveOwnerId(req: IncomingMessage, res: ServerResponse) {
     if (!authorization?.startsWith('Bearer ')) throw httpError(401, 'Authentication is required.')
     const token = authorization.slice('Bearer '.length).trim()
     if (!token) throw httpError(401, 'Invalid access token.')
-
-    const { data, error } = await supabaseAuthClient.auth.getUser(token)
-    if (error || !data.user) throw httpError(401, 'Authentication session is invalid.')
-    return data.user.id
+    return authenticateAccessToken(token)
   }
 
   return ensureOwnerId(req, res)
@@ -664,9 +674,7 @@ async function requireAuthenticatedUserId(req: IncomingMessage) {
   const token = authorization.slice('Bearer '.length).trim()
   if (!token) throw asyncHttpError(401, 'Invalid access token.')
 
-  const { data, error } = await supabaseAuthClient.auth.getUser(token)
-  if (error || !data.user) throw asyncHttpError(401, 'Authentication session is invalid.')
-  return data.user.id
+  return authenticateAccessToken(token)
 }
 
 function assertPositiveId(url: URL, label: string) {
