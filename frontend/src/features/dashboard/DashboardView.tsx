@@ -7,7 +7,15 @@ import { TelegramIntegrationCard } from './components/TelegramIntegrationCard'
 import { WhatsAppIntegrationCard } from './components/WhatsAppIntegrationCard'
 import { FeatureLandscape } from './components/FeatureLandscape'
 
-interface DashboardViewProps { tasks: Task[]; schedule: ScheduleItem[]; finance: FinanceEntry[]; onToggleTask: (id: number) => void; activeView: View; onNavigate: (view: View) => void }
+interface DashboardViewProps {
+  tasks: Task[]
+  schedule: ScheduleItem[]
+  finance: FinanceEntry[]
+  onToggleTask: (id: number) => void
+  activeView: View
+  onNavigate: (view: View) => void
+}
+
 const getToday = () => new Intl.DateTimeFormat('sv-SE').format(new Date())
 
 export function DashboardView({ tasks, schedule, finance, onToggleTask, activeView, onNavigate }: DashboardViewProps) {
@@ -36,30 +44,46 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, activeVi
         </div>
       </div>
 
-      <FeatureLandscape activeView={activeView} onNavigate={onNavigate} />
-
       <div className="stat-row">
         <StatCard label="Schedule" value={String(todaySchedule.length)} hint="planned today" />
         <StatCard label="Tasks" value={`${completed}/${tasks.length}`} hint={`${openTasks} open`} />
         <StatCard label="Expense" value={currency.format(expense)} hint="spent today" />
       </div>
 
-      <section className="content-card schedule-card motion-card">
-        <div className="card-heading"><div><span className="section-kicker">AGENDA</span><h3>Today&apos;s schedule</h3></div><span className="card-meta">{todaySchedule.length} items</span></div>
-        <div className="schedule-list">
-          {todaySchedule.length === 0 ? <div className="empty-state"><strong>No activities planned</strong><span>Your Schedule is empty for today.</span></div> : todaySchedule.map((item) => <div className="schedule-item" key={item.id}><div className="schedule-time"><strong>{item.startTime}</strong><span>{item.endTime}</span></div><div className="timeline-dot" /><div className="schedule-copy"><strong>{item.title}</strong><span>{item.type} · {item.location || 'No location'}</span></div></div>)}
-        </div>
-      </section>
+      <div className="dashboard-primary-grid">
+        <section className="content-card schedule-card motion-card">
+          <div className="card-heading"><div><span className="section-kicker">AGENDA</span><h3>Today&apos;s schedule</h3></div><span className="card-meta">{todaySchedule.length} items</span></div>
+          <div className="schedule-list">
+            {todaySchedule.length === 0 ? <div className="empty-state"><strong>No activities planned</strong><span>Your Schedule is empty for today.</span></div> : todaySchedule.map((item) => (
+              <div className="schedule-item" key={item.id}>
+                <div className="schedule-time"><strong>{item.startTime}</strong><span>{item.endTime}</span></div>
+                <div className="timeline-dot" />
+                <div className="schedule-copy"><strong>{item.title}</strong><span>{item.type} · {item.location || 'No location'}</span></div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      <TelegramIntegrationCard />
-      <WhatsAppIntegrationCard />
+        <section className="content-card task-card motion-card">
+          <div className="card-heading"><div><span className="section-kicker">FOCUS</span><h3>Task queue</h3></div><span className="card-meta">{openTasks} open</span></div>
+          <div className="task-list">
+            {tasks.length === 0 ? <div className="empty-state"><strong>No tasks yet</strong><span>Add a task to start your focus queue.</span></div> : tasks.map((task) => (
+              <button className="task-row" key={task.id} type="button" onClick={() => onToggleTask(task.id)}>
+                <span className={task.status === 'done' ? 'task-check is-done' : 'task-check'}>{task.status === 'done' ? '✓' : ''}</span>
+                <span className="task-copy"><strong className={task.status === 'done' ? 'is-complete' : ''}>{task.title}</strong><small>{task.category}</small></span>
+                <span className={'priority-badge ' + task.priority}>{task.priority}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      </div>
 
-      <section className="content-card task-card motion-card">
-        <div className="card-heading"><div><span className="section-kicker">FOCUS</span><h3>Task queue</h3></div><span className="card-meta">{openTasks} open</span></div>
-        <div className="task-list">
-          {tasks.length === 0 ? <div className="empty-state"><strong>No tasks yet</strong><span>Add a task to start your focus queue.</span></div> : tasks.map((task) => <button className="task-row" key={task.id} type="button" onClick={() => onToggleTask(task.id)}><span className={task.status === 'done' ? 'task-check is-done' : 'task-check'}>{task.status === 'done' ? '✓' : ''}</span><span className="task-copy"><strong className={task.status === 'done' ? 'is-complete' : ''}>{task.title}</strong><small>{task.category}</small></span><span className={'priority-badge ' + task.priority}>{task.priority}</span></button>)}
-        </div>
-      </section>
+      <FeatureLandscape activeView={activeView} onNavigate={onNavigate} />
+
+      <div className="dashboard-integration-grid">
+        <TelegramIntegrationCard />
+        <WhatsAppIntegrationCard />
+      </div>
     </section>
   )
 }
