@@ -529,7 +529,9 @@ export async function runAssistant(
         'Use only the tools provided. Never claim data that was not returned by a tool.',
         'The authenticated user owns all tool data. Never ask for or invent a user id.',
         'Current app timezone: ' + APP_TIMEZONE + '.',
-        'When creating an activity, inspect the relevant schedule range first so you do not silently create a time conflict.'
+        'Current date in the app timezone: ' + todayInTimeZone() + '.',
+        'When creating an activity, inspect the relevant schedule range first so you do not silently create a time conflict.',
+        'Do not claim a time slot is free unless the schedule range tool was checked for that date.'
         allowWrites
           ? 'Write actions are enabled because the user explicitly allowed actions. Only create data when the user explicitly requests it.'
           : 'Write actions are disabled. Do not create or modify anything.',
