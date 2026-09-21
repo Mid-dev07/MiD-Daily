@@ -1856,3 +1856,46 @@
     transition-duration: 1ms !important;
   }
 }
+
+
+/* Nature cleanup — remove remaining legacy neon signals */
+.schedule-date-caption strong {
+  color: #dfe7d5;
+  text-shadow: none;
+}
+
+.toast {
+  color: #dce5d5;
+  background: linear-gradient(142deg, rgba(43, 57, 42, .96), rgba(18, 26, 19, .97));
+  border-color: rgba(183, 201, 138, .20);
+  box-shadow:
+    0 1px 0 rgba(255, 250, 225, .06) inset,
+    0 22px 46px -20px rgba(0, 0, 0, .78);
+}
+
+.toast::after {
+  background: linear-gradient(90deg, var(--nature-sage), rgba(217, 197, 141, .28));
+  box-shadow: none;
+}
+
+.toast-icon {
+  color: #182114;
+  background: linear-gradient(142deg, #d7ca8c, #9faf73);
+  box-shadow: none;
+}
+
+.feature-landscape:has(.feature-node:hover) .feature-core,
+.feature-landscape:has(.feature-node:focus-visible) .feature-core {
+  transform: translate(-50%, -50%) rotate(-2deg) scale(1.04);
+  border-color: rgba(217, 197, 141, .24);
+  box-shadow:
+    0 1px 0 rgba(255, 250, 225, .08) inset,
+    0 24px 38px -18px rgba(0, 0, 0, .84),
+    0 0 52px -24px rgba(183, 201, 138, .42);
+}
+
+@supports not selector(:has(*)) {
+  .feature-landscape:hover .feature-core {
+    transform: translate(-50%, -50%) rotate(-2deg) scale(1.04);
+  }
+}
