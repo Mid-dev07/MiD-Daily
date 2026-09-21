@@ -740,11 +740,11 @@ function validateTaskPatch(body: Record<string, unknown>) {
     if (body.dueDate !== null && (typeof body.dueDate !== 'string' || !isIsoDate(body.dueDate))) {
       throw httpError(400, 'Task due date is invalid.')
     }
-    patch.dueDate = body.dueDate === null ? null : body.dueDate
+    patch.dueDate = body.dueDate === null ? null : (body.dueDate as string)
   }
   if (Object.prototype.hasOwnProperty.call(body, 'notes')) {
     if (body.notes !== null && typeof body.notes !== 'string') throw httpError(400, 'Task notes are invalid.')
-    patch.notes = body.notes === null ? null : body.notes.trim() || null
+    patch.notes = body.notes === null ? null : (body.notes as string).trim() || null
   }
 
   if (Object.keys(patch).length === 0) throw httpError(400, 'No task fields were provided.')
