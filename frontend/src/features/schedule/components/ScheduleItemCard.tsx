@@ -16,6 +16,9 @@ export function ScheduleItemCard({ item, index, onView, onEdit, onSync, onDelete
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const reminder = getReminderState(item)
+  const modeLabel = item.activityMode === 'FIXED'
+    ? (item.recurrence.frequency === 'NONE' ? 'Fixed time' : 'Fixed · ' + item.recurrence.frequency.toLowerCase())
+    : 'One-time'
   const syncLabel = item.googleCalendar.status === 'synced' ? 'Update Google' : 'Sync to Google'
   const calendarLabel = item.googleCalendar.status === 'synced'
     ? 'Google Calendar synced'
@@ -61,7 +64,7 @@ export function ScheduleItemCard({ item, index, onView, onEdit, onSync, onDelete
 
       <div className="schedule-event-body">
         <div className="schedule-event-header">
-          <div><span className="event-type">{item.type}</span><h3>{item.title}</h3></div>
+          <div><span className="event-type">{item.activityMode} · {item.type}</span><h3>{item.title}</h3></div>
           <span className={`schedule-event-status reminder-${reminder.status}`}>{reminder.status === 'scheduled' ? `Reminder ${formatReminderTime(reminder.triggerAt)}` : reminder.label}</span>
         </div>
 
@@ -71,7 +74,7 @@ export function ScheduleItemCard({ item, index, onView, onEdit, onSync, onDelete
           <span className={reminder.status === 'scheduled' ? 'meta-chip is-enabled' : 'meta-chip'}>
             {item.reminderEnabled ? `Reminder ${item.reminderOffset === 0 ? 'at start' : `${item.reminderOffset}m`}` : 'Reminder off'}
           </span>
-          <span className="meta-chip">{item.recurrence.frequency === 'NONE' ? 'One-time' : `Repeats ${item.recurrence.frequency.toLowerCase()}`}</span>
+          <span className="meta-chip">{modeLabel}</span>
           <span className={item.googleCalendar.status === 'synced' ? 'meta-chip is-enabled' : 'meta-chip'}>{calendarLabel}</span>
         </div>
 
