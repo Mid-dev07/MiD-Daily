@@ -202,6 +202,11 @@ function assertOptionalDate(value: unknown, field: string) {
   return value
 }
 
+function optionalText(value: unknown, field: string, max = 500) {
+  if (value === null || value === undefined || value === '') return ''
+  return assertString(value, field, max)
+}
+
 function assertPositiveAmount(value: unknown) {
   const amount = Number(value)
   if (!Number.isFinite(amount) || amount <= 0 || amount > 1_000_000_000) throw new Error('Expense amount is invalid.')
@@ -376,8 +381,8 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
 
     const startTime = args.startTime === null ? '' : assertString(args.startTime, 'Activity start time', 5)
     const endTime = args.endTime === null ? '' : assertString(args.endTime, 'Activity end time', 5)
-    const location = args.location === null ? '' : assertString(args.location, 'Activity location', 200)
-    const notes = args.notes === null ? '' : assertString(args.notes, 'Activity notes', 5000)
+    const location = optionalText(args.location, 'Activity location', 200)
+    const notes = optionalText(args.notes, 'Activity notes', 5000)
 
     const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/
     if (mode !== 'FLEXIBLE') {
@@ -432,7 +437,7 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
     const period = assertString(args.period, 'Budget period', 10) as 'WEEK' | 'MONTH'
     const startsOn = assertOptionalDate(args.startsOn, 'Budget start') 
     const endsOn = args.endsOn === null ? null : assertOptionalDate(args.endsOn, 'Budget end') ?? null
-    const notes = args.notes === null ? null : assertString(args.notes, 'Budget notes', 5000)
+    const notes = args.notes === null || args.notes === '' ? null : assertString(args.notes, 'Budget notes', 5000)
 
     if (!startsOn) throw new Error('Budget start date is required.')
     if (!['WEEK','MONTH'].includes(period)) throw new Error('Budget period is invalid.')
