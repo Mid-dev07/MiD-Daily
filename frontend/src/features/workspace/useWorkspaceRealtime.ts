@@ -57,12 +57,13 @@ function mapSchedule(row: Row): ScheduleItem {
 
 export function useWorkspaceRealtime(
   userId: string | undefined,
+  enabled: boolean,
   onTasks: (updater: (current: Task[]) => Task[]) => void,
   onFinance: (updater: (current: FinanceEntry[]) => FinanceEntry[]) => void,
   onSchedule: (updater: (current: ScheduleItem[]) => ScheduleItem[]) => void,
 ) {
   useEffect(() => {
-    if (!userId || !supabase) return
+    if (!userId || !enabled || !supabase) return
 
     const upsertById = <T extends { id: number }>(items: T[], next: T) => {
       const existing = items.some((item) => item.id === next.id)
@@ -122,5 +123,5 @@ export function useWorkspaceRealtime(
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [userId, onTasks, onFinance, onSchedule])
+  }, [userId, enabled, onTasks, onFinance, onSchedule])
 }
