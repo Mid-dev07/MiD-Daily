@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { useModalBehavior } from '../../../lib/useModalBehavior'
 import type { ReminderOffset, RecurrenceFrequency, ScheduleDraft, ScheduleItem, ScheduleType } from '../schedule.types'
 
 interface ScheduleFormProps {
@@ -44,6 +45,7 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
   }, [open, initialItem, defaultDate])
 
   if (!open) return null
+  useModalBehavior(open, onClose, saving)
 
   const setField = <K extends keyof ScheduleDraft>(field: K, value: ScheduleDraft[K]) => {
     setDraft((current) => ({ ...current, [field]: value }))
@@ -90,7 +92,7 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
 
           <div className="form-grid two">
             <label>Start<input disabled={saving} type="time" value={draft.startTime} onChange={(e) => setField('startTime', e.target.value)} /></label>
-            <label>End<input type="time" value={draft.endTime} onChange={(e) => setField('endTime', e.target.value)} /></label>
+            <label>End<input disabled={saving} type="time" value={draft.endTime} onChange={(e) => setField('endTime', e.target.value)} /></label>
           </div>
 
           <label>Location<input disabled={saving} value={draft.location} onChange={(e) => setField('location', e.target.value)} placeholder="Optional" /></label>
