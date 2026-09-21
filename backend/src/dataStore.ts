@@ -78,7 +78,7 @@ export async function createTask(userId: string, task: Omit<TaskRecord, 'id'>) {
   return taskFromRow(data)
 }
 
-export async function updateTask(userId: string, id: number, task: Partial<TaskRecord>) {
+export async function updateTask(userId: string, id: number, task: Partial<TaskRecord> & { dueDate?: string | null; notes?: string | null }) {
   const { data, error } = await db().from('tasks').update({
     ...(task.title === undefined ? {} : { title: task.title }),
     ...(task.category === undefined ? {} : { category: task.category }),
@@ -121,7 +121,7 @@ export async function createFinance(userId: string, entry: Omit<FinanceRecord, '
   return financeFromRow(data)
 }
 
-export async function updateFinance(userId: string, id: number, entry: Partial<FinanceRecord>) {
+export async function updateFinance(userId: string, id: number, entry: Partial<FinanceRecord> & { notes?: string | null }) {
   const { data, error } = await db().from('finance_entries').update({
     ...(entry.type === undefined ? {} : { type: entry.type }),
     ...(entry.title === undefined ? {} : { title: entry.title }),
