@@ -35,7 +35,7 @@ export function FinanceView({ finance, onSaveFinance, onDeleteFinance }: Finance
   const periodFinance = useMemo(() => finance.filter((entry) => isInFinancePeriod(entry.date, period)), [finance, period])
   const filtered = useMemo(() => periodFinance
     .filter((entry) => {
-      const q = query.toLowerCase()
+      const q = query.trim().toLowerCase()
       return (!q || entry.title.toLowerCase().includes(q) || entry.category.toLowerCase().includes(q))
         && (type === 'ALL' || entry.type === type)
         && (category === 'ALL' || entry.category === category)
@@ -66,12 +66,34 @@ export function FinanceView({ finance, onSaveFinance, onDeleteFinance }: Finance
   return (
     <section className="workspace page-enter">
       <div className="page-intro">
-        <div><span className="section-kicker">FINANCE</span><h2>Money, made visible.</h2><p>Track income and expenses by period, category, and date, with your account data persisted to the workspace.</p></div>
-        <button className="primary-button" type="button" onClick={openCreate}>+ Add transaction</button>
+        <div>
+          <h2>Finance</h2>
+          <p>See income, spending, and balance for the period you choose.</p>
+        </div>
+        <button className="primary-button" type="button" onClick={openCreate}>Add transaction</button>
       </div>
 
-      <div className="filter-row finance-periods">
-        {periodOptions.map((option) => <button key={option.value} className={period === option.value ? 'filter-button is-active' : 'filter-button'} type="button" onClick={() => setPeriod(option.value)}>{option.label}</button>)}
+      <div className="finance-toolbar content-card">
+        <div className="finance-toolbar-periods filter-row">
+          {periodOptions.map((option) => (
+            <button key={option.value} className={period === option.value ? 'filter-button is-active' : 'filter-button'} type="button" onClick={() => setPeriod(option.value)}>
+              {option.label}
+            </button>
+          ))}
+        </div>
+        <div className="finance-toolbar-controls">
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search transactions" aria-label="Search transactions" />
+          <div className="filter-row">
+            {typeOptions.map((option) => (
+              <button key={option.value} className={type === option.value ? 'filter-button is-active' : 'filter-button'} type="button" onClick={() => setType(option.value)}>
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <select value={category} onChange={(event) => setCategory(event.target.value)} aria-label="Filter by category">
+            {categories.map((value) => <option key={value} value={value}>{value === 'ALL' ? 'All categories' : value}</option>)}
+          </select>
+        </div>
       </div>
 
       <div className="stat-row">
@@ -81,30 +103,32 @@ export function FinanceView({ finance, onSaveFinance, onDeleteFinance }: Finance
       </div>
 
       <section className="content-card finance-insights">
-        <div className="card-heading"><div><span className="section-kicker">BREAKDOWN</span><h3>Top expense categories</h3></div><span className="card-meta">{expenseByCategory.length} categories</span></div>
-        {expenseByCategory.length === 0 ? <div className="empty-state"><strong>No expenses in this period</strong><span>Add an expense to build the breakdown.</span></div> : expenseByCategory.map(([name, amount]) => (
-          <div className="finance-breakdown-row" key={name}><span>{name}</span><div className="finance-breakdown-track"><span style={{ width: expense ? Math.min(100, (amount / expense) * 100) + '%' : '0%' }} /></div><strong>{currency.format(amount)}</strong></div>
+        <div className="card-heading">
+          <div><span className="section-kicker">Breakdown</span><h3>Top expenses</h3></div>
+          <span className="card-meta">{expenseByCategory.length} categories</span>
+        </div>
+        {expenseByCategory.length === 0 ? (
+          <div className="empty-state"><strong>No expenses in this period.</strong><span>Add an expense to see the breakdown.</span></div>
+        ) : expenseByCategory.map(([name, amount]) => (
+          <div className="finance-breakdown-row" key={name}>
+            <span>{name}</span>
+            <div className="finance-breakdown-track" aria-hidden="true"><span style={{ width: expense ? Math.min(100, (amount / expense) * 100) + '%' : '0%' }} /></div>
+            <strong>{currency.format(amount)}</strong>
+          </div>
         ))}
       </section>
 
-      <div className="finance-toolbar content-card">
-        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search title or category" aria-label="Search transactions" />
-        <div className="filter-row">
-          {typeOptions.map((option) => <button key={option.value} className={type === option.value ? 'filter-button is-active' : 'filter-button'} type="button" onClick={() => setType(option.value)}>{option.label}</button>)}
-        </div>
-        <select value={category} onChange={(event) => setCategory(event.target.value)} aria-label="Filter by category">
-          {categories.map((value) => <option key={value} value={value}>{value === 'ALL' ? 'All categories' : value}</option>)}
-        </select>
-      </div>
-
       <div className="content-card module-list">
         {filtered.length === 0 ? (
-          <div className="empty-state"><strong>No matching transactions</strong><span>Adjust the filters or create a new transaction.</span></div>
+          <div className="empty-state"><strong>No matching transactions.</strong><span>Adjust the filters or add a transaction.</span></div>
         ) : filtered.map((entry) => (
           <article className="finance-row" key={entry.id}>
             <div className="module-main"><strong>{entry.title}</strong><span>{entry.category} · {formatDate(entry.date)}{entry.notes ? ' · ' + entry.notes : ''}</span></div>
             <strong className={entry.type === 'income' ? 'amount-positive' : 'amount-negative'}>{entry.type === 'income' ? '+' : '-'}{currency.format(entry.amount)}</strong>
-            <div className="finance-row-actions"><button className="text-button" type="button" onClick={() => openEdit(entry)}>Edit</button><button className="text-button danger" type="button" onClick={() => remove(entry.id)}>Delete</button></div>
+            <div className="finance-row-actions">
+              <button className="text-button" type="button" onClick={() => openEdit(entry)}>Edit</button>
+              <button className="text-button danger" type="button" onClick={() => remove(entry.id)}>Delete</button>
+            </div>
           </article>
         ))}
       </div>
