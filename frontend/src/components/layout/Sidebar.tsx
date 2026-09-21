@@ -16,7 +16,7 @@ const navigation: Array<{ id: View; label: string; icon: string }> = [
 
 export function Sidebar({ activeView, onNavigate }: SidebarProps) {
   return (
-    <aside className="sidebar">
+    <aside className="sidebar glass-panel">
       <div className="brand">
         <div className="brand-mark">M</div>
         <div className="brand-copy">
