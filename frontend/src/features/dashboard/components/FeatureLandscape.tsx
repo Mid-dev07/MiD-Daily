@@ -19,39 +19,43 @@ export function FeatureLandscape({ activeView, onNavigate }: FeatureLandscapePro
     <section className="feature-landscape motion-card" aria-labelledby="feature-landscape-title">
       <div className="feature-landscape-heading">
         <div>
-          <span className="section-kicker">EXPLORE YOUR DAY</span>
-          <h3 id="feature-landscape-title">Everything grows from one place.</h3>
-          <p>Move through MiD Daily like a landscape: each feature has its own place, depth, and state.</p>
+          <span className="section-kicker">YOUR DIGITAL LANDSCAPE</span>
+          <h3 id="feature-landscape-title">One place. Different rhythms.</h3>
+          <p>Explore the parts of your day as living pieces of the same environment.</p>
         </div>
-        <span className="feature-landscape-hint">Hover · feel · enter</span>
+        <span className="feature-landscape-hint">Hover · explore · enter</span>
       </div>
 
-      <div className="feature-orbit" aria-label="MiD Daily features">
+      <div className="feature-scene">
+        {features.map((feature) => (
+          <button
+            key={feature.id}
+            type="button"
+            className={activeView === feature.id ? 'feature-node is-active' : 'feature-node'}
+            data-feature={feature.id}
+            aria-current={activeView === feature.id ? 'page' : undefined}
+            onClick={() => onNavigate(feature.id)}
+          >
+            <span className="feature-node-label">
+              <span className="feature-node-icon" aria-hidden="true">{feature.icon}</span>
+              <span className="feature-node-title">{feature.label}</span>
+            </span>
+            <span className="feature-node-meta">{feature.meta}</span>
+          </button>
+        ))}
+
         <div className="feature-core" aria-hidden="true">
+          <div className="feature-core-glass" />
           <div className="feature-core-label">
             <strong>MiD</strong>
             <span>daily rhythm</span>
           </div>
         </div>
 
-        {features.map((feature) => {
-          return (
-            <button
-              key={feature.id}
-              type="button"
-              className={activeView === feature.id ? 'feature-node is-active' : 'feature-node'}
-              data-feature={feature.id}
-              aria-current={activeView === feature.id ? 'page' : undefined}
-              onClick={() => onNavigate(feature.id)}
-            >
-              <span className="feature-node-label">
-                <span className="feature-node-icon" aria-hidden="true">{feature.icon}</span>
-                <span className="feature-node-title">{feature.label}</span>
-              </span>
-              <span className="feature-node-meta">{feature.meta}</span>
-            </button>
-          )
-        })}
+        <div className="feature-scene-caption" aria-hidden="true">
+          <span className="scene-caption-line" />
+          <span>calm systems · natural flow</span>
+        </div>
       </div>
     </section>
   )
