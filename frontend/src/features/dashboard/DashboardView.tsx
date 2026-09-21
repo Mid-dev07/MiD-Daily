@@ -84,6 +84,11 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
     return results
   }, [schedule, today])
 
+  const flexiblePlans = useMemo(() => schedule
+    .filter((item) => item.activityMode === 'FLEXIBLE')
+    .sort((a, b) => (a.activityDeadline ?? '9999-12-31').localeCompare(b.activityDeadline ?? '9999-12-31'))
+    .slice(0, 3), [schedule])
+
   const upcomingDateLabel = new Intl.DateTimeFormat('id-ID', {
     weekday: 'short',
     day: 'numeric',
@@ -228,6 +233,26 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
             </div>
           </div>
         </section>
+
+        {flexiblePlans.length > 0 && (
+          <section className="content-card dashboard-flexible">
+            <div className="card-heading">
+              <div>
+                <span className="section-kicker">Adaptive</span>
+                <h3>Flexible plans</h3>
+              </div>
+              <span className="card-meta">{flexiblePlans.length} active</span>
+            </div>
+            <div className="dashboard-flexible-list">
+              {flexiblePlans.map((item) => (
+                <button className="dashboard-flexible-item" key={item.id} type="button" onClick={() => onNavigate('schedule')}>
+                  <span>{item.durationMinutes} min</span>
+                  <div><strong>{item.title}</strong><small>{item.targetCount}× / {item.targetPeriod?.toLowerCase()}{item.activityDeadline ? ' · due ' + item.activityDeadline : ''}</small></div>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="content-card dashboard-upcoming">
           <div className="card-heading">

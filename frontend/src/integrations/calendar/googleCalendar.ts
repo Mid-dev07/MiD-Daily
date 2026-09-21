@@ -15,6 +15,10 @@ function buildDetails(item: ScheduleItem) {
 }
 
 export function toGoogleCalendarEventPayload(item: ScheduleItem): GoogleCalendarEventPayload {
+  if (item.activityMode === 'FLEXIBLE' || !item.startTime || !item.endTime) {
+    throw new Error('Flexible plans do not have fixed calendar events.')
+  }
+
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
 
   return {

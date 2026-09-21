@@ -20,6 +20,7 @@ interface ReminderSchedule {
   reminder_enabled: boolean
   reminder_offset: number
   recurrence: Recurrence
+  activity_mode: string
 }
 
 interface TelegramRecipient {
@@ -91,8 +92,9 @@ export async function runBackgroundReminderDispatch(now = new Date()) {
   const previousDate = addDays(current.date, -1)
   const [{ data: schedules, error: scheduleError }, { data: telegrams, error: telegramError }, { data: whatsapps, error: whatsAppError }] = await Promise.all([
     db().from('schedule_items')
-      .select('id,user_id,title,type,event_date,start_time,reminder_enabled,reminder_offset,recurrence')
+      .select('id,user_id,title,type,activity_mode,event_date,start_time,reminder_enabled,reminder_offset,recurrence')
       .eq('reminder_enabled', true)
+      .neq('activity_mode', 'FLEXIBLE')
       .lte('event_date', current.date),
     db().from('telegram_connections').select('user_id,chat_id'),
     db().from('whatsapp_connections').select('user_id,wa_id'),

@@ -1,9 +1,13 @@
 import { createClient } from '@supabase/supabase-js'
 
+export type ActivityMode = 'FIXED' | 'FLEXIBLE' | 'ONE_TIME'
+export type TargetPeriod = 'DAY' | 'WEEK' | 'MONTH'
+
 export interface ScheduleRecord {
   id: number
   title: string
   type: 'CLASS' | 'WORK' | 'MEETING' | 'STUDY' | 'PERSONAL' | 'APPOINTMENT' | 'EVENT' | 'OTHER'
+  activityMode: ActivityMode
   date: string
   startTime: string
   endTime: string
@@ -12,6 +16,12 @@ export interface ScheduleRecord {
   reminderEnabled: boolean
   reminderOffset: 0 | 5 | 10 | 15 | 30 | 60
   recurrence: { frequency: 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY'; interval: number; until?: string }
+  targetCount?: number | null
+  targetPeriod?: TargetPeriod | null
+  durationMinutes?: number | null
+  preferredStartTime?: string | null
+  preferredEndTime?: string | null
+  activityDeadline?: string | null
   googleCalendar: { status: 'not-synced' | 'pending' | 'synced' | 'error'; calendarId: string; eventId?: string; lastSyncedAt?: string; error?: string }
 }
 
@@ -34,19 +44,26 @@ function fromRow(row: Record<string, unknown>): ScheduleRecord {
     id: Number(row.id),
     title: String(row.title),
     type: row.type as ScheduleRecord['type'],
+    activityMode: row.activity_mode as ScheduleRecord['activityMode'],
     date: String(row.event_date),
-    startTime: String(row.start_time).slice(0, 5),
-    endTime: String(row.end_time).slice(0, 5),
+    startTime: row.start_time == null ? '' : String(row.start_time).slice(0, 5),
+    endTime: row.end_time == null ? '' : String(row.end_time).slice(0, 5),
     location: String(row.location ?? ''),
     notes: String(row.notes ?? ''),
     reminderEnabled: Boolean(row.reminder_enabled),
     reminderOffset: Number(row.reminder_offset) as ScheduleRecord['reminderOffset'],
     recurrence: (row.recurrence ?? { frequency: 'NONE', interval: 1 }) as ScheduleRecord['recurrence'],
+    targetCount: row.target_count == null ? undefined : Number(row.target_count),
+    targetPeriod: row.target_period as ScheduleRecord['targetPeriod'],
+    durationMinutes: row.duration_minutes == null ? undefined : Number(row.duration_minutes),
+    preferredStartTime: row.preferred_start_time == null ? undefined : String(row.preferred_start_time).slice(0, 5),
+    preferredEndTime: row.preferred_end_time == null ? undefined : String(row.preferred_end_time).slice(0, 5),
+    activityDeadline: typeof row.activity_deadline === 'string' ? row.activity_deadline : undefined,
     googleCalendar: (row.google_calendar ?? { status: 'not-synced', calendarId: 'primary' }) as ScheduleRecord['googleCalendar'],
   }
 }
 
-const columns = 'id,title,type,event_date,start_time,end_time,location,notes,reminder_enabled,reminder_offset,recurrence,google_calendar'
+const columns = 'id,title,type,activity_mode,event_date,start_time,end_time,location,notes,reminder_enabled,reminder_offset,recurrence,target_count,target_period,duration_minutes,preferred_start_time,preferred_end_time,activity_deadline,google_calendar'
 
 export async function listSchedule(userId: string) {
   const { data, error } = await db().from('schedule_items').select(columns).eq('user_id', userId).order('event_date', { ascending: true }).order('start_time', { ascending: true })
@@ -59,14 +76,21 @@ export async function createSchedule(userId: string, item: Omit<ScheduleRecord, 
     user_id: userId,
     title: item.title,
     type: item.type,
+    activity_mode: item.activityMode,
     event_date: item.date,
-    start_time: item.startTime,
+    start_time: item.startTime || null,
     end_time: item.endTime,
     location: item.location,
     notes: item.notes,
     reminder_enabled: item.reminderEnabled,
     reminder_offset: item.reminderOffset,
     recurrence: item.recurrence,
+    target_count: item.targetCount ?? null,
+    target_period: item.targetPeriod ?? null,
+    duration_minutes: item.durationMinutes ?? null,
+    preferred_start_time: item.preferredStartTime ?? null,
+    preferred_end_time: item.preferredEndTime ?? null,
+    activity_deadline: item.activityDeadline ?? null,
     google_calendar: item.googleCalendar,
   }).select(columns).single()
   if (error) throw new Error(`Schedule create failed: ${error.message}`)
@@ -78,13 +102,20 @@ export async function updateSchedule(userId: string, id: number, item: Partial<O
     ...(item.title === undefined ? {} : { title: item.title }),
     ...(item.type === undefined ? {} : { type: item.type }),
     ...(item.date === undefined ? {} : { event_date: item.date }),
-    ...(item.startTime === undefined ? {} : { start_time: item.startTime }),
+    ...(item.startTime === undefined ? {} : { start_time: item.startTime || null }),
     ...(item.endTime === undefined ? {} : { end_time: item.endTime }),
     ...(item.location === undefined ? {} : { location: item.location }),
     ...(item.notes === undefined ? {} : { notes: item.notes }),
     ...(item.reminderEnabled === undefined ? {} : { reminder_enabled: item.reminderEnabled }),
     ...(item.reminderOffset === undefined ? {} : { reminder_offset: item.reminderOffset }),
     ...(item.recurrence === undefined ? {} : { recurrence: item.recurrence }),
+    ...(item.activityMode === undefined ? {} : { activity_mode: item.activityMode }),
+    ...(item.targetCount === undefined ? {} : { target_count: item.targetCount ?? null }),
+    ...(item.targetPeriod === undefined ? {} : { target_period: item.targetPeriod ?? null }),
+    ...(item.durationMinutes === undefined ? {} : { duration_minutes: item.durationMinutes ?? null }),
+    ...(item.preferredStartTime === undefined ? {} : { preferred_start_time: item.preferredStartTime ?? null }),
+    ...(item.preferredEndTime === undefined ? {} : { preferred_end_time: item.preferredEndTime ?? null }),
+    ...(item.activityDeadline === undefined ? {} : { activity_deadline: item.activityDeadline ?? null }),
     ...(item.googleCalendar === undefined ? {} : { google_calendar: item.googleCalendar }),
   }).eq('id', id).eq('user_id', userId).select(columns).maybeSingle()
   if (error) throw new Error(`Schedule update failed: ${error.message}`)

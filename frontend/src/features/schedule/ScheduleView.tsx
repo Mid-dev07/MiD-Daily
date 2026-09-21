@@ -36,6 +36,11 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
   const [notificationSupport, setNotificationSupport] = useState(getNotificationSupport)
 
   const normalizedSchedule = useMemo(() => normalizeScheduleList(schedule), [schedule])
+  const flexiblePlans = useMemo(() => normalizedSchedule
+    .filter((item) => item.activityMode === 'FLEXIBLE')
+    .sort((a, b) => (a.activityDeadline ?? '9999-12-31').localeCompare(b.activityDeadline ?? '9999-12-31')),
+  [normalizedSchedule])
+
   const visibleItems = useMemo(() => normalizedSchedule
     .filter((item) => scheduleOccursOnDate(item, date))
     .filter((item) => filter === 'ALL' || item.type === filter)
@@ -178,7 +183,7 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
 
       <div className="content-card schedule-events-card">
         {visibleItems.length === 0
-          ? <EmptyState title="Nothing scheduled" description="Try another date, clear the filter, or add an activity." />
+          ? <EmptyState title="Nothing scheduled" description="Try another date, clear the filter, or add a fixed activity." />
           : <div className="schedule-events">{visibleItems.map(({ item, source }, index) => (
             <ScheduleItemCard
               key={source.id + '-' + item.date}
@@ -191,6 +196,33 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
             />
           ))}</div>}
       </div>
+
+      {flexiblePlans.length > 0 && (
+        <section className="content-card flexible-plans-card">
+          <div className="card-heading">
+            <div>
+              <span className="section-kicker">Flexible</span>
+              <h3>Plans without fixed slots</h3>
+            </div>
+            <span className="card-meta">{flexiblePlans.length} plan{flexiblePlans.length === 1 ? '' : 's'}</span>
+          </div>
+          <div className="flexible-plan-list">
+            {flexiblePlans.map((item) => (
+              <article className="flexible-plan" key={item.id}>
+                <button className="flexible-plan-main" type="button" onClick={() => setDetailItem(item)}>
+                  <strong>{item.title}</strong>
+                  <span>{item.targetCount} session{item.targetCount === 1 ? '' : 's'} · {item.targetPeriod?.toLowerCase()} · {item.durationMinutes} min each</span>
+                </button>
+                <div className="flexible-plan-meta">
+                  <span>{item.preferredStartTime && item.preferredEndTime ? item.preferredStartTime + '–' + item.preferredEndTime : 'Any suitable time'}</span>
+                  {item.activityDeadline && <span>due {item.activityDeadline}</span>}
+                </div>
+                <button className="text-button" type="button" onClick={() => openEdit(item)}>Edit</button>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
       <details className="secondary-panel">
         <summary>Connections &amp; notifications</summary>

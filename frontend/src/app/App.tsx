@@ -16,6 +16,7 @@ import { createRemoteTask, updateRemoteTask, deleteRemoteTask } from '../feature
 import { normalizeFinanceList } from '../features/finance/finance.migration'
 import { validateFinanceDraft } from '../features/finance/finance.validation'
 import { createRemoteFinance, updateRemoteFinance, deleteRemoteFinance } from '../features/finance/financeApi'
+import { createRemoteFinanceBudget, updateRemoteFinanceBudget, deleteRemoteFinanceBudget } from '../features/finance/financeBudgetApi'
 import { initialScheduleItems } from '../features/schedule/schedule.data'
 import { loadWorkspaceBootstrap } from '../features/workspace/workspaceApi'
 import { normalizeScheduleList } from '../features/schedule/schedule.migration'
@@ -27,12 +28,13 @@ import { hasCompletedRemoteSync, markRemoteSyncComplete } from '../lib/dataSync'
 import { useWorkspaceRealtime } from '../features/workspace/useWorkspaceRealtime'
 import { useAuth } from '../features/auth/AuthProvider'
 import { navigateToView, viewFromPath } from './routing'
-import type { FinanceDraft, FinanceEntry, Task, TaskDraft, View } from '../types'
+import type { FinanceBudget, FinanceBudgetDraft, FinanceDraft, FinanceEntry, Task, TaskDraft, View } from '../types'
 import type { ScheduleItem } from '../features/schedule/schedule.types'
 
 const TASK_STORAGE_KEY = 'mid-daily.tasks'
 const FINANCE_STORAGE_KEY = 'mid-daily.finance'
 const SCHEDULE_STORAGE_KEY = 'mid-daily.schedule'
+const BUDGET_STORAGE_KEY = 'mid-daily.finance-budgets'
 
 const reportError = (reason: unknown) => reason instanceof Error ? reason.message : 'Remote data sync failed.'
 
@@ -62,6 +64,7 @@ export function App() {
   const [tasks, setTasks] = useState<Task[]>(() => normalizeTaskList(readUserStorage(TASK_STORAGE_KEY, userId, userId ? [] : initialTasks)))
   const [finance, setFinance] = useState<FinanceEntry[]>(() => normalizeFinanceList(readUserStorage(FINANCE_STORAGE_KEY, userId, userId ? [] : financeEntries)))
   const [schedule, setSchedule] = useState<ScheduleItem[]>(() => normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, userId ? [] : initialScheduleItems)))
+  const [budgets, setBudgets] = useState<FinanceBudget[]>(() => readUserStorage(BUDGET_STORAGE_KEY, userId, []))
   const [toast, setToast] = useState('')
   const [timePeriod, setTimePeriod] = useState(getTimePeriod)
   const [readyScope, setReadyScope] = useState<string>('')
@@ -90,6 +93,10 @@ export function App() {
     if (readyScope !== workspaceScope) return
     writeUserStorage(SCHEDULE_STORAGE_KEY, userId, schedule)
   }, [schedule, workspaceScope, readyScope])
+  useEffect(() => {
+    if (readyScope !== workspaceScope) return
+    writeUserStorage(BUDGET_STORAGE_KEY, userId, budgets)
+  }, [budgets, workspaceScope, readyScope])
 
   useEffect(() => {
     setReadyScope('')
@@ -98,6 +105,7 @@ export function App() {
       setTasks(normalizeTaskList(initialTasks))
       setFinance(normalizeFinanceList(financeEntries))
       setSchedule(normalizeScheduleList(initialScheduleItems))
+      setBudgets([])
       setReadyScope('demo')
       return
     }
@@ -105,6 +113,7 @@ export function App() {
     setTasks(normalizeTaskList(readUserStorage(TASK_STORAGE_KEY, userId, [])))
     setFinance(normalizeFinanceList(readUserStorage(FINANCE_STORAGE_KEY, userId, [])))
     setSchedule(normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, [])))
+    setBudgets(readUserStorage(BUDGET_STORAGE_KEY, userId, []))
   }, [userId])
 
   useEffect(() => {
@@ -143,6 +152,7 @@ export function App() {
         setTasks(nextTasks)
         setFinance(nextFinance)
         setSchedule(nextSchedule)
+        setBudgets(remote.budgets ?? [])
 
         markRemoteSyncComplete(TASK_STORAGE_KEY, userId)
         markRemoteSyncComplete(FINANCE_STORAGE_KEY, userId)
@@ -260,6 +270,40 @@ export function App() {
     }
   }
 
+  const saveBudget = async (draft: FinanceBudgetDraft, editingId?: number) => {
+    const normalized: FinanceBudgetDraft = {
+      ...draft,
+      name: draft.name.trim(),
+      category: draft.category.trim(),
+      amount: Math.abs(draft.amount),
+      notes: draft.notes?.trim() || undefined,
+      endsOn: draft.endsOn || undefined,
+    }
+
+    if (!normalized.name) return 'Budget name is required.'
+    if (!Number.isFinite(normalized.amount) || normalized.amount <= 0) return 'Budget amount must be greater than zero.'
+    if (!['WEEK', 'MONTH'].includes(normalized.period)) return 'Budget period is invalid.'
+    if (editingId) {
+      const next = userId ? await updateRemoteFinanceBudget(editingId, normalized) : { ...budgets.find((budget) => budget.id === editingId)!, ...normalized }
+      setBudgets((items) => items.map((budget) => budget.id === editingId ? next : budget))
+    } else {
+      const next = userId ? await createRemoteFinanceBudget(normalized) : { id: Date.now(), ...normalized }
+      setBudgets((items) => [...items, next])
+    }
+    setToast(editingId ? 'Budget updated' : 'Budget added')
+    return null
+  }
+
+  const deleteBudget = async (id: number) => {
+    try {
+      if (userId) await deleteRemoteFinanceBudget(id)
+      setBudgets((current) => current.filter((budget) => budget.id !== id))
+      setToast('Budget deleted')
+    } catch (reason) {
+      setToast(reportError(reason))
+    }
+  }
+
   const handleScheduleChange = async (next: ScheduleItem[]) => {
     if (!userId) {
       setSchedule(next)
@@ -299,7 +343,7 @@ export function App() {
             {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={finance} onToggleTask={(id) => void toggleTask(id)} onNavigate={navigate} />}
             {activeView === 'schedule' && <ScheduleView schedule={schedule} onScheduleChange={handleScheduleChange} demoMode={!userId} />}
             {activeView === 'tasks' && <TasksView tasks={tasks} onSaveTask={saveTask} onToggleTask={(id) => void toggleTask(id)} onDeleteTask={(id) => void deleteTask(id)} />}
-            {activeView === 'finance' && <FinanceView finance={finance} onSaveFinance={saveFinance} onDeleteFinance={(id) => void deleteFinance(id)} />}
+            {activeView === 'finance' && <FinanceView finance={finance} budgets={budgets} onSaveFinance={saveFinance} onDeleteFinance={(id) => void deleteFinance(id)} onSaveBudget={saveBudget} onDeleteBudget={(id) => void deleteBudget(id)} />}
             {activeView === 'social' && <SocialAnalyticsView />}
             {activeView === 'assistant' && <AssistantView />}
           </div>

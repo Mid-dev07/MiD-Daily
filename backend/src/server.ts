@@ -11,13 +11,17 @@ import {
 } from './integrations/googleCalendarStore.js'
 import {
   createFinance,
+  createFinanceBudget,
   createTask,
   deleteFinance,
+  deleteFinanceBudget,
   deleteTask,
   isDataPersistenceConfigured,
   listFinance,
+  listFinanceBudgets,
   listTasks,
   updateFinance,
+  updateFinanceBudget,
   updateTask,
 } from './dataStore.js'
 import { claimTelegramUpdate, createTelegramLinkCode, deleteTelegramConnectionByUserId, getTelegramConnectionByChatId, getTelegramConnectionByUserId, redeemTelegramLinkCode, isTelegramPersistenceConfigured } from './integrations/telegramStore.js'
@@ -695,6 +699,13 @@ function assertFinanceId(url: URL) {
   return id
 }
 
+function assertFinanceBudgetId(url: URL) {
+  const raw = url.pathname.split('/').pop() ?? ''
+  const id = Number(raw)
+  if (!Number.isSafeInteger(id) || id <= 0) throw httpError(400, 'Finance budget ID is invalid.')
+  return id
+}
+
 function assertText(value: unknown, field: string, maxLength: number) {
   if (typeof value !== 'string' || !value.trim() || value.trim().length > maxLength) {
     throw httpError(400, field + ' is invalid.')
@@ -832,6 +843,12 @@ function scheduleTimeMinutes(value: string) {
   return hours * 60 + minutes
 }
 
+function optionalScheduleTimeMinutes(value: unknown, field: string) {
+  if (value === undefined || value === null || value === '') return null
+  if (typeof value !== 'string') throw httpError(400, field + ' is invalid.')
+  return scheduleTimeMinutes(value)
+}
+
 function isIsoDate(value: unknown) {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
   const [year, month, day] = value.split('-').map(Number)
@@ -839,7 +856,8 @@ function isIsoDate(value: unknown) {
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
 }
 
-function scheduleOccursOnDate(item: Pick<ScheduleRecord, 'date' | 'recurrence'>, targetDate: string) {
+function scheduleOccursOnDate(item: Pick<ScheduleRecord, 'date' | 'recurrence' | 'activityMode'>, targetDate: string) {
+  if (item.activityMode === 'FLEXIBLE') return false
   if (!isIsoDate(targetDate) || targetDate < item.date) return false
   if (item.recurrence.frequency === 'NONE') return targetDate === item.date
   if (item.recurrence.until && targetDate > item.recurrence.until) return false
@@ -872,40 +890,68 @@ function scheduleOccursOnDate(item: Pick<ScheduleRecord, 'date' | 'recurrence'>,
 function validateScheduleInput(body: Record<string, unknown>) {
   const title = typeof body.title === 'string' ? body.title.trim() : ''
   const type = body.type
+  const activityModeValue = body.activityMode
   const date = body.date
-  const startTime = body.startTime
-  const endTime = body.endTime
+  const startTimeValue = body.startTime
+  const endTimeValue = body.endTime
   const location = typeof body.location === 'string' ? body.location.trim() : ''
   const notes = typeof body.notes === 'string' ? body.notes.trim() : ''
   const reminderEnabledValue = body.reminderEnabled
   const reminderOffset = Number(body.reminderOffset)
   const recurrenceValue = body.recurrence
   const googleCalendarValue = body.googleCalendar
+  const targetCount = body.targetCount === undefined || body.targetCount === null || body.targetCount === '' ? null : Number(body.targetCount)
+  const targetPeriod = body.targetPeriod === undefined || body.targetPeriod === null || body.targetPeriod === '' ? null : String(body.targetPeriod)
+  const durationMinutes = body.durationMinutes === undefined || body.durationMinutes === null || body.durationMinutes === '' ? null : Number(body.durationMinutes)
+  const preferredStartTime = body.preferredStartTime === undefined || body.preferredStartTime === null || body.preferredStartTime === '' ? null : String(body.preferredStartTime)
+  const preferredEndTime = body.preferredEndTime === undefined || body.preferredEndTime === null || body.preferredEndTime === '' ? null : String(body.preferredEndTime)
+  const activityDeadline = body.activityDeadline === undefined || body.activityDeadline === null || body.activityDeadline === '' ? null : body.activityDeadline
 
   if (!title) throw httpError(400, 'Schedule title is required.')
-  if (typeof reminderEnabledValue !== 'boolean') throw httpError(400, 'Schedule reminder setting is invalid.')
-  if (title.length > 200 || location.length > 200 || notes.length > 5000) throw httpError(400, 'Schedule text is too long.')
   if (!['CLASS','WORK','MEETING','STUDY','PERSONAL','APPOINTMENT','EVENT','OTHER'].includes(String(type))) throw httpError(400, 'Schedule type is invalid.')
   if (!isIsoDate(date)) throw httpError(400, 'Schedule date is invalid.')
-  if (typeof startTime !== 'string' || typeof endTime !== 'string') throw httpError(400, 'Schedule time is required.')
-  const start = scheduleTimeMinutes(startTime)
-  const end = scheduleTimeMinutes(endTime)
-  if (start >= end) throw httpError(400, 'Schedule end time must be after start time.')
-  if (![0,5,10,15,30,60].includes(reminderOffset)) throw httpError(400, 'Schedule reminder offset is invalid.')
-
-  if (recurrenceValue !== undefined && (!recurrenceValue || typeof recurrenceValue !== 'object' || Array.isArray(recurrenceValue))) {
-    throw httpError(400, 'Schedule recurrence is invalid.')
-  }
+  if (typeof reminderEnabledValue !== 'boolean') throw httpError(400, 'Schedule reminder setting is invalid.')
+  if (title.length > 200 || location.length > 200 || notes.length > 5000) throw httpError(400, 'Schedule text is too long.')
 
   const recurrence = recurrenceValue && typeof recurrenceValue === 'object'
     ? recurrenceValue as Record<string, unknown>
     : { frequency: 'NONE', interval: 1 }
-
-  if (!['NONE','DAILY','WEEKLY','MONTHLY'].includes(String(recurrence.frequency))) throw httpError(400, 'Schedule recurrence is invalid.')
-  const interval = Number(recurrence.interval ?? 1)
-  if (!Number.isInteger(interval) || interval < 1 || interval > 30) throw httpError(400, 'Schedule recurrence interval is invalid.')
+  const recurrenceFrequency = String(recurrence.frequency)
+  const recurrenceInterval = Number(recurrence.interval ?? 1)
+  if (!['NONE','DAILY','WEEKLY','MONTHLY'].includes(recurrenceFrequency)) throw httpError(400, 'Schedule recurrence is invalid.')
+  if (!Number.isInteger(recurrenceInterval) || recurrenceInterval < 1 || recurrenceInterval > 30) throw httpError(400, 'Schedule recurrence interval is invalid.')
   if (recurrence.until !== undefined && recurrence.until !== null && !isIsoDate(recurrence.until)) throw httpError(400, 'Schedule recurrence end date is invalid.')
   if (recurrence.until && String(recurrence.until) < String(date)) throw httpError(400, 'Schedule recurrence end date cannot be before the activity date.')
+
+  const inferredMode = recurrenceFrequency !== 'NONE' ? 'FIXED' : 'ONE_TIME'
+  const activityMode = String(activityModeValue ?? inferredMode)
+  if (!['FIXED','FLEXIBLE','ONE_TIME'].includes(activityMode)) throw httpError(400, 'Activity mode is invalid.')
+
+  const startTime = typeof startTimeValue === 'string' && startTimeValue ? startTimeValue : null
+  const endTime = typeof endTimeValue === 'string' && endTimeValue ? endTimeValue : null
+
+  if (activityMode === 'FLEXIBLE') {
+    if (startTime || endTime) throw httpError(400, 'Flexible activities cannot have fixed start or end times.')
+    if (recurrenceFrequency !== 'NONE') throw httpError(400, 'Flexible activities cannot repeat on a fixed recurrence rule.')
+    if (reminderEnabledValue) throw httpError(400, 'Flexible activities cannot use fixed-time reminders.')
+    if (targetCount === null || !Number.isInteger(targetCount) || targetCount < 1 || targetCount > 100) throw httpError(400, 'Flexible target count is invalid.')
+    if (!['DAY','WEEK','MONTH'].includes(String(targetPeriod))) throw httpError(400, 'Flexible target period is invalid.')
+    if (durationMinutes === null || !Number.isInteger(durationMinutes) || durationMinutes < 5 || durationMinutes > 1440) throw httpError(400, 'Flexible duration is invalid.')
+    const preferredStart = optionalScheduleTimeMinutes(preferredStartTime, 'Preferred start time')
+    const preferredEnd = optionalScheduleTimeMinutes(preferredEndTime, 'Preferred end time')
+    if ((preferredStart === null) !== (preferredEnd === null)) throw httpError(400, 'Preferred time window requires both start and end.')
+    if (preferredStart !== null && preferredEnd !== null && preferredStart >= preferredEnd) throw httpError(400, 'Preferred end time must be after start time.')
+    if (activityDeadline !== null && !isIsoDate(activityDeadline)) throw httpError(400, 'Flexible activity deadline is invalid.')
+    if (activityDeadline !== null && String(activityDeadline) < String(date)) throw httpError(400, 'Flexible activity deadline cannot be before the planning start date.')
+  } else {
+    const start = typeof startTime === 'string' ? scheduleTimeMinutes(startTime) : null
+    const end = typeof endTime === 'string' ? scheduleTimeMinutes(endTime) : null
+    if (start === null || end === null) throw httpError(400, 'Schedule time is required.')
+    if (start >= end) throw httpError(400, 'Schedule end time must be after start time.')
+    if (end - start > 24 * 60) throw httpError(400, 'Schedule duration cannot exceed 24 hours.')
+  }
+
+  if (![0,5,10,15,30,60].includes(reminderOffset)) throw httpError(400, 'Schedule reminder offset is invalid.')
 
   if (googleCalendarValue !== undefined && (!googleCalendarValue || typeof googleCalendarValue !== 'object' || Array.isArray(googleCalendarValue))) {
     throw httpError(400, 'Google Calendar metadata is invalid.')
@@ -927,35 +973,50 @@ function validateScheduleInput(body: Record<string, unknown>) {
   const candidate: Omit<ScheduleRecord, 'id'> = {
     title,
     type: type as ScheduleRecord['type'],
+    activityMode: activityMode as ScheduleRecord['activityMode'],
     date: String(date),
-    startTime,
-    endTime,
+    startTime: activityMode === 'FLEXIBLE' ? '' : String(startTime),
+    endTime: activityMode === 'FLEXIBLE' ? '' : String(endTime),
     location,
     notes,
-    reminderEnabled: reminderEnabledValue,
+    reminderEnabled: activityMode === 'FLEXIBLE' ? false : reminderEnabledValue,
     reminderOffset: reminderOffset as ScheduleRecord['reminderOffset'],
-    recurrence: {
-      frequency: recurrence.frequency as ScheduleRecord['recurrence']['frequency'],
-      interval,
-      ...(typeof recurrence.until === 'string' ? { until: recurrence.until } : {}),
-    },
-    googleCalendar: {
-      status: syncStatus,
-      calendarId,
-      ...(typeof googleCalendar.eventId === 'string' ? { eventId: googleCalendar.eventId } : {}),
-      ...(typeof googleCalendar.lastSyncedAt === 'string' ? { lastSyncedAt: googleCalendar.lastSyncedAt } : {}),
-      ...(typeof googleCalendar.error === 'string' ? { error: googleCalendar.error } : {}),
-    },
+    recurrence: activityMode === 'FLEXIBLE'
+      ? { frequency: 'NONE', interval: 1 }
+      : {
+          frequency: recurrenceFrequency as ScheduleRecord['recurrence']['frequency'],
+          interval: recurrenceInterval,
+          ...(typeof recurrence.until === 'string' ? { until: recurrence.until } : {}),
+        },
+    targetCount,
+    targetPeriod: targetPeriod as ScheduleRecord['targetPeriod'],
+    durationMinutes,
+    preferredStartTime,
+    preferredEndTime,
+    activityDeadline: typeof activityDeadline === 'string' ? activityDeadline : undefined,
+    googleCalendar: activityMode === 'FLEXIBLE'
+      ? { status: 'not-synced', calendarId: 'primary' }
+      : {
+          status: syncStatus,
+          calendarId,
+          ...(typeof googleCalendar.eventId === 'string' ? { eventId: googleCalendar.eventId } : {}),
+          ...(typeof googleCalendar.lastSyncedAt === 'string' ? { lastSyncedAt: googleCalendar.lastSyncedAt } : {}),
+          ...(typeof googleCalendar.error === 'string' ? { error: googleCalendar.error } : {}),
+        },
   }
 
   return candidate
 }
 
-function assertNoScheduleOverlap(items: ScheduleRecord[], candidate: { id?: number; date: string; startTime: string; endTime: string }) {
+function assertNoScheduleOverlap(items: ScheduleRecord[], candidate: { id?: number; activityMode: ScheduleRecord['activityMode']; date: string; startTime: string; endTime: string }) {
+  if (candidate.activityMode === 'FLEXIBLE') return
   const start = scheduleTimeMinutes(candidate.startTime)
   const end = scheduleTimeMinutes(candidate.endTime)
   const conflict = items.some((item) =>
     item.id !== candidate.id &&
+    item.activityMode !== 'FLEXIBLE' &&
+    item.startTime &&
+    item.endTime &&
     scheduleOccursOnDate(item, candidate.date) &&
     start < scheduleTimeMinutes(item.endTime) &&
     end > scheduleTimeMinutes(item.startTime),
@@ -1028,6 +1089,94 @@ async function handleDeleteTask(req: IncomingMessage, res: ServerResponse, url: 
 async function handleListFinance(req: IncomingMessage, res: ServerResponse) {
   const userId = await requireAuthenticatedUserId(req)
   sendJson(res, 200, { items: await listFinance(userId) })
+}
+
+function validateFinanceBudgetInput(body: Record<string, unknown>) {
+  const name = typeof body.name === 'string' ? body.name.trim() : ''
+  const category = typeof body.category === 'string' ? body.category.trim() : ''
+  const amount = Number(body.amount)
+  const period = String(body.period)
+  const startsOn = body.startsOn
+  const endsOn = body.endsOn
+  const notes = body.notes
+
+  if (!name || name.length > 200) throw httpError(400, 'Budget name is invalid.')
+  if (category.length > 100) throw httpError(400, 'Budget category is invalid.')
+  if (!Number.isFinite(amount) || amount <= 0) throw httpError(400, 'Budget amount must be greater than zero.')
+  if (!['WEEK','MONTH'].includes(period)) throw httpError(400, 'Budget period is invalid.')
+  if (!isIsoDate(startsOn)) throw httpError(400, 'Budget start date is invalid.')
+  if (endsOn !== undefined && endsOn !== null && endsOn !== '' && !isIsoDate(endsOn)) throw httpError(400, 'Budget end date is invalid.')
+  if (typeof endsOn === 'string' && endsOn && endsOn < String(startsOn)) throw httpError(400, 'Budget end date cannot be before start date.')
+  if (typeof notes === 'string' && notes.length > 5000) throw httpError(400, 'Budget notes are invalid.')
+
+  return {
+    name,
+    category,
+    amount,
+    period: period as 'WEEK' | 'MONTH',
+    startsOn: String(startsOn),
+    endsOn: typeof endsOn === 'string' && endsOn ? endsOn : undefined,
+    notes: typeof notes === 'string' && notes.trim() ? notes.trim() : undefined,
+  }
+}
+
+function validateFinanceBudgetPatch(body: Record<string, unknown>) {
+  const patch: Partial<import('./dataStore.js').FinanceBudgetRecord> = {}
+  if (Object.prototype.hasOwnProperty.call(body, 'name')) patch.name = assertText(body.name, 'Budget name', 200)
+  if (Object.prototype.hasOwnProperty.call(body, 'category')) {
+    if (typeof body.category !== 'string' || body.category.trim().length > 100) throw httpError(400, 'Budget category is invalid.')
+    patch.category = body.category.trim()
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'amount')) {
+    const amount = Number(body.amount)
+    if (!Number.isFinite(amount) || amount <= 0) throw httpError(400, 'Budget amount must be greater than zero.')
+    patch.amount = amount
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'period')) {
+    if (!['WEEK','MONTH'].includes(String(body.period))) throw httpError(400, 'Budget period is invalid.')
+    patch.period = body.period as 'WEEK' | 'MONTH'
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'startsOn')) {
+    if (!isIsoDate(body.startsOn)) throw httpError(400, 'Budget start date is invalid.')
+    patch.startsOn = body.startsOn as string
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'endsOn')) {
+    if (body.endsOn !== null && body.endsOn !== '' && !isIsoDate(body.endsOn)) throw httpError(400, 'Budget end date is invalid.')
+    patch.endsOn = body.endsOn === null || body.endsOn === '' ? null : body.endsOn as string
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'notes')) {
+    if (body.notes !== null && (typeof body.notes !== 'string' || body.notes.length > 5000)) throw httpError(400, 'Budget notes are invalid.')
+    patch.notes = body.notes === null ? null : body.notes.trim() || null
+  }
+  if (Object.keys(patch).length === 0) throw httpError(400, 'No budget fields were provided.')
+  return patch
+}
+
+async function handleListFinanceBudgets(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  sendJson(res, 200, { items: await listFinanceBudgets(userId) })
+}
+
+async function handleCreateFinanceBudget(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  const body = await readRequestJson(req)
+  sendJson(res, 201, { item: await createFinanceBudget(userId, validateFinanceBudgetInput(body)) })
+}
+
+async function handleUpdateFinanceBudget(req: IncomingMessage, res: ServerResponse, url: URL) {
+  const userId = await requireAuthenticatedUserId(req)
+  const id = assertFinanceBudgetId(url)
+  const body = await readRequestJson(req)
+  const item = await updateFinanceBudget(userId, id, validateFinanceBudgetPatch(body))
+  if (!item) throw httpError(404, 'Finance budget not found.')
+  sendJson(res, 200, { item })
+}
+
+async function handleDeleteFinanceBudget(req: IncomingMessage, res: ServerResponse, url: URL) {
+  const userId = await requireAuthenticatedUserId(req)
+  const deleted = await deleteFinanceBudget(userId, assertFinanceBudgetId(url))
+  if (!deleted) throw httpError(404, 'Finance budget not found.')
+  sendJson(res, 200, { deleted: true })
 }
 
 async function handleCreateFinance(req: IncomingMessage, res: ServerResponse) {
@@ -1426,13 +1575,14 @@ async function handleTelegramUpdate(req: IncomingMessage, res: ServerResponse) {
 
 async function handleWorkspaceBootstrap(req: IncomingMessage, res: ServerResponse) {
   const userId = await requireAuthenticatedUserId(req)
-  const [tasks, finance, schedule] = await Promise.all([
+  const [tasks, finance, schedule, budgets] = await Promise.all([
     listTasks(userId),
     listFinance(userId),
     listSchedule(userId),
+    listFinanceBudgets(userId),
   ])
 
-  sendJson(res, 200, { tasks, finance, schedule })
+  sendJson(res, 200, { tasks, finance, schedule, budgets })
 }
 
 function handleAiStatus(req: IncomingMessage, res: ServerResponse) {
@@ -1654,6 +1804,22 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
     }
     if (req.method === 'PUT' && url.pathname.startsWith('/api/finance/')) {
       await handleUpdateFinance(req, res, url)
+      return
+    }
+    if (req.method === 'DELETE' && url.pathname.startsWith('/api/finance-budgets/')) {
+      await handleDeleteFinanceBudget(req, res, url)
+      return
+    }
+    if (req.method === 'PUT' && url.pathname.startsWith('/api/finance-budgets/')) {
+      await handleUpdateFinanceBudget(req, res, url)
+      return
+    }
+    if (req.method === 'GET' && url.pathname === '/api/finance-budgets') {
+      await handleListFinanceBudgets(req, res)
+      return
+    }
+    if (req.method === 'POST' && url.pathname === '/api/finance-budgets') {
+      await handleCreateFinanceBudget(req, res)
       return
     }
     if (req.method === 'DELETE' && url.pathname.startsWith('/api/finance/')) {

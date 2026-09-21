@@ -36,6 +36,7 @@ function monthDifference(from: Date, to: Date) {
 }
 
 export function scheduleOccursOnDate(item: ScheduleItem, targetDate: string) {
+  if (item.activityMode === 'FLEXIBLE') return false
   if (!isValidDateString(targetDate) || targetDate < item.date) return false
   if (item.recurrence.frequency === 'NONE') return targetDate === item.date
   if (item.recurrence.until && targetDate > item.recurrence.until) return false

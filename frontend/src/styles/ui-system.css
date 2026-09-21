@@ -1942,3 +1942,247 @@ textarea:focus {
     gap: 3px;
   }
 }
+
+/* Adaptive planner + finance planning */
+.planner-mode-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.planner-mode-option {
+  display: grid;
+  gap: 4px;
+  min-height: 78px;
+  padding: 12px;
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  background: var(--ui-surface-2);
+  color: var(--ui-text-2);
+  text-align: left;
+  cursor: pointer;
+}
+
+.planner-mode-option:hover {
+  border-color: var(--ui-border-strong);
+  color: var(--ui-text);
+}
+
+.planner-mode-option.is-active {
+  border-color: rgba(183,201,138,.35);
+  background: var(--ui-accent-soft);
+  color: var(--ui-text);
+}
+
+.planner-mode-option strong { font-size: 12px; }
+.planner-mode-option span {
+  color: var(--ui-text-3);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.optional-label {
+  margin-left: 4px;
+  color: var(--ui-text-3);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.field-hint {
+  margin-top: -5px;
+  color: var(--ui-text-3);
+  font-size: 10px;
+}
+
+.flexible-plans-card,
+.finance-budget-card {
+  margin-top: 12px;
+}
+
+.flexible-plan-list,
+.finance-budget-list {
+  display: grid;
+}
+
+.flexible-plan {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.flexible-plan:last-child,
+.finance-budget-row:last-child { border-bottom: 0; }
+
+.flexible-plan-main,
+.dashboard-flexible-item {
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ui-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.flexible-plan-main {
+  display: grid;
+  gap: 3px;
+}
+
+.flexible-plan-main strong,
+.dashboard-flexible-item strong {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flexible-plan-main span,
+.flexible-plan-meta,
+.dashboard-flexible-item small {
+  color: var(--ui-text-3);
+  font-size: 10px;
+}
+
+.flexible-plan-meta {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.detail-callout {
+  display: grid;
+  gap: 3px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  background: var(--ui-accent-soft);
+}
+
+.detail-callout strong { font-size: 12px; }
+.detail-callout span { color: var(--ui-text-2); font-size: 11px; line-height: 1.45; }
+
+.finance-budget-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(110px, 1.4fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.finance-budget-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.finance-budget-copy strong {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.finance-budget-copy span,
+.finance-budget-amounts small {
+  color: var(--ui-text-3);
+  font-size: 10px;
+}
+
+.finance-budget-meter {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--ui-surface-3);
+}
+
+.finance-budget-meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ui-accent);
+}
+
+.finance-budget-row.is-over .finance-budget-meter span {
+  background: var(--ui-danger);
+}
+
+.finance-budget-amounts {
+  display: grid;
+  gap: 3px;
+  justify-items: end;
+  white-space: nowrap;
+}
+
+.finance-budget-amounts strong { font-size: 11px; }
+
+.dashboard-flexible {
+  margin-top: 12px;
+}
+
+.dashboard-flexible-list {
+  display: grid;
+}
+
+.dashboard-flexible-item {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.dashboard-flexible-item:last-child { border-bottom: 0; }
+.dashboard-flexible-item > span {
+  color: var(--ui-accent);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.dashboard-flexible-item div { min-width: 0; }
+.dashboard-flexible-item strong,
+.dashboard-flexible-item small {
+  display: block;
+}
+.dashboard-flexible-item small { margin-top: 2px; }
+
+@media (max-width: 860px) {
+  .planner-mode-options {
+    grid-template-columns: 1fr;
+  }
+
+  .finance-budget-row {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .finance-budget-amounts {
+    justify-items: start;
+  }
+
+  .flexible-plan {
+    grid-template-columns: 1fr auto;
+  }
+
+  .flexible-plan-meta {
+    justify-items: end;
+  }
+}
+
+@media (max-width: 560px) {
+  .flexible-plan {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .flexible-plan-meta {
+    justify-items: start;
+    white-space: normal;
+  }
+}
