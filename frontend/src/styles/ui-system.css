@@ -1420,6 +1420,53 @@ textarea:focus {
 .daily-pulse,
 .feature-landscape { display: none !important; }
 
+.assistant-channels-card {
+  margin-bottom: 12px;
+}
+
+.assistant-channel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.assistant-channel-card {
+  min-width: 0;
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  background: #121912;
+}
+
+.assistant-channel-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.assistant-channel-copy .integration-label {
+  margin-bottom: 2px;
+}
+
+.assistant-channel-copy strong {
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.assistant-channel-copy small {
+  color: var(--ui-text-3);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.assistant-channel-card .integration-badge {
+  flex: 0 0 auto;
+}
+
 @media (max-width: 980px) {
   .app-frame { grid-template-columns: 194px minmax(0,1fr); }
   .workspace { width: min(var(--ui-content), calc(100vw - 40px)); }
@@ -1564,6 +1611,9 @@ textarea:focus {
 
   .social-foundation-grid,
   .dashboard-integration-grid { grid-template-columns: 1fr; }
+  .assistant-channel-grid { grid-template-columns: 1fr; }
+  .assistant-channel-card { align-items: stretch; flex-direction: column; }
+
 
   .ai-message { max-width: 92%; }
   .ai-composer { grid-template-columns: 1fr; }
