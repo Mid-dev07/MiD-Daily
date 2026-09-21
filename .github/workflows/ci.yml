@@ -26,19 +26,16 @@ jobs:
       - name: Check frontend asset budget
         run: |
           node --input-type=module - <<'NODE'
-          import { readdirSync, statSync } from 'node:fs'
+          import { readFileSync, readdirSync, statSync } from 'node:fs'
           import { gzipSync } from 'node:zlib'
 
           const assetDir = 'dist/assets'
           const files = readdirSync(assetDir)
           const js = files.filter((name) => name.endsWith('.js'))
           const css = files.filter((name) => name.endsWith('.css'))
-          const largestJs = Math.max(0, ...js.map((name) => statSync(`${assetDir}/${name}`).size))
-          const cssGzip = gzipSync(css.flatMap((name) => []).toString()).length
-
-          const largestJsBytes = largestJs
-          const largestJsGzip = Math.max(0, ...js.map((name) => gzipSync(require('node:fs').readFileSync(`${assetDir}/${name}`)).length))
-          const totalCssGzip = css.reduce((sum, name) => sum + gzipSync(require('node:fs').readFileSync(`${assetDir}/${name}`)).length, 0)
+          const largestJsBytes = Math.max(0, ...js.map((name) => statSync(`${assetDir}/${name}`).size))
+          const largestJsGzip = Math.max(0, ...js.map((name) => gzipSync(readFileSync(`${assetDir}/${name}`)).length))
+          const totalCssGzip = css.reduce((sum, name) => sum + gzipSync(readFileSync(`${assetDir}/${name}`)).length, 0)
 
           console.log(`Largest JS: ${largestJsGzip} bytes gzip (${largestJsBytes} bytes raw)`)
           console.log(`Total CSS: ${totalCssGzip} bytes gzip`)
@@ -59,6 +56,7 @@ jobs:
           node-version: 22
       - run: npm install
       - run: npm test
+
   worker:
     runs-on: ubuntu-latest
     defaults:
