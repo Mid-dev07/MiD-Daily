@@ -172,9 +172,10 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
 
       <ScheduleToolbar date={date} filter={filter} onShiftDate={(days) => setDate(shiftDate(date, days))} onResetDate={() => setDate(getToday())} onFilterChange={setFilter} />
 
-      <GoogleCalendarIntegrationCard />
+      <div className="schedule-integrations">
+        <GoogleCalendarIntegrationCard />
 
-      <div className="notification-card schedule-integration-card">
+        <div className="notification-card schedule-integration-card">
         <div className="notification-copy">
           <span className="integration-label">DEVICE NOTIFICATIONS</span>
           <strong className={notificationSupport === 'granted' ? 'notification-status' : ''}>{notificationLabel}</strong>
@@ -186,6 +187,7 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
           ) : (
             <button className="secondary-button" type="button" disabled={notificationSupport === 'unsupported' || notificationSupport === 'denied'} onClick={() => void enableNotifications()}>Enable</button>
           )}
+        </div>
         </div>
       </div>
 

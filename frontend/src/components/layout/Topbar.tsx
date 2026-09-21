@@ -25,7 +25,7 @@ export function Topbar({ view }: TopbarProps) {
     <header className="topbar editorial-topbar">
       <div className="topbar-copy">
         <div className="topbar-index" aria-label={meta.label}>
-          <span>LVLL {meta.index}</span>
+          <span>LEVEL {meta.index}</span>
           <i aria-hidden="true">/</i>
           <strong>{meta.label}</strong>
         </div>

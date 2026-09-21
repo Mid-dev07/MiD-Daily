@@ -76,7 +76,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, activeVi
         </div>
         <div className="welcome-side">
           <div className="day-progress" style={{ '--day-progress': completionPercent + '%' } as CSSProperties} aria-label={completionPercent + '% of tasks completed'}>
-            <div className="day-progress-copy"><strong>{completionPercent}%</strong><span>focus</span></div>
+            <div className="day-progress-copy"><strong>{completionPercent}%</strong><span>tasks done</span></div>
           </div>
           <div className="welcome-date"><strong>Today</strong><span>{formatDate(today)}</span></div>
         </div>
