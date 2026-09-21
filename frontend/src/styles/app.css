@@ -2795,3 +2795,11 @@ textarea {
     opacity: .72;
   }
 }
+
+
+/* Final nature override for the remaining legacy brand highlight */
+.brand-mark {
+  box-shadow:
+    0 1px 0 rgba(255, 250, 225, .09) inset,
+    0 12px 28px -14px rgba(183, 201, 138, .34);
+}
