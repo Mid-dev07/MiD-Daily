@@ -4,7 +4,8 @@ import type { ScheduleItem, RecurrenceRule } from './schedule.types'
 const defaultRecurrence: RecurrenceRule = { frequency: 'NONE', interval: 1 }
 const defaultGoogleCalendar: GoogleCalendarSyncMeta = { status: 'not-synced', calendarId: 'primary' }
 
-type LegacyScheduleItem = Omit<ScheduleItem, 'recurrence' | 'googleCalendar'> & {
+type LegacyScheduleItem = Omit<ScheduleItem, 'recurrence' | 'googleCalendar' | 'activityMode'> & {
+  activityMode?: ScheduleItem['activityMode']
   recurrence?: Partial<RecurrenceRule>
   googleCalendar?: Partial<GoogleCalendarSyncMeta>
   googleCalendarConnected?: boolean
@@ -26,7 +27,8 @@ export function normalizeScheduleItem(input: LegacyScheduleItem): ScheduleItem {
       }
     : defaultGoogleCalendar
 
-  return { ...input, recurrence, googleCalendar }
+  const activityMode = input.activityMode ?? (recurrence.frequency !== 'NONE' ? 'FIXED' : 'ONE_TIME')
+  return { ...input, activityMode, recurrence, googleCalendar }
 }
 
 export function normalizeScheduleList(items: LegacyScheduleItem[]): ScheduleItem[] {
