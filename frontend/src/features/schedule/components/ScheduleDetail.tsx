@@ -13,9 +13,9 @@ interface ScheduleDetailProps {
 }
 
 export function ScheduleDetail({ item, onClose, onEdit, onSync }: ScheduleDetailProps) {
-  useModalBehavior(Boolean(item), onClose, busy)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  useModalBehavior(Boolean(item), onClose, busy)
 
   if (!item) return null
   useModalBehavior(Boolean(item), onClose, busy)
