@@ -84,7 +84,7 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
         </div>
 
         <form className="schedule-form" onSubmit={submit}>
-          <label>Title<input disabled={saving} value={draft.title} onChange={(e) => setField('title', e.target.value)} placeholder="e.g. Team meeting" autoFocus /></label>
+          <label>Title<input disabled={saving} value={draft.title} onChange={(e) => setField('title', e.target.value)} placeholder="e.g. Team meeting" autoFocus maxLength={200} /></label>
 
           <div className="form-grid two">
             <label>Type<select disabled={saving} value={draft.type} onChange={(e) => setField('type', e.target.value as ScheduleType)}>{types.map((type) => <option key={type} value={type}>{type}</option>)}</select></label>
@@ -96,8 +96,8 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
             <label>End<input disabled={saving} type="time" value={draft.endTime} onChange={(e) => setField('endTime', e.target.value)} /></label>
           </div>
 
-          <label>Location<input disabled={saving} value={draft.location} onChange={(e) => setField('location', e.target.value)} placeholder="Optional" /></label>
-          <label>Notes<textarea disabled={saving} value={draft.notes} onChange={(e) => setField('notes', e.target.value)} rows={3} placeholder="Optional notes" /></label>
+          <label>Location<input disabled={saving} value={draft.location} onChange={(e) => setField('location', e.target.value)} placeholder="Optional" maxLength={200} /></label>
+          <label>Notes<textarea disabled={saving} value={draft.notes} onChange={(e) => setField('notes', e.target.value)} rows={3} placeholder="Optional notes" maxLength={5000} /></label>
 
           <div className="form-section">
             <div className="form-section-heading"><strong>Repeat</strong><span>Stored locally; sync-safe model.</span></div>
