@@ -2890,3 +2890,135 @@ textarea {
     min-height: 36px;
   }
 }
+
+
+/* Progressive disclosure and connection controls */
+.schedule-more {
+  position: relative;
+}
+
+.schedule-more > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.schedule-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.schedule-more-menu {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 6px);
+  z-index: 20;
+  display: grid;
+  min-width: 154px;
+  padding: 6px;
+  border: 1px solid rgba(232, 239, 221, .10);
+  border-radius: 12px;
+  background: #151d16;
+  box-shadow: 0 18px 34px -22px rgba(0, 0, 0, .86);
+}
+
+.schedule-more-menu .text-button {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.connections-toggle,
+.dashboard-section-link {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.connections-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 0;
+  border-top: 1px solid var(--color-border-soft);
+  border-bottom: 1px solid var(--color-border-soft);
+  color: #dbe4d4;
+  background: transparent;
+  text-align: left;
+}
+
+.connections-toggle:hover,
+.connections-toggle:focus-visible {
+  color: #f0f2e8;
+}
+
+.connections-toggle .section-kicker {
+  margin-bottom: 3px;
+}
+
+.connections-toggle strong {
+  display: block;
+  font-size: 13px;
+}
+
+.connections-toggle-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(232, 239, 221, .10);
+  border-radius: 50%;
+  color: #c6d0b9;
+  font-size: 16px;
+}
+
+.dashboard-connections {
+  grid-column: 1 / -1;
+}
+
+.connection-loading {
+  padding: 18px;
+  color: #9da897;
+  text-align: center;
+}
+
+.dashboard-section-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  margin-top: 10px;
+  padding: 4px 0;
+  color: #b8c6a2;
+  background: transparent;
+  font-size: 10px;
+}
+
+.dashboard-section-link:hover,
+.dashboard-section-link:focus-visible {
+  color: #e4eadb;
+}
+
+@media (max-width: 720px) {
+  .schedule-more-menu {
+    position: static;
+    min-width: 0;
+    margin-top: 4px;
+    border-radius: 10px;
+    box-shadow: none;
+  }
+
+  .schedule-event-actions {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .schedule-event-actions {
+    gap: 3px;
+  }
+
+  .connections-toggle {
+    padding: 13px 0;
+  }
+}
