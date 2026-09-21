@@ -11,7 +11,6 @@ interface TaskDetailProps {
 export function TaskDetail({ task, onClose, onEdit }: TaskDetailProps) {
   useModalBehavior(Boolean(task), onClose)
   if (!task) return null
-  useModalBehavior(Boolean(task), onClose)
 
   const progress = task.progress ?? (task.status === 'done' ? 100 : 0)
   const statusLabel = task.status === 'done' ? 'Done' : task.status === 'in-progress' ? 'In progress' : 'To do'
