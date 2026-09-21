@@ -877,12 +877,13 @@ function validateScheduleInput(body: Record<string, unknown>) {
   const endTime = body.endTime
   const location = typeof body.location === 'string' ? body.location.trim() : ''
   const notes = typeof body.notes === 'string' ? body.notes.trim() : ''
-  const reminderEnabled = Boolean(body.reminderEnabled)
+  const reminderEnabledValue = body.reminderEnabled
   const reminderOffset = Number(body.reminderOffset)
   const recurrenceValue = body.recurrence
   const googleCalendarValue = body.googleCalendar
 
   if (!title) throw httpError(400, 'Schedule title is required.')
+  if (typeof reminderEnabledValue !== 'boolean') throw httpError(400, 'Schedule reminder setting is invalid.')
   if (title.length > 200 || location.length > 200 || notes.length > 5000) throw httpError(400, 'Schedule text is too long.')
   if (!['CLASS','WORK','MEETING','STUDY','PERSONAL','APPOINTMENT','EVENT','OTHER'].includes(String(type))) throw httpError(400, 'Schedule type is invalid.')
   if (!isIsoDate(date)) throw httpError(400, 'Schedule date is invalid.')
@@ -891,6 +892,10 @@ function validateScheduleInput(body: Record<string, unknown>) {
   const end = scheduleTimeMinutes(endTime)
   if (start >= end) throw httpError(400, 'Schedule end time must be after start time.')
   if (![0,5,10,15,30,60].includes(reminderOffset)) throw httpError(400, 'Schedule reminder offset is invalid.')
+
+  if (recurrenceValue !== undefined && (!recurrenceValue || typeof recurrenceValue !== 'object' || Array.isArray(recurrenceValue))) {
+    throw httpError(400, 'Schedule recurrence is invalid.')
+  }
 
   const recurrence = recurrenceValue && typeof recurrenceValue === 'object'
     ? recurrenceValue as Record<string, unknown>
@@ -901,6 +906,10 @@ function validateScheduleInput(body: Record<string, unknown>) {
   if (!Number.isInteger(interval) || interval < 1 || interval > 30) throw httpError(400, 'Schedule recurrence interval is invalid.')
   if (recurrence.until !== undefined && recurrence.until !== null && !isIsoDate(recurrence.until)) throw httpError(400, 'Schedule recurrence end date is invalid.')
   if (recurrence.until && String(recurrence.until) < String(date)) throw httpError(400, 'Schedule recurrence end date cannot be before the activity date.')
+
+  if (googleCalendarValue !== undefined && (!googleCalendarValue || typeof googleCalendarValue !== 'object' || Array.isArray(googleCalendarValue))) {
+    throw httpError(400, 'Google Calendar metadata is invalid.')
+  }
 
   const googleCalendar = googleCalendarValue && typeof googleCalendarValue === 'object'
     ? googleCalendarValue as Record<string, unknown>
@@ -923,7 +932,7 @@ function validateScheduleInput(body: Record<string, unknown>) {
     endTime,
     location,
     notes,
-    reminderEnabled,
+    reminderEnabled: reminderEnabledValue,
     reminderOffset: reminderOffset as ScheduleRecord['reminderOffset'],
     recurrence: {
       frequency: recurrence.frequency as ScheduleRecord['recurrence']['frequency'],
