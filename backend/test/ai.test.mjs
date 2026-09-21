@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { buildAssistantTools } from '../dist/ai/assistant.js'
+import { buildAssistantTools, hasScheduleConflict } from '../dist/ai/assistant.js'
 
 test('AI exposes only read tools by default', () => {
   const tools = buildAssistantTools(false)
@@ -67,4 +67,32 @@ test('read tools stay available without write permission', () => {
   assert.ok(readOnly.includes('get_active_budgets'))
   assert.ok(!readOnly.includes('create_activity'))
   assert.ok(!readOnly.includes('create_budget'))
+})
+
+test('AI schedule conflict guard catches overlapping fixed activities and ignores flexible plans', () => {
+  const items = [
+    {
+      id: 1,
+      title: 'Class',
+      type: 'CLASS',
+      activityMode: 'ONE_TIME',
+      date: '2026-09-22',
+      startTime: '14:00',
+      endTime: '16:00',
+      recurrence: { frequency: 'NONE', interval: 1 },
+    },
+    {
+      id: 2,
+      title: 'Flexible AI study',
+      type: 'STUDY',
+      activityMode: 'FLEXIBLE',
+      date: '2026-09-22',
+      startTime: '',
+      endTime: '',
+      recurrence: { frequency: 'NONE', interval: 1 },
+    },
+  ]
+
+  assert.equal(hasScheduleConflict(items, { date: '2026-09-22', startTime: '15:00', endTime: '15:30' }), true)
+  assert.equal(hasScheduleConflict(items, { date: '2026-09-22', startTime: '16:00', endTime: '16:30' }), false)
 })
