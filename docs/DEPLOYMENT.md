@@ -1,89 +1,94 @@
 # MiD-Daily — Deployment
 
-## Target architecture
-Browser → Render Static Site (frontend) → Render Web Service (backend) → Supabase Auth/PostgreSQL → Google Calendar API.
+## Current production architecture
+Browser → Cloudflare Workers (frontend) → Cloudflare Worker API (backend) → Supabase Auth/PostgreSQL.
 
-## Render
-`render.yaml` defines a static Vite frontend and a Node backend. The frontend uses rootDir `frontend`; the API uses rootDir `backend`.
-Render requires web services to listen on `0.0.0.0` and use the provided `PORT` environment variable. citeturn697876search0turn697876search4turn212543search5
+Optional provider connections extend the backend to Google Calendar, Telegram, WhatsApp, Instagram analytics, and OpenAI.
 
-Set frontend variables:
+## Cloudflare
+
+Frontend:
+`https://mid-daily.e41262272.workers.dev`
+
+Backend:
+`https://mid-daily-api.e41262272.workers.dev`
+
+The frontend is a Vite SPA deployed from `frontend/` using Cloudflare Workers Assets. The backend is a TypeScript Worker deployed from `backend/`.
+
+Frontend build variables:
 ```env
-VITE_API_BASE_URL=https://<backend-url>
+VITE_API_BASE_URL=https://mid-daily-api.e41262272.workers.dev
 VITE_SUPABASE_URL=https://<project-ref>.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=<publishable-key>
 ```
 
-Set backend variables:
-```env
-FRONTEND_URL=https://<frontend-url>
-COOKIE_SECURE=true
-GOOGLE_CLIENT_ID=<client-id>
-GOOGLE_CLIENT_SECRET=<client-secret>
-GOOGLE_REDIRECT_URI=https://<backend-url>/auth/google/callback
-SUPABASE_URL=https://<project-ref>.supabase.co
-SUPABASE_SECRET_KEY=<secret-key>
-TOKEN_ENCRYPTION_KEY_B64=<generated-secret>
-```
-
-Static-site environment variables are build-time values, so frontend env changes require a rebuild. Render supports `sync: false` for secrets and `generateValue` for generated values. citeturn929801search9turn929801search0
+Backend runtime values are configured in Wrangler plus Worker secrets. Keep all provider secrets server-side.
 
 ## Supabase
-Apply every migration in `supabase/migrations/` in timestamp order. Keep the secret key backend-only. Supabase documents that secret/service-role keys bypass RLS and must never be exposed in browser code. citeturn212543search1turn212543search2turn212543search3
 
-Configure Supabase Auth for email/password, password recovery, and Google OAuth. Add the deployed frontend URL to the allowed redirect/site URLs.
+Production project:
+`ywpvwxhfzgxwmxrwcfsf`
+
+Required production checks:
+- Supabase project is healthy.
+- RLS is enabled on core user-data tables.
+- Task, Finance, and Schedule policies scope rows to `auth.uid()`.
+- Integration tables remain service-only and are not exposed as a client data API.
+- Run Supabase security/performance advisors after schema changes.
+
+## Authentication
+
+Supported client flows:
+- Email/password sign-in
+- Email/password registration
+- Google OAuth
+- Password reset
+- Password recovery update
+
+The frontend uses the Supabase publishable key only. Sensitive provider credentials never belong in Vite environment variables.
+
+## Core data
+
+Task, Finance, and Schedule APIs derive the owner from the authenticated Supabase access token. CRUD data is persisted in Supabase and rehydrated after refresh.
 
 ## Google Calendar
-Authorized redirect URI:
-`https://<backend-url>/auth/google/callback`
 
-After deploy: sign in → connect Google Calendar → create Schedule item → Sync to Google → verify the event → edit → Update Google → delete → verify remote deletion.
+Flow:
+sign in → connect Google → create Schedule item → sync → edit/update → delete.
 
-## External integrations
+Google access and refresh tokens are encrypted before persistence.
 
-For Telegram:
-```env
-TELEGRAM_BOT_TOKEN=<bot-token>
-TELEGRAM_BOT_USERNAME=<bot-username>
-TELEGRAM_WEBHOOK_SECRET=<secret>
-TELEGRAM_WEBHOOK_URL=https://<backend-url>/webhooks/telegram
-APP_TIMEZONE=Asia/Jakarta
-```
+## Telegram
 
-For WhatsApp Cloud API:
-```env
-WHATSAPP_ACCESS_TOKEN=<access-token>
-WHATSAPP_PHONE_NUMBER_ID=<phone-number-id>
-WHATSAPP_GRAPH_VERSION=<graph-version>
-WHATSAPP_APP_SECRET=<app-secret>
-WHATSAPP_VERIFY_TOKEN=<verify-token>
-WHATSAPP_BUSINESS_PHONE_NUMBER=<business-number>
-```
+Linking is authenticated and uses one-time link codes. Webhooks verify Telegram's configured secret token and deduplicate update IDs.
 
-For Instagram analytics foundation:
-```env
-INSTAGRAM_ACCESS_TOKEN=<access-token>
-INSTAGRAM_GRAPH_VERSION=<graph-version>
-INSTAGRAM_ACCOUNT_ID=<professional-account-id>
-INSTAGRAM_GRAPH_HOST=https://graph.instagram.com
-```
+## WhatsApp
 
-For MiD-Daily Assistant:
-```env
-OPENAI_API_KEY=<server-side-api-key>
-OPENAI_MODEL=gpt-5.6
-```
+Linking is authenticated and uses one-time link codes. Webhooks verify Meta HMAC signatures and deduplicate incoming update hashes.
 
-These credentials remain backend-only except the Supabase publishable key and Vite public variables described above. Configure each provider only after the deployed backend URL is known.
+## Assistant
 
-## Health
-`GET /health` should return HTTP 200 and identify `mid-daily-backend`.
+The assistant is backend-mediated. Read tools are always available when configured; write tools are exposed only when the user explicitly enables actions in the UI.
 
-## Free-tier limitation
-Render documents that Free web services spin down after 15 minutes of inactivity and are intended for hobby/testing rather than production. citeturn212543search0turn212543search6
+## Notifications
 
-## CI
-GitHub Actions builds frontend and backend on pushes and pull requests to `main`.
+Browser notifications use the service worker at `/sw.js`. Notification delivery requires a browser/device grant and the app to be running for the current reminder scheduler implementation.
+
+## CI/CD
+
+GitHub Actions verifies:
+- frontend TypeScript + Vite build
+- backend TypeScript build + tests
+- worker dry-run
+- production frontend deployment + smoke test
+- production backend deployment + health/secrets checks
 
 ## Production hardening
-Before public production: domain-specific CORS, API rate limiting, structured audit logging, backup/restore verification, HTTPS-only cookies, and an always-on backend plan where required.
+
+Before exposing the app broadly:
+- enable Supabase leaked-password protection;
+- review provider-specific rate limits and quotas;
+- verify backup/restore expectations;
+- keep domain-specific CORS;
+- review logs for provider failures without logging secrets;
+- re-test cold-start and token-refresh boundaries.
