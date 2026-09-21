@@ -199,6 +199,9 @@ function assertString(value: unknown, field: string, max = 500) {
 function assertOptionalDate(value: unknown, field: string) {
   if (value === null || value === undefined || value === '') return undefined
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) throw new Error(field + ' is invalid.')
+  const [year, month, day] = value.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day))
+  if (date.toISOString().slice(0, 10) !== value) throw new Error(field + ' is invalid.')
   return value
 }
 
