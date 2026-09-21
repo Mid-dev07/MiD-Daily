@@ -9,9 +9,10 @@ Schedule reminder intent is evaluated by the reminder engine, then passed to a n
 ## Current behavior
 
 - Permission is requested only from an explicit user action.
-- A service worker is registered at application startup when supported.
-- The app-level reminder scheduler checks active reminders every 15 seconds.
+- A service worker is registered when a notification is first delivered and supported.
+- The app-level reminder scheduler checks active reminders every 15 seconds when a background trigger is not already scheduled.
 - Reminder delivery is deduplicated per browser session.
+- After a delivery, the scheduler rechecks so recurring reminders do not leave the scheduler idle.
 - Notifications include schedule metadata for future click handling.
 
 ## Current limitation
