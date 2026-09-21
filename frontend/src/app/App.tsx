@@ -12,13 +12,14 @@ const SocialAnalyticsView = lazy(() => import('../features/social/SocialAnalytic
 const AssistantView = lazy(() => import('../features/ai/AssistantView').then((module) => ({ default: module.AssistantView })))
 import { normalizeTaskList } from '../features/tasks/task.migration'
 import { validateTaskDraft } from '../features/tasks/task.validation'
-import { listRemoteTasks, createRemoteTask, updateRemoteTask, deleteRemoteTask } from '../features/tasks/tasksApi'
+import { createRemoteTask, updateRemoteTask, deleteRemoteTask } from '../features/tasks/tasksApi'
 import { normalizeFinanceList } from '../features/finance/finance.migration'
 import { validateFinanceDraft } from '../features/finance/finance.validation'
-import { listRemoteFinance, createRemoteFinance, updateRemoteFinance, deleteRemoteFinance } from '../features/finance/financeApi'
+import { createRemoteFinance, updateRemoteFinance, deleteRemoteFinance } from '../features/finance/financeApi'
 import { initialScheduleItems } from '../features/schedule/schedule.data'
+import { loadWorkspaceBootstrap } from '../features/workspace/workspaceApi'
 import { normalizeScheduleList } from '../features/schedule/schedule.migration'
-import { listRemoteSchedule, createRemoteSchedule, updateRemoteSchedule, deleteRemoteSchedule } from '../features/schedule/scheduleApi'
+import { createRemoteSchedule, updateRemoteSchedule, deleteRemoteSchedule } from '../features/schedule/scheduleApi'
 import { useReminderScheduler } from '../features/schedule/hooks/useReminderScheduler'
 import { registerBrowserServiceWorker } from '../integrations/notifications/serviceWorker'
 import { readUserStorage, writeUserStorage, hasUserStorage } from '../lib/userStorage'
@@ -69,69 +70,48 @@ export function App() {
     if (!userId) return
     let active = true
 
-    const hydrateTasks = async () => {
+    const hydrate = async () => {
       try {
-        const remote = normalizeTaskList(await listRemoteTasks())
-        const cacheExists = hasUserStorage(TASK_STORAGE_KEY, userId)
+        const remote = await loadWorkspaceBootstrap()
+        const localTasks = normalizeTaskList(readUserStorage(TASK_STORAGE_KEY, userId, []))
+        const localFinance = normalizeFinanceList(readUserStorage(FINANCE_STORAGE_KEY, userId, []))
+        const localSchedule = normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, []))
 
-        if (remote.length > 0 || hasCompletedRemoteSync(TASK_STORAGE_KEY, userId)) {
-          if (active) setTasks(remote)
-        } else if (cacheExists && tasks.length > 0) {
-          const migrated: Task[] = []
-          for (const task of tasks) migrated.push(await createRemoteTask(task))
-          if (active) setTasks(normalizeTaskList(migrated))
-        } else if (active) {
-          setTasks([])
-        }
+        const taskNeedsMigration = remote.tasks.length === 0 && !hasCompletedRemoteSync(TASK_STORAGE_KEY, userId) && hasUserStorage(TASK_STORAGE_KEY, userId)
+        const financeNeedsMigration = remote.finance.length === 0 && !hasCompletedRemoteSync(FINANCE_STORAGE_KEY, userId) && hasUserStorage(FINANCE_STORAGE_KEY, userId)
+        const scheduleNeedsMigration = remote.schedule.length === 0 && !hasCompletedRemoteSync(SCHEDULE_STORAGE_KEY, userId) && hasUserStorage(SCHEDULE_STORAGE_KEY, userId)
+
+        const [migratedTasks, migratedFinance, migratedSchedule] = await Promise.all([
+          taskNeedsMigration
+            ? Promise.all(localTasks.map((task) => createRemoteTask(task)))
+            : Promise.resolve([]),
+          financeNeedsMigration
+            ? Promise.all(localFinance.map((entry) => createRemoteFinance(entry)))
+            : Promise.resolve([]),
+          scheduleNeedsMigration
+            ? Promise.all(localSchedule.map((item) => createRemoteSchedule(item)))
+            : Promise.resolve([]),
+        ])
+
+        if (!active) return
+
+        const nextTasks = taskNeedsMigration ? normalizeTaskList(migratedTasks) : normalizeTaskList(remote.tasks)
+        const nextFinance = financeNeedsMigration ? normalizeFinanceList(migratedFinance) : normalizeFinanceList(remote.finance)
+        const nextSchedule = scheduleNeedsMigration ? normalizeScheduleList(migratedSchedule) : normalizeScheduleList(remote.schedule)
+
+        setTasks(nextTasks)
+        setFinance(nextFinance)
+        setSchedule(nextSchedule)
+
         markRemoteSyncComplete(TASK_STORAGE_KEY, userId)
-      } catch (reason) {
-        if (active) setToast('Tasks: ' + reportError(reason))
-      }
-    }
-
-    const hydrateFinance = async () => {
-      try {
-        const remote = normalizeFinanceList(await listRemoteFinance())
-        const cacheExists = hasUserStorage(FINANCE_STORAGE_KEY, userId)
-
-        if (remote.length > 0 || hasCompletedRemoteSync(FINANCE_STORAGE_KEY, userId)) {
-          if (active) setFinance(remote)
-        } else if (cacheExists && finance.length > 0) {
-          const migrated: FinanceEntry[] = []
-          for (const entry of finance) migrated.push(await createRemoteFinance(entry))
-          if (active) setFinance(normalizeFinanceList(migrated))
-        } else if (active) {
-          setFinance([])
-        }
         markRemoteSyncComplete(FINANCE_STORAGE_KEY, userId)
-      } catch (reason) {
-        if (active) setToast('Finance: ' + reportError(reason))
-      }
-    }
-
-    const hydrateSchedule = async () => {
-      try {
-        const remote = normalizeScheduleList(await listRemoteSchedule())
-        const cacheExists = hasUserStorage(SCHEDULE_STORAGE_KEY, userId)
-
-        if (remote.length > 0 || hasCompletedRemoteSync(SCHEDULE_STORAGE_KEY, userId)) {
-          if (active) setSchedule(remote)
-        } else if (cacheExists && schedule.length > 0) {
-          const migrated: ScheduleItem[] = []
-          for (const item of schedule) migrated.push(await createRemoteSchedule(item))
-          if (active) setSchedule(normalizeScheduleList(migrated))
-        } else if (active) {
-          setSchedule([])
-        }
         markRemoteSyncComplete(SCHEDULE_STORAGE_KEY, userId)
       } catch (reason) {
-        if (active) setToast('Schedule: ' + reportError(reason))
+        if (active) setToast(reportError(reason))
       }
     }
 
-    void hydrateTasks()
-    void hydrateFinance()
-    void hydrateSchedule()
+    void hydrate()
 
     return () => { active = false }
   }, [userId])
