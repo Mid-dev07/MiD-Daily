@@ -1,7 +1,7 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto'
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
 import { createClient } from '@supabase/supabase-js'
-import { runAssistant } from './ai/index.js'
+import { isAssistantConfigured, runAssistant } from './ai/index.js'
 import {
   deleteGoogleConnection,
   getGoogleConnection,
@@ -1372,6 +1372,10 @@ async function handleTelegramUpdate(req: IncomingMessage, res: ServerResponse) {
 }
 
 
+function handleAiStatus(req: IncomingMessage, res: ServerResponse) {
+  sendJson(res, 200, { configured: isAssistantConfigured() })
+}
+
 async function handleAiChat(req: IncomingMessage, res: ServerResponse) {
   const userId = await requireAuthenticatedUserId(req)
   const body = await readRequestJson(req)
@@ -1437,6 +1441,12 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
   const url = new URL(req.url ?? '/', `http://localhost:${PORT}`)
 
   try {
+    if (req.method === 'GET' && url.pathname === '/api/ai/status') {
+      await requireAuthenticatedUserId(req)
+      handleAiStatus(req, res)
+      return
+    }
+
     if (req.method === 'POST' && url.pathname === '/api/ai/chat') {
       await handleAiChat(req, res)
       return
