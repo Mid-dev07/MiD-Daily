@@ -1,17 +1,14 @@
-import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import type { FinanceEntry, Task, View } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
 import { scheduleOccursOnDate } from '../schedule/schedule.date'
 import { currency, formatDate } from '../../lib/format'
-import { StatCard } from '../../components/ui/StatCard'
-import { FeatureLandscape } from './components/FeatureLandscape'
 
 interface DashboardViewProps {
   tasks: Task[]
   schedule: ScheduleItem[]
   finance: FinanceEntry[]
   onToggleTask: (id: number) => void
-  activeView: View
   onNavigate: (view: View) => void
 }
 
@@ -20,8 +17,7 @@ const getToday = () => new Intl.DateTimeFormat('sv-SE').format(new Date())
 const TelegramIntegrationCard = lazy(() => import('./components/TelegramIntegrationCard').then((module) => ({ default: module.TelegramIntegrationCard })))
 const WhatsAppIntegrationCard = lazy(() => import('./components/WhatsAppIntegrationCard').then((module) => ({ default: module.WhatsAppIntegrationCard })))
 
-
-export function DashboardView({ tasks, schedule, finance, onToggleTask, activeView, onNavigate }: DashboardViewProps) {
+export function DashboardView({ tasks, schedule, finance, onToggleTask, onNavigate }: DashboardViewProps) {
   const [connectionsOpen, setConnectionsOpen] = useState(false)
   const [now, setNow] = useState(() => new Date())
   const today = getToday()
@@ -30,14 +26,17 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, activeVi
     const timer = window.setInterval(() => setNow(new Date()), 60_000)
     return () => window.clearInterval(timer)
   }, [])
-  const todayScheduleCount = useMemo(() => schedule.filter((item) => scheduleOccursOnDate(item, today)).length, [schedule, today])
+
   const todaySchedule = useMemo(() => schedule
     .filter((item) => scheduleOccursOnDate(item, today))
-    .sort((a, b) => a.startTime.localeCompare(b.startTime))
-    .slice(0, 5), [schedule, today])
+    .sort((a, b) => a.startTime.localeCompare(b.startTime)), [schedule, today])
+
   const completed = tasks.filter((task) => task.status === 'done').length
-  const expense = finance.filter((entry) => entry.type === 'expense' && entry.date === today).reduce((sum, entry) => sum + entry.amount, 0)
   const openTasks = tasks.filter((task) => task.status !== 'done').length
+  const expense = finance
+    .filter((entry) => entry.type === 'expense' && entry.date === today)
+    .reduce((sum, entry) => sum + entry.amount, 0)
+
   const focusTasks = useMemo(() => [...tasks]
     .filter((task) => task.status !== 'done')
     .sort((a, b) => {
@@ -47,7 +46,12 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, activeVi
       return (a.dueDate ?? '9999-12-31').localeCompare(b.dueDate ?? '9999-12-31')
     })
     .slice(0, 5), [tasks])
-  const completionPercent = tasks.length ? Math.round((completed / tasks.length) * 100) : 0
+
+  const overdueTasks = useMemo(() => [...tasks]
+    .filter((task) => task.status !== 'done' && task.dueDate && task.dueDate < today)
+    .sort((a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? ''))
+    .slice(0, 2), [tasks, today])
+
   const currentMinutes = now.getHours() * 60 + now.getMinutes()
   const currentSchedule = todaySchedule.find((item) => {
     const start = Number(item.startTime.slice(0, 2)) * 60 + Number(item.startTime.slice(3, 5))
@@ -58,118 +62,139 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, activeVi
     const start = Number(item.startTime.slice(0, 2)) * 60 + Number(item.startTime.slice(3, 5))
     return start >= currentMinutes
   })
-  const overdueTasks = useMemo(() => [...tasks]
-    .filter((task) => task.status !== 'done' && task.dueDate && task.dueDate < today)
-    .sort((a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? ''))
-    .slice(0, 3), [tasks, today])
   const currentTimeLabel = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now)
 
   return (
-    <section className="dashboard-grid page-enter">
-      <div className="welcome-card motion-card glass-panel">
-        <div className="welcome-content">
-          <div className="welcome-index"><span>01</span><i aria-hidden="true">/</i><strong>TODAY</strong></div>
-          <span className="section-kicker">MI-D / DAILY SYSTEM</span>
-          <h2><span>Keep your day</span> <em>in motion.</em></h2>
-          <p>Your schedule, tasks, and finances update from the data you manage in MiD-Daily.</p>
-          <div className="welcome-meta-line"><span>CALM · CLEAR · CONNECTED</span><span>LOCAL RHYTHM</span></div>
+    <section className="workspace dashboard-page page-enter">
+      <div className="page-intro">
+        <div>
+          <h2>Today</h2>
+          <p>{formatDate(today)} · your day at a glance.</p>
         </div>
-        <div className="welcome-side">
-          <div className="day-progress" style={{ '--day-progress': completionPercent + '%' } as CSSProperties} aria-label={completionPercent + '% of tasks completed'}>
-            <div className="day-progress-copy"><strong>{completionPercent}%</strong><span>tasks done</span></div>
+        <button className="primary-button" type="button" onClick={() => onNavigate('schedule')}>Open schedule</button>
+      </div>
+
+      <div className="dashboard-overview">
+        <section className="content-card dashboard-agenda">
+          <div className="card-heading">
+            <div>
+              <span className="section-kicker">Schedule</span>
+              <h3>Today&apos;s agenda</h3>
+            </div>
+            <span className="card-meta">
+              {nextSchedule ? `Next ${nextSchedule.startTime}` : 'No more today'}
+            </span>
           </div>
-          <div className="welcome-date"><strong>Today</strong><span>{formatDate(today)}</span></div>
-        </div>
-      </div>
 
-      <section className="daily-pulse" aria-label="Daily command center">
-        <article className="daily-pulse-item">
-          <span className="section-kicker">NOW</span>
-          <strong>{currentTimeLabel}</strong>
-          <small>{currentSchedule ? currentSchedule.title : 'No active activity'}</small>
-        </article>
-        <article className="daily-pulse-item">
-          <span className="section-kicker">NEXT</span>
-          <strong>{nextSchedule ? nextSchedule.startTime : '—'}</strong>
-          <small>{nextSchedule ? nextSchedule.title : 'Nothing else scheduled today'}</small>
-        </article>
-        <article className="daily-pulse-item is-risk">
-          <span className="section-kicker">AT RISK</span>
-          <strong>{overdueTasks.length}</strong>
-          <small>{overdueTasks.length ? overdueTasks[0].title + (overdueTasks.length > 1 ? ' +' + (overdueTasks.length - 1) : '') : 'No overdue tasks'}</small>
-        </article>
-      </section>
+          <div className="dashboard-context">
+            <strong>{currentTimeLabel}</strong>
+            <span>{currentSchedule ? currentSchedule.title : nextSchedule ? `Next: ${nextSchedule.title}` : 'Free time'}</span>
+          </div>
 
-      <div className="stat-row">
-        <StatCard label="Schedule" value={String(todayScheduleCount)} hint="planned today" />
-        <StatCard label="Tasks" value={`${completed}/${tasks.length}`} hint={`${openTasks} open`} />
-        <StatCard label="Expense" value={currency.format(expense)} hint="spent today" />
-      </div>
-
-      <div className="dashboard-primary-grid">
-        <section className="content-card schedule-card motion-card">
-          <div className="card-heading"><div><span className="section-kicker">AGENDA</span><h3>Today&apos;s schedule</h3></div><span className="card-meta">{todaySchedule.length}{todayScheduleCount > 5 ? ' of ' + todayScheduleCount : ''} items</span></div>
           <div className="schedule-list">
-            {todaySchedule.length === 0 ? <div className="empty-state"><strong>No activities planned</strong><span>Your Schedule is empty for today.</span></div> : todaySchedule.map((item) => (
+            {todaySchedule.length === 0 ? (
+              <div className="empty-state">
+                <strong>Your schedule is clear.</strong>
+                <span>Add an activity when you need one.</span>
+              </div>
+            ) : todaySchedule.slice(0, 6).map((item) => (
               <div className="schedule-item" key={item.id}>
                 <div className="schedule-time"><strong>{item.startTime}</strong><span>{item.endTime}</span></div>
-                <div className="timeline-dot" />
-                <div className="schedule-copy"><strong>{item.title}</strong><span>{item.type} · {item.location || 'No location'}</span></div>
+                <div className="timeline-dot" aria-hidden="true" />
+                <div className="schedule-copy"><strong>{item.title}</strong><span>{item.type}{item.location ? ` · ${item.location}` : ''}</span></div>
               </div>
             ))}
           </div>
-          {todayScheduleCount > 5 && (
+
+          {todaySchedule.length > 6 && (
             <button className="dashboard-section-link" type="button" onClick={() => onNavigate('schedule')}>
-              View full schedule <span aria-hidden="true">→</span>
+              View {todaySchedule.length - 6} more <span aria-hidden="true">→</span>
             </button>
           )}
         </section>
 
-        <section className="content-card task-card motion-card">
-          <div className="card-heading"><div><span className="section-kicker">FOCUS</span><h3>Task queue</h3></div><span className="card-meta">{openTasks} open</span></div>
+        <section className="content-card dashboard-focus">
+          <div className="card-heading">
+            <div>
+              <span className="section-kicker">Focus</span>
+              <h3>Open tasks</h3>
+            </div>
+            <span className="card-meta">{openTasks} open</span>
+          </div>
+
           <div className="task-list">
-            {openTasks === 0 ? <div className="empty-state"><strong>All tasks complete</strong><span>Your focus queue is clear for now.</span></div> : focusTasks.map((task) => (
+            {openTasks === 0 ? (
+              <div className="empty-state">
+                <strong>All tasks complete.</strong>
+                <span>Your queue is clear.</span>
+              </div>
+            ) : focusTasks.map((task) => (
               <button className="task-row" key={task.id} type="button" onClick={() => onToggleTask(task.id)}>
                 <span className="task-check" aria-hidden="true" />
-                <span className="task-copy"><strong>{task.title}</strong><small>{task.category}{task.dueDate ? ' · due ' + task.dueDate : ''}</small></span>
+                <span className="task-copy">
+                  <strong>{task.title}</strong>
+                  <small>{task.category}{task.dueDate ? ` · due ${task.dueDate}` : ''}</small>
+                </span>
                 <span className={'priority-badge ' + task.priority}>{task.priority}</span>
               </button>
             ))}
           </div>
+
           {openTasks > 5 && (
             <button className="dashboard-section-link" type="button" onClick={() => onNavigate('tasks')}>
-              View all open tasks <span aria-hidden="true">→</span>
+              View all tasks <span aria-hidden="true">→</span>
             </button>
           )}
         </section>
       </div>
 
-      <FeatureLandscape activeView={activeView} onNavigate={onNavigate} />
-
-      <section className="dashboard-connections">
-        <button
-          className="connections-toggle"
-          type="button"
-          aria-expanded={connectionsOpen}
-          aria-controls="dashboard-connections-content"
-          onClick={() => setConnectionsOpen((open) => !open)}
-        >
-          <span>
-            <span className="section-kicker">CONNECTIONS</span>
-            <strong>External channels</strong>
-          </span>
-          <span className="connections-toggle-icon" aria-hidden="true">{connectionsOpen ? '−' : '+'}</span>
-        </button>
-
-        {connectionsOpen && (
-          <div id="dashboard-connections-content" className="dashboard-integration-grid">
-            <Suspense fallback={<div className="content-card connection-loading">Opening connections…</div>}>
-              <TelegramIntegrationCard />
-              <WhatsAppIntegrationCard />
-            </Suspense>
+      <section className="content-card dashboard-finance">
+        <div>
+          <div className="card-heading">
+            <div>
+              <span className="section-kicker">Finance</span>
+              <h3>Today&apos;s money</h3>
+            </div>
+            <span className="card-meta">{formatDate(today)}</span>
           </div>
-        )}
+
+          <div className="dashboard-finance-values">
+            <div className="dashboard-finance-value">
+              <span>Spent</span>
+              <strong className="amount-negative">{currency.format(expense)}</strong>
+              <small>expenses today</small>
+            </div>
+            <div className="dashboard-finance-value">
+              <span>Tasks</span>
+              <strong>{completed}/{tasks.length}</strong>
+              <small>completed</small>
+            </div>
+            <div className="dashboard-finance-value">
+              <span>Agenda</span>
+              <strong>{todaySchedule.length}</strong>
+              <small>activities</small>
+            </div>
+          </div>
+        </div>
+
+        <div className="dashboard-risk">
+          <span>Attention</span>
+          <strong>{overdueTasks.length ? `${overdueTasks.length} overdue task${overdueTasks.length > 1 ? 's' : ''}` : 'Nothing overdue'}</strong>
+        </div>
       </section>
+
+      <details className="dashboard-connections">
+        <summary className="connections-toggle">
+          <span><strong>Connections</strong></span>
+          <span className="connections-toggle-icon" aria-hidden="true">+</span>
+        </summary>
+        <div className="dashboard-integration-grid">
+          <Suspense fallback={<div className="content-card connection-loading">Opening connections…</div>}>
+            <TelegramIntegrationCard />
+            <WhatsAppIntegrationCard />
+          </Suspense>
+        </div>
+      </details>
     </section>
   )
 }
