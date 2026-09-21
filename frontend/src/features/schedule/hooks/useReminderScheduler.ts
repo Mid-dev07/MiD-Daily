@@ -5,7 +5,7 @@ import { getReminderState } from '../schedule.reminder'
 import type { ScheduleItem } from '../schedule.types'
 
 const DISPATCHED_KEY = 'mid-daily.notification-dispatched'
-const POLL_INTERVAL = 15_000
+const PERMISSION_RECHECK_MS = 60_000
 
 function readDispatched() {
   try {
@@ -26,35 +26,64 @@ function writeDispatched(values: Set<string>) {
 
 export function useReminderScheduler(schedule: ScheduleItem[]) {
   useEffect(() => {
+    let cancelled = false
+    let timer: number | undefined
     let running = false
+    const normalized = normalizeScheduleList(schedule)
+
+    const scheduleNext = (targetAt?: number, fallbackDelay = PERMISSION_RECHECK_MS) => {
+      if (cancelled) return
+      const delay = targetAt === undefined
+        ? fallbackDelay
+        : Math.max(1000, targetAt - Date.now() + 50)
+      timer = window.setTimeout(() => {
+        void tick()
+      }, delay)
+    }
 
     const tick = async () => {
-      if (running || getNotificationSupport() !== 'granted') return
-      running = true
+      if (cancelled || running) return
 
+      if (getNotificationSupport() !== 'granted') {
+        scheduleNext(undefined)
+        return
+      }
+
+      running = true
       try {
         const dispatched = readDispatched()
         const now = new Date()
+        let nextTriggerAt: number | undefined
 
-        for (const item of normalizeScheduleList(schedule)) {
+        for (const item of normalized) {
           const reminder = getReminderState(item, now)
-          if (reminder.status !== 'due' || !reminder.triggerAt) continue
 
-          const key = item.id + ':' + reminder.triggerAt.getTime()
-          if (dispatched.has(key)) continue
+          if (reminder.status === 'due' && reminder.triggerAt) {
+            const key = item.id + ':' + reminder.triggerAt.getTime()
+            if (!dispatched.has(key) && await showScheduleReminder(item, reminder)) {
+              dispatched.add(key)
+              writeDispatched(dispatched)
+            }
+            continue
+          }
 
-          if (await showScheduleReminder(item, reminder)) {
-            dispatched.add(key)
-            writeDispatched(dispatched)
+          if (reminder.status === 'scheduled' && reminder.triggerAt) {
+            const targetAt = reminder.triggerAt.getTime()
+            nextTriggerAt = nextTriggerAt === undefined ? targetAt : Math.min(nextTriggerAt, targetAt)
           }
         }
+
+        if (nextTriggerAt !== undefined) scheduleNext(nextTriggerAt)
       } finally {
         running = false
       }
     }
 
     void tick()
-    const interval = window.setInterval(() => void tick(), POLL_INTERVAL)
-    return () => window.clearInterval(interval)
+
+    return () => {
+      cancelled = true
+      if (timer !== undefined) window.clearTimeout(timer)
+    }
   }, [schedule])
 }
