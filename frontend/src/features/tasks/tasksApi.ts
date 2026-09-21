@@ -15,7 +15,9 @@ export async function createRemoteTask(draft: TaskDraft) {
   return data.item
 }
 
-export type TaskUpdate = Partial<Omit<TaskDraft, 'dueDate' | 'notes'>> & { dueDate?: string | null; notes?: string | null }\n\nexport async function updateRemoteTask(id: number, draft: TaskUpdate) {
+export type TaskUpdate = Partial<Omit<TaskDraft, 'dueDate' | 'notes'>> & { dueDate?: string | null; notes?: string | null }
+
+export async function updateRemoteTask(id: number, draft: TaskUpdate) {
   const data = await apiRequest<{ item: Task }>(`/api/tasks/${encodeURIComponent(id)}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
