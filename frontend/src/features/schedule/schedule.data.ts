@@ -1,5 +1,6 @@
 import type { ScheduleItem } from './schedule.types'
 
+const today = new Intl.DateTimeFormat('sv-SE').format(new Date())
 const noRepeat = { frequency: 'NONE' as const, interval: 1 }
 const notSynced = { status: 'not-synced' as const, calendarId: 'primary' }
 
@@ -8,7 +9,7 @@ export const initialScheduleItems: ScheduleItem[] = [
     id: 1,
     title: 'Project planning',
     type: 'WORK',
-    date: '2026-09-20',
+    date: today,
     startTime: '09:00',
     endTime: '10:00',
     location: 'Workspace',
@@ -22,7 +23,7 @@ export const initialScheduleItems: ScheduleItem[] = [
     id: 2,
     title: 'Coding session',
     type: 'STUDY',
-    date: '2026-09-20',
+    date: today,
     startTime: '13:00',
     endTime: '15:00',
     location: 'Home',
@@ -36,7 +37,7 @@ export const initialScheduleItems: ScheduleItem[] = [
     id: 3,
     title: 'Evening review',
     type: 'PERSONAL',
-    date: '2026-09-20',
+    date: today,
     startTime: '20:00',
     endTime: '20:30',
     location: 'Home',
