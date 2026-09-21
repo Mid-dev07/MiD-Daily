@@ -64,10 +64,10 @@ export function App() {
   const [schedule, setSchedule] = useState<ScheduleItem[]>(() => normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, userId ? [] : initialScheduleItems)))
   const [toast, setToast] = useState('')
   const [timePeriod, setTimePeriod] = useState(getTimePeriod)
-  const [readyScope, setReadyScope] = useState<string>(() => workspaceScope)
+  const [readyScope, setReadyScope] = useState<string>('')
 
   useReminderScheduler(schedule)
-  useWorkspaceRealtime(userId, setTasks, setFinance, setSchedule)
+  useWorkspaceRealtime(userId, readyScope === workspaceScope, setTasks, setFinance, setSchedule)
 
   useEffect(() => {
     void registerBrowserServiceWorker()
