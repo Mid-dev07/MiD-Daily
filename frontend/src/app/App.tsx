@@ -193,7 +193,7 @@ export function App() {
 
     if (editingId) {
       if (!finance.some((entry) => entry.id === editingId)) return 'Transaction not found.'
-      const next = userId ? await updateRemoteFinance(editingId, normalizedDraft) : { ...finance.find((entry) => entry.id === editingId)!, ...normalizedDraft }
+      const remoteFinanceDraft = { ...normalizedDraft, notes: normalizedDraft.notes ?? null }\n      const next = userId ? await updateRemoteFinance(editingId, remoteFinanceDraft) : { ...finance.find((entry) => entry.id === editingId)!, ...normalizedDraft }
       setFinance((items) => items.map((entry) => entry.id === editingId ? next : entry))
       setToast('Transaction updated')
     } else {
