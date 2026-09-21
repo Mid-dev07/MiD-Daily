@@ -6,7 +6,7 @@ test('AI exposes only read tools by default', () => {
   const tools = buildAssistantTools(false)
   assert.deepEqual(
     tools.map((tool) => tool.name),
-    ['get_today_schedule', 'get_schedule_range', 'get_active_budgets', 'get_open_tasks', 'get_expense_summary'],
+    ['get_today_schedule', 'get_open_tasks', 'get_schedule_range', 'get_active_budgets', 'get_expense_summary'],
   )
 })
 
@@ -16,9 +16,9 @@ test('AI exposes write tools only when explicitly enabled', () => {
     tools.map((tool) => tool.name),
     [
       'get_today_schedule',
+      'get_open_tasks',
       'get_schedule_range',
       'get_active_budgets',
-      'get_open_tasks',
       'get_expense_summary',
       'create_activity',
       'create_budget',
@@ -53,6 +53,9 @@ test('AI write schemas require complete strict argument sets', () => {
     'preferredStartTime',
     'preferredEndTime',
     'activityDeadline',
+    'recurrenceFrequency',
+    'recurrenceInterval',
+    'recurrenceUntil',
     'location',
     'notes',
   ])
