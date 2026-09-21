@@ -26,6 +26,8 @@ import {
 } from './dataStore.js'
 import { claimTelegramUpdate, createTelegramLinkCode, deleteTelegramConnectionByUserId, getTelegramConnectionByChatId, getTelegramConnectionByUserId, redeemTelegramLinkCode, isTelegramPersistenceConfigured } from './integrations/telegramStore.js'
 import { isTelegramConfigured, parseCommand, sendTelegramMessage, verifyWebhookSecret } from './integrations/telegram.js'
+import { dispatchNaturalLanguageMessage } from './integrations/gateway.js'
+import { isInstagramAnalyticsConfigured } from './integrations/instagramAnalytics.js'
 import { getWhatsAppConfig, isWhatsAppConfigured, parseWhatsAppCommand, sendWhatsAppText, verifyWebhookChallenge, verifyWhatsAppSignature, buildWhatsAppUpdateHash } from './integrations/whatsapp.js'
 import { createWhatsAppLinkCode, deleteWhatsAppConnectionByUserId, getWhatsAppConnectionByUserId, getWhatsAppConnectionByWaId, redeemWhatsAppLinkCode, claimWhatsAppUpdate, isWhatsAppPersistenceConfigured } from './integrations/whatsappStore.js'
 import {
@@ -1235,6 +1237,7 @@ async function whatsAppHelp(to: string) {
     '/expenses',
     '/schedule',
     '/schedule tomorrow',
+    'You can also send normal-language requests without a slash command.',
     '/disconnect',
   ].join('\n'))
 }
@@ -1314,7 +1317,25 @@ async function handleWhatsAppWebhook(req: IncomingMessage, res: ServerResponse) 
 
   const parsed = parseWhatsAppCommand(incoming.text)
   if (!parsed) {
-    sendJson(res, 200, { ok: true, ignored: true })
+    const connection = await getWhatsAppConnectionByWaId(incoming.from)
+    if (!connection) {
+      await sendWhatsAppText(incoming.from, 'WhatsApp is not linked. Open MiD-Daily and generate a WhatsApp connection link first.')
+    } else {
+      try {
+        const result = await dispatchNaturalLanguageMessage({
+          channel: 'whatsapp',
+          userId: connection.user_id,
+          text: incoming.text,
+        })
+        await sendWhatsAppText(incoming.from, result.text)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'MiD-Daily Assistant could not process this message.'
+        await sendWhatsAppText(incoming.from, message === 'AI integration is not configured.'
+          ? 'MiD-Daily Assistant is not configured on this deployment yet.'
+          : 'MiD-Daily Assistant could not process that request right now.')
+      }
+    }
+    sendJson(res, 200, { ok: true })
     return
   }
 
@@ -1415,6 +1436,35 @@ function formatTelegramExpenses(items: Array<{ title: string; amount: number; ca
   ).join('\n')
 }
 
+async function handleIntegrationStatus(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  const [telegram, whatsapp] = await Promise.all([
+    getTelegramConnectionByUserId(userId),
+    getWhatsAppConnectionByUserId(userId),
+  ])
+
+  sendJson(res, 200, {
+    ai: { configured: isAssistantConfigured() },
+    telegram: {
+      configured: isTelegramConfigured() && isTelegramPersistenceConfigured(),
+      connected: Boolean(telegram),
+      connectedAt: telegram?.connected_at ?? null,
+      username: telegram?.telegram_username ?? null,
+    },
+    whatsapp: {
+      configured: isWhatsAppConfigured() && isWhatsAppPersistenceConfigured(),
+      connected: Boolean(whatsapp),
+      connectedAt: whatsapp?.connected_at ?? null,
+      displayName: whatsapp?.display_name ?? null,
+      businessPhoneNumber: getWhatsAppConfig().businessPhoneNumber || null,
+    },
+    instagram: {
+      configured: isInstagramAnalyticsConfigured(),
+      mode: 'analytics-read-only',
+    },
+  })
+}
+
 async function handleTelegramStatus(req: IncomingMessage, res: ServerResponse) {
   const userId = await requireAuthenticatedUserId(req)
   const connection = await getTelegramConnectionByUserId(userId)
@@ -1496,7 +1546,25 @@ async function handleTelegramUpdate(req: IncomingMessage, res: ServerResponse) {
 
   const parsed = parseCommand(textValue)
   if (!parsed) {
-    sendJson(res, 200, { ok: true, ignored: true })
+    const connection = await getTelegramConnectionByChatId(chatId)
+    if (!connection) {
+      await sendTelegramMessage(chatId, 'Telegram is not linked. Open MiD-Daily and generate a Telegram connection link first.')
+    } else {
+      try {
+        const result = await dispatchNaturalLanguageMessage({
+          channel: 'telegram',
+          userId: connection.user_id,
+          text: textValue,
+        })
+        await sendTelegramMessage(chatId, result.text)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'MiD-Daily Assistant could not process this message.'
+        await sendTelegramMessage(chatId, message === 'AI integration is not configured.'
+          ? 'MiD-Daily Assistant is not configured on this deployment yet.'
+          : 'MiD-Daily Assistant could not process that request right now.')
+      }
+    }
+    sendJson(res, 200, { ok: true })
     return
   }
 
@@ -1679,6 +1747,11 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
         schedulePersistenceConfigured: isSchedulePersistenceConfigured(),
         authConfigured: Boolean(supabaseAuthClient),
       })
+      return
+    }
+
+    if (req.method === 'GET' && url.pathname === '/api/integrations/status') {
+      await handleIntegrationStatus(req, res)
       return
     }
 
