@@ -18,7 +18,7 @@ export function Topbar({ view }: TopbarProps) {
         <span className="topbar-kicker">MI-D DAILY</span>
         <h1>{title}</h1>
       </div>
-      <div className="profile-chip">
+      <div className="profile-chip glass-panel">
         <span className="avatar">{user?.email?.slice(0, 1).toUpperCase() ?? 'M'}</span>
         <span>{user?.email ?? 'Personal workspace'}</span>
         {configured && user && <button className="text-button" type="button" onClick={() => void logout()}>Sign out</button>}
