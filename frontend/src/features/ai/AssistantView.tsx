@@ -23,13 +23,17 @@ export function AssistantView() {
   const [integrations, setIntegrations] = useState<IntegrationStatus | null>(null)
   const [integrationLoading, setIntegrationLoading] = useState(true)
   const [integrationBusy, setIntegrationBusy] = useState<'telegram' | 'whatsapp' | null>(null)
+  const [integrationError, setIntegrationError] = useState('')
 
   const refreshIntegrations = async () => {
     setIntegrationLoading(true)
     try {
       setIntegrations(await getIntegrationStatus())
+      setIntegrationError('')
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Unable to load integrations.')
+      const message = reason instanceof Error ? reason.message : 'Unable to load integration status.'
+      setIntegrations(null)
+      setIntegrationError(message)
     } finally {
       setIntegrationLoading(false)
     }
@@ -97,7 +101,8 @@ export function AssistantView() {
     }
   }
 
-  const channelLabel = (configured: boolean, connected: boolean, identity: string) => {
+  const channelLabel = (configured: boolean | undefined, connected: boolean, identity: string) => {
+    if (configured === undefined) return { title: 'Checking…', detail: 'Checking provider configuration.' }
     if (!configured) return { title: 'Not configured', detail: 'Provider credentials are not configured on this deployment.' }
     if (connected) return { title: 'Connected', detail: identity || 'Connected account' }
     return { title: 'Ready to connect', detail: 'Link this channel to send natural-language requests.' }
@@ -125,6 +130,7 @@ export function AssistantView() {
           <div><span className="section-kicker">CHANNELS</span><h3>Connect your assistant</h3></div>
           <button className="text-button" type="button" disabled={integrationLoading} onClick={() => void refreshIntegrations()}>{integrationLoading ? 'Checking…' : 'Refresh'}</button>
         </div>
+        {integrationError && <div className="ai-availability-note" role="alert"><strong>Integration status could not be checked.</strong><span>{integrationError} Refresh the status before troubleshooting provider setup.</span></div>}
 
         <div className="assistant-channel-grid">
           <article className="assistant-channel-card">
@@ -133,7 +139,7 @@ export function AssistantView() {
               <strong>{telegram.title}</strong>
               <small>{telegram.detail}</small>
             </div>
-            {integrations?.telegram.configured && (
+            {integrations?.telegram.configured ? (
               <div className="integration-actions">
                 {integrations.telegram.connected ? (
                   <button className="text-button danger" type="button" disabled={integrationBusy !== null} onClick={() => void disconnect('telegram')}>Disconnect</button>
@@ -141,7 +147,7 @@ export function AssistantView() {
                   <button className="secondary-button" type="button" disabled={integrationBusy !== null} onClick={() => void openConnectionLink('telegram')}>{integrationBusy === 'telegram' ? 'Opening…' : 'Connect'}</button>
                 )}
               </div>
-            )}
+            ) : integrations && <span className="integration-badge">{telegram.title === 'Not configured' ? 'SETUP' : '…'}</span>}
           </article>
 
           <article className="assistant-channel-card">
@@ -150,7 +156,7 @@ export function AssistantView() {
               <strong>{whatsapp.title}</strong>
               <small>{whatsapp.detail}</small>
             </div>
-            {integrations?.whatsapp.configured && (
+            {integrations?.whatsapp.configured ? (
               <div className="integration-actions">
                 {integrations.whatsapp.connected ? (
                   <button className="text-button danger" type="button" disabled={integrationBusy !== null} onClick={() => void disconnect('whatsapp')}>Disconnect</button>
@@ -158,7 +164,7 @@ export function AssistantView() {
                   <button className="secondary-button" type="button" disabled={integrationBusy !== null} onClick={() => void openConnectionLink('whatsapp')}>{integrationBusy === 'whatsapp' ? 'Opening…' : 'Connect'}</button>
                 )}
               </div>
-            )}
+            ) : integrations && <span className="integration-badge">{whatsapp.title === 'Not configured' ? 'SETUP' : '…'}</span>}
           </article>
 
           <article className="assistant-channel-card">
@@ -189,15 +195,17 @@ export function AssistantView() {
             <span>Allow actions</span>
           </label>
           <span className="card-meta">
-            {integrations?.ai.configured === undefined
-              ? 'Checking AI service…'
-              : integrations.ai.configured
+            {integrationError
+              ? 'AI service status unavailable'
+              : integrations?.ai.configured === undefined
+                ? 'Checking AI service…'
+                : integrations.ai.configured
                 ? (allowWrites ? 'Write actions enabled' : 'Read-only mode')
                 : 'AI service not configured'}
           </span>
         </div>
 
-        {integrations?.ai.configured === false && (
+        {integrations?.ai.configured === false && !integrationError && (
           <div className="ai-availability-note" role="status">
             <strong>Assistant is not configured on this deployment.</strong>
             <span>The core workspace remains fully usable without AI. Add the server-side OpenAI configuration to enable this module.</span>
