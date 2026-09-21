@@ -775,7 +775,7 @@ function validateFinanceInput(body: Record<string, unknown>) {
 }
 
 function validateFinancePatch(body: Record<string, unknown>) {
-  const patch: Partial<import('./dataStore.js').FinanceRecord> = {}
+  const patch: Partial<import('./dataStore.js').FinanceRecord> & { notes?: string | null } = {}
 
   if (Object.prototype.hasOwnProperty.call(body, 'type')) {
     if (!['income', 'expense'].includes(String(body.type))) throw httpError(400, 'Finance type is invalid.')
@@ -800,7 +800,7 @@ function validateFinancePatch(body: Record<string, unknown>) {
   }
   if (Object.prototype.hasOwnProperty.call(body, 'notes')) {
     if (body.notes !== null && typeof body.notes !== 'string') throw httpError(400, 'Finance notes are invalid.')
-    patch.notes = typeof body.notes === 'string' && body.notes.trim() ? body.notes.trim() : undefined
+    patch.notes = body.notes === null ? null : body.notes.trim() || null
   }
 
   if (Object.keys(patch).length === 0) throw httpError(400, 'No finance fields were provided.')
