@@ -1670,6 +1670,4 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
   }
 }
 
-createServer((req, res) => void handle(req, res)).listen(PORT, () => {
-  console.log(`MiD-Daily backend listening on http://localhost:${PORT}`)
-})
+export const server = createServer((req, res) => void handle(req, res))
