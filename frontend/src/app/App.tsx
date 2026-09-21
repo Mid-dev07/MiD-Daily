@@ -19,6 +19,7 @@ import { initialScheduleItems } from '../features/schedule/schedule.data'
 import { normalizeScheduleList } from '../features/schedule/schedule.migration'
 import { listRemoteSchedule, createRemoteSchedule, updateRemoteSchedule, deleteRemoteSchedule } from '../features/schedule/scheduleApi'
 import { useReminderScheduler } from '../features/schedule/hooks/useReminderScheduler'
+import { registerBrowserServiceWorker } from '../integrations/notifications/serviceWorker'
 import { readUserStorage, writeUserStorage, hasUserStorage } from '../lib/userStorage'
 import { hasCompletedRemoteSync, markRemoteSyncComplete } from '../lib/dataSync'
 import { useAuth } from '../features/auth/AuthProvider'
@@ -49,6 +50,10 @@ export function App() {
   const [timePeriod, setTimePeriod] = useState(getTimePeriod)
 
   useReminderScheduler(schedule)
+
+  useEffect(() => {
+    void registerBrowserServiceWorker()
+  }, [])
 
   useEffect(() => {
     const timer = window.setInterval(() => setTimePeriod(getTimePeriod()), 60_000)
