@@ -46,6 +46,7 @@ function getTimePeriod(hour = new Date().getHours()) {
 export function App() {
   const { user } = useAuth()
   const userId = user?.id
+  const workspaceScope = userId ? userId : 'demo'
   const [activeView, setActiveView] = useState<View>(() => viewFromPath(window.location.pathname))
 
   useEffect(() => {
@@ -63,7 +64,7 @@ export function App() {
   const [schedule, setSchedule] = useState<ScheduleItem[]>(() => normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, userId ? [] : initialScheduleItems)))
   const [toast, setToast] = useState('')
   const [timePeriod, setTimePeriod] = useState(getTimePeriod)
-  const [readyUserId, setReadyUserId] = useState<string | undefined>(() => userId)
+  const [readyScope, setReadyScope] = useState<string>(() => workspaceScope)
 
   useReminderScheduler(schedule)
   useWorkspaceRealtime(userId, setTasks, setFinance, setSchedule)
@@ -78,25 +79,29 @@ export function App() {
   }, [])
 
   useEffect(() => {
-    if (readyUserId !== userId) return
+    if (readyScope !== workspaceScope) return
     writeUserStorage(TASK_STORAGE_KEY, userId, tasks)
-  }, [tasks, userId, readyUserId])
+  }, [tasks, workspaceScope, readyScope])
   useEffect(() => {
-    if (readyUserId !== userId) return
+    if (readyScope !== workspaceScope) return
     writeUserStorage(FINANCE_STORAGE_KEY, userId, finance)
-  }, [finance, userId, readyUserId])
+  }, [finance, workspaceScope, readyScope])
   useEffect(() => {
     if (!userId || !workspaceReady) return
     writeUserStorage(SCHEDULE_STORAGE_KEY, userId, schedule)
-  }, [schedule, userId, readyUserId])
+  }, [schedule, workspaceScope, readyScope])
 
   useEffect(() => {
+    setReadyScope('')
+
     if (!userId) {
-      setReadyUserId(undefined)
+      setTasks(normalizeTaskList(initialTasks))
+      setFinance(normalizeFinanceList(financeEntries))
+      setSchedule(normalizeScheduleList(initialScheduleItems))
+      setReadyScope('demo')
       return
     }
 
-    setReadyUserId(undefined)
     setTasks(normalizeTaskList(readUserStorage(TASK_STORAGE_KEY, userId, [])))
     setFinance(normalizeFinanceList(readUserStorage(FINANCE_STORAGE_KEY, userId, [])))
     setSchedule(normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, [])))
@@ -142,7 +147,7 @@ export function App() {
         markRemoteSyncComplete(TASK_STORAGE_KEY, userId)
         markRemoteSyncComplete(FINANCE_STORAGE_KEY, userId)
         markRemoteSyncComplete(SCHEDULE_STORAGE_KEY, userId)
-        setReadyUserId(userId)
+        setReadyScope(userId)
       } catch (reason) {
         if (active) {
           setWorkspaceReady(true)
