@@ -75,10 +75,10 @@ export function TaskForm({ open, initialTask, onClose, onSubmit }: TaskFormProps
         </div>
 
         <form className="schedule-form" onSubmit={submit}>
-          <label>Title<input disabled={saving} value={draft.title} onChange={(event) => setField('title', event.target.value)} placeholder="e.g. Finish API documentation" autoFocus /></label>
+          <label>Title<input disabled={saving} value={draft.title} onChange={(event) => setField('title', event.target.value)} placeholder="e.g. Finish API documentation" autoFocus maxLength={200} /></label>
 
           <div className="form-grid two">
-            <label>Category<input disabled={saving} value={draft.category} onChange={(event) => setField('category', event.target.value)} /></label>
+            <label>Category<input disabled={saving} value={draft.category} maxLength={100} onChange={(event) => setField('category', event.target.value)} /></label>
             <label>Due date<input disabled={saving} type="date" value={draft.dueDate ?? ''} onChange={(event) => setField('dueDate', event.target.value)} /></label>
           </div>
 
@@ -96,7 +96,7 @@ export function TaskForm({ open, initialTask, onClose, onSubmit }: TaskFormProps
           </div>
 
           <label>Progress<input disabled={saving} type="number" min="0" max="100" value={draft.progress} onChange={(event) => setField('progress', Number(event.target.value))} /></label>
-          <label>Notes<textarea disabled={saving} value={draft.notes ?? ''} onChange={(event) => setField('notes', event.target.value)} rows={4} placeholder="Optional context, acceptance criteria, or next step" /></label>
+          <label>Notes<textarea disabled={saving} value={draft.notes ?? ''} onChange={(event) => setField('notes', event.target.value)} rows={4} placeholder="Optional context, acceptance criteria, or next step" maxLength={5000} /></label>
 
           {error && <div className="form-error" role="alert">{error}</div>}
           <div className="modal-actions"><button className="secondary-button" type="button" disabled={saving} onClick={onClose}>Cancel</button><button className="primary-button" disabled={saving} type="submit">{saving ? 'Saving…' : initialTask ? 'Save changes' : 'Add task'}</button></div>
