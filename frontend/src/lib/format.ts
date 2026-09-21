@@ -5,7 +5,7 @@ export const currency = new Intl.NumberFormat('id-ID', {
 })
 
 export function formatDate(date: string) {
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('id-ID', {
     weekday: 'long',
     day: '2-digit',
     month: 'long',
@@ -14,7 +14,7 @@ export function formatDate(date: string) {
 }
 
 export function formatShortDate(date: string) {
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('id-ID', {
     day: '2-digit',
     month: 'short',
   }).format(new Date(`${date}T00:00:00`))
