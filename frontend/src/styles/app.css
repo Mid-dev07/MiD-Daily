@@ -2761,3 +2761,37 @@ textarea {
     scroll-behavior: auto !important;
   }
 }
+
+
+/* Responsive performance guardrails for the editorial layer */
+.day-progress::after {
+  box-shadow: inset 0 2px 9px rgba(0, 0, 0, .48);
+}
+
+@media (max-width: 720px) {
+  .feature-node {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow:
+      0 1px 0 rgba(255, 252, 230, .06) inset,
+      0 16px 30px -24px rgba(0, 0, 0, .86);
+  }
+
+  .feature-node:hover,
+  .feature-node:focus-visible,
+  .feature-node.is-active {
+    box-shadow:
+      0 1px 0 rgba(255, 252, 230, .08) inset,
+      0 18px 32px -24px rgba(0, 0, 0, .90);
+  }
+}
+
+@media (max-width: 640px) {
+  .grain-noise {
+    display: none;
+  }
+
+  .welcome-card::before {
+    opacity: .72;
+  }
+}
