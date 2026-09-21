@@ -4,18 +4,34 @@ function scopedKey(baseKey: string, userId?: string) {
   return userId ? `${baseKey}:${userId}` : baseKey
 }
 
+function readRawStorage(key: string) {
+  try {
+    return localStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
+function removeStorage(key: string) {
+  try {
+    localStorage.removeItem(key)
+  } catch {
+    // Storage can be unavailable in restricted contexts.
+  }
+}
+
 export function readUserStorage<T>(baseKey: string, userId: string | undefined, fallback: T): T {
   const key = scopedKey(baseKey, userId)
 
   if (userId) {
-    const rawScoped = localStorage.getItem(key)
+    const rawScoped = readRawStorage(key)
     if (rawScoped) return readStorage(key, fallback)
 
-    const legacy = localStorage.getItem(baseKey)
+    const legacy = readRawStorage(baseKey)
     if (legacy) {
       const migrated = readStorage(baseKey, fallback)
       writeStorage(key, migrated)
-      localStorage.removeItem(baseKey)
+      removeStorage(baseKey)
       return migrated
     }
   }
@@ -28,5 +44,5 @@ export function writeUserStorage<T>(baseKey: string, userId: string | undefined,
 }
 
 export function hasUserStorage(baseKey: string, userId?: string) {
-  return Boolean(userId && localStorage.getItem(`${baseKey}:${userId}`))
+  return Boolean(userId && readRawStorage(`${baseKey}:${userId}`))
 }
