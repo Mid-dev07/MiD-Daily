@@ -21,7 +21,13 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, activeVi
   return (
     <section className="dashboard-grid page-enter">
       <div className="welcome-card motion-card glass-panel">
-        <div><span className="section-kicker">TODAY</span><h2>Keep your day in motion.</h2><p>Your schedule, tasks, and finances update from the data you manage in MiD-Daily.</p></div>
+        <div className="welcome-content">
+          <div className="welcome-index"><span>01</span><i aria-hidden="true">/</i><strong>TODAY</strong></div>
+          <span className="section-kicker">MI-D / DAILY SYSTEM</span>
+          <h2><span>Keep your day</span> <em>in motion.</em></h2>
+          <p>Your schedule, tasks, and finances update from the data you manage in MiD-Daily.</p>
+          <div className="welcome-meta-line"><span>CALM · CLEAR · CONNECTED</span><span>LOCAL RHYTHM</span></div>
+        </div>
         <div className="welcome-side">
           <div className="day-progress" style={{ '--day-progress': completionPercent + '%' } as CSSProperties} aria-label={completionPercent + '% of tasks completed'}>
             <div className="day-progress-copy"><strong>{completionPercent}%</strong><span>focus</span></div>
