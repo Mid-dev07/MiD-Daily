@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
-import { supabase } from '../../../lib/supabase'
-import { normalizeTaskList } from '../../tasks/task.migration'
-import { normalizeFinanceList } from '../../finance/finance.migration'
-import { normalizeScheduleList } from '../../schedule/schedule.migration'
-import type { FinanceEntry, Task } from '../../../types'
-import type { ScheduleItem } from '../../schedule/schedule.types'
+import { supabase } from '../../lib/supabase'
+import { normalizeTaskList } from '../tasks/task.migration'
+import { normalizeFinanceList } from '../finance/finance.migration'
+import { normalizeScheduleList } from '../schedule/schedule.migration'
+import type { FinanceEntry, Task } from '../../types'
+import type { ScheduleItem } from '../schedule/schedule.types'
 
 type Row = Record<string, unknown>
 type ChangePayload = {
