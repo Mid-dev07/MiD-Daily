@@ -1,4 +1,4 @@
-import type { View } from '../../types'
+import type { View } from '../types'
 
 const viewPaths: Record<View, string> = {
   dashboard: '/',
