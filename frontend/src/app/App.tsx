@@ -124,19 +124,27 @@ export function App() {
   }, [toast])
 
   useEffect(() => {
+    let frame = 0
     const onPointerMove = (event: PointerEvent) => {
-      const target = event.target as HTMLElement | null
-      const surface = target?.closest<HTMLElement>('.sidebar, .profile-chip, .welcome-card, .stat-card, .content-card, .schedule-event, .schedule-integration-card, .primary-button, .secondary-button, .icon-button, .filter-button, .task-row, .text-button, .modal-card, .feature-landscape, .feature-node')
-      if (!surface) return
-      const rect = surface.getBoundingClientRect()
-      const x = ((event.clientX - rect.left) / Math.max(rect.width, 1)) * 100
-      const y = ((event.clientY - rect.top) / Math.max(rect.height, 1)) * 100
-      surface.style.setProperty('--spec-x', x.toFixed(2) + '%')
-      surface.style.setProperty('--spec-y', y.toFixed(2) + '%')
+      if (frame) return
+      frame = window.requestAnimationFrame(() => {
+        frame = 0
+        const target = event.target as HTMLElement | null
+        const surface = target?.closest<HTMLElement>('.sidebar, .profile-chip, .welcome-card, .stat-card, .content-card, .schedule-event, .schedule-integration-card, .primary-button, .secondary-button, .icon-button, .filter-button, .task-row, .text-button, .modal-card, .feature-landscape, .feature-node')
+        if (!surface) return
+        const rect = surface.getBoundingClientRect()
+        const x = ((event.clientX - rect.left) / Math.max(rect.width, 1)) * 100
+        const y = ((event.clientY - rect.top) / Math.max(rect.height, 1)) * 100
+        surface.style.setProperty('--spec-x', x.toFixed(2) + '%')
+        surface.style.setProperty('--spec-y', y.toFixed(2) + '%')
+      })
     }
 
-    document.addEventListener('pointermove', onPointerMove)
-    return () => document.removeEventListener('pointermove', onPointerMove)
+    document.addEventListener('pointermove', onPointerMove, { passive: true })
+    return () => {
+      document.removeEventListener('pointermove', onPointerMove)
+      if (frame) window.cancelAnimationFrame(frame)
+    }
   }, [])
 
   const toggleTask = async (id: number) => {
@@ -260,7 +268,7 @@ export function App() {
   }
 
   return (
-    <div className="app-frame">
+    <div className="app-frame" data-view={activeView}>
       <div className="atmosphere" aria-hidden="true" />
       <svg className="grain-noise" aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none">
         <filter id="mid-grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" /></filter>
