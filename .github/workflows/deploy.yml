@@ -113,5 +113,5 @@ jobs:
           echo "Backend health response (HTTP $status):"
           printf '%s\n' "$body"
           test "$status" = "200"
-          RESPONSE="$body" node -e 'const data=JSON.parse(process.env.RESPONSE); if (!data.ok || !data.authConfigured || !data.dataPersistenceConfigured) process.exit(1); console.log("Integration readiness:", JSON.stringify(data.integrations ?? {}))'
+          RESPONSE="$body" node -e 'const data=JSON.parse(process.env.RESPONSE); if (!data.ok || !data.authConfigured || !data.dataPersistenceConfigured || data.integrations?.ai !== true) process.exit(1); console.log("Integration readiness:", JSON.stringify(data.integrations ?? {}))'
           echo "Backend smoke test passed."

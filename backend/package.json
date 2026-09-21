@@ -13,8 +13,7 @@
     "test": "npm run build && node --test test/*.test.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.116.0",
-    "openai": "^7.20.0"
+    "@supabase/supabase-js": "^2.116.0"
   },
   "devDependencies": {
     "@types/node": "^24.4.0",

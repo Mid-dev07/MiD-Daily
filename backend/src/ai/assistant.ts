@@ -1,28 +1,29 @@
-import OpenAI from 'openai'
-import { toResponseInputItems } from 'openai/lib/responses/ResponseInputItems'
-import type { ResponseInputItem } from 'openai/resources/responses/responses'
 import { createFinance, createFinanceBudget, createTask, listFinance, listFinanceBudgets, listTasks } from '../dataStore.js'
 import { createSchedule, listSchedule, type ScheduleRecord } from '../scheduleStore.js'
 
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY ?? ''
-const OPENAI_MODEL = process.env.OPENAI_MODEL ?? 'gpt-5.6'
+const WORKERS_AI_MODEL = '@cf/zai-org/glm-4.7-flash'
 const APP_TIMEZONE = process.env.APP_TIMEZONE ?? 'Asia/Jakarta'
 const MAX_TOOL_ROUNDS = 4
 const MAX_ITEMS = 20
 
-const client = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null
+export interface WorkersAiBinding {
+  run(model: string, input: Record<string, unknown>): Promise<unknown>
+}
+
+let assistantAi: WorkersAiBinding | null = null
+
+export function configureAssistantRuntime(ai: WorkersAiBinding | null | undefined) {
+  assistantAi = ai ?? null
+}
+
+export function isAssistantConfigured() {
+  return Boolean(assistantAi)
+}
 
 export type AssistantMessage = {
   role: 'user' | 'assistant'
   content: string
-}
-
-type ToolCall = {
-  type: 'function_call'
-  name: string
-  arguments: string
-  call_id: string
 }
 
 const baseTools = [
@@ -545,88 +546,144 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
   throw new Error('Unknown AI tool.')
 }
 
-function toolCallItems(value: unknown): ToolCall[] {
-  if (!Array.isArray(value)) return []
-  return value.filter((item): item is ToolCall =>
-    Boolean(
-      item &&
-      typeof item === 'object' &&
-      (item as Record<string, unknown>).type === 'function_call' &&
-      typeof (item as Record<string, unknown>).name === 'string' &&
-      typeof (item as Record<string, unknown>).arguments === 'string' &&
-      typeof (item as Record<string, unknown>).call_id === 'string'
-    ),
-  )
+type WorkersAiToolCall = {
+  name: string
+  arguments: Record<string, unknown>
 }
 
-export async function runAssistant(
+type WorkersAiResponse = {
+  response?: string
+  choices?: Array<{
+    message?: { content?: unknown }
+  }>
+  tool_calls?: unknown
+}
+
+function assistantResponseText(value: unknown) {
+  if (!value || typeof value !== 'object') return ''
+  const response = value as WorkersAiResponse
+  if (typeof response.response === 'string') return response.response
+
+  const first = Array.isArray(response.choices) ? response.choices[0] : undefined
+  const content = first?.message?.content
+  return typeof content === 'string' ? content : ''
+}
+
+function assistantToolCalls(value: unknown): WorkersAiToolCall[] {
+  if (!value || typeof value !== 'object') return []
+  const response = value as WorkersAiResponse
+  if (!Array.isArray(response.tool_calls)) return []
+
+  const calls: WorkersAiToolCall[] = []
+  for (const raw of response.tool_calls) {
+    if (!raw || typeof raw !== 'object') continue
+    const item = raw as Record<string, unknown>
+    const nestedFunction = item.function && typeof item.function === 'object'
+      ? item.function as Record<string, unknown>
+      : null
+    const nameValue = typeof item.name === 'string'
+      ? item.name
+      : typeof nestedFunction?.name === 'string'
+        ? nestedFunction.name
+        : ''
+    const argumentsValue = item.arguments ?? nestedFunction?.arguments
+    if (!nameValue || argumentsValue === undefined) continue
+
+    if (argumentsValue && typeof argumentsValue === 'object') {
+      calls.push({ name: nameValue, arguments: argumentsValue as Record<string, unknown> })
+      continue
+    }
+
+    if (typeof argumentsValue === 'string') {
+      try {
+        const parsed = JSON.parse(argumentsValue) as unknown
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          calls.push({ name: nameValue, arguments: parsed as Record<string, unknown> })
+        }
+      } catch {
+        // The model returned malformed tool arguments; ignore the call and let the next round continue safely.
+      }
+    }
+  }
+
+  return calls
+}
+
+function workersAiTools(allowWrites: boolean) {
+  return buildAssistantTools(allowWrites).map((tool) => ({
+    name: tool.name,
+    description: tool.description,
+    parameters: tool.parameters,
+  }))
+}
+
+async function runWorkersAi(
+  ai: WorkersAiBinding,
   userId: string,
   messages: AssistantMessage[],
   allowWrites: boolean,
 ) {
-  if (!client) throw new Error('AI integration is not configured.')
-
-  const sanitized = messages
-    .slice(-10)
-    .map((message) => ({
-      role: message.role,
-      content: assertString(message.content, 'Message', 4000),
-    }))
-
-  let input: ResponseInputItem[] = sanitized
-  const tools = buildAssistantTools(allowWrites)
   const actions: Array<{ tool: string; ok: boolean }> = []
+  const systemMessage = [
+    'You are MiD-Daily Assistant.',
+    'Use only the tools provided. Never claim data that was not returned by a tool.',
+    'The authenticated user owns all tool data. Never ask for or invent a user id.',
+    'Current app timezone: ' + APP_TIMEZONE + '.',
+    'Current date in the app timezone: ' + todayInTimeZone() + '.',
+    'When creating an activity, inspect the relevant schedule range first so you do not silently create a time conflict.',
+    'Do not claim a time slot is free unless the schedule range tool was checked for that date.',
+    allowWrites
+      ? 'Write actions are enabled because the user explicitly allowed actions. Only create data when the user explicitly requests it.'
+      : 'Write actions are disabled. Do not create or modify anything.',
+    'Answer in the same language as the user when practical.',
+  ].join(' ')
+
+  const modelMessages: Array<Record<string, unknown>> = [
+    { role: 'system', content: systemMessage },
+    ...messages,
+  ]
+  const tools = workersAiTools(allowWrites)
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round += 1) {
-    const response = await client.responses.create({
-      model: OPENAI_MODEL,
-      instructions: [
-        'You are MiD-Daily Assistant.',
-        'Use only the tools provided. Never claim data that was not returned by a tool.',
-        'The authenticated user owns all tool data. Never ask for or invent a user id.',
-        'Current app timezone: ' + APP_TIMEZONE + '.',
-        'Current date in the app timezone: ' + todayInTimeZone() + '.',
-        'When creating an activity, inspect the relevant schedule range first so you do not silently create a time conflict.',
-        'Do not claim a time slot is free unless the schedule range tool was checked for that date.',
-        allowWrites
-          ? 'Write actions are enabled because the user explicitly allowed actions. Only create data when the user explicitly requests it.'
-          : 'Write actions are disabled. Do not create or modify anything.',
-      ].join(' '),
-      input,
+    const rawResponse = await ai.run(WORKERS_AI_MODEL, {
+      messages: modelMessages,
       tools,
+      tool_choice: 'auto',
+      temperature: 0.2,
       store: false,
+      user: userId,
     })
 
-    const calls = toolCallItems(response.output)
+    const calls = assistantToolCalls(rawResponse)
     if (calls.length === 0) {
       return {
-        text: response.output_text || 'I could not produce a response.',
+        text: assistantResponseText(rawResponse) || 'I could not produce a response.',
         actions,
-        model: OPENAI_MODEL,
+        model: WORKERS_AI_MODEL,
       }
     }
 
-    input.push(...toResponseInputItems(response.output))
+    modelMessages.push({
+      role: 'assistant',
+      content: JSON.stringify(rawResponse && typeof rawResponse === 'object'
+        ? (rawResponse as Record<string, unknown>).tool_calls
+        : calls),
+    })
 
-    const actionResults: Array<Record<string, unknown>> = []
     for (const call of calls) {
       try {
-        const result = await executeTool(userId, call.name, call.arguments)
-        actionResults.push({ tool: call.name, ok: true })
+        const result = await executeTool(userId, call.name, JSON.stringify(call.arguments))
         actions.push({ tool: call.name, ok: true })
-        input.push({
-          type: 'function_call_output',
-          call_id: call.call_id,
-          output: JSON.stringify(result),
+        modelMessages.push({
+          role: 'tool',
+          content: JSON.stringify({ name: call.name, result }),
         })
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Tool failed.'
-        actionResults.push({ tool: call.name, ok: false })
         actions.push({ tool: call.name, ok: false })
-        input.push({
-          type: 'function_call_output',
-          call_id: call.call_id,
-          output: JSON.stringify({ error: message }),
+        modelMessages.push({
+          role: 'tool',
+          content: JSON.stringify({ name: call.name, error: message }),
         })
       }
     }
@@ -637,4 +694,21 @@ export async function runAssistant(
   }
 
   throw new Error('AI request failed.')
+}
+
+export async function runAssistant(
+  userId: string,
+  messages: AssistantMessage[],
+  allowWrites: boolean,
+) {
+  if (!assistantAi) throw new Error('AI integration is not configured.')
+
+  const sanitized = messages
+    .slice(-10)
+    .map((message) => ({
+      role: message.role,
+      content: assertString(message.content, 'Message', 4000),
+    }))
+
+  return runWorkersAi(assistantAi, userId, sanitized, allowWrites)
 }

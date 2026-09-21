@@ -7,6 +7,9 @@
     "nodejs_compat_populate_process_env"
   ],
   "keep_vars": true,
+  "ai": {
+    "binding": "AI"
+  },
   "vars": {
     "SUPABASE_URL": "https://ywpvwxhfzgxwmxrwcfsf.supabase.co",
     "FRONTEND_URL": "https://mid-daily.e41262272.workers.dev",
