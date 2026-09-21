@@ -63,7 +63,7 @@ export function App() {
   const [schedule, setSchedule] = useState<ScheduleItem[]>(() => normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, userId ? [] : initialScheduleItems)))
   const [toast, setToast] = useState('')
   const [timePeriod, setTimePeriod] = useState(getTimePeriod)
-  const [workspaceReady, setWorkspaceReady] = useState(() => !userId)
+  const [readyUserId, setReadyUserId] = useState<string | undefined>(() => userId)
 
   useReminderScheduler(schedule)
   useWorkspaceRealtime(userId, setTasks, setFinance, setSchedule)
@@ -78,25 +78,25 @@ export function App() {
   }, [])
 
   useEffect(() => {
-    if (!userId || !workspaceReady) return
+    if (readyUserId !== userId) return
     writeUserStorage(TASK_STORAGE_KEY, userId, tasks)
-  }, [tasks, userId, workspaceReady])
+  }, [tasks, userId, readyUserId])
   useEffect(() => {
     if (!userId || !workspaceReady) return
     writeUserStorage(FINANCE_STORAGE_KEY, userId, finance)
-  }, [finance, userId, workspaceReady])
+  }, [finance, userId, readyUserId])
   useEffect(() => {
     if (!userId || !workspaceReady) return
     writeUserStorage(SCHEDULE_STORAGE_KEY, userId, schedule)
-  }, [schedule, userId, workspaceReady])
+  }, [schedule, userId, readyUserId])
 
   useEffect(() => {
     if (!userId) {
-      setWorkspaceReady(true)
+      setReadyUserId(undefined)
       return
     }
 
-    setWorkspaceReady(false)
+    setReadyUserId(undefined)
     setTasks(normalizeTaskList(readUserStorage(TASK_STORAGE_KEY, userId, [])))
     setFinance(normalizeFinanceList(readUserStorage(FINANCE_STORAGE_KEY, userId, [])))
     setSchedule(normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, [])))
@@ -142,7 +142,7 @@ export function App() {
         markRemoteSyncComplete(TASK_STORAGE_KEY, userId)
         markRemoteSyncComplete(FINANCE_STORAGE_KEY, userId)
         markRemoteSyncComplete(SCHEDULE_STORAGE_KEY, userId)
-        setWorkspaceReady(true)
+        setReadyUserId(userId)
       } catch (reason) {
         if (active) {
           setWorkspaceReady(true)
