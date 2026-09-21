@@ -46,6 +46,16 @@ jobs:
           workingDirectory: frontend
           command: deploy
 
+      - name: Smoke test frontend
+        working-directory: .
+        run: |
+          set -euo pipefail
+          html=$(curl --fail --silent --show-error --location https://mid-daily.e41262272.workers.dev/)
+          asset=$(printf '%s' "$html" | grep -oE 'src="/assets/[^"]+\.js"' | head -n 1 | cut -d'"' -f2)
+          test -n "$asset"
+          curl --fail --silent --show-error --location "https://mid-daily.e41262272.workers.dev$asset" | grep -q 'ywpvwxhfzgxwmxrwcfsf'
+          echo "Frontend smoke test passed."
+
   deploy-backend:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -73,3 +83,12 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: backend
           command: deploy
+
+      - name: Smoke test backend
+        working-directory: .
+        run: |
+          set -euo pipefail
+          response=$(curl --fail --silent --show-error --location https://mid-daily-api.e41262272.workers.dev/health)
+          echo "$response"
+          RESPONSE="$response" node -e 'const data=JSON.parse(process.env.RESPONSE); if (!data.ok || !data.authConfigured || !data.dataPersistenceConfigured) process.exit(1)'
+          echo "Backend smoke test passed."
