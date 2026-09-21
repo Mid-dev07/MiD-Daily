@@ -31,13 +31,26 @@ const ENV_KEYS = [
   'OPENAI_MODEL',
 ] as const
 
-for (const key of ENV_KEYS) {
-  const value = (env as Record<string, unknown>)[key]
-  if (typeof value === 'string') {
-    process.env[key] = value
+function syncWorkerEnv() {
+  for (const key of ENV_KEYS) {
+    const value = (env as Record<string, unknown>)[key]
+    if (typeof value === 'string') {
+      process.env[key] = value
+    }
   }
 }
 
+syncWorkerEnv()
+
 await import('../src/server.js')
 
-export default httpServerHandler({ port: 8787 })
+const fetchHandler = httpServerHandler({ port: 8787 })
+
+export default {
+  fetch: fetchHandler,
+  async scheduled(controller: { scheduledTime: number }) {
+    syncWorkerEnv()
+    const { runBackgroundReminderDispatch } = await import('../src/backgroundReminders.js')
+    await runBackgroundReminderDispatch(new Date(controller.scheduledTime))
+  },
+}

@@ -100,7 +100,7 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
           <label>Notes<textarea disabled={saving} value={draft.notes} onChange={(e) => setField('notes', e.target.value)} rows={3} placeholder="Optional notes" maxLength={5000} /></label>
 
           <div className="form-section">
-            <div className="form-section-heading"><strong>Repeat</strong><span>Stored locally; sync-safe model.</span></div>
+            <div className="form-section-heading"><strong>Repeat</strong><span>Stored in your workspace; recurring dates are generated from one rule.</span></div>
             <div className="form-grid two">
               <label>Frequency<select disabled={saving} value={draft.recurrence.frequency} onChange={(e) => updateRecurrence('frequency', e.target.value as RecurrenceFrequency)}>{recurrenceOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
               <label>Every<input disabled={saving || draft.recurrence.frequency === 'NONE'} type="number" min="1" max="30" value={draft.recurrence.interval} onChange={(e) => updateRecurrence('interval', Number(e.target.value))} /></label>
@@ -111,7 +111,7 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
           </div>
 
           <div className="form-section">
-            <div className="form-section-heading"><strong>Reminder</strong><span>Active while MiD-Daily is open; browser/device delivery uses your notification permission.</span></div>
+            <div className="form-section-heading"><strong>Reminder</strong><span>Browser reminders run while MiD-Daily is open. Connected Telegram or WhatsApp can receive background delivery.</span></div>
             <div className="reminder-row">
               <label className="switch-field"><input disabled={saving} type="checkbox" checked={draft.reminderEnabled} onChange={(e) => setField('reminderEnabled', e.target.checked)} /><span>Enable reminder</span></label>
               <select value={draft.reminderOffset} disabled={saving || !draft.reminderEnabled} onChange={(e) => setField('reminderOffset', Number(e.target.value) as ReminderOffset)} aria-label="Reminder offset">

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState, type CSSProperties } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from 'react'
 import type { FinanceEntry, Task, View } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
 import { scheduleOccursOnDate } from '../schedule/schedule.date'
@@ -23,7 +23,13 @@ const WhatsAppIntegrationCard = lazy(() => import('./components/WhatsAppIntegrat
 
 export function DashboardView({ tasks, schedule, finance, onToggleTask, activeView, onNavigate }: DashboardViewProps) {
   const [connectionsOpen, setConnectionsOpen] = useState(false)
+  const [now, setNow] = useState(() => new Date())
   const today = getToday()
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60_000)
+    return () => window.clearInterval(timer)
+  }, [])
   const todayScheduleCount = useMemo(() => schedule.filter((item) => scheduleOccursOnDate(item, today)).length, [schedule, today])
   const todaySchedule = useMemo(() => schedule
     .filter((item) => scheduleOccursOnDate(item, today))
@@ -42,6 +48,21 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, activeVi
     })
     .slice(0, 5), [tasks])
   const completionPercent = tasks.length ? Math.round((completed / tasks.length) * 100) : 0
+  const currentMinutes = now.getHours() * 60 + now.getMinutes()
+  const currentSchedule = todaySchedule.find((item) => {
+    const start = Number(item.startTime.slice(0, 2)) * 60 + Number(item.startTime.slice(3, 5))
+    const end = Number(item.endTime.slice(0, 2)) * 60 + Number(item.endTime.slice(3, 5))
+    return currentMinutes >= start && currentMinutes < end
+  })
+  const nextSchedule = todaySchedule.find((item) => {
+    const start = Number(item.startTime.slice(0, 2)) * 60 + Number(item.startTime.slice(3, 5))
+    return start >= currentMinutes
+  })
+  const overdueTasks = useMemo(() => [...tasks]
+    .filter((task) => task.status !== 'done' && task.dueDate && task.dueDate < today)
+    .sort((a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? ''))
+    .slice(0, 3), [tasks, today])
+  const currentTimeLabel = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now)
 
   return (
     <section className="dashboard-grid page-enter">
@@ -60,6 +81,24 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, activeVi
           <div className="welcome-date"><strong>Today</strong><span>{formatDate(today)}</span></div>
         </div>
       </div>
+
+      <section className="daily-pulse" aria-label="Daily command center">
+        <article className="daily-pulse-item">
+          <span className="section-kicker">NOW</span>
+          <strong>{currentTimeLabel}</strong>
+          <small>{currentSchedule ? currentSchedule.title : 'No active activity'}</small>
+        </article>
+        <article className="daily-pulse-item">
+          <span className="section-kicker">NEXT</span>
+          <strong>{nextSchedule ? nextSchedule.startTime : '—'}</strong>
+          <small>{nextSchedule ? nextSchedule.title : 'Nothing else scheduled today'}</small>
+        </article>
+        <article className="daily-pulse-item is-risk">
+          <span className="section-kicker">AT RISK</span>
+          <strong>{overdueTasks.length}</strong>
+          <small>{overdueTasks.length ? overdueTasks[0].title + (overdueTasks.length > 1 ? ' +' + (overdueTasks.length - 1) : '') : 'No overdue tasks'}</small>
+        </article>
+      </section>
 
       <div className="stat-row">
         <StatCard label="Schedule" value={String(todayScheduleCount)} hint="planned today" />

@@ -1,24 +1,37 @@
-# MiD-Daily — Notification Layer
+# MiD-Daily — Notifications
 
-## M2.5 scope
+## Delivery model
 
-The notification layer is separated from Schedule UI.
+MiD-Daily uses two notification paths:
 
-Schedule reminder intent is evaluated by the reminder engine, then passed to a notification adapter. The browser adapter can use the Notifications API and a service worker.
+1. **Browser/device reminders**
+   - Permission is requested from the browser.
+   - Reminder scheduling runs while the MiD-Daily application is open.
+   - The service worker handles notification clicks and can reopen/focus the application.
 
-## Current behavior
+2. **Background channel delivery**
+   - When a user has linked Telegram and/or WhatsApp, scheduled reminders can be delivered without the MiD-Daily tab being open.
+   - Cloudflare Workers Cron runs the background dispatcher every minute.
+   - The dispatcher uses APP_TIMEZONE (production: Asia/Jakarta) for schedule time calculations.
+   - Dispatch claims are stored in public.reminder_dispatches so retries and concurrent executions do not intentionally duplicate a successful delivery.
+   - Failed provider deliveries release their claim so a later retry can deliver the reminder.
 
-- Permission is requested only from an explicit user action.
-- A service worker is registered when a notification is first delivered and supported.
-- The app-level reminder scheduler checks active reminders every 15 seconds when a background trigger is not already scheduled.
-- Reminder delivery is deduplicated per browser session.
-- After a delivery, the scheduler rechecks so recurring reminders do not leave the scheduler idle.
-- Notifications include schedule metadata for future click handling.
+## Recurrence
 
-## Current limitation
+Supported schedule recurrence:
+- none
+- daily
+- weekly
+- monthly
 
-M2.5 is not a guaranteed background alarm system. The scheduler depends on the MiD-Daily application context being active. Persistent background delivery requires a later PWA push and/or native device layer.
+Reminder offsets:
+- at start
+- 5, 10, 15, 30, or 60 minutes before
 
-## Future adapters
+Recurring dates are resolved from the schedule recurrence rule rather than materialized into separate rows.
 
-Browser / PWA, Android native, and iOS native implementations should consume the same Schedule reminder domain model.
+## Operational boundary
+
+Browser notifications are not a guaranteed background scheduler. For reliable background delivery, a linked Telegram or WhatsApp channel is required.
+
+The dispatcher is intentionally lightweight for the initial personal/small-scale deployment. It checks the current and immediately previous local calendar date to handle reminder offsets that cross midnight.

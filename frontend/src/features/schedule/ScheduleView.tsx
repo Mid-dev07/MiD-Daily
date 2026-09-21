@@ -110,7 +110,7 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
         : 'Notifications not enabled'
 
   const notificationDescription = notificationSupport === 'granted'
-    ? 'Browser/device notifications are active. Reminder scheduling is active while MiD-Daily is open; native/background delivery depends on the device and browser.'
+    ? 'Browser/device notifications are active while MiD-Daily is open. Connected Telegram or WhatsApp can provide background delivery.'
     : notificationSupport === 'denied'
       ? 'Permission is blocked. Enable notifications in the browser or device settings.'
       : notificationSupport === 'unsupported'

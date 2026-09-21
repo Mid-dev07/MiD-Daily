@@ -13,6 +13,9 @@
     "COOKIE_SECURE": "true",
     "APP_TIMEZONE": "Asia/Jakarta"
   },
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
   "observability": {
     "enabled": true
   },
