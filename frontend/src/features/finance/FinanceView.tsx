@@ -66,7 +66,7 @@ export function FinanceView({ finance, onSaveFinance, onDeleteFinance }: Finance
   return (
     <section className="workspace page-enter">
       <div className="page-intro">
-        <div><span className="section-kicker">FINANCE</span><h2>Money, made visible.</h2><p>Track income and expenses by period, category, and date before the database layer is connected.</p></div>
+        <div><span className="section-kicker">FINANCE</span><h2>Money, made visible.</h2><p>Track income and expenses by period, category, and date, with your account data persisted to the workspace.</p></div>
         <button className="primary-button" type="button" onClick={openCreate}>+ Add transaction</button>
       </div>
 
