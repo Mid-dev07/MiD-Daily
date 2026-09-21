@@ -33,10 +33,11 @@ const emptyDraft = (date: string): ScheduleDraft => ({
 })
 
 export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit }: ScheduleFormProps) {
-  useModalBehavior(open, onClose, saving)
   const [draft, setDraft] = useState<ScheduleDraft>(() => emptyDraft(defaultDate))
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+
+  useModalBehavior(open, onClose, saving)
 
   useEffect(() => {
     if (!open) return
@@ -46,7 +47,6 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
   }, [open, initialItem, defaultDate])
 
   if (!open) return null
-  useModalBehavior(open, onClose, saving)
 
   const setField = <K extends keyof ScheduleDraft>(field: K, value: ScheduleDraft[K]) => {
     setDraft((current) => ({ ...current, [field]: value }))
