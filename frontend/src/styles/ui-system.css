@@ -1595,3 +1595,123 @@ textarea:focus {
   .text-button,
   .filter-button { transition: none; }
 }
+
+
+/* Authentication */
+
+.auth-card {
+  display: grid;
+  gap: 14px;
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 3px;
+}
+
+.auth-brand > div {
+  display: grid;
+  gap: 2px;
+}
+
+.auth-brand strong { font-size: 14px; }
+.auth-brand span:not(.brand-mark) { color: var(--ui-text-3); font-size: 11px; }
+
+.auth-card h1 { margin: 0; }
+.auth-subtitle { margin: 0; }
+
+.auth-google { width: 100%; }
+
+.auth-divider {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 9px;
+  color: var(--ui-text-3);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  height: 1px;
+  background: var(--ui-border);
+}
+
+.auth-form {
+  display: grid;
+  gap: 12px;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--ui-text-2);
+  font-size: 12px;
+}
+
+.auth-links {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.auth-link {
+  min-height: 36px;
+  padding: 5px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ui-text-2);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.auth-link:hover { color: var(--ui-text); }
+.auth-message { margin-top: 1px; }
+.auth-message.is-success {
+  color: var(--ui-success);
+  font-size: 12px;
+}
+
+.connections-toggle {
+  list-style: none;
+}
+
+.connections-toggle::-webkit-details-marker { display: none; }
+
+.dashboard-context {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: -2px 8px 8px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.dashboard-context strong {
+  font-size: 18px;
+  letter-spacing: -.02em;
+}
+
+.dashboard-context span {
+  overflow: hidden;
+  color: var(--ui-text-3);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.connection-loading {
+  padding: 16px;
+  color: var(--ui-text-3);
+}
+
+@media (max-width: 760px) {
+  .auth-card { padding: 22px; }
+  .auth-links { flex-direction: column; }
+  .auth-link { text-align: left; }
+  .dashboard-context { margin-inline: 2px; }
+}
