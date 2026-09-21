@@ -64,6 +64,19 @@ export function AuthView() {
     }
   }
 
+  const continueWithGoogle = async () => {
+    if (submitting) return
+    setSubmitting(true)
+    setError('')
+    setMessage('')
+    try {
+      const reason = await signInWithGoogle()
+      if (reason) setError(reason)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   const title = mode === 'signin' ? 'Welcome back.' : mode === 'signup' ? 'Create your workspace.' : mode === 'reset' ? 'Reset your password.' : 'Choose a new password.'
 
   return (
@@ -75,7 +88,7 @@ export function AuthView() {
         <p className="auth-subtitle">Sign in to keep your Schedule, Tasks, Finance, and integrations tied to your account.</p>
 
         {mode !== 'recovery' && (
-          <button className="secondary-button auth-google" disabled={submitting} type="button" onClick={() => void signInWithGoogle()}>Continue with Google</button>
+          <button className="secondary-button auth-google" disabled={submitting} type="button" onClick={() => void continueWithGoogle()}>Continue with Google</button>
         )}
 
         {mode !== 'recovery' && <div className="auth-divider"><span>or</span></div>}
@@ -99,8 +112,8 @@ export function AuthView() {
         {error && <div className="form-error auth-message" role="alert">{error}</div>}
         {message && <div className="auth-message is-success" role="status">{message}</div>}
 
-        {mode === 'signin' && <div className="auth-links"><button type="button" className="auth-link" onClick={() => setMode('signup')}>Create an account</button><button type="button" className="auth-link" onClick={() => setMode('reset')}>Forgot password?</button></div>}
-        {mode === 'signup' && <button type="button" className="auth-link" onClick={() => setMode('signin')}>Back to sign in</button>}
+        {mode === 'signin' && <div className="auth-links"><button type="button" className="auth-link" disabled={submitting} onClick={() => setMode('signup')}>Create an account</button><button type="button" className="auth-link" disabled={submitting} onClick={() => setMode('reset')}>Forgot password?</button></div>}
+        {mode === 'signup' && <button type="button" className="auth-link" disabled={submitting} onClick={() => setMode('signin')}>Back to sign in</button>}
         {mode === 'reset' && <button type="button" className="auth-link" onClick={() => setMode('signin')}>Back to sign in</button>}
       </section>
     </main>
