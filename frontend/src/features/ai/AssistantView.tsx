@@ -11,6 +11,7 @@ export function AssistantView() {
   const [allowWrites, setAllowWrites] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [lastActions, setLastActions] = useState<Array<{ tool: string; ok: boolean }>>([])
 
   const canSend = useMemo(() => input.trim().length > 0 && !loading, [input, loading])
 
@@ -22,11 +23,13 @@ export function AssistantView() {
     setMessages(nextMessages)
     setInput('')
     setError('')
+    setLastActions([])
     setLoading(true)
 
     try {
       const result = await sendAIMessage(nextMessages.slice(-10), allowWrites)
       setMessages((current) => [...current, { role: 'assistant' as const, content: result.text }].slice(-10))
+      setLastActions(result.actions)
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Assistant request failed.')
     } finally {
@@ -43,7 +46,16 @@ export function AssistantView() {
       <section className="content-card ai-shell-card">
         <div className="ai-toolbar">
           <label className="ai-action-toggle">
-            <input type="checkbox" checked={allowWrites} onChange={(event) => setAllowWrites(event.target.checked)} />
+            <input
+              type="checkbox"
+              checked={allowWrites}
+              onChange={(event) => {
+                if (event.target.checked && !window.confirm('Allow MiD-Daily Assistant to create Tasks and Expenses only when you explicitly ask it to?')) {
+                  return
+                }
+                setAllowWrites(event.target.checked)
+              }}
+            />
             <span>Allow actions</span>
           </label>
           <span className="card-meta">{allowWrites ? 'Task and expense creation enabled' : 'Read-only mode'}</span>
@@ -60,6 +72,16 @@ export function AssistantView() {
         </div>
 
         {error && <div className="form-error" role="alert">{error}</div>}
+
+        {lastActions.length > 0 && (
+          <div className="ai-action-summary" aria-label="Assistant action results">
+            {lastActions.map((action, index) => (
+              <span key={action.tool + index} className={action.ok ? 'ai-action-chip is-ok' : 'ai-action-chip is-error'}>
+                {action.ok ? '✓' : '!' } {action.tool.replace(/_/g, ' ')}
+              </span>
+            ))}
+          </div>
+        )}
 
         <div className="ai-composer">
           <textarea value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => {
