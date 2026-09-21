@@ -150,7 +150,7 @@ export function App() {
         setReadyScope(userId)
       } catch (reason) {
         if (active) {
-          setWorkspaceReady(true)
+          setReadyScope(userId)
           setToast(reportError(reason))
         }
       }
