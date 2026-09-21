@@ -11,6 +11,18 @@ The goal is not to place a forest image behind a conventional dashboard. Nature 
 
 Cinematic forest carries the default dark, immersive mood. Natural luxury appears through warm stone, sage, linen-like softness, and sunlight during calmer or more premium moments.
 
+## Performance direction
+
+The cinematic layer is intentionally lightweight for normal devices:
+- no remote photographic background is required for the Dashboard Feature Landscape;
+- backdrop-filter rendering is disabled in the production material layer;
+- full-screen ambient motion is static instead of continuously repainting;
+- pointer-following specular tracking is not used in the main application shell;
+- procedural grain is not rendered in the DOM;
+- entry transitions use opacity/transform rather than animated blur.
+
+The visual goal remains cinematic, but the runtime budget takes priority over decorative effects.
+
 ## Editorial spatial layer
 
 MiD Daily now uses an editorial composition layer inspired by premium interactive portfolios without copying a specific site.
