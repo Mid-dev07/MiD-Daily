@@ -1,13 +1,19 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 export function useModalBehavior(open: boolean, onClose: () => void, disabled = false) {
+  const onCloseRef = useRef(onClose)
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
+
   useEffect(() => {
     if (!open) return
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && !disabled) {
         event.preventDefault()
-        onClose()
+        onCloseRef.current()
       }
     }
 
@@ -19,5 +25,5 @@ export function useModalBehavior(open: boolean, onClose: () => void, disabled = 
       document.body.style.overflow = previousOverflow
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [open, onClose, disabled])
+  }, [open, disabled])
 }
