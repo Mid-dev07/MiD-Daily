@@ -872,8 +872,8 @@
 }
 
 @keyframes unreal-modal-in {
-  from { opacity: 0; transform: translateY(10px) scale(.96); filter: blur(6px); }
-  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  from { opacity: 0; transform: translateY(10px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .toast {
@@ -910,8 +910,8 @@
 }
 
 @keyframes unreal-page-in {
-  from { opacity: 0; transform: translateY(8px) scale(.992); filter: blur(4px); }
-  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  from { opacity: 0; transform: translateY(8px) scale(.992); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .schedule-date-caption strong {
