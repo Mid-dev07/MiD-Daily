@@ -126,7 +126,7 @@ export function App() {
   useEffect(() => {
     const onPointerMove = (event: PointerEvent) => {
       const target = event.target as HTMLElement | null
-      const surface = target?.closest<HTMLElement>('.sidebar, .profile-chip, .welcome-card, .stat-card, .content-card, .schedule-event, .schedule-integration-card, .primary-button, .secondary-button, .icon-button, .filter-button, .task-row, .text-button, .modal-card')
+      const surface = target?.closest<HTMLElement>('.sidebar, .profile-chip, .welcome-card, .stat-card, .content-card, .schedule-event, .schedule-integration-card, .primary-button, .secondary-button, .icon-button, .filter-button, .task-row, .text-button, .modal-card, .feature-landscape, .feature-node')
       if (!surface) return
       const rect = surface.getBoundingClientRect()
       const x = ((event.clientX - rect.left) / Math.max(rect.width, 1)) * 100
@@ -270,7 +270,7 @@ export function App() {
       <main className="main-content">
         <Topbar view={activeView} />
         <div className="view-key">
-          {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={finance} onToggleTask={(id) => void toggleTask(id)} />}
+          {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={finance} onToggleTask={(id) => void toggleTask(id)} activeView={activeView} onNavigate={setActiveView} />}
           {activeView === 'schedule' && <ScheduleView schedule={schedule} onScheduleChange={handleScheduleChange} demoMode={!userId} />}
           {activeView === 'tasks' && <TasksView tasks={tasks} onSaveTask={saveTask} onToggleTask={(id) => void toggleTask(id)} onDeleteTask={(id) => void deleteTask(id)} />}
           {activeView === 'finance' && <FinanceView finance={finance} onSaveFinance={saveFinance} onDeleteFinance={(id) => void deleteFinance(id)} />}
