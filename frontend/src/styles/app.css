@@ -2129,3 +2129,60 @@ textarea {
     font-size: 8px;
   }
 }
+
+
+/* Natural time-of-day atmosphere */
+.app-frame[data-time-period="morning"]::before {
+  filter: saturate(.78) contrast(1.04) brightness(.62);
+  opacity: .38;
+}
+
+.app-frame[data-time-period="morning"]::after {
+  background:
+    radial-gradient(46% 52% at 74% 18%, rgba(224, 206, 153, .15), transparent 69%),
+    linear-gradient(180deg, rgba(227, 222, 199, .025), transparent 52%, rgba(7, 12, 8, .18));
+}
+
+.app-frame[data-time-period="day"]::before {
+  filter: saturate(.76) contrast(1.04) brightness(.58);
+  opacity: .34;
+}
+
+.app-frame[data-time-period="day"]::after {
+  background:
+    radial-gradient(44% 50% at 78% 22%, rgba(221, 207, 160, .10), transparent 70%),
+    linear-gradient(180deg, transparent 48%, rgba(6, 11, 7, .20));
+}
+
+.app-frame[data-time-period="evening"]::before {
+  filter: saturate(.70) contrast(1.06) brightness(.50);
+  opacity: .34;
+}
+
+.app-frame[data-time-period="evening"]::after {
+  background:
+    radial-gradient(40% 42% at 78% 20%, rgba(201, 151, 102, .12), transparent 70%),
+    linear-gradient(180deg, rgba(60, 37, 22, .035), transparent 44%, rgba(7, 11, 8, .38));
+}
+
+.app-frame[data-time-period="night"]::before {
+  filter: saturate(.45) contrast(1.10) brightness(.36);
+  opacity: .27;
+}
+
+.app-frame[data-time-period="night"]::after {
+  background:
+    radial-gradient(42% 42% at 78% 18%, rgba(126, 148, 140, .07), transparent 70%),
+    linear-gradient(180deg, rgba(7, 12, 9, .14), transparent 45%, rgba(5, 8, 6, .48));
+}
+
+@media (max-width: 640px) {
+  .app-frame[data-time-period="morning"]::before,
+  .app-frame[data-time-period="day"]::before {
+    opacity: .28;
+  }
+
+  .app-frame[data-time-period="evening"]::before {
+    opacity: .25;
+  }
+}
