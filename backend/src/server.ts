@@ -1365,6 +1365,7 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
         persistenceConfigured: isGooglePersistenceConfigured(),
         dataPersistenceConfigured: isDataPersistenceConfigured(),
         schedulePersistenceConfigured: isSchedulePersistenceConfigured(),
+        authConfigured: Boolean(supabaseAuthClient),
       })
       return
     }
