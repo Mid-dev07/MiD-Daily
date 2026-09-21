@@ -157,7 +157,8 @@ export function App() {
 
     if (editingId) {
       if (!tasks.some((task) => task.id === editingId)) return 'Task not found.'
-      const next = userId ? await updateRemoteTask(editingId, normalizedDraft) : { ...tasks.find((task) => task.id === editingId)!, ...normalizedDraft }
+      const remoteDraft = { ...normalizedDraft, dueDate: normalizedDraft.dueDate ?? null, notes: normalizedDraft.notes ?? null }
+      const next = userId ? await updateRemoteTask(editingId, remoteDraft) : { ...tasks.find((task) => task.id === editingId)!, ...normalizedDraft }
       setTasks((items) => items.map((task) => task.id === editingId ? next : task))
       setToast('Task updated')
     } else {
