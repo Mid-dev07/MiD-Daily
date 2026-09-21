@@ -15,6 +15,7 @@ export function AuthView() {
   const [newPassword, setNewPassword] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     if (recovery && session) setMode('recovery')
@@ -22,37 +23,44 @@ export function AuthView() {
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (submitting) return
+
+    setSubmitting(true)
     setError('')
     setMessage('')
 
-    const normalizedEmail = normalizeEmail(email)
+    try {
+      const normalizedEmail = normalizeEmail(email)
 
-    if (mode === 'signin') {
-      const reason = await signInWithPassword(normalizedEmail, password)
+      if (mode === 'signin') {
+        const reason = await signInWithPassword(normalizedEmail, password)
+        if (reason) setError(reason)
+        return
+      }
+
+      if (mode === 'signup') {
+        const result = await signUp(normalizedEmail, password)
+        if (result.error) setError(result.error)
+        else setMessage(result.needsConfirmation ? 'Check your email to confirm the account.' : 'Account created.')
+        return
+      }
+
+      if (mode === 'reset') {
+        const reason = await resetPassword(normalizedEmail)
+        if (reason) setError(reason)
+        else setMessage('Password reset link sent. Check your email.')
+        return
+      }
+
+      const reason = await updatePassword(newPassword)
       if (reason) setError(reason)
-      return
-    }
-
-    if (mode === 'signup') {
-      const result = await signUp(normalizedEmail, password)
-      if (result.error) setError(result.error)
-      else setMessage(result.needsConfirmation ? 'Check your email to confirm the account.' : 'Account created.')
-      return
-    }
-
-    if (mode === 'reset') {
-      const reason = await resetPassword(normalizedEmail)
-      if (reason) setError(reason)
-      else setMessage('Password reset link sent. Check your email.')
-      return
-    }
-
-    const reason = await updatePassword(newPassword)
-    if (reason) setError(reason)
-    else {
-      setNewPassword('')
-      setMessage('Password updated. You are signed in.')
-      clearRecovery()
+      else {
+        setNewPassword('')
+        setMessage('Password updated. You are signed in.')
+        clearRecovery()
+      }
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -67,7 +75,7 @@ export function AuthView() {
         <p className="auth-subtitle">Sign in to keep your Schedule, Tasks, Finance, and integrations tied to your account.</p>
 
         {mode !== 'recovery' && (
-          <button className="secondary-button auth-google" type="button" onClick={() => void signInWithGoogle()}>Continue with Google</button>
+          <button className="secondary-button auth-google" disabled={submitting} type="button" onClick={() => void signInWithGoogle()}>Continue with Google</button>
         )}
 
         {mode !== 'recovery' && <div className="auth-divider"><span>or</span></div>}
@@ -85,7 +93,7 @@ export function AuthView() {
             <label>New password<input type="password" required minLength={8} autoComplete="new-password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} /></label>
           )}
 
-          <button className="primary-button" type="submit">{mode === 'signin' ? 'Sign in' : mode === 'signup' ? 'Create account' : mode === 'reset' ? 'Send reset link' : 'Update password'}</button>
+          <button className="primary-button" disabled={submitting} type="submit">{submitting ? 'Working…' : mode === 'signin' ? 'Sign in' : mode === 'signup' ? 'Create account' : mode === 'reset' ? 'Send reset link' : 'Update password'}</button>
         </form>
 
         {error && <div className="form-error auth-message" role="alert">{error}</div>}
