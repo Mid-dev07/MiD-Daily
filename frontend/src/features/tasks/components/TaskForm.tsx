@@ -20,10 +20,11 @@ const emptyDraft: TaskDraft = {
 }
 
 export function TaskForm({ open, initialTask, onClose, onSubmit }: TaskFormProps) {
-  useModalBehavior(open, onClose, saving)
   const [draft, setDraft] = useState<TaskDraft>(emptyDraft)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+
+  useModalBehavior(open, onClose, saving)
 
   useEffect(() => {
     if (!open) return
@@ -41,7 +42,6 @@ export function TaskForm({ open, initialTask, onClose, onSubmit }: TaskFormProps
   }, [open, initialTask])
 
   if (!open) return null
-  useModalBehavior(open, onClose, saving)
 
   const setField = <K extends keyof TaskDraft>(field: K, value: TaskDraft[K]) => {
     setDraft((current) => ({ ...current, [field]: value }))
