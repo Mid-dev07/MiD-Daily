@@ -1,8 +1,9 @@
 import OpenAI from 'openai'
 import { toResponseInputItems } from 'openai/lib/responses/ResponseInputItems'
 import type { ResponseInputItem } from 'openai/resources/responses/responses'
-import { createFinance, createTask, listFinance, listTasks } from '../dataStore.js'
-import { listSchedule } from '../scheduleStore.js'
+import { createFinance, createFinanceBudget, createTask, listFinance, listFinanceBudgets, listTasks } from '../dataStore.js'
+import { createSchedule, listSchedule, type ScheduleRecord } from '../scheduleStore.js'
+
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY ?? ''
 const OPENAI_MODEL = process.env.OPENAI_MODEL ?? 'gpt-5.6'
@@ -12,7 +13,7 @@ const MAX_ITEMS = 20
 
 const client = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null
 
-type ChatMessage = {
+export type AssistantMessage = {
   role: 'user' | 'assistant'
   content: string
 }
@@ -51,6 +52,33 @@ const baseTools = [
   },
   {
     type: 'function' as const,
+    name: 'get_schedule_range',
+    description: 'Read fixed activities for an ISO date range (maximum 14 days) and active flexible plans. Use this before suggesting free time.',
+    parameters: {
+      type: 'object',
+      properties: {
+        startDate: { type: 'string', description: 'ISO date YYYY-MM-DD.' },
+        endDate: { type: 'string', description: 'ISO date YYYY-MM-DD, same or after startDate.' },
+      },
+      required: ['startDate', 'endDate'],
+      additionalProperties: false,
+    },
+    strict: true,
+  },
+  {
+    type: 'function' as const,
+    name: 'get_active_budgets',
+    description: 'Read active weekly and monthly finance budgets for the authenticated user.',
+    parameters: {
+      type: 'object',
+      properties: {},
+      required: [],
+      additionalProperties: false,
+    },
+    strict: true,
+  },
+  {
+    type: 'function' as const,
     name: 'get_expense_summary',
     description: 'Read finance totals for today: income, expenses, balance, and top expense categories.',
     parameters: {
@@ -64,6 +92,54 @@ const baseTools = [
 ]
 
 const writeTools = [
+  {
+    type: 'function' as const,
+    name: 'create_activity',
+    description: 'Create a schedule activity only when the user explicitly asks to add/create/save an activity. Supports fixed-time, flexible, and one-time plans.',
+    parameters: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', description: 'Activity title.' },
+        type: { type: 'string', enum: ['CLASS','WORK','MEETING','STUDY','PERSONAL','APPOINTMENT','EVENT','OTHER'] },
+        mode: { type: 'string', enum: ['FIXED','FLEXIBLE','ONE_TIME'] },
+        date: { type: 'string', description: 'Planning/activity date in YYYY-MM-DD.' },
+        startTime: { type: ['string','null'], description: 'Fixed start time HH:MM, or null for flexible.' },
+        endTime: { type: ['string','null'], description: 'Fixed end time HH:MM, or null for flexible.' },
+        targetCount: { type: ['integer','null'], description: 'Flexible target count, or null.' },
+        targetPeriod: { type: ['string','null'], enum: ['DAY','WEEK','MONTH',null], description: 'Flexible target period, or null.' },
+        durationMinutes: { type: ['integer','null'], description: 'Flexible session length in minutes, or null.' },
+        preferredStartTime: { type: ['string','null'], description: 'Optional preferred window start HH:MM.' },
+        preferredEndTime: { type: ['string','null'], description: 'Optional preferred window end HH:MM.' },
+        activityDeadline: { type: ['string','null'], description: 'Optional flexible deadline YYYY-MM-DD.' },
+        location: { type: ['string','null'], description: 'Optional location.' },
+        notes: { type: ['string','null'], description: 'Optional notes.' },
+      },
+      required: ['title','type','mode','date','startTime','endTime','targetCount','targetPeriod','durationMinutes','preferredStartTime','preferredEndTime','activityDeadline','location','notes'],
+      additionalProperties: false,
+    },
+    strict: true,
+  },
+  {
+    type: 'function' as const,
+    name: 'create_budget',
+    description: 'Create a weekly or monthly budget only when the user explicitly asks to add/set/create a budget.',
+    parameters: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', description: 'Budget name.' },
+        category: { type: 'string', description: 'Category to track, or empty string for all expenses.' },
+        amount: { type: 'number', description: 'Positive budget amount.' },
+        period: { type: 'string', enum: ['WEEK','MONTH'] },
+        startsOn: { type: 'string', description: 'ISO start date YYYY-MM-DD.' },
+        endsOn: { type: ['string','null'], description: 'Optional ISO end date YYYY-MM-DD.' },
+        notes: { type: ['string','null'], description: 'Optional notes.' },
+      },
+      required: ['name','category','amount','period','startsOn','endsOn','notes'],
+      additionalProperties: false,
+    },
+    strict: true,
+  },
+
   {
     type: 'function' as const,
     name: 'create_task',
@@ -155,6 +231,58 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
     return { date: today, items }
   }
 
+  if (name === 'get_schedule_range') {
+    const startDate = assertOptionalDate(args.startDate, 'Schedule range start') ?? todayInTimeZone()
+    const endDate = assertOptionalDate(args.endDate, 'Schedule range end') ?? startDate
+    const start = new Date(startDate + 'T00:00:00Z').getTime()
+    const end = new Date(endDate + 'T00:00:00Z').getTime()
+    if (end < start) throw new Error('Schedule range end cannot be before start.')
+    if ((end - start) / 86_400_000 > 13) throw new Error('Schedule range cannot exceed 14 days.')
+
+    const all = await listSchedule(userId)
+    const fixed = all
+      .filter((item) => item.activityMode !== 'FLEXIBLE' && item.date >= startDate && item.date <= endDate)
+      .slice(0, MAX_ITEMS)
+      .map((item) => ({
+        date: item.date,
+        title: item.title,
+        type: item.type,
+        startTime: item.startTime,
+        endTime: item.endTime,
+        location: item.location || null,
+      }))
+    const flexible = all
+      .filter((item) => item.activityMode === 'FLEXIBLE' && item.date <= endDate && (!item.activityDeadline || item.activityDeadline >= startDate))
+      .slice(0, MAX_ITEMS)
+      .map((item) => ({
+        title: item.title,
+        date: item.date,
+        targetCount: item.targetCount ?? null,
+        targetPeriod: item.targetPeriod ?? null,
+        durationMinutes: item.durationMinutes ?? null,
+        preferredStartTime: item.preferredStartTime ?? null,
+        preferredEndTime: item.preferredEndTime ?? null,
+        deadline: item.activityDeadline ?? null,
+      }))
+    return { startDate, endDate, fixed, flexible }
+  }
+
+  if (name === 'get_active_budgets') {
+    const today = todayInTimeZone()
+    const items = (await listFinanceBudgets(userId))
+      .filter((budget) => budget.startsOn <= today && (!budget.endsOn || budget.endsOn >= today))
+      .slice(0, MAX_ITEMS)
+      .map((budget) => ({
+        name: budget.name,
+        category: budget.category || null,
+        amount: budget.amount,
+        period: budget.period,
+        startsOn: budget.startsOn,
+        endsOn: budget.endsOn ?? null,
+      }))
+    return { date: today, items }
+  }
+
   if (name === 'get_open_tasks') {
     const items = (await listTasks(userId))
       .filter((task) => task.status !== 'done')
@@ -188,6 +316,92 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5)
         .map(([category, amount]) => ({ category, amount })),
+    }
+  }
+
+  if (name === 'create_activity') {
+    const title = assertString(args.title, 'Activity title')
+    const type = assertString(args.type, 'Activity type', 20) as ScheduleRecord['type']
+    const mode = assertString(args.mode, 'Activity mode', 20) as ScheduleRecord['activityMode']
+    const date = assertOptionalDate(args.date, 'Activity date')
+    if (!date) throw new Error('Activity date is required.')
+    if (!['CLASS','WORK','MEETING','STUDY','PERSONAL','APPOINTMENT','EVENT','OTHER'].includes(type)) throw new Error('Activity type is invalid.')
+    if (!['FIXED','FLEXIBLE','ONE_TIME'].includes(mode)) throw new Error('Activity mode is invalid.')
+
+    const startTime = args.startTime === null ? '' : assertString(args.startTime, 'Activity start time', 5)
+    const endTime = args.endTime === null ? '' : assertString(args.endTime, 'Activity end time', 5)
+    const location = args.location === null ? '' : assertString(args.location, 'Activity location', 200)
+    const notes = args.notes === null ? '' : assertString(args.notes, 'Activity notes', 5000)
+
+    const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/
+    if (mode !== 'FLEXIBLE') {
+      if (!timePattern.test(startTime) || !timePattern.test(endTime)) throw new Error('Fixed activities require valid start and end times.')
+      if (startTime >= endTime) throw new Error('Activity end time must be after start time.')
+    }
+
+    const targetCount = args.targetCount === null ? null : Number(args.targetCount)
+    const targetPeriod = args.targetPeriod === null ? null : String(args.targetPeriod) as ScheduleRecord['targetPeriod']
+    const durationMinutes = args.durationMinutes === null ? null : Number(args.durationMinutes)
+    const preferredStartTime = args.preferredStartTime === null ? null : assertString(args.preferredStartTime, 'Preferred start time', 5)
+    const preferredEndTime = args.preferredEndTime === null ? null : assertString(args.preferredEndTime, 'Preferred end time', 5)
+    const activityDeadline = args.activityDeadline === null ? null : assertOptionalDate(args.activityDeadline, 'Activity deadline') ?? null
+
+    if (mode === 'FLEXIBLE') {
+      if (!Number.isInteger(targetCount) || targetCount < 1 || targetCount > 100) throw new Error('Flexible target count is invalid.')
+      if (!targetPeriod || !['DAY','WEEK','MONTH'].includes(targetPeriod)) throw new Error('Flexible target period is invalid.')
+      if (!Number.isInteger(durationMinutes) || durationMinutes < 5 || durationMinutes > 1440) throw new Error('Flexible duration is invalid.')
+      if ((preferredStartTime === null) !== (preferredEndTime === null)) throw new Error('Preferred time window requires both start and end.')
+      if (preferredStartTime && preferredEndTime && (!timePattern.test(preferredStartTime) || !timePattern.test(preferredEndTime) || preferredStartTime >= preferredEndTime)) throw new Error('Preferred time window is invalid.')
+      if (activityDeadline && activityDeadline < date) throw new Error('Activity deadline cannot be before the planning date.')
+    }
+
+    return {
+      created: await createSchedule(userId, {
+        title,
+        type,
+        activityMode: mode,
+        date,
+        startTime: mode === 'FLEXIBLE' ? '' : startTime,
+        endTime: mode === 'FLEXIBLE' ? '' : endTime,
+        location,
+        notes,
+        reminderEnabled: false,
+        reminderOffset: 0,
+        recurrence: { frequency: 'NONE', interval: 1 },
+        targetCount,
+        targetPeriod,
+        durationMinutes,
+        preferredStartTime,
+        preferredEndTime,
+        activityDeadline,
+        googleCalendar: { status: 'not-synced', calendarId: 'primary' },
+      }),
+    }
+  }
+
+  if (name === 'create_budget') {
+    const nameValue = assertString(args.name, 'Budget name', 200)
+    const category = typeof args.category === 'string' ? args.category.trim().slice(0, 100) : ''
+    const amount = assertPositiveAmount(args.amount)
+    const period = assertString(args.period, 'Budget period', 10) as 'WEEK' | 'MONTH'
+    const startsOn = assertOptionalDate(args.startsOn, 'Budget start') 
+    const endsOn = args.endsOn === null ? null : assertOptionalDate(args.endsOn, 'Budget end') ?? null
+    const notes = args.notes === null ? null : assertString(args.notes, 'Budget notes', 5000)
+
+    if (!startsOn) throw new Error('Budget start date is required.')
+    if (!['WEEK','MONTH'].includes(period)) throw new Error('Budget period is invalid.')
+    if (endsOn && endsOn < startsOn) throw new Error('Budget end date cannot be before start date.')
+
+    return {
+      created: await createFinanceBudget(userId, {
+        name: nameValue,
+        category,
+        amount,
+        period,
+        startsOn,
+        endsOn,
+        notes,
+      }),
     }
   }
 
@@ -245,7 +459,7 @@ function toolCallItems(value: unknown): ToolCall[] {
 
 export async function runAssistant(
   userId: string,
-  messages: ChatMessage[],
+  messages: AssistantMessage[],
   allowWrites: boolean,
 ) {
   if (!client) throw new Error('AI integration is not configured.')
