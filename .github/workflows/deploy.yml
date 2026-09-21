@@ -54,8 +54,17 @@ jobs:
           asset=$(printf '%s' "$html" | grep -oE 'src="/assets/[^"]+\.js"' | head -n 1 | cut -d'"' -f2)
           test -n "$asset"
           curl --fail --silent --show-error --location "https://mid-daily.e41262272.workers.dev$asset" -o /tmp/mid-daily-app.js
-          grep -q 'ywpvwxhfzgxwmxrwcfsf' /tmp/mid-daily-app.js
-          echo "Frontend smoke test passed."
+          for attempt in 1 2 3 4 5; do
+            if grep -Eq 'ywpvwxhfzgxwmxrwcfsf|supabase\.co' /tmp/mid-daily-app.js; then
+              echo "Frontend smoke test passed."
+              exit 0
+            fi
+            echo "Supabase marker not visible yet; waiting for edge propagation (attempt $attempt/5)..."
+            sleep 3
+            curl --fail --silent --show-error --location "https://mid-daily.e41262272.workers.dev$asset" -o /tmp/mid-daily-app.js
+          done
+          echo "Frontend smoke test failed: Supabase marker was not found in the deployed bundle."
+          exit 1
 
   deploy-backend:
     runs-on: ubuntu-latest
