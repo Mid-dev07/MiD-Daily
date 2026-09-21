@@ -856,7 +856,8 @@ function isIsoDate(value: unknown) {
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
 }
 
-function scheduleOccursOnDate(item: Pick<ScheduleRecord, 'date' | 'recurrence'>, targetDate: string) {
+function scheduleOccursOnDate(item: Pick<ScheduleRecord, 'date' | 'recurrence' | 'activityMode'>, targetDate: string) {
+  if (item.activityMode === 'FLEXIBLE') return false
   if (!isIsoDate(targetDate) || targetDate < item.date) return false
   if (item.recurrence.frequency === 'NONE') return targetDate === item.date
   if (item.recurrence.until && targetDate > item.recurrence.until) return false
