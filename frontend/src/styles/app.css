@@ -3064,3 +3064,26 @@ textarea {
 @media (max-width: 720px) {
   .daily-pulse { grid-template-columns: 1fr; }
 }
+
+
+/* Paint budget hardening: utility surfaces should not create hidden compositing layers on every card. */
+.profile-chip::before,
+.content-card::before,
+.stat-card::before,
+.schedule-event::before,
+.primary-button::before,
+.secondary-button::before,
+.icon-button::before,
+.filter-button::before,
+.task-row::before,
+.text-button::before,
+.modal-card::before,
+.schedule-integration-card::before {
+  display: none;
+}
+
+.feature-landscape,
+.dashboard-connections {
+  content-visibility: auto;
+  contain-intrinsic-size: 540px;
+}
