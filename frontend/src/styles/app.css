@@ -2084,3 +2084,48 @@ textarea {
     padding: 18px;
   }
 }
+
+
+/* Assistant action status */
+.ai-action-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 2px 0 0;
+}
+
+.ai-action-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 24px;
+  padding: 0 8px;
+  border: 1px solid rgba(232, 239, 221, .08);
+  border-radius: 999px;
+  color: #9da897;
+  background: rgba(12, 18, 13, .52);
+  font-size: 9px;
+  letter-spacing: .02em;
+}
+
+.ai-action-chip.is-ok {
+  color: #cfdbbc;
+  border-color: rgba(183, 201, 138, .22);
+  background: rgba(79, 104, 65, .22);
+}
+
+.ai-action-chip.is-error {
+  color: #e0b5ac;
+  border-color: rgba(207, 137, 123, .24);
+  background: rgba(78, 40, 34, .20);
+}
+
+@media (max-width: 640px) {
+  .ai-action-summary {
+    gap: 5px;
+  }
+
+  .ai-action-chip {
+    font-size: 8px;
+  }
+}
