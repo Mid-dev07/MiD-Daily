@@ -31,6 +31,7 @@ export function Sidebar({ activeView, onNavigate }: SidebarProps) {
             key={item.id}
             className={activeView === item.id ? 'nav-item is-active' : 'nav-item'}
             type="button"
+            aria-current={activeView === item.id ? 'page' : undefined}
             onClick={() => onNavigate(item.id)}
           >
             <span className="nav-icon" aria-hidden="true">{item.icon}</span>
