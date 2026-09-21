@@ -1485,7 +1485,7 @@
   background:
     linear-gradient(180deg, rgba(11, 17, 12, .12), rgba(8, 12, 9, .74)),
     linear-gradient(90deg, rgba(10, 15, 11, .84), rgba(10, 15, 11, .22) 46%, rgba(8, 12, 9, .70)),
-    url("https://images.unsplash.com/photo-1760474689266-a44ed3c67cb8?auto=format&fit=crop&fm=jpg&ixlib=rb-4.1.0&q=84&w=1800");
+    url("https://images.unsplash.com/photo-1760474689266-a44ed3c67cb8?auto=format&fit=crop&fm=jpg&ixlib=rb-4.1.0&q=84&w=1400");
   background-size: cover;
   background-position: center;
   box-shadow:
@@ -1901,7 +1901,96 @@
   }
 }
 
-@media (max-width: 430px) {
+@media (max-width: 640px) {
+  .app-frame {
+    display: block;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    top: auto;
+    bottom: 12px;
+    z-index: 60;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    padding: 7px;
+    border: 1px solid rgba(232, 239, 221, .11);
+    border-radius: 22px;
+    box-shadow:
+      0 1px 0 rgba(255, 250, 225, .06) inset,
+      0 24px 52px -24px rgba(0, 0, 0, .90);
+  }
+
+  .brand,
+  .sidebar-footer {
+    display: none;
+  }
+
+  .nav-list {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .nav-item,
+  .nav-item:hover,
+  .nav-item:active {
+    min-width: 0;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    padding: 8px 4px 9px;
+    border-radius: 15px;
+    transform: none;
+  }
+
+  .nav-item span:last-child {
+    display: block;
+    overflow: hidden;
+    max-width: 100%;
+    font-size: 8px;
+    line-height: 1;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .nav-icon {
+    width: auto;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .nav-item.is-active::before {
+    left: 9px;
+    right: 9px;
+    top: auto;
+    bottom: 4px;
+    width: auto;
+    height: 2px;
+  }
+
+  .main-content {
+    padding: 18px 14px 102px;
+  }
+
+  .topbar {
+    position: relative;
+    top: auto;
+    margin: 0 0 22px;
+    padding: 0;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .profile-chip {
+    max-width: 56vw;
+  }
+
   .feature-landscape {
     padding: 18px 13px 16px;
   }
