@@ -25,6 +25,7 @@ import { registerBrowserServiceWorker } from '../integrations/notifications/serv
 import { readUserStorage, writeUserStorage, hasUserStorage } from '../lib/userStorage'
 import { hasCompletedRemoteSync, markRemoteSyncComplete } from '../lib/dataSync'
 import { useAuth } from '../features/auth/AuthProvider'
+import { navigateToView, viewFromPath } from './routing'
 import type { FinanceDraft, FinanceEntry, Task, TaskDraft, View } from '../types'
 import type { ScheduleItem } from '../features/schedule/schedule.types'
 
@@ -44,7 +45,18 @@ function getTimePeriod(hour = new Date().getHours()) {
 export function App() {
   const { user } = useAuth()
   const userId = user?.id
-  const [activeView, setActiveView] = useState<View>('dashboard')
+  const [activeView, setActiveView] = useState<View>(() => viewFromPath(window.location.pathname))
+
+  useEffect(() => {
+    const handlePopState = () => setActiveView(viewFromPath(window.location.pathname))
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  const navigate = (view: View) => {
+    navigateToView(view)
+    setActiveView(view)
+  }
   const [tasks, setTasks] = useState<Task[]>(() => normalizeTaskList(readUserStorage(TASK_STORAGE_KEY, userId, userId ? [] : initialTasks)))
   const [finance, setFinance] = useState<FinanceEntry[]>(() => normalizeFinanceList(readUserStorage(FINANCE_STORAGE_KEY, userId, userId ? [] : financeEntries)))
   const [schedule, setSchedule] = useState<ScheduleItem[]>(() => normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, userId ? [] : initialScheduleItems)))
@@ -246,12 +258,12 @@ export function App() {
   return (
     <div className="app-frame" data-view={activeView} data-time-period={timePeriod}>
       <div className="atmosphere" aria-hidden="true" />
-      <Sidebar activeView={activeView} onNavigate={setActiveView} />
+      <Sidebar activeView={activeView} onNavigate={navigate} />
       <main className="main-content">
         <Topbar view={activeView} />
         <Suspense fallback={<section className="workspace view-loading" aria-live="polite"><span className="section-kicker">LOADING</span><h2>Opening your workspace…</h2></section>}>
           <div className="view-key">
-            {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={finance} onToggleTask={(id) => void toggleTask(id)} activeView={activeView} onNavigate={setActiveView} />}
+            {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={finance} onToggleTask={(id) => void toggleTask(id)} activeView={activeView} onNavigate={navigate} />}
             {activeView === 'schedule' && <ScheduleView schedule={schedule} onScheduleChange={handleScheduleChange} demoMode={!userId} />}
             {activeView === 'tasks' && <TasksView tasks={tasks} onSaveTask={saveTask} onToggleTask={(id) => void toggleTask(id)} onDeleteTask={(id) => void deleteTask(id)} />}
             {activeView === 'finance' && <FinanceView finance={finance} onSaveFinance={saveFinance} onDeleteFinance={(id) => void deleteFinance(id)} />}
