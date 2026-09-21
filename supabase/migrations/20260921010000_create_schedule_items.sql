@@ -30,10 +30,10 @@ drop policy if exists "schedule_insert_own" on public.schedule_items;
 drop policy if exists "schedule_update_own" on public.schedule_items;
 drop policy if exists "schedule_delete_own" on public.schedule_items;
 
-create policy "schedule_select_own" on public.schedule_items for select to authenticated using (auth.uid() = user_id);
-create policy "schedule_insert_own" on public.schedule_items for insert to authenticated with check (auth.uid() = user_id);
-create policy "schedule_update_own" on public.schedule_items for update to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
-create policy "schedule_delete_own" on public.schedule_items for delete to authenticated using (auth.uid() = user_id);
+create policy "schedule_select_own" on public.schedule_items for select to authenticated using ((select auth.uid()) = user_id);
+create policy "schedule_insert_own" on public.schedule_items for insert to authenticated with check ((select auth.uid()) = user_id);
+create policy "schedule_update_own" on public.schedule_items for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
+create policy "schedule_delete_own" on public.schedule_items for delete to authenticated using ((select auth.uid()) = user_id);
 
 revoke all on table public.schedule_items from anon;
 grant select, insert, update, delete on table public.schedule_items to authenticated;
