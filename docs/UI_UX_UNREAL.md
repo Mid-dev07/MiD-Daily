@@ -11,6 +11,20 @@ The goal is not to place a forest image behind a conventional dashboard. Nature 
 
 Cinematic forest carries the default dark, immersive mood. Natural luxury appears through warm stone, sage, linen-like softness, and sunlight during calmer or more premium moments.
 
+## Editorial spatial layer
+
+MiD Daily now uses an editorial composition layer inspired by premium interactive portfolios without copying a specific site.
+
+Principles:
+- numbered levels ("LVLL 001", "LVLL 002", etc.) give each workspace view a sense of place and sequence;
+- oversized display typography is used as a visual anchor while utility copy stays compact;
+- generous negative space separates hierarchy instead of adding more cards;
+- the Dashboard hero and Feature Landscape act as an environment first, interface second;
+- motion remains restrained and progressively degrades on touch and reduced-motion contexts;
+- responsive behavior is contract-driven: no critical positioning depends on absolute coordinates, and the mobile layout collapses into a single-column flow with bottom navigation.
+
+This layer is intentionally lightweight: CSS gradients, transforms, controlled blur, and one photographic environment are preferred over persistent 3D canvases or heavy animation runtimes.
+
 ## Material language
 1. **Dew glass**
    - restrained translucency
