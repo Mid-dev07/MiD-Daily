@@ -106,7 +106,7 @@ const writeTools = [
         startTime: { type: ['string','null'], description: 'Fixed start time HH:MM, or null for flexible.' },
         endTime: { type: ['string','null'], description: 'Fixed end time HH:MM, or null for flexible.' },
         targetCount: { type: ['integer','null'], description: 'Flexible target count, or null.' },
-        targetPeriod: { type: ['string','null'], enum: ['DAY','WEEK','MONTH',null], description: 'Flexible target period, or null.' },
+        targetPeriod: { type: ['string','null'], description: 'Flexible target period DAY, WEEK, or MONTH, or null.' },
         durationMinutes: { type: ['integer','null'], description: 'Flexible session length in minutes, or null.' },
         preferredStartTime: { type: ['string','null'], description: 'Optional preferred window start HH:MM.' },
         preferredEndTime: { type: ['string','null'], description: 'Optional preferred window end HH:MM.' },
@@ -208,6 +208,38 @@ function assertPositiveAmount(value: unknown) {
   return amount
 }
 
+function scheduleOccursOnDate(
+  item: Pick<ScheduleRecord, 'date' | 'recurrence' | 'activityMode'>,
+  targetDate: string,
+) {
+  if (item.activityMode === 'FLEXIBLE' || targetDate < item.date) return false
+  if (item.recurrence.frequency === 'NONE') return targetDate === item.date
+  if (item.recurrence.until && targetDate > item.recurrence.until) return false
+
+  const start = new Date(item.date + 'T00:00:00Z')
+  const target = new Date(targetDate + 'T00:00:00Z')
+  const interval = Math.max(1, item.recurrence.interval)
+
+  if (item.recurrence.frequency === 'DAILY') {
+    const days = Math.round((target.getTime() - start.getTime()) / 86_400_000)
+    return days >= 0 && days % interval === 0
+  }
+
+  if (item.recurrence.frequency === 'WEEKLY') {
+    const days = Math.round((target.getTime() - start.getTime()) / 86_400_000)
+    return days >= 0 && days % (7 * interval) === 0
+  }
+
+  const months = (target.getUTCFullYear() - start.getUTCFullYear()) * 12 + (target.getUTCMonth() - start.getUTCMonth())
+  if (months < 0 || months % interval !== 0) return false
+
+  const occurrence = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1))
+  occurrence.setUTCMonth(occurrence.getUTCMonth() + months)
+  const lastDay = new Date(Date.UTC(occurrence.getUTCFullYear(), occurrence.getUTCMonth() + 1, 0)).getUTCDate()
+  occurrence.setUTCDate(Math.min(start.getUTCDate(), lastDay))
+  return occurrence.toISOString().slice(0, 10) === targetDate
+}
+
 async function executeTool(userId: string, name: string, rawArguments: string) {
   let args: Record<string, unknown>
   try {
@@ -219,7 +251,7 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
   if (name === 'get_today_schedule') {
     const today = todayInTimeZone()
     const items = (await listSchedule(userId))
-      .filter((item) => item.date === today)
+      .filter((item) => scheduleOccursOnDate(item, today))
       .slice(0, MAX_ITEMS)
       .map((item) => ({
         title: item.title,
@@ -240,17 +272,31 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
     if ((end - start) / 86_400_000 > 13) throw new Error('Schedule range cannot exceed 14 days.')
 
     const all = await listSchedule(userId)
-    const fixed = all
-      .filter((item) => item.activityMode !== 'FLEXIBLE' && item.date >= startDate && item.date <= endDate)
-      .slice(0, MAX_ITEMS)
-      .map((item) => ({
-        date: item.date,
-        title: item.title,
-        type: item.type,
-        startTime: item.startTime,
-        endTime: item.endTime,
-        location: item.location || null,
-      }))
+    const fixed: Array<{
+      date: string
+      title: string
+      type: ScheduleRecord['type']
+      startTime: string
+      endTime: string
+      location: string | null
+    }> = []
+
+    for (let cursor = start; cursor <= end && fixed.length < MAX_ITEMS; cursor += 86_400_000) {
+      const date = new Date(cursor).toISOString().slice(0, 10)
+      for (const item of all) {
+        if (!scheduleOccursOnDate(item, date) || item.activityMode === 'FLEXIBLE') continue
+        fixed.push({
+          date,
+          title: item.title,
+          type: item.type,
+          startTime: item.startTime,
+          endTime: item.endTime,
+          location: item.location || null,
+        })
+        if (fixed.length >= MAX_ITEMS) break
+      }
+    }
+    fixed.sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime))
     const flexible = all
       .filter((item) => item.activityMode === 'FLEXIBLE' && item.date <= endDate && (!item.activityDeadline || item.activityDeadline >= startDate))
       .slice(0, MAX_ITEMS)
@@ -483,6 +529,7 @@ export async function runAssistant(
         'Use only the tools provided. Never claim data that was not returned by a tool.',
         'The authenticated user owns all tool data. Never ask for or invent a user id.',
         'Current app timezone: ' + APP_TIMEZONE + '.',
+        'When creating an activity, inspect the relevant schedule range first so you do not silently create a time conflict.'
         allowWrites
           ? 'Write actions are enabled because the user explicitly allowed actions. Only create data when the user explicitly requests it.'
           : 'Write actions are disabled. Do not create or modify anything.',
