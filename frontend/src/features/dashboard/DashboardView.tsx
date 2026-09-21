@@ -25,6 +25,7 @@ const WhatsAppIntegrationCard = lazy(() => import('./components/WhatsAppIntegrat
 export function DashboardView({ tasks, schedule, finance, onToggleTask, activeView, onNavigate }: DashboardViewProps) {
   const [connectionsOpen, setConnectionsOpen] = useState(false)
   const today = getToday()
+  const todayScheduleCount = useMemo(() => schedule.filter((item) => item.date === today).length, [schedule, today])
   const todaySchedule = useMemo(() => schedule
     .filter((item) => item.date === today)
     .sort((a, b) => a.startTime.localeCompare(b.startTime))
@@ -69,7 +70,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, activeVi
 
       <div className="dashboard-primary-grid">
         <section className="content-card schedule-card motion-card">
-          <div className="card-heading"><div><span className="section-kicker">AGENDA</span><h3>Today&apos;s schedule</h3></div><span className="card-meta">{todaySchedule.length} items</span></div>
+          <div className="card-heading"><div><span className="section-kicker">AGENDA</span><h3>Today&apos;s schedule</h3></div><span className="card-meta">{todaySchedule.length}{todayScheduleCount > 5 ? ' of ' + todayScheduleCount : ''} items</span></div>
           <div className="schedule-list">
             {todaySchedule.length === 0 ? <div className="empty-state"><strong>No activities planned</strong><span>Your Schedule is empty for today.</span></div> : todaySchedule.map((item) => (
               <div className="schedule-item" key={item.id}>
@@ -79,6 +80,11 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, activeVi
               </div>
             ))}
           </div>
+          {todayScheduleCount > 5 && (
+            <button className="dashboard-section-link" type="button" onClick={() => onNavigate('schedule')}>
+              View full schedule <span aria-hidden="true">→</span>
+            </button>
+          )}
         </section>
 
         <section className="content-card task-card motion-card">
@@ -92,6 +98,11 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, activeVi
               </button>
             ))}
           </div>
+          {openTasks > 5 && (
+            <button className="dashboard-section-link" type="button" onClick={() => onNavigate('tasks')}>
+              View all open tasks <span aria-hidden="true">→</span>
+            </button>
+          )}
         </section>
       </div>
 
