@@ -75,6 +75,10 @@
 ## Gate J — UX and reliability
 - [ ] Dashboard remains usable at desktop, tablet, and mobile widths.
 - [ ] Mobile navigation remains reachable while scrolling.
+- [ ] Browser URL reflects the active workspace view and Back/Forward restores it.
+- [ ] Realtime workspace updates are received by a second authenticated tab/device.
+- [ ] Auth logout resets the active in-memory workspace before demo state is loaded.
+- [ ] Background reminder dispatch is deduplicated and does not depend on an open browser tab for connected Telegram/WhatsApp users.
 - [ ] Modals support Escape and do not scroll the page behind them.
 - [ ] Keyboard focus is visible.
 - [ ] Reduced-motion preference is respected.
