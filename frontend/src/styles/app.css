@@ -2800,3 +2800,93 @@ textarea {
     0 1px 0 rgba(255, 250, 225, .09) inset,
     0 12px 28px -14px rgba(183, 201, 138, .34);
 }
+
+
+/* Information architecture: utility content before secondary integrations */
+.dashboard-primary-grid,
+.dashboard-integration-grid {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.dashboard-primary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, .9fr);
+  gap: 16px;
+}
+
+.dashboard-primary-grid > * {
+  min-width: 0;
+}
+
+.dashboard-primary-grid .schedule-card,
+.dashboard-primary-grid .task-card {
+  min-height: 320px;
+}
+
+.dashboard-integration-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.view-loading {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.view-loading h2 {
+  margin: 0;
+  font-size: clamp(24px, 4vw, 38px);
+  letter-spacing: -.045em;
+}
+
+.card-meta,
+.schedule-summary {
+  color: #879283;
+}
+
+.text-button {
+  min-height: 28px;
+  padding: 5px 8px;
+}
+
+.filter-button {
+  min-height: 32px;
+}
+
+@media (max-width: 720px) {
+  .dashboard-primary-grid,
+  .dashboard-integration-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-primary-grid .schedule-card,
+  .dashboard-primary-grid .task-card {
+    min-height: 0;
+  }
+
+  .dashboard-integration-grid {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-primary-grid,
+  .dashboard-integration-grid {
+    gap: 12px;
+  }
+
+  .text-button {
+    min-height: 30px;
+    padding-inline: 9px;
+  }
+
+  .filter-button {
+    min-height: 36px;
+  }
+}
