@@ -73,10 +73,7 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
 
   const deleteSchedule = async (item: ScheduleItem) => {
     if (!window.confirm('Delete “' + item.title + '”?')) return
-
-    if (item.googleCalendar.eventId) {
-      await deleteGoogleCalendarEvent(item, item.googleCalendar.eventId)
-    }
+    if (item.googleCalendar.eventId) await deleteGoogleCalendarEvent(item, item.googleCalendar.eventId)
     await onScheduleChange(normalizedSchedule.filter((entry) => entry.id !== item.id))
   }
 
@@ -89,7 +86,6 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
   const enableNotifications = async () => {
     const permission = await requestNotificationPermission()
     setNotificationSupport(permission)
-
     if (permission === 'granted') {
       await showNotification('MiD-Daily • Notifications enabled', {
         body: 'Schedule reminders are ready.',
@@ -163,50 +159,60 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
   return (
     <section className="workspace page-enter">
       <div className="page-intro schedule-intro">
-        <div><span className="section-kicker">AGENDA</span><h2>Make time visible.</h2><p>One flexible schedule for classes, work, study, appointments, and everything in between.</p></div>
+        <div>
+          <h2>Schedule</h2>
+          <p>Plan classes, work, study, and personal time in one place.</p>
+        </div>
         <div className="schedule-header-actions">
           {demoMode && <button className="secondary-button" type="button" onClick={() => void resetToSeed()}>Reset demo</button>}
-          <button className="primary-button" type="button" onClick={openCreate}>+ Add activity</button>
+          <button className="primary-button" type="button" onClick={openCreate}>Add activity</button>
         </div>
       </div>
 
       <ScheduleToolbar date={date} filter={filter} onShiftDate={(days) => setDate(shiftDate(date, days))} onResetDate={() => setDate(getToday())} onFilterChange={setFilter} />
 
-      <div className="schedule-integrations">
-        <GoogleCalendarIntegrationCard />
-
-        <div className="notification-card schedule-integration-card">
-        <div className="notification-copy">
-          <span className="integration-label">DEVICE NOTIFICATIONS</span>
-          <strong className={notificationSupport === 'granted' ? 'notification-status' : ''}>{notificationLabel}</strong>
-          <span>{notificationDescription}</span>
-        </div>
-        <div className="notification-actions">
-          {notificationSupport === 'granted' ? (
-            <button className="secondary-button" type="button" onClick={() => void showNotification('MiD-Daily • Test reminder', { body: 'Your notification channel is working.', tag: 'mid-daily.notification-test', data: { url: '/' } })}>Test</button>
-          ) : (
-            <button className="secondary-button" type="button" disabled={notificationSupport === 'unsupported' || notificationSupport === 'denied'} onClick={() => void enableNotifications()}>Enable</button>
-          )}
-        </div>
-        </div>
+      <div className="schedule-date-caption">
+        <div><strong>{formatDateLong(date)}</strong><span>{visibleItems.length} {visibleItems.length === 1 ? 'activity' : 'activities'}</span></div>
+        <span>{reminderCount} reminder{reminderCount === 1 ? '' : 's'}</span>
       </div>
-
-      <div className="schedule-date-caption"><strong>{formatDateLong(date)}</strong><span>{visibleItems.length} {visibleItems.length === 1 ? 'activity' : 'activities'} visible</span></div>
-      <div className="schedule-summary"><span>Reminder engine active.</span><span>•</span><span>{reminderCount} reminder {reminderCount === 1 ? 'is' : 'are'} configured for this date.</span></div>
 
       <div className="content-card schedule-events-card">
-        {visibleItems.length === 0 ? <EmptyState title="Nothing scheduled" description="Choose another date, clear the filter, or add a new activity." /> : <div className="schedule-events">{visibleItems.map(({ item, source }, index) => (
-          <ScheduleItemCard
-            key={source.id + '-' + item.date}
-            item={item}
-            index={index}
-            onView={() => setDetailItem(source)}
-            onEdit={() => openEdit(source)}
-            onSync={() => syncSchedule(source)}
-            onDelete={() => deleteSchedule(source)}
-          />
-        ))}</div>}
+        {visibleItems.length === 0
+          ? <EmptyState title="Nothing scheduled" description="Try another date, clear the filter, or add an activity." />
+          : <div className="schedule-events">{visibleItems.map(({ item, source }, index) => (
+            <ScheduleItemCard
+              key={source.id + '-' + item.date}
+              item={item}
+              index={index}
+              onView={() => setDetailItem(source)}
+              onEdit={() => openEdit(source)}
+              onSync={() => syncSchedule(source)}
+              onDelete={() => deleteSchedule(source)}
+            />
+          ))}</div>}
       </div>
+
+      <details className="secondary-panel">
+        <summary>Connections &amp; notifications</summary>
+        <div className="schedule-integrations">
+          <GoogleCalendarIntegrationCard />
+
+          <div className="notification-card schedule-integration-card">
+            <div className="notification-copy">
+              <span className="integration-label">Device notifications</span>
+              <strong className={notificationSupport === 'granted' ? 'notification-status' : ''}>{notificationLabel}</strong>
+              <span>{notificationDescription}</span>
+            </div>
+            <div className="notification-actions">
+              {notificationSupport === 'granted' ? (
+                <button className="secondary-button" type="button" onClick={() => void showNotification('MiD-Daily • Test reminder', { body: 'Your notification channel is working.', tag: 'mid-daily.notification-test', data: { url: '/' } })}>Test</button>
+              ) : (
+                <button className="secondary-button" type="button" disabled={notificationSupport === 'unsupported' || notificationSupport === 'denied'} onClick={() => void enableNotifications()}>Enable</button>
+              )}
+            </div>
+          </div>
+        </div>
+      </details>
 
       <ScheduleForm open={formOpen} initialItem={editingItem} defaultDate={date} onClose={() => setFormOpen(false)} onSubmit={saveSchedule} />
       <ScheduleDetail item={detailItem} onClose={() => setDetailItem(undefined)} onEdit={openEdit} onSync={syncSchedule} />
