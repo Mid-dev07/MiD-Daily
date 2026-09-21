@@ -6,8 +6,8 @@ export interface TaskRecord {
   category: string
   priority: 'low' | 'medium' | 'high'
   status: 'todo' | 'in-progress' | 'done'
-  dueDate?: string
-  notes?: string
+  dueDate?: string | null
+  notes?: string | null
   progress: number
 }
 
@@ -18,7 +18,7 @@ export interface FinanceRecord {
   amount: number
   category: string
   date: string
-  notes?: string
+  notes?: string | null
 }
 
 const SUPABASE_URL = process.env.SUPABASE_URL ?? ''
