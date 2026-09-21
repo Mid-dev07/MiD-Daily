@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import type { FinanceEntry, Task } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
 import { currency, formatDate } from '../../lib/format'
@@ -14,12 +15,18 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask }: Dashbo
   const completed = tasks.filter((task) => task.status === 'done').length
   const expense = finance.filter((entry) => entry.type === 'expense' && entry.date === today).reduce((sum, entry) => sum + entry.amount, 0)
   const openTasks = tasks.filter((task) => task.status !== 'done').length
+  const completionPercent = tasks.length ? Math.round((completed / tasks.length) * 100) : 0
 
   return (
     <section className="dashboard-grid page-enter">
-      <div className="welcome-card motion-card">
+      <div className="welcome-card motion-card glass-panel">
         <div><span className="section-kicker">TODAY</span><h2>Keep your day in motion.</h2><p>Your schedule, tasks, and finances update from the data you manage in MiD-Daily.</p></div>
-        <div className="welcome-date"><strong>Today</strong><span>{formatDate(today)}</span></div>
+        <div className="welcome-side">
+          <div className="day-progress" style={{ '--day-progress': completionPercent + '%' } as CSSProperties} aria-label={completionPercent + '% of tasks completed'}>
+            <div className="day-progress-copy"><strong>{completionPercent}%</strong><span>focus</span></div>
+          </div>
+          <div className="welcome-date"><strong>Today</strong><span>{formatDate(today)}</span></div>
+        </div>
       </div>
 
       <div className="stat-row">
