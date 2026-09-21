@@ -19,11 +19,12 @@ export function FeatureLandscape({ activeView, onNavigate }: FeatureLandscapePro
     <section className="feature-landscape motion-card" aria-labelledby="feature-landscape-title">
       <div className="feature-landscape-heading">
         <div>
+          <div className="feature-level" aria-hidden="true"><span>LVLL 002</span><i>/</i><strong>LANDSCAPE</strong></div>
           <span className="section-kicker">YOUR DIGITAL LANDSCAPE</span>
-          <h3 id="feature-landscape-title">One place. Different rhythms.</h3>
+          <h3 id="feature-landscape-title"><span>One place.</span> <em>Different rhythms.</em></h3>
           <p>Explore the parts of your day as living pieces of the same environment.</p>
         </div>
-        <span className="feature-landscape-hint">Hover · explore · enter</span>
+        <span className="feature-landscape-hint"><span>Explore the system</span><strong>↗</strong></span>
       </div>
 
       <div className="feature-scene">
@@ -55,6 +56,7 @@ export function FeatureLandscape({ activeView, onNavigate }: FeatureLandscapePro
         <div className="feature-scene-caption" aria-hidden="true">
           <span className="scene-caption-line" />
           <span>calm systems · natural flow</span>
+          <strong>06 modules</strong>
         </div>
       </div>
     </section>
