@@ -80,6 +80,8 @@ function sendJson(res: ServerResponse, status: number, payload: unknown) {
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
     'Referrer-Policy': 'no-referrer',
+    ...(COOKIE_SECURE ? { 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains' } : {}),
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
   })
   res.end(body)
 }
@@ -91,6 +93,8 @@ function sendRedirect(res: ServerResponse, location: string) {
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
     'Referrer-Policy': 'no-referrer',
+    ...(COOKIE_SECURE ? { 'Strict-Transport-Security': 'max-age=31536000; includeSubDomains' } : {}),
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
   })
   res.end()
 }
@@ -683,6 +687,13 @@ function assertFinanceId(url: URL) {
   return id
 }
 
+function assertText(value: unknown, field: string, maxLength: number) {
+  if (typeof value !== 'string' || !value.trim() || value.trim().length > maxLength) {
+    throw httpError(400, field + ' is invalid.')
+  }
+  return value.trim()
+}
+
 function validateTaskInput(body: Record<string, unknown>) {
   const title = typeof body.title === 'string' ? body.title.trim() : ''
   const category = typeof body.category === 'string' ? body.category.trim() : ''
@@ -693,6 +704,7 @@ function validateTaskInput(body: Record<string, unknown>) {
   const notes = body.notes
 
   if (!title || !category) throw httpError(400, 'Task title and category are required.')
+  if (title.length > 200 || category.length > 100) throw httpError(400, 'Task title or category is too long.')
   if (!['low', 'medium', 'high'].includes(String(priority))) throw httpError(400, 'Task priority is invalid.')
   if (!['todo', 'in-progress', 'done'].includes(String(status))) throw httpError(400, 'Task status is invalid.')
   if (!Number.isInteger(progress) || Number(progress) < 0 || Number(progress) > 100) throw httpError(400, 'Task progress is invalid.')
@@ -715,12 +727,10 @@ function validateTaskPatch(body: Record<string, unknown>) {
   const patch: Partial<import('./dataStore.js').TaskRecord> & { dueDate?: string | null; notes?: string | null } = {}
 
   if (Object.prototype.hasOwnProperty.call(body, 'title')) {
-    if (typeof body.title !== 'string' || !body.title.trim()) throw httpError(400, 'Task title is invalid.')
-    patch.title = body.title.trim()
+    patch.title = assertText(body.title, 'Task title', 200)
   }
   if (Object.prototype.hasOwnProperty.call(body, 'category')) {
-    if (typeof body.category !== 'string' || !body.category.trim()) throw httpError(400, 'Task category is invalid.')
-    patch.category = body.category.trim()
+    patch.category = assertText(body.category, 'Task category', 100)
   }
   if (Object.prototype.hasOwnProperty.call(body, 'priority')) {
     if (!['low', 'medium', 'high'].includes(String(body.priority))) throw httpError(400, 'Task priority is invalid.')
@@ -743,7 +753,7 @@ function validateTaskPatch(body: Record<string, unknown>) {
     patch.dueDate = body.dueDate === null ? null : (body.dueDate as string)
   }
   if (Object.prototype.hasOwnProperty.call(body, 'notes')) {
-    if (body.notes !== null && typeof body.notes !== 'string') throw httpError(400, 'Task notes are invalid.')
+    if (body.notes !== null && (typeof body.notes !== 'string' || body.notes.length > 5000)) throw httpError(400, 'Task notes are invalid.')
     patch.notes = body.notes === null ? null : (body.notes as string).trim() || null
   }
 
@@ -761,8 +771,10 @@ function validateFinanceInput(body: Record<string, unknown>) {
 
   if (!['income', 'expense'].includes(String(type))) throw httpError(400, 'Finance type is invalid.')
   if (!title || !category) throw httpError(400, 'Finance title and category are required.')
+  if (title.length > 200 || category.length > 100) throw httpError(400, 'Finance title or category is too long.')
   if (!Number.isFinite(amount) || amount <= 0) throw httpError(400, 'Finance amount must be greater than zero.')
   if (typeof date !== 'string' || !isIsoDate(date)) throw httpError(400, 'Finance date is invalid.')
+  if (typeof notes === 'string' && notes.length > 5000) throw httpError(400, 'Finance notes are invalid.')
 
   return {
     type: type as 'income' | 'expense',
@@ -770,7 +782,7 @@ function validateFinanceInput(body: Record<string, unknown>) {
     amount,
     category,
     date,
-    notes: typeof notes === 'string' && notes.trim() ? notes.trim() : undefined,
+    notes: typeof notes === 'string' && notes.length <= 5000 && notes.trim() ? notes.trim() : undefined,
   }
 }
 
@@ -782,8 +794,7 @@ function validateFinancePatch(body: Record<string, unknown>) {
     patch.type = body.type as 'income' | 'expense'
   }
   if (Object.prototype.hasOwnProperty.call(body, 'title')) {
-    if (typeof body.title !== 'string' || !body.title.trim()) throw httpError(400, 'Finance title is invalid.')
-    patch.title = body.title.trim()
+    patch.title = assertText(body.title, 'Finance title', 200)
   }
   if (Object.prototype.hasOwnProperty.call(body, 'amount')) {
     const amount = Number(body.amount)
@@ -791,15 +802,14 @@ function validateFinancePatch(body: Record<string, unknown>) {
     patch.amount = amount
   }
   if (Object.prototype.hasOwnProperty.call(body, 'category')) {
-    if (typeof body.category !== 'string' || !body.category.trim()) throw httpError(400, 'Finance category is invalid.')
-    patch.category = body.category.trim()
+    patch.category = assertText(body.category, 'Finance category', 100)
   }
   if (Object.prototype.hasOwnProperty.call(body, 'date')) {
     if (typeof body.date !== 'string' || !isIsoDate(body.date)) throw httpError(400, 'Finance date is invalid.')
     patch.date = body.date
   }
   if (Object.prototype.hasOwnProperty.call(body, 'notes')) {
-    if (body.notes !== null && typeof body.notes !== 'string') throw httpError(400, 'Finance notes are invalid.')
+    if (body.notes !== null && (typeof body.notes !== 'string' || body.notes.length > 5000)) throw httpError(400, 'Finance notes are invalid.')
     patch.notes = body.notes === null ? null : body.notes.trim() || null
   }
 
@@ -835,6 +845,7 @@ function validateScheduleInput(body: Record<string, unknown>) {
   const googleCalendarValue = body.googleCalendar
 
   if (!title) throw httpError(400, 'Schedule title is required.')
+  if (title.length > 200 || location.length > 200 || notes.length > 5000) throw httpError(400, 'Schedule text is too long.')
   if (!['CLASS','WORK','MEETING','STUDY','PERSONAL','APPOINTMENT','EVENT','OTHER'].includes(String(type))) throw httpError(400, 'Schedule type is invalid.')
   if (!isIsoDate(date)) throw httpError(400, 'Schedule date is invalid.')
   if (typeof startTime !== 'string' || typeof endTime !== 'string') throw httpError(400, 'Schedule time is required.')
