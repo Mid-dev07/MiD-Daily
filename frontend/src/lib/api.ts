@@ -1,6 +1,10 @@
 import { supabase } from './supabase'
 
-const API_BASE_URL = ((import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:8787').replace(/\/$/, '')
+const configuredApiUrl = ((import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '').trim()
+const defaultApiUrl = import.meta.env.DEV
+  ? 'http://localhost:8787'
+  : 'https://mid-daily-api.e41262272.workers.dev'
+const API_BASE_URL = (configuredApiUrl || defaultApiUrl).replace(/\/$/, '')
 
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number) {
