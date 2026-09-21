@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { useModalBehavior } from '../../lib/useModalBehavior'
-import type { FinanceBudget, FinanceBudgetDraft, FinanceBudgetPeriod } from '../../types'
+import { useModalBehavior } from '../../../lib/useModalBehavior'
+import type { FinanceBudget, FinanceBudgetDraft, FinanceBudgetPeriod } from '../../../types'
 
 interface FinanceBudgetFormProps {
   open: boolean
