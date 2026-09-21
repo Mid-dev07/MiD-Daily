@@ -39,9 +39,9 @@ This layer is intentionally lightweight: CSS gradients, transforms, controlled b
 
 ## Material language
 1. **Dew glass**
-   - restrained translucency
-   - soft blur
-   - subtle specular catch
+   - translucent appearance without mandatory GPU blur
+   - subtle highlight
+   - lightweight painted surfaces by default
    - no cyan neon glow
 
 2. **Natural stone / wood surface**
@@ -65,9 +65,7 @@ Semantic states: muted green success, warm ochre warning, muted clay-red danger.
 Avoid bright cyan as a primary visual identity.
 
 ## Environmental photography
-Use a small number of carefully selected nature photographs with dark overlays so text remains legible.
-Photography should contain no distracting UI-like shapes, work when heavily darkened, remain recognizable at low opacity, and be optimized for performance.
-Unsplash images are broadly licensed for personal and most commercial use, but third-party trademark/person/property rights still need review for individual images.
+Nature photography is optional rather than required on the critical application path. When used in future surface treatments, it should be local or otherwise optimized, darkened for legibility, and kept out of the initial critical render.
 
 ## Feature landscape
 Feature navigation should behave as part of the environment:
