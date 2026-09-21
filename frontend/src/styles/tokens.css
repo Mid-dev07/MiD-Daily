@@ -1,42 +1,57 @@
 :root {
-  /* MiD Daily — Unreal-grade material system */
-  --bg-void: #0a1119;
-  --bg-deep: #0d151f;
-  --surface-0: #0f1a26;
-  --surface-1: #142130;
-  --surface-2: #1b2b3d;
-  --surface-3: #24384e;
-  --line: rgba(255,255,255,.08);
-  --line-strong: rgba(255,255,255,.16);
-  --accent: #4fd1ff;
-  --accent-soft: rgba(79,209,255,.20);
-  --accent-glow: rgba(79,209,255,.40);
-  --state-success: #4ade80;
-  --state-warning: #fbbf24;
-  --state-danger: #fb7185;
-  --light-angle: 145deg;
-  --spec-highlight: rgba(255,255,255,.14);
-  --ao-shadow: rgba(0,0,0,.55);
+  /* MiD Daily — Nature Cinematic material system */
+  --bg-void: #0b100c;
+  --bg-deep: #111812;
+  --surface-0: #151d16;
+  --surface-1: #1b251d;
+  --surface-2: #253126;
+  --surface-3: #303d30;
+
+  --line: rgba(232, 239, 221, .09);
+  --line-strong: rgba(244, 239, 216, .17);
+
+  /* Nature-led identity: moss + sage + warm sunlight */
+  --accent: #b7c98a;
+  --accent-soft: rgba(183, 201, 138, .18);
+  --accent-glow: rgba(183, 201, 138, .32);
+
+  --nature-moss: #71885e;
+  --nature-sage: #9dad7b;
+  --nature-fern: #526a4f;
+  --nature-stone: #8f8a73;
+  --nature-sun: #d9c58d;
+  --nature-fog: #ccd7c5;
+
+  --state-success: #9fbd74;
+  --state-warning: #d8b56c;
+  --state-danger: #cf897b;
+
+  /* One consistent, natural key light */
+  --light-angle: 142deg;
+  --spec-highlight: rgba(255, 250, 225, .15);
+  --ao-shadow: rgba(0, 0, 0, .56);
 
   /* Compatibility aliases for the existing component layer */
   --color-bg: var(--bg-void);
   --color-surface: var(--surface-1);
   --color-surface-strong: var(--surface-0);
   --color-border: var(--line);
-  --color-border-soft: rgba(255,255,255,.055);
-  --color-text: #eaf5fb;
-  --color-text-muted: #8ca2b4;
-  --color-text-faint: #5e768c;
+  --color-border-soft: rgba(232, 239, 221, .055);
+  --color-text: #edf1e6;
+  --color-text-muted: #a9b3a1;
+  --color-text-faint: #778273;
   --color-accent: var(--accent);
-  --color-accent-soft: rgba(79,209,255,.12);
+  --color-accent-soft: var(--accent-soft);
   --color-success: var(--state-success);
   --color-warning: var(--state-warning);
   --color-danger: var(--state-danger);
+
   --radius-sm: 10px;
   --radius-md: 14px;
-  --radius-lg: 20px;
-  --shadow-soft: 0 18px 50px rgba(0,0,0,.22);
-  --duration-fast: 160ms;
-  --duration-normal: 260ms;
-  --ease-standard: cubic-bezier(.2,.8,.2,1);
+  --radius-lg: 22px;
+  --shadow-soft: 0 22px 56px rgba(0, 0, 0, .24);
+
+  --duration-fast: 170ms;
+  --duration-normal: 320ms;
+  --ease-standard: cubic-bezier(.2, .8, .2, 1);
 }
