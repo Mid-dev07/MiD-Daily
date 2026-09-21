@@ -39,6 +39,15 @@ function nextOccurrenceDate(item: ScheduleItem, now: Date) {
 }
 
 export function getReminderState(item: ScheduleItem, now = new Date()): ReminderState {
+  if (item.activityMode === 'FLEXIBLE') {
+    return {
+      status: 'disabled',
+      eventAt: new Date(),
+      triggerAt: null,
+      label: 'Flexible plan',
+    }
+  }
+
   if (!item.reminderEnabled) {
     return {
       status: 'disabled',
