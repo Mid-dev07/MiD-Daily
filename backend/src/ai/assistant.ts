@@ -438,13 +438,20 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
     if (mode === 'FLEXIBLE' && recurrenceFrequency !== 'NONE') throw new Error('Flexible activities cannot use recurrence.')
 
     if (mode === 'FLEXIBLE') {
-      if (!Number.isInteger(targetCount) || targetCount < 1 || targetCount > 100) throw new Error('Flexible target count is invalid.')
+      if (targetCount === null) throw new Error('Flexible target count is invalid.')
+      if (!Number.isInteger(targetCount)) throw new Error('Flexible target count is invalid.')
+      if (targetCount < 1 || targetCount > 100) throw new Error('Flexible target count is invalid.')
       if (!targetPeriod || !['DAY','WEEK','MONTH'].includes(targetPeriod)) throw new Error('Flexible target period is invalid.')
-      if (!Number.isInteger(durationMinutes) || durationMinutes < 5 || durationMinutes > 1440) throw new Error('Flexible duration is invalid.')
+      if (durationMinutes === null) throw new Error('Flexible duration is invalid.')
+      if (!Number.isInteger(durationMinutes)) throw new Error('Flexible duration is invalid.')
+      if (durationMinutes < 5 || durationMinutes > 1440) throw new Error('Flexible duration is invalid.')
       if ((preferredStartTime === null) !== (preferredEndTime === null)) throw new Error('Preferred time window requires both start and end.')
       if (preferredStartTime && preferredEndTime && (!timePattern.test(preferredStartTime) || !timePattern.test(preferredEndTime) || preferredStartTime >= preferredEndTime)) throw new Error('Preferred time window is invalid.')
       if (activityDeadline && activityDeadline < date) throw new Error('Activity deadline cannot be before the planning date.')
     }
+
+    const persistedTargetCount = mode === 'FLEXIBLE' ? Number(targetCount) : targetCount
+    const persistedDurationMinutes = mode === 'FLEXIBLE' ? Number(durationMinutes) : durationMinutes
 
     return {
       created: await createSchedule(userId, {
@@ -463,9 +470,9 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
           interval: mode === 'FLEXIBLE' ? 1 : recurrenceInterval,
           ...(mode === 'FLEXIBLE' || !recurrenceUntil ? {} : { until: recurrenceUntil }),
         },
-        targetCount,
+        targetCount: persistedTargetCount,
         targetPeriod,
-        durationMinutes,
+        durationMinutes: persistedDurationMinutes,
         preferredStartTime,
         preferredEndTime,
         activityDeadline,
