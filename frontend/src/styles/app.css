@@ -1680,7 +1680,7 @@
 .feature-node[data-feature="tasks"] { grid-column: 4; grid-row: 2; }
 .feature-node[data-feature="finance"] { grid-column: 3; grid-row: 3; }
 .feature-node[data-feature="social"] { grid-column: 1; grid-row: 3; }
-.feature-node[data-feature="assistant"] { grid-column: 2; grid-row: 2; justify-self: end; margin-right: 16px; }
+.feature-node[data-feature="assistant"] { grid-column: 1; grid-row: 2; justify-self: start; margin-left: 16px; }
 
 .feature-node::before {
   content: "";
