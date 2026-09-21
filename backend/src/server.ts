@@ -1317,15 +1317,31 @@ async function handleAiChat(req: IncomingMessage, res: ServerResponse) {
   }
 }
 
-function addCors(res: ServerResponse) {
-  res.setHeader('Access-Control-Allow-Origin', FRONTEND_URL)
+function isAllowedFrontendOrigin(origin: string) {
+  if (origin === FRONTEND_URL) return true
+
+  try {
+    const url = new URL(origin)
+    return url.protocol === 'https:'
+      && /^(?:[A-Za-z0-9]+-)?mid-daily\\.e41262272\\.workers\\.dev$/i.test(url.hostname)
+  } catch {
+    return false
+  }
+}
+
+function addCors(req: IncomingMessage, res: ServerResponse) {
+  const origin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
+  const allowedOrigin = isAllowedFrontendOrigin(origin) ? origin : FRONTEND_URL
+
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigin)
   res.setHeader('Access-Control-Allow-Credentials', 'true')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+  res.setHeader('Vary', 'Origin')
 }
 
 async function handle(req: IncomingMessage, res: ServerResponse) {
-  addCors(res)
+  addCors(req, res)
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204)
