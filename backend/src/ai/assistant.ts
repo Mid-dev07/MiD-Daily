@@ -122,7 +122,7 @@ function assertString(value: unknown, field: string, max = 500) {
 
 function assertOptionalDate(value: unknown, field: string) {
   if (value === null || value === undefined || value === '') return undefined
-  if (typeof value !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) throw new Error(field + ' is invalid.')
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) throw new Error(field + ' is invalid.')
   return value
 }
 
