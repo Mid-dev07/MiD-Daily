@@ -3,8 +3,6 @@ import type { FinanceEntry, Task, View } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
 import { currency, formatDate } from '../../lib/format'
 import { StatCard } from '../../components/ui/StatCard'
-import { TelegramIntegrationCard } from './components/TelegramIntegrationCard'
-import { WhatsAppIntegrationCard } from './components/WhatsAppIntegrationCard'
 import { FeatureLandscape } from './components/FeatureLandscape'
 
 interface DashboardViewProps {
@@ -63,7 +61,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, activeVi
       </div>
 
       <div className="stat-row">
-        <StatCard label="Schedule" value={String(todaySchedule.length)} hint="planned today" />
+        <StatCard label="Schedule" value={String(todayScheduleCount)} hint="planned today" />
         <StatCard label="Tasks" value={`${completed}/${tasks.length}`} hint={`${openTasks} open`} />
         <StatCard label="Expense" value={currency.format(expense)} hint="spent today" />
       </div>
@@ -92,7 +90,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, activeVi
           <div className="task-list">
             {openTasks === 0 ? <div className="empty-state"><strong>All tasks complete</strong><span>Your focus queue is clear for now.</span></div> : focusTasks.map((task) => (
               <button className="task-row" key={task.id} type="button" onClick={() => onToggleTask(task.id)}>
-                <span className="task-check">{''}</span>
+                <span className="task-check" aria-hidden="true" />
                 <span className="task-copy"><strong>{task.title}</strong><small>{task.category}{task.dueDate ? ' · due ' + task.dueDate : ''}</small></span>
                 <span className={'priority-badge ' + task.priority}>{task.priority}</span>
               </button>
