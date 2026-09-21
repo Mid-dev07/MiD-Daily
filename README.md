@@ -13,7 +13,8 @@ Core:
 - Authentication
 
 Connected:
-- Browser/device reminders
+- Browser/device reminders (foreground)
+- Telegram/WhatsApp background reminder delivery
 - Google Calendar
 - Telegram
 - WhatsApp
