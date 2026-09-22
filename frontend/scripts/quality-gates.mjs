@@ -46,14 +46,30 @@ if (!tsxFiles.some((file) => file.endsWith('app/App.tsx') && /useEnvironment/.te
 }
 const sidebarSource = readFileSync(join(srcDir, 'components/layout/Sidebar.tsx'), 'utf8')
 const appSource = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
-if (!/nav-index/.test(sidebarSource) || !/index: '001'/.test(sidebarSource)) {
+if (!/nav-index/.test(sidebarSource) || !/index: '001'/.test(sidebarSource) || !/index: '009'/.test(sidebarSource)) {
   failures.push('Field-guide navigation must keep explicit navigation indices.')
+}
+if (!/useRef\(null\)/.test(sidebarSource) || !/scrollIntoView/.test(sidebarSource)) {
+  failures.push('Active field-guide navigation should remain discoverable when the mobile rail scrolls horizontally.')
+}
+if (!/grid-auto-flow:\s*column/.test(uiSystem) || !/grid-auto-columns:\s*minmax\(68px,\s*78px\)/.test(uiSystem) || !/overflow-x:\s*auto/.test(uiSystem)) {
+  failures.push('Mobile field-guide navigation must remain horizontally scrollable and touch-sized.')
 }
 if (!/data-module=\{activeView\}/.test(appSource)) {
   failures.push('Active module marker must remain wired to the view container.')
 }
 if (!/UNREAL Habitat Material System/.test(uiSystem)) {
   failures.push('UNREAL habitat material system must remain present in the active UI stylesheet.')
+}
+for (const terrain of [
+  'data-module="dashboard"', 'data-module="schedule"', 'data-module="tasks"',
+  'data-module="finance"', 'data-module="social"', 'data-module="assistant"',
+  'data-module="profile"', 'data-module="insights"', 'data-module="habits"',
+]) {
+  if (!uiSystem.includes(terrain)) failures.push('Missing final ecosystem terrain selector: ' + terrain)
+}
+if (/overflow:\s*clip/.test(uiSystem)) {
+  failures.push('Interactive cards must not reintroduce overflow: clip.')
 }
 if (!/environmentCssVariables/.test(readFileSync(join(srcDir, 'environment/visual.ts'), 'utf8'))) {
   failures.push('Environment visual state must remain the source for live CSS variables.')
