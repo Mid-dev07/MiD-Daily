@@ -120,13 +120,13 @@
 - Continuous polling in the idle shell should be avoided unless the feature explicitly requires it.
 
 ## Final hardening evidence — 2026-09-22
-- ✅ Main CI completed successfully for merge commit `cbeea8083407273ad5e52fe6ed11f3f250026af7`.
-- ✅ Production frontend/backend deployment and smoke tests completed successfully for that release.
+- ✅ Main CI completed successfully for final release commit `bef7f4984482be6e2ab26bb3f84e602ff9767735`.
+- ✅ Production frontend/backend deployment and smoke tests completed successfully for final release commit `bef7f4984482be6e2ab26bb3f84e602ff9767735` (deploy run 300).
 - ✅ Supabase public-schema RLS is enabled, user-owned CRUD policies use `auth.uid()`, integration tables are client-denied, and profile avatar storage is owner-restricted.
 - ⚠️ Supabase security advisor still reports native leaked-password protection as disabled; the application-level password exposure proxy remains part of the production smoke test.
 - ℹ️ Supabase performance advisor currently reports 12 unused-index INFO findings; no destructive index changes were made solely from those advisories.
-- ✅ Final hardening branch adds a regression gate for modal behavior, canonical tokens, reduced motion, legacy CSS removal, and persistent-blur avoidance.
-- ✅ Final hardening branch standardizes Escape, scroll locking, focus trapping, and focus restoration for true modal dialogs.
+- ✅ Final hardening release adds a regression gate for modal behavior, canonical tokens, reduced motion, legacy CSS removal, and persistent-blur avoidance.
+- ✅ Final hardening release standardizes Escape, scroll locking, focus trapping, and focus restoration for true modal dialogs.
 - ⚠️ Pixel-level browser visual inspection is not available in this execution environment; automated build, static QA, backend tests, Worker dry-run, and production smoke checks are the authoritative automated gates.
 - ⚠️ Credentialed end-user flows (email registration/recovery, Google OAuth, Telegram/Google Calendar interactive consent) require an interactive test account/session and are not fabricated here.
 
