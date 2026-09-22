@@ -47,6 +47,12 @@
 - [ ] Data remains isolated per authenticated user.
 - [ ] Refresh rehydrates remote data correctly.
 
+## Gate J — Productivity layer
+- [ ] Quick Capture creates only the explicitly requested Task, Expense, or Schedule item.
+- [ ] Quick Capture explains missing/ambiguous information without creating data.
+- [ ] Daily Briefing reflects current tasks, schedule, near deadlines, and today's spending.
+- [ ] Assistant planner shortcuts remain read-only until action permission is explicitly enabled.
+
 ## Gate G — Google Calendar
 - [ ] Connect Google Calendar.
 - [ ] Sync a Schedule item.
