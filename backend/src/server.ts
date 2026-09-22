@@ -400,6 +400,30 @@ async function readRequestJson(req: IncomingMessage) {
   })
 }
 
+async function handlePasswordExposureCheck(req: IncomingMessage, res: ServerResponse) {
+  const body = await readRequestJson(req)
+  const hashPrefix = typeof body.hashPrefix === 'string' ? body.hashPrefix.trim().toUpperCase() : ''
+
+  if (!/^[0-9A-F]{5}$/.test(hashPrefix)) {
+    throw httpError(400, 'A valid 5-character SHA-1 hash prefix is required.')
+  }
+
+  const response = await fetch(`https://api.pwnedpasswords.com/range/${hashPrefix}`, {
+    headers: {
+      'User-Agent': 'MiD-Daily Password Security Check/1.0',
+      'Add-Padding': 'true',
+      Accept: 'text/plain',
+    },
+  })
+
+  if (!response.ok) {
+    throw httpError(503, 'Password security check is temporarily unavailable. Please try again.')
+  }
+
+  const suffixes = await response.text()
+  sendJson(res, 200, { ok: true, suffixes })
+}
+
 function parseEventPayload(value: unknown): GoogleCalendarEventPayload {
   if (!value || typeof value !== 'object') throw new Error('Calendar event is required.')
   const event = value as Record<string, unknown>
@@ -1757,6 +1781,11 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
   try {
     if (req.method === 'GET' && url.pathname === '/api/workspace/bootstrap') {
       await handleWorkspaceBootstrap(req, res)
+      return
+    }
+
+    if (req.method === 'POST' && url.pathname === '/api/security/password-range') {
+      await handlePasswordExposureCheck(req, res)
       return
     }
 
