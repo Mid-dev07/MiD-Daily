@@ -6,7 +6,7 @@ test('AI exposes only read tools by default', () => {
   const tools = buildAssistantTools(false)
   assert.deepEqual(
     tools.map((tool) => tool.name),
-    ['get_today_schedule', 'get_open_tasks', 'get_schedule_range', 'get_active_budgets', 'get_expense_summary'],
+    ['get_today_schedule', 'get_open_tasks', 'get_schedule_range', 'get_habits', 'get_active_budgets', 'get_expense_summary'],
   )
 })
 
