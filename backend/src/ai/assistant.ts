@@ -575,14 +575,18 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
 }
 
 type WorkersAiToolCall = {
+  id: string
   name: string
   arguments: Record<string, unknown>
 }
 
 type WorkersAiResponse = {
-  response?: string
+  response?: unknown
   choices?: Array<{
-    message?: { content?: unknown }
+    message?: {
+      content?: unknown
+      tool_calls?: unknown
+    }
   }>
   tool_calls?: unknown
 }
@@ -590,21 +594,37 @@ type WorkersAiResponse = {
 function assistantResponseText(value: unknown) {
   if (!value || typeof value !== 'object') return ''
   const response = value as WorkersAiResponse
-  if (typeof response.response === 'string') return response.response
 
-  const first = Array.isArray(response.choices) ? response.choices[0] : undefined
-  const content = first?.message?.content
-  return typeof content === 'string' ? content : ''
+  const candidates = [
+    response.response,
+    Array.isArray(response.choices) ? response.choices[0]?.message?.content : undefined,
+  ]
+
+  for (const content of candidates) {
+    if (typeof content === 'string' && content.trim()) return content
+    if (Array.isArray(content)) {
+      const textParts = content
+        .filter((part) => part && typeof part === 'object' && typeof (part as Record<string, unknown>).text === 'string')
+        .map((part) => String((part as Record<string, unknown>).text))
+      if (textParts.length > 0) return textParts.join('')
+    }
+  }
+
+  return ''
 }
 
 function assistantToolCalls(value: unknown): WorkersAiToolCall[] {
   if (!value || typeof value !== 'object') return []
   const response = value as WorkersAiResponse
-  if (!Array.isArray(response.tool_calls)) return []
+  const firstMessage = Array.isArray(response.choices) ? response.choices[0]?.message : undefined
+  const rawCalls = response.tool_calls ?? firstMessage?.tool_calls
+  if (!Array.isArray(rawCalls)) return []
 
   const calls: WorkersAiToolCall[] = []
-  for (const raw of response.tool_calls) {
+  for (let index = 0; index < rawCalls.length; index += 1) {
+    const raw = rawCalls[index]
     if (!raw || typeof raw !== 'object') continue
+
     const item = raw as Record<string, unknown>
     const nestedFunction = item.function && typeof item.function === 'object'
       ? item.function as Record<string, unknown>
@@ -617,21 +637,31 @@ function assistantToolCalls(value: unknown): WorkersAiToolCall[] {
     const argumentsValue = item.arguments ?? nestedFunction?.arguments
     if (!nameValue || argumentsValue === undefined) continue
 
-    if (argumentsValue && typeof argumentsValue === 'object') {
-      calls.push({ name: nameValue, arguments: argumentsValue as Record<string, unknown> })
-      continue
-    }
-
-    if (typeof argumentsValue === 'string') {
+    let parsedArguments: Record<string, unknown> | null = null
+    if (argumentsValue && typeof argumentsValue === 'object' && !Array.isArray(argumentsValue)) {
+      parsedArguments = argumentsValue as Record<string, unknown>
+    } else if (typeof argumentsValue === 'string') {
       try {
         const parsed = JSON.parse(argumentsValue) as unknown
         if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-          calls.push({ name: nameValue, arguments: parsed as Record<string, unknown> })
+          parsedArguments = parsed as Record<string, unknown>
         }
       } catch {
-        // The model returned malformed tool arguments; ignore the call and let the next round continue safely.
+        continue
       }
     }
+
+    if (!parsedArguments) continue
+
+    const id = typeof item.id === 'string' && item.id.trim()
+      ? item.id
+      : `call_${index + 1}`
+
+    calls.push({
+      id,
+      name: nameValue,
+      arguments: parsedArguments,
+    })
   }
 
   return calls
@@ -698,9 +728,15 @@ async function runWorkersAi(
 
     modelMessages.push({
       role: 'assistant',
-      content: JSON.stringify(rawResponse && typeof rawResponse === 'object'
-        ? (rawResponse as Record<string, unknown>).tool_calls
-        : calls),
+      content: null,
+      tool_calls: calls.map((call) => ({
+        id: call.id,
+        type: 'function',
+        function: {
+          name: call.name,
+          arguments: JSON.stringify(call.arguments),
+        },
+      })),
     })
 
     for (const call of calls) {
@@ -709,14 +745,18 @@ async function runWorkersAi(
         actions.push({ tool: call.name, ok: true })
         modelMessages.push({
           role: 'tool',
-          content: JSON.stringify({ name: call.name, result }),
+          tool_call_id: call.id,
+          name: call.name,
+          content: JSON.stringify(result),
         })
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Tool failed.'
         actions.push({ tool: call.name, ok: false })
         modelMessages.push({
           role: 'tool',
-          content: JSON.stringify({ name: call.name, error: message }),
+          tool_call_id: call.id,
+          name: call.name,
+          content: JSON.stringify({ error: message }),
         })
       }
     }
