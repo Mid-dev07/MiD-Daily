@@ -123,10 +123,12 @@ export function useEnvironment(): UseEnvironment {
         if (permission === 'denied' && !location) {
           throw new Error('Location access is blocked. MiD will continue in local-time mode.')
         }
-        const nextLocation = await requestBrowserLocation()
-        saveLocation(nextLocation)
-        activeLocation = nextLocation
-        setLocation(nextLocation)
+        if (permission !== 'denied' || !location) {
+          const nextLocation = await requestBrowserLocation()
+          saveLocation(nextLocation)
+          activeLocation = nextLocation
+          setLocation(nextLocation)
+        }
       } catch (reason) {
         if (version !== requestVersion.current) return
         const message = reason instanceof Error ? reason.message : 'Location could not be determined.'
@@ -149,6 +151,11 @@ export function useEnvironment(): UseEnvironment {
       const nextWeather = await fetchWeather(activeLocation, controller.signal)
       if (version !== requestVersion.current) return
       setWeather(nextWeather)
+      if (activeLocation.timezone !== nextWeather.timezone) {
+        const resolvedLocation = { ...activeLocation, timezone: nextWeather.timezone }
+        saveLocation(resolvedLocation)
+        setLocation(resolvedLocation)
+      }
       setStatus(weatherCacheIsStale(nextWeather) ? 'degraded' : 'ready')
       setError(null)
     } catch (reason) {
