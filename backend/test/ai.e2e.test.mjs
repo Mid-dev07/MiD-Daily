@@ -52,9 +52,19 @@ test('AI chat route completes a UI-shaped read tool round-trip', async () => {
         assert.ok(input.tools.some((tool) => tool.type === 'function' && tool.function?.name === 'get_open_tasks'))
         assert.ok(!input.tools.some((tool) => tool.type === 'function' && tool.function?.name === 'create_task'))
         return {
-          tool_calls: [{
-            name: 'get_open_tasks',
-            arguments: {},
+          choices: [{
+            message: {
+              role: 'assistant',
+              content: null,
+              tool_calls: [{
+                id: 'call_tasks',
+                type: 'function',
+                function: {
+                  name: 'get_open_tasks',
+                  arguments: '{}',
+                },
+              }],
+            },
           }],
         }
       }
@@ -109,13 +119,23 @@ test('AI chat route completes a UI-shaped write tool round-trip only when action
         assert.ok(Array.isArray(toolList))
         assert.ok(toolList.some((tool) => tool.type === 'function' && tool.function?.name === 'create_task'))
         return {
-          tool_calls: [{
-            name: 'create_task',
-            arguments: {
-              title: 'Review AI integration',
-              category: 'Engineering',
-              priority: 'medium',
-              dueDate: null,
+          choices: [{
+            message: {
+              role: 'assistant',
+              content: null,
+              tool_calls: [{
+                id: 'call_create_task',
+                type: 'function',
+                function: {
+                  name: 'create_task',
+                  arguments: JSON.stringify({
+                    title: 'Review AI integration',
+                    category: 'Engineering',
+                    priority: 'medium',
+                    dueDate: null,
+                  }),
+                },
+              }],
             },
           }],
         }
