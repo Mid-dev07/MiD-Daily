@@ -147,7 +147,7 @@ export function AssistantView() {
                   <button className="secondary-button" type="button" disabled={integrationBusy !== null} onClick={() => void openConnectionLink('telegram')}>{integrationBusy === 'telegram' ? 'Opening…' : 'Connect'}</button>
                 )}
               </div>
-            ) : integrations && <span className="integration-badge">{telegram.title === 'Not configured' ? 'SETUP' : '…'}</span>}
+            ) : integrations && <button className="secondary-button" type="button" onClick={() => window.open('https://t.me/BotFather', '_blank', 'noopener,noreferrer')}>Open setup</button>}
           </article>
 
           <article className="assistant-channel-card">
@@ -164,7 +164,7 @@ export function AssistantView() {
                   <button className="secondary-button" type="button" disabled={integrationBusy !== null} onClick={() => void openConnectionLink('whatsapp')}>{integrationBusy === 'whatsapp' ? 'Opening…' : 'Connect'}</button>
                 )}
               </div>
-            ) : integrations && <span className="integration-badge">{whatsapp.title === 'Not configured' ? 'SETUP' : '…'}</span>}
+            ) : integrations && <button className="secondary-button" type="button" onClick={() => window.open('https://developers.facebook.com/apps/', '_blank', 'noopener,noreferrer')}>Open setup</button>}
           </article>
 
           <article className="assistant-channel-card">
