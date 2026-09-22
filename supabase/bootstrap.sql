@@ -293,27 +293,45 @@ grant all on table public.reminder_dispatches to service_role;
 -- 8) Explicit client-deny policies for server-only integration and dispatch tables.
 -- RLS is defense-in-depth: these policies keep anon/authenticated denied even if
 -- table privileges are changed later. service_role remains the intended server path.
-do $
-begin
-  foreach _table in array array[
-    'google_calendar_connections',
-    'telegram_connections',
-    'telegram_link_codes',
-    'telegram_updates',
-    'whatsapp_connections',
-    'whatsapp_link_codes',
-    'whatsapp_updates',
-    'reminder_dispatches'
-  ]
-  loop
-    execute format('drop policy if exists %I on public.%I', _table || '_deny_client', _table);
-    execute format(
-      'create policy %I on public.%I for all to anon, authenticated using (false) with check (false)',
-      _table || '_deny_client',
-      _table
-    );
-  end loop;
-end $;
+drop policy if exists "google_calendar_connections_deny_client" on public.google_calendar_connections;
+create policy "google_calendar_connections_deny_client"
+  on public.google_calendar_connections for all to anon, authenticated
+  using (false) with check (false);
+
+drop policy if exists "telegram_connections_deny_client" on public.telegram_connections;
+create policy "telegram_connections_deny_client"
+  on public.telegram_connections for all to anon, authenticated
+  using (false) with check (false);
+
+drop policy if exists "telegram_link_codes_deny_client" on public.telegram_link_codes;
+create policy "telegram_link_codes_deny_client"
+  on public.telegram_link_codes for all to anon, authenticated
+  using (false) with check (false);
+
+drop policy if exists "telegram_updates_deny_client" on public.telegram_updates;
+create policy "telegram_updates_deny_client"
+  on public.telegram_updates for all to anon, authenticated
+  using (false) with check (false);
+
+drop policy if exists "whatsapp_connections_deny_client" on public.whatsapp_connections;
+create policy "whatsapp_connections_deny_client"
+  on public.whatsapp_connections for all to anon, authenticated
+  using (false) with check (false);
+
+drop policy if exists "whatsapp_link_codes_deny_client" on public.whatsapp_link_codes;
+create policy "whatsapp_link_codes_deny_client"
+  on public.whatsapp_link_codes for all to anon, authenticated
+  using (false) with check (false);
+
+drop policy if exists "whatsapp_updates_deny_client" on public.whatsapp_updates;
+create policy "whatsapp_updates_deny_client"
+  on public.whatsapp_updates for all to anon, authenticated
+  using (false) with check (false);
+
+drop policy if exists "reminder_dispatches_deny_client" on public.reminder_dispatches;
+create policy "reminder_dispatches_deny_client"
+  on public.reminder_dispatches for all to anon, authenticated
+  using (false) with check (false);
 
 -- 9) Planner modes + Finance budgets
 alter table public.schedule_items
