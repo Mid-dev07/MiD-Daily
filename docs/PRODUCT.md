@@ -17,11 +17,11 @@ Personal use first, with a clear ownership model suitable for small-scale multi-
 - Browser/device reminders
 - Google Calendar
 - Telegram
-- WhatsApp
 - Assistant
 
-## Optional foundation
-- Instagram analytics is implemented as a provider adapter and UI foundation. It remains intentionally disabled until a provider account and current API permissions are configured.
+## Deferred providers
+- WhatsApp is intentionally out of the current production scope.
+- Instagram analytics remains an optional read-only foundation and is intentionally unconfigured until a provider account and current API permissions are available.
 
 ## Product principles
 1. Core data remains user-scoped.
