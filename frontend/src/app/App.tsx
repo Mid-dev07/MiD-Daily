@@ -11,6 +11,7 @@ const TasksView = lazy(() => import('../features/tasks/TasksView').then((module)
 const SocialAnalyticsView = lazy(() => import('../features/social/SocialAnalyticsView').then((module) => ({ default: module.SocialAnalyticsView })))
 const AssistantView = lazy(() => import('../features/ai/AssistantView').then((module) => ({ default: module.AssistantView })))
 const ProfileView = lazy(() => import('../features/profile/ProfileView').then((module) => ({ default: module.ProfileView })))
+const InsightsView = lazy(() => import('../features/insights/InsightsView').then((module) => ({ default: module.InsightsView })))
 import { normalizeTaskList } from '../features/tasks/task.migration'
 import { validateTaskDraft } from '../features/tasks/task.validation'
 import { createRemoteTask, updateRemoteTask, deleteRemoteTask } from '../features/tasks/tasksApi'
@@ -376,7 +377,7 @@ export function App() {
             {activeView === 'social' && <SocialAnalyticsView />}
             {activeView === 'assistant' && <AssistantView />}
             {activeView === 'profile' && (
-              user && profile ? (
+            {activeView === 'profile' && (user && profile ? (
                 <ProfileView user={user} profile={profile} onProfileChange={setProfile} onToast={setToast} />
               ) : (
                 <section className="workspace view-loading" aria-live="polite">
@@ -384,8 +385,8 @@ export function App() {
                   <h2>{profileLoading ? 'Loading your profile…' : 'Profile unavailable'}</h2>
                   <p>{profileLoading ? 'Restoring your profile details.' : 'Sign in to manage your MiD-Daily profile.'}</p>
                 </section>
-              )
-            )}
+              ))}
+            {activeView === 'insights' && <InsightsView tasks={tasks} schedule={schedule} finance={finance} onNavigate={navigate} />}
           </div>
         </Suspense>
       </main>
