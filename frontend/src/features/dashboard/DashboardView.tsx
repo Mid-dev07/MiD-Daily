@@ -97,6 +97,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
     .slice(0, 3), [schedule])
 
   const upcomingDateLabel = new Intl.DateTimeFormat('id-ID', {
+    timeZone: timezone,
     weekday: 'short',
     day: 'numeric',
     month: 'short',
