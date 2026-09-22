@@ -64,3 +64,34 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
 
   return data as T
 }
+
+
+export async function checkPasswordExposure(password: string): Promise<void> {
+  const encoded = new TextEncoder().encode(password)
+  const digest = await crypto.subtle.digest('SHA-1', encoded)
+  const fullHash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase()
+  const hashPrefix = fullHash.slice(0, 5)
+  const hashSuffix = fullHash.slice(5)
+
+  try {
+    const result = await apiRequest<{ ok: boolean; suffixes: string }>('/api/security/password-range', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hashPrefix }),
+    })
+
+    const compromised = result.suffixes.split('\n').some((line) => {
+      const [suffix, count] = line.trim().toUpperCase().split(':')
+      return suffix === hashSuffix && Number(count) > 0
+    })
+
+    if (compromised) {
+      throw new Error('This password has appeared in known data breaches. Choose a different password.')
+    }
+  } catch (reason) {
+    if (reason instanceof Error && reason.message.includes('has appeared in known data breaches')) {
+      throw reason
+    }
+    throw new Error('Password security check is unavailable. Please try again.')
+  }
+}
