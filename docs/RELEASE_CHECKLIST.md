@@ -68,7 +68,7 @@
 - [ ] Not applicable to the current production scope.
 - WhatsApp is intentionally skipped; do not treat missing WhatsApp credentials as a release failure.
 
-## Gate J — Assistant
+## Gate K — Assistant
 - [ ] Verify the Cloudflare Workers AI binding is available in production.
 - [ ] Test read-only schedule/task/expense queries.
 - [ ] Confirm writes are unavailable in read-only mode.
@@ -77,7 +77,7 @@
 - [ ] Confirm the UI reports action results.
 - [ ] Verify the same Assistant/tool permission boundaries apply from Telegram.
 
-## Gate K — UX and reliability
+## Gate L — UX and reliability
 - [ ] Dashboard remains usable at desktop, tablet, and mobile widths.
 - [ ] Mobile navigation remains reachable while scrolling.
 - [ ] Browser URL reflects the active workspace view and Back/Forward restores it.
