@@ -45,8 +45,9 @@ test('AI chat route completes a UI-shaped read tool round-trip', async () => {
       assert.ok(Array.isArray(input.tools))
 
       if (aiCalls === 1) {
-        assert.ok((input.tools as Array<{ name: string }>).some((tool) => tool.name === 'get_open_tasks'))
-        assert.ok(!(input.tools as Array<{ name: string }>).some((tool) => tool.name === 'create_task'))
+        assert.ok(Array.isArray(input.tools))
+        assert.ok(input.tools.some((tool) => tool.name === 'get_open_tasks'))
+        assert.ok(!input.tools.some((tool) => tool.name === 'create_task'))
         return {
           tool_calls: [{
             name: 'get_open_tasks',
@@ -55,7 +56,7 @@ test('AI chat route completes a UI-shaped read tool round-trip', async () => {
         }
       }
 
-      const messages = input.messages as Array<{ role?: string; content?: unknown }>
+      const messages = input.messages
       assert.ok(messages.some((message) => message.role === 'tool'))
       return {
         response: 'You have one open task: Finish AI E2E test.',
@@ -99,10 +100,11 @@ test('AI chat route completes a UI-shaped write tool round-trip only when action
   configureAssistantRuntime({
     async run(_model, input) {
       aiCalls += 1
-      const tools = input.tools as Array<{ name: string }>
+      const toolList = input.tools
 
       if (aiCalls === 1) {
-        assert.ok(tools.some((tool) => tool.name === 'create_task'))
+        assert.ok(Array.isArray(toolList))
+        assert.ok(toolList.some((tool) => tool.name === 'create_task'))
         return {
           tool_calls: [{
             name: 'create_task',
