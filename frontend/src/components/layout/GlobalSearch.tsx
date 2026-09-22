@@ -121,7 +121,7 @@ export function GlobalSearch({ tasks, finance, schedule, onNavigate, onClose }: 
         <div className="global-search-input-wrap">
           <span aria-hidden="true">⌕</span>
           <input
-            ref={inputRef}
+            autoFocus
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search tasks, expenses, schedule…"
