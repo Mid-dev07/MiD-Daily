@@ -13,6 +13,8 @@ Personal use first, with a clear ownership model suitable for small-scale multi-
 - Finance / income and expenses
 - Authentication / account and recovery
 - Profile / photo, display name, username, and bio
+- Quick Capture / task, expense, and schedule capture from Today
+- Daily Briefing / current priorities and daily context
 
 ## Connected modules
 - Browser/device reminders
