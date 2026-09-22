@@ -16,6 +16,7 @@ const titles: Record<View, string> = {
   assistant: 'Assistant',
   profile: 'Profile',
   insights: 'Insights',
+  habits: 'Habits',
 }
 
 function initials(name: string) {
