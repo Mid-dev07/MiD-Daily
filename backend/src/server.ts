@@ -1626,6 +1626,30 @@ async function handleTelegramUpdate(req: IncomingMessage, res: ServerResponse) {
   }
 
   const parsed = parseCommand(textValue)
+
+  if (parsed?.command === 'start' || parsed?.command === 'link') {
+    if (!parsed.args) {
+      await telegramHelp(chatId)
+      sendJson(res, 200, { ok: true })
+      return
+    }
+
+    const result = await redeemTelegramLinkCode(
+      parsed.args,
+      chatId,
+      telegramUserId,
+      typeof from?.username === 'string' ? from.username : undefined,
+    )
+    await sendTelegramMessage(
+      chatId,
+      result
+        ? 'Telegram connected to your MiD-Daily account.'
+        : 'This link code is invalid, expired, or already used.',
+    )
+    sendJson(res, 200, { ok: true })
+    return
+  }
+
   const connection = await getTelegramConnectionByChatId(chatId)
   if (!connection) {
     await sendTelegramMessage(chatId, 'Telegram is not linked. Open MiD-Daily and generate a Telegram connection link first.')
@@ -1635,26 +1659,6 @@ async function handleTelegramUpdate(req: IncomingMessage, res: ServerResponse) {
 
   if (!parsed) {
     await handleTelegramAiMessage(chatId, connection.user_id, textValue)
-    sendJson(res, 200, { ok: true })
-    return
-  }
-
-  if (parsed.command === 'start' || parsed.command === 'link') {
-    if (!parsed.args) {
-      await telegramHelp(chatId)
-      sendJson(res, 200, { ok: true })
-      return
-    }
-
-    const result = await redeemTelegramLinkCode(parsed.args, chatId, telegramUserId, typeof from?.username === 'string' ? from.username : undefined)
-    await sendTelegramMessage(chatId, result ? 'Telegram connected to your MiD-Daily account.' : 'This link code is invalid, expired, or already used.')
-    sendJson(res, 200, { ok: true })
-    return
-  }
-
-  const connection = await getTelegramConnectionByChatId(chatId)
-  if (!connection) {
-    await sendTelegramMessage(chatId, 'Telegram is not linked. Open MiD-Daily and generate a Telegram connection link first.')
     sendJson(res, 200, { ok: true })
     return
   }
