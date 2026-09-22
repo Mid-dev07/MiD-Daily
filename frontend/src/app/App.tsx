@@ -71,15 +71,6 @@ export function App() {
   }, [])
 
   useEffect(() => {
-    const handleNavigateEvent = (event: Event) => {
-      const next = (event as CustomEvent<View>).detail
-      if (next) navigate(next)
-    }
-    window.addEventListener('mid:navigate', handleNavigateEvent)
-    return () => window.removeEventListener('mid:navigate', handleNavigateEvent)
-  }, [])
-
-  useEffect(() => {
     const handlePopState = () => setActiveView(viewFromPath(window.location.pathname))
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
@@ -390,7 +381,7 @@ export function App() {
       <div className="atmosphere" aria-hidden="true" />
       <Sidebar activeView={activeView} onNavigate={navigate} />
       <main className="main-content">
-        <Topbar view={activeView} profile={profile} onProfile={() => navigate('profile')} onSearch={() => setSearchOpen(true)} userId={userId} tasks={tasks} finance={finance} schedule={schedule} />
+        <Topbar view={activeView} profile={profile} onProfile={() => navigate('profile')} onSearch={() => setSearchOpen(true)} onNavigate={navigate} userId={userId} tasks={tasks} finance={finance} schedule={schedule} />
         <Suspense fallback={<section className="workspace view-loading" aria-live="polite"><span className="section-kicker">LOADING</span><h2>Opening your workspace…</h2></section>}>
           <div className="view-key">
             {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={finance} onToggleTask={(id) => void toggleTask(id)} onNavigate={navigate} />}
