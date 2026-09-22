@@ -18,6 +18,7 @@ test('AI exposes write tools only when explicitly enabled', () => {
       'get_today_schedule',
       'get_open_tasks',
       'get_schedule_range',
+      'get_habits',
       'get_active_budgets',
       'get_expense_summary',
       'create_activity',
