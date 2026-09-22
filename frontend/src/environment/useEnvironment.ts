@@ -139,6 +139,10 @@ export function useEnvironment(): UseEnvironment {
     }
 
     if (version !== requestVersion.current) return
+    if (!activeLocation) {
+      setStatus('idle')
+      return
+    }
 
     const cached = getCachedWeather(activeLocation)
     if (cached) setWeather(cached)
