@@ -1,44 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { Habit, HabitLog } from '../../types'
 import { archiveHabit, createHabit, listHabitLogs, listHabits, toggleHabitLog, updateHabit } from './habitApi'
-import { shiftDate } from '../schedule/schedule.date'
+import { weekday, weekDates, habitStreak, habitWeekProgress } from './habitRules'
 
 const APP_TIMEZONE = 'Asia/Jakarta'
 const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 function todayInAppTimezone() {
   return new Intl.DateTimeFormat('sv-SE', { timeZone: APP_TIMEZONE }).format(new Date())
-}
-
-function weekday(date: string) {
-  const day = new Date(date + 'T12:00:00Z').getUTCDay()
-  return day === 0 ? 7 : day
-}
-
-function weekDates(today: string) {
-  const mondayOffset = weekday(today) - 1
-  const monday = shiftDate(today, -mondayOffset)
-  return Array.from({ length: 7 }, (_, index) => shiftDate(monday, index))
-}
-
-function streakFor(habit: Habit, logs: Set<string>, today: string) {
-  let cursor = today
-  let streak = 0
-  for (let i = 0; i < 90; i += 1) {
-    const day = weekday(cursor)
-    if (habit.targetDays.includes(day)) {
-      if (!logs.has(habit.id + ':' + cursor)) break
-      streak += 1
-    }
-    cursor = shiftDate(cursor, -1)
-  }
-  return streak
-}
-
-function weekProgress(habit: Habit, logs: Set<string>, dates: string[], today: string) {
-  const dueSoFar = dates.filter((date) => date <= today && habit.targetDays.includes(weekday(date)))
-  const complete = dueSoFar.filter((date) => logs.has(habit.id + ':' + date)).length
-  return { complete, due: dueSoFar.length }
 }
 
 export function HabitsView() {
@@ -195,8 +164,8 @@ export function HabitsView() {
 
           <div className="habit-list">
             {habits.map((habit) => {
-              const progress = weekProgress(habit, logSet, dates, today)
-              const streak = streakFor(habit, logSet, today)
+              const progress = habitWeekProgress(habit, logSet, dates, today)
+              const streak = habitStreak(habit, logSet, today)
               return (
                 <article className="habit-row" key={habit.id}>
                   <div className="habit-main">
