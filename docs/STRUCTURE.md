@@ -20,6 +20,7 @@ frontend/src/
 │   │   └── ScheduleView.tsx
 │   └── tasks/
 ├── lib/                     # Generic utilities
+├── environment/             # Time, location, astronomy, weather, and environment rendering
 ├── styles/                  # Tokens, global styles, app styles
 └── types/                   # Shared application types
 ```
