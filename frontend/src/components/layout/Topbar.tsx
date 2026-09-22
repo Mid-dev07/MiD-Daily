@@ -5,6 +5,7 @@ interface TopbarProps {
   view: View
   profile: Profile | null
   onProfile: () => void
+  onSearch: () => void
 }
 
 const titles: Record<View, string> = {
@@ -24,7 +25,7 @@ function initials(name: string) {
   return letters.toUpperCase() || 'M'
 }
 
-export function Topbar({ view, profile, onProfile }: TopbarProps) {
+export function Topbar({ view, profile, onProfile, onSearch }: TopbarProps) {
   const { configured, user, signOut } = useAuth()
 
   const logout = async () => {
@@ -36,9 +37,13 @@ export function Topbar({ view, profile, onProfile }: TopbarProps) {
 
   return (
     <header className="topbar">
-      <h1>{titles[view]}</h1>
+      <div className="topbar-title"><h1>{titles[view]}</h1></div>
 
-      <div className="profile-chip">
+      <div className="topbar-actions">
+        <button className="search-trigger" type="button" onClick={onSearch} aria-label="Search MiD-Daily">
+          <span aria-hidden="true">⌕</span><span>Search</span><kbd>⌘K</kbd>
+        </button>
+        <div className="profile-chip">
         <button className="profile-trigger" type="button" onClick={onProfile} aria-label="Open your profile">
           {profile?.avatarUrl ? (
             <img className="avatar profile-chip-avatar-image" src={profile.avatarUrl} alt="" />
@@ -50,6 +55,7 @@ export function Topbar({ view, profile, onProfile }: TopbarProps) {
         {configured && user && (
           <button className="text-button" type="button" onClick={() => void logout()}>Sign out</button>
         )}
+        </div>
       </div>
     </header>
   )
