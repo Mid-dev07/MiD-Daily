@@ -120,8 +120,8 @@
 - Continuous polling in the idle shell should be avoided unless the feature explicitly requires it.
 
 ## Final hardening evidence — 2026-09-22
-- ✅ Main CI completed successfully for final release commit `bef7f4984482be6e2ab26bb3f84e602ff9767735`.
-- ✅ Production frontend/backend deployment and smoke tests completed successfully for final release commit `bef7f4984482be6e2ab26bb3f84e602ff9767735` (deploy run 300).
+- ✅ Main CI completed successfully for final production commit `ccf8fac9340aeb314898100485d54a257dba0eec` (run 602).
+- ✅ Production frontend/backend deployment and smoke tests completed successfully for final production commit `ccf8fac9340aeb314898100485d54a257dba0eec` (deploy run 304).
 - ✅ Supabase public-schema RLS is enabled, user-owned CRUD policies use `auth.uid()`, integration tables are client-denied, and profile avatar storage is owner-restricted.
 - ⚠️ Supabase security advisor still reports native leaked-password protection as disabled; the application-level password exposure proxy remains part of the production smoke test.
 - ℹ️ Supabase performance advisor currently reports 12 unused-index INFO findings; no destructive index changes were made solely from those advisories.
@@ -131,11 +131,12 @@
 - ⚠️ Credentialed end-user flows (email registration/recovery, Google OAuth, Telegram/Google Calendar interactive consent) require an interactive test account/session and are not fabricated here.
 
 ## Final phase — ecosystem convergence
-- [ ] Each core module retains a distinct terrain cue without introducing heavy visual dependencies.
-- [ ] Mobile field-guide navigation is horizontally scrollable, touch-sized, and auto-reveals the active module.
-- [ ] Interactive cards do not use `overflow: clip`.
-- [ ] Final ecosystem selectors remain covered by `qa:static`.
-- [ ] Existing frontend/backend/Worker/deployment/smoke gates remain green after the final visual phase.
+- ✅ Each core module retains a distinct terrain cue without introducing heavy visual dependencies.
+- ✅ Mobile field-guide navigation is horizontally scrollable, touch-sized, and auto-reveals the active module.
+- ✅ Interactive cards do not use `overflow: clip`.
+- ✅ Final ecosystem selectors remain covered by `qa:static`.
+- ✅ Existing frontend/backend/Worker/deployment/smoke gates remain green after the final visual phase.
+- ✅ Main CI run 602 and production deploy run 304 are green on commit `ccf8fac9340aeb314898100485d54a257dba0eec`.
 
 ## Final state
 Do not call the release final until every applicable production gate passes. Deferred providers may remain unconfigured when they are explicitly out of scope for the current release, but the UI must state that boundary clearly. Core features and every in-scope integration must be operational. For Telegram AI, both the explicit `/ai` command and ordinary messages should use the shared Assistant gateway.
