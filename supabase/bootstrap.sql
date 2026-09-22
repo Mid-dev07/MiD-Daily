@@ -290,7 +290,32 @@ alter table public.reminder_dispatches enable row level security;
 revoke all on table public.reminder_dispatches from anon, authenticated;
 grant all on table public.reminder_dispatches to service_role;
 
--- 8) Planner modes + Finance budgets
+-- 8) Explicit client-deny policies for server-only integration and dispatch tables.
+-- RLS is defense-in-depth: these policies keep anon/authenticated denied even if
+-- table privileges are changed later. service_role remains the intended server path.
+do $
+begin
+  foreach _table in array array[
+    'google_calendar_connections',
+    'telegram_connections',
+    'telegram_link_codes',
+    'telegram_updates',
+    'whatsapp_connections',
+    'whatsapp_link_codes',
+    'whatsapp_updates',
+    'reminder_dispatches'
+  ]
+  loop
+    execute format('drop policy if exists %I on public.%I', _table || '_deny_client', _table);
+    execute format(
+      'create policy %I on public.%I for all to anon, authenticated using (false) with check (false)',
+      _table || '_deny_client',
+      _table
+    );
+  end loop;
+end $;
+
+-- 9) Planner modes + Finance budgets
 alter table public.schedule_items
   add column if not exists activity_mode text not null default 'ONE_TIME',
   add column if not exists target_count integer,
@@ -401,7 +426,7 @@ create trigger finance_budgets_set_updated_at
   before update on public.finance_budgets
   for each row execute function public.set_updated_at();
 
--- 9) Realtime publication for authenticated workspace sync.
+-- 10) Realtime publication for authenticated workspace sync.
 do $$
 begin
   if not exists (
