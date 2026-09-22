@@ -12,7 +12,7 @@
 - [ ] Task, Finance, and Schedule own-row policies are present.
 - [ ] Integration tables remain service-only.
 - [ ] Security and performance advisors reviewed.
-- [ ] Leaked-password protection enabled.
+- [ ] Native leaked-password protection: documented Free-plan limitation; application-level HIBP protection is enabled.
 
 ## Gate C — Cloudflare
 - [ ] Frontend Worker deploy succeeds.
@@ -55,6 +55,7 @@
 - [ ] Complete private-chat linking.
 - [ ] Verify supported commands.
 - [ ] Verify duplicate delivery does not duplicate writes.
+- [ ] Verify `/ai <request>` and normal natural-language messages reach the shared Assistant.
 
 ## Gate H — WhatsApp (deferred)
 - [ ] Not applicable to the current production scope.
@@ -67,6 +68,7 @@
 - [ ] Enable actions explicitly.
 - [ ] Test one Task write and one Expense write.
 - [ ] Confirm the UI reports action results.
+- [ ] Verify the same Assistant/tool permission boundaries apply from Telegram.
 
 ## Gate J — UX and reliability
 - [ ] Dashboard remains usable at desktop, tablet, and mobile widths.
@@ -91,4 +93,4 @@
 - Continuous polling in the idle shell should be avoided unless the feature explicitly requires it.
 
 ## Final state
-Do not call the release final until every applicable production gate passes. Deferred providers may remain unconfigured when they are explicitly out of scope for the current release, but the UI must state that boundary clearly. Core features and every in-scope integration must be operational.
+Do not call the release final until every applicable production gate passes. Deferred providers may remain unconfigured when they are explicitly out of scope for the current release, but the UI must state that boundary clearly. Core features and every in-scope integration must be operational. For Telegram AI, both the explicit `/ai` command and ordinary messages should use the shared Assistant gateway.
