@@ -130,5 +130,12 @@
 - ⚠️ Pixel-level browser visual inspection is not available in this execution environment; automated build, static QA, backend tests, Worker dry-run, and production smoke checks are the authoritative automated gates.
 - ⚠️ Credentialed end-user flows (email registration/recovery, Google OAuth, Telegram/Google Calendar interactive consent) require an interactive test account/session and are not fabricated here.
 
+## Final phase — ecosystem convergence
+- [ ] Each core module retains a distinct terrain cue without introducing heavy visual dependencies.
+- [ ] Mobile field-guide navigation is horizontally scrollable, touch-sized, and auto-reveals the active module.
+- [ ] Interactive cards do not use `overflow: clip`.
+- [ ] Final ecosystem selectors remain covered by `qa:static`.
+- [ ] Existing frontend/backend/Worker/deployment/smoke gates remain green after the final visual phase.
+
 ## Final state
 Do not call the release final until every applicable production gate passes. Deferred providers may remain unconfigured when they are explicitly out of scope for the current release, but the UI must state that boundary clearly. Core features and every in-scope integration must be operational. For Telegram AI, both the explicit `/ai` command and ordinary messages should use the shared Assistant gateway.
