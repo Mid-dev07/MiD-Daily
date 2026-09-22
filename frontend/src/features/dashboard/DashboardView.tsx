@@ -10,10 +10,11 @@ interface DashboardViewProps {
   finance: FinanceEntry[]
   onToggleTask: (id: number) => void
   onNavigate: (view: View) => void
+  timezone?: string
 }
 
-const APP_TIMEZONE = 'Asia/Jakarta'
-const getToday = () => new Intl.DateTimeFormat('sv-SE', { timeZone: APP_TIMEZONE }).format(new Date())
+const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+const getToday = (timezone: string) => new Intl.DateTimeFormat('sv-SE', { timeZone: timezone }).format(new Date())
 
 const TelegramIntegrationCard = lazy(() => import('./components/TelegramIntegrationCard').then((module) => ({ default: module.TelegramIntegrationCard })))
 const WhatsAppIntegrationCard = lazy(() => import('./components/WhatsAppIntegrationCard').then((module) => ({ default: module.WhatsAppIntegrationCard })))
@@ -22,9 +23,9 @@ const DailyBriefing = lazy(() => import('./components/DailyBriefing').then((modu
 const FocusMode = lazy(() => import('./components/FocusMode').then((module) => ({ default: module.FocusMode })))
 const FeatureLandscape = lazy(() => import('./components/FeatureLandscape').then((module) => ({ default: module.FeatureLandscape })))
 
-export function DashboardView({ tasks, schedule, finance, onToggleTask, onNavigate }: DashboardViewProps) {
+export function DashboardView({ tasks, schedule, finance, onToggleTask, onNavigate, timezone = LOCAL_TIMEZONE }: DashboardViewProps) {
   const [now, setNow] = useState(() => new Date())
-  const today = getToday()
+  const today = getToday(timezone)
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 60_000)
@@ -64,7 +65,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
     .sort((a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? ''))
     .slice(0, 3), [tasks, today])
 
-  const nowParts = new Intl.DateTimeFormat('en-GB', { timeZone: APP_TIMEZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(now)
+  const nowParts = new Intl.DateTimeFormat('en-GB', { timeZone: timezone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(now)
   const currentMinutes = Number(nowParts.find((part) => part.type === 'hour')?.value ?? 0) * 60 + Number(nowParts.find((part) => part.type === 'minute')?.value ?? 0)
   const currentSchedule = todaySchedule.find((item) => {
     const start = Number(item.startTime.slice(0, 2)) * 60 + Number(item.startTime.slice(3, 5))
@@ -96,12 +97,13 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
     .slice(0, 3), [schedule])
 
   const upcomingDateLabel = new Intl.DateTimeFormat('id-ID', {
+    timeZone: timezone,
     weekday: 'short',
     day: 'numeric',
     month: 'short',
   })
 
-  const currentTimeLabel = new Intl.DateTimeFormat('id-ID', { timeZone: APP_TIMEZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now)
+  const currentTimeLabel = new Intl.DateTimeFormat('id-ID', { timeZone: timezone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now)
 
   return (
     <section className="workspace dashboard-page page-enter">

@@ -1,6 +1,8 @@
 import { useAuth } from '../../features/auth/AuthProvider'
 import type { FinanceEntry, Profile, Task, View } from '../../types'
 import type { ScheduleItem } from '../../features/schedule/schedule.types'
+import type { EnvironmentState } from '../../environment/types'
+import { environmentLabel, weatherGlyph } from '../../environment/visual'
 import { lazy, Suspense } from 'react'
 
 const NotificationCenter = lazy(() => import('./NotificationCenter').then((module) => ({ default: module.NotificationCenter })))
@@ -15,6 +17,8 @@ interface TopbarProps {
   tasks: Task[]
   finance: FinanceEntry[]
   schedule: ScheduleItem[]
+  environment: EnvironmentState
+  onEnvironmentAction: () => void
 }
 
 const viewIndices: Record<View, string> = {
@@ -46,7 +50,7 @@ function initials(name: string) {
   return letters.toUpperCase() || 'M'
 }
 
-export function Topbar({ view, profile, onProfile, onSearch, onNavigate, userId, tasks, finance, schedule }: TopbarProps) {
+export function Topbar({ view, profile, onProfile, onSearch, onNavigate, userId, tasks, finance, schedule, environment, onEnvironmentAction }: TopbarProps) {
   const { configured, user, signOut } = useAuth()
 
   const logout = async () => {
@@ -55,6 +59,10 @@ export function Topbar({ view, profile, onProfile, onSearch, onNavigate, userId,
   }
 
   const displayName = profile?.displayName || user?.email || 'Personal workspace'
+  const environmentText = environmentLabel(environment)
+  const environmentTitle = environment.location
+    ? 'Refresh MiD environment from your current location'
+    : 'Use your location to personalize MiD weather and daylight'
 
   return (
     <header className="topbar">
@@ -69,6 +77,14 @@ export function Topbar({ view, profile, onProfile, onSearch, onNavigate, userId,
       </div>
 
       <div className="topbar-actions">
+        <button className="environment-control" type="button" onClick={onEnvironmentAction} title={environmentTitle} aria-label={environmentTitle}>
+          <span className="environment-glyph" aria-hidden="true">{weatherGlyph(environment)}</span>
+          <span className="environment-readout">
+            <b>{environmentText}</b>
+            <small>{environment.location ? 'local environment' : 'personalize sky'}</small>
+          </span>
+        </button>
+        <span className="environment-attribution-inline" aria-label="Weather data source">{environment.weather ? 'Open-Meteo' : 'MiD local'}</span>
         <button className="search-trigger" type="button" onClick={onSearch} aria-label="Search MiD-Daily">
           <span aria-hidden="true">⌕</span><span>Search</span><kbd>⌘K</kbd>
         </button>

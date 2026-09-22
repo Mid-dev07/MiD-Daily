@@ -26,6 +26,9 @@ import { loadWorkspaceBootstrap } from '../features/workspace/workspaceApi'
 import { normalizeScheduleList } from '../features/schedule/schedule.migration'
 import { createRemoteSchedule, updateRemoteSchedule, deleteRemoteSchedule } from '../features/schedule/scheduleApi'
 import { useReminderScheduler } from '../features/schedule/hooks/useReminderScheduler'
+import { useEnvironment } from '../environment/useEnvironment'
+import { environmentCssVariables } from '../environment/visual'
+import { EnvironmentScene } from '../environment/EnvironmentScene'
 import { registerBrowserServiceWorker } from '../integrations/notifications/serviceWorker'
 import { readUserStorage, writeUserStorage, hasUserStorage } from '../lib/userStorage'
 import { hasCompletedRemoteSync, markRemoteSyncComplete } from '../lib/dataSync'
@@ -42,13 +45,6 @@ const SCHEDULE_STORAGE_KEY = 'mid-daily.schedule'
 const BUDGET_STORAGE_KEY = 'mid-daily.finance-budgets'
 
 const reportError = (reason: unknown) => reason instanceof Error ? reason.message : 'Remote data sync failed.'
-
-function getTimePeriod(hour = new Date().getHours()) {
-  if (hour >= 5 && hour < 11) return 'morning'
-  if (hour >= 11 && hour < 17) return 'day'
-  if (hour >= 17 && hour < 21) return 'evening'
-  return 'night'
-}
 
 export function App() {
   const { user } = useAuth()
@@ -110,19 +106,14 @@ export function App() {
   const [schedule, setSchedule] = useState<ScheduleItem[]>(() => normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, userId ? [] : initialScheduleItems)))
   const [budgets, setBudgets] = useState<FinanceBudget[]>(() => readUserStorage(BUDGET_STORAGE_KEY, userId, []))
   const [toast, setToast] = useState('')
-  const [timePeriod, setTimePeriod] = useState(getTimePeriod)
   const [readyScope, setReadyScope] = useState<string>('')
+  const { environment, requestLocation, refresh: refreshEnvironment } = useEnvironment()
 
   useReminderScheduler(schedule)
   useWorkspaceRealtime(userId, readyScope === workspaceScope, setTasks, setFinance, setSchedule)
 
   useEffect(() => {
     void registerBrowserServiceWorker()
-  }, [])
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setTimePeriod(getTimePeriod()), 60_000)
-    return () => window.clearInterval(timer)
   }, [])
 
   useEffect(() => {
@@ -377,14 +368,21 @@ export function App() {
   }
 
   return (
-    <div className="app-frame" data-view={activeView} data-time-period={timePeriod}>
-      <div className="atmosphere" aria-hidden="true" />
+    <div
+      className="app-frame"
+      data-view={activeView}
+      data-day-phase={environment.dayPhase}
+      data-weather={environment.weather?.condition ?? 'clear'}
+      data-environment-status={environment.status}
+      style={environmentCssVariables(environment)}
+    >
+      <EnvironmentScene environment={environment} />
       <Sidebar activeView={activeView} onNavigate={navigate} />
       <main className="main-content">
-        <Topbar view={activeView} profile={profile} onProfile={() => navigate('profile')} onSearch={() => setSearchOpen(true)} onNavigate={navigate} userId={userId} tasks={tasks} finance={finance} schedule={schedule} />
+        <Topbar view={activeView} profile={profile} onProfile={() => navigate('profile')} onSearch={() => setSearchOpen(true)} onNavigate={navigate} userId={userId} tasks={tasks} finance={finance} schedule={schedule} environment={environment} onEnvironmentAction={() => void (environment.location ? refreshEnvironment() : requestLocation())} />
         <Suspense fallback={<section className="workspace view-loading" aria-live="polite"><span className="section-kicker">LOADING</span><h2>Opening your workspace…</h2></section>}>
           <div className="view-key">
-            {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={finance} onToggleTask={(id) => void toggleTask(id)} onNavigate={navigate} />}
+            {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={finance} onToggleTask={(id) => void toggleTask(id)} onNavigate={navigate} timezone={environment.location?.timezone} />}
             {activeView === 'schedule' && <ScheduleView schedule={schedule} onScheduleChange={handleScheduleChange} demoMode={!userId} />}
             {activeView === 'tasks' && <TasksView tasks={tasks} onSaveTask={saveTask} onToggleTask={(id) => void toggleTask(id)} onDeleteTask={(id) => void deleteTask(id)} />}
             {activeView === 'finance' && <FinanceView finance={finance} budgets={budgets} onSaveFinance={saveFinance} onDeleteFinance={(id) => void deleteFinance(id)} onSaveBudget={saveBudget} onDeleteBudget={(id) => void deleteBudget(id)} />}

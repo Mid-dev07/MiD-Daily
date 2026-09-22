@@ -17,6 +17,15 @@ const uiSystem = readFileSync(join(srcDir, 'styles/ui-system.css'), 'utf8')
 const tokens = readFileSync(join(srcDir, 'styles/tokens.css'), 'utf8')
 const dashboard = readFileSync(join(srcDir, 'features/dashboard/DashboardView.tsx'), 'utf8')
 const modalCandidates = tsxFiles.filter((file) => /role="dialog"[\s\S]{0,240}aria-modal="true"/.test(readFileSync(file, 'utf8')))
+const environmentFiles = [
+  'environment/types.ts',
+  'environment/astronomy.ts',
+  'environment/weather.ts',
+  'environment/location.ts',
+  'environment/visual.ts',
+  'environment/useEnvironment.ts',
+  'environment/EnvironmentScene.tsx',
+]
 
 const failures = []
 
@@ -31,6 +40,22 @@ if (!/--font-ui\s*:/.test(tokens) || !/--font-display\s*:/.test(tokens) || !/--e
 }
 if (!/FeatureLandscape/.test(dashboard) || !/<FeatureLandscape/.test(dashboard)) {
   failures.push('Dashboard signature FeatureLandscape must remain wired into DashboardView.')
+}
+if (!tsxFiles.some((file) => file.endsWith('app/App.tsx') && /useEnvironment/.test(readFileSync(file, 'utf8')) && /EnvironmentScene/.test(readFileSync(file, 'utf8')))) {
+  failures.push('Living environment must be wired into the application shell.')
+}
+const missingEnvironmentFiles = environmentFiles.filter((relative) => !existsSync(join(srcDir, relative)))
+if (missingEnvironmentFiles.length) {
+  for (const relative of missingEnvironmentFiles) failures.push('Missing environment foundation file: ' + relative)
+} else {
+  const environmentHook = readFileSync(join(srcDir, 'environment/useEnvironment.ts'), 'utf8')
+  if (!environmentHook.includes('60_000') || !environmentHook.includes('visibilitychange')) {
+    failures.push('Environment updates must remain minute-scale and visibility-aware.')
+  }
+  const weatherSource = readFileSync(join(srcDir, 'environment/weather.ts'), 'utf8')
+  if (!weatherSource.includes('15 * 60 * 1000') || !weatherSource.includes('api.open-meteo.com')) {
+    failures.push('Weather service must keep a bounded cache and use the documented Open-Meteo endpoint.')
+  }
 }
 if (!/@media\s*\(prefers-reduced-motion:\s*reduce\)/.test(uiSystem) && !cssFiles.some((file) => /prefers-reduced-motion:\s*reduce/.test(readFileSync(file, 'utf8')))) {
   failures.push('A reduced-motion media query must exist in active frontend CSS.')

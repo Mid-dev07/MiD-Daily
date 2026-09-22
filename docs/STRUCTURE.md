@@ -20,6 +20,7 @@ frontend/src/
 │   │   └── ScheduleView.tsx
 │   └── tasks/
 ├── lib/                     # Generic utilities
+├── environment/             # Time, location, astronomy, weather, and environment rendering
 ├── styles/                  # Tokens, global styles, app styles
 └── types/                   # Shared application types
 ```
@@ -44,3 +45,10 @@ Schedule owns event intent, recurrence, and reminder intent. Native notification
 - `features/schedule/hooks/`: Schedule-side orchestration hooks.
 - `integrations/notifications/`: provider-specific notification adapters and service worker registration.
 - `public/sw.js`: browser service worker used for notification presentation.
+
+
+## UNREAL Living Environment
+
+The `environment/` directory is the canonical home for MiD-Daily's procedural environmental system. It owns location permission flow, weather fetching/cache, local solar/lunar calculations, visual-state mapping, and the environment renderer. The system is intentionally dependency-free and must remain secondary to application content.
+
+See `docs/UNREAL_LIVING_ENVIRONMENT.md` for the behavioral, privacy, performance, and QA contract.
