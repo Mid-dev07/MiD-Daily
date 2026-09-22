@@ -3439,7 +3439,6 @@ textarea:focus {
 .view-key > .workspace .content-card,
 .view-key > .workspace .glass-panel {
   position: relative;
-  overflow: clip;
   box-shadow:
     inset 0 1px 0 var(--spec-highlight),
     0 18px 46px -38px var(--ao-shadow);
@@ -3450,16 +3449,6 @@ textarea:focus {
     transform 220ms var(--ease-spring);
 }
 
-.view-key > .workspace .content-card::after,
-.view-key > .workspace .glass-panel::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: .48;
-  background:
-    linear-gradient(var(--light-angle), rgba(255,250,225,.022), transparent 19%, transparent 74%, rgba(0,0,0,.045));
-}
 
 .view-key > .workspace .content-card:hover {
   border-color: rgba(226,235,216,.15);
