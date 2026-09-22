@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase, supabaseConfigured } from '../../lib/supabase'
+import { checkPasswordExposure } from '../../lib/api'
 
 interface AuthContextValue {
   configured: boolean
@@ -63,6 +64,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
     },
     signUp: async (email, password) => {
       if (!supabase) return { error: 'Authentication is not configured.', needsConfirmation: false }
+      try {
+        await checkPasswordExposure(password)
+      } catch (reason) {
+        return { error: reason instanceof Error ? reason.message : 'Password security check is unavailable. Please try again.', needsConfirmation: false }
+      }
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -90,6 +96,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
     },
     updatePassword: async (password) => {
       if (!supabase) return 'Authentication is not configured.'
+      try {
+        await checkPasswordExposure(password)
+      } catch (reason) {
+        return reason instanceof Error ? reason.message : 'Password security check is unavailable. Please try again.'
+      }
       const { error } = await supabase.auth.updateUser({ password })
       return error?.message ?? null
     },
