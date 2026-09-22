@@ -70,7 +70,10 @@ export function SocialAnalyticsView() {
             <div className="social-setup-panel">
               <strong>Provider setup</strong>
               <span>MiD-Daily is ready for a server-side Instagram access token. Configure <code>INSTAGRAM_ACCESS_TOKEN</code>, <code>INSTAGRAM_GRAPH_VERSION</code>, and <code>INSTAGRAM_ACCOUNT_ID</code>.</span>
-              <a href="https://developers.facebook.com/docs/instagram-platform/" target="_blank" rel="noreferrer">Open Meta Instagram Platform docs ↗</a>
+              <div className="integration-actions">
+                <button className="secondary-button" type="button" onClick={() => window.open('https://developers.facebook.com/apps/', '_blank', 'noopener,noreferrer')}>Open Instagram setup</button>
+                <a href="https://developers.facebook.com/docs/instagram-platform/" target="_blank" rel="noreferrer">Read Meta Instagram Platform docs ↗</a>
+              </div>
             </div>
           </>
         )}
