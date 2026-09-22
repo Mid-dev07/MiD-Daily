@@ -97,6 +97,12 @@
 - [ ] Verify the same Assistant/tool permission boundaries apply from Telegram.
 - [ ] Assistant can read active habit context without receiving habit write tools.
 
+## Gate L1 — Command Center
+- [ ] Global Search opens with Ctrl/Cmd+K, focuses input, closes with Escape, and navigates to Task/Finance/Schedule results.
+- [ ] Notification Center shows actionable attention items, supports per-item dismissal, and persists dismissals per user.
+- [ ] Notification timing refreshes without idle polling storms.
+- [ ] Focus Mode can select an open task, start/pause/reset a 25-minute session, and mark the task complete.
+
 ## Gate L — UX and reliability
 - [ ] Dashboard remains usable at desktop, tablet, and mobile widths.
 - [ ] Mobile navigation remains reachable while scrolling.
