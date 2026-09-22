@@ -674,12 +674,12 @@ async function runWorkersAi(
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round += 1) {
     const rawResponse = await ai.run(WORKERS_AI_MODEL, {
+      // Keep the Workers AI binding payload deliberately minimal. The
+      // documented traditional function-calling contract only requires
+      // messages and tools; optional OpenAI-compatibility fields can be
+      // model-specific and may trigger 8001 validation errors.
       messages: modelMessages,
       tools,
-      tool_choice: 'auto',
-      temperature: 0.2,
-      store: false,
-      user: userId,
     })
 
     const calls = assistantToolCalls(rawResponse)
