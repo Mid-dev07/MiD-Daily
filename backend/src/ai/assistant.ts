@@ -1,4 +1,4 @@
-import { createFinance, createFinanceBudget, createTask, listFinance, listFinanceBudgets, listTasks } from '../dataStore.js'
+import { createFinance, createFinanceBudget, createTask, listFinance, listFinanceBudgets, listTasks, listHabits, listHabitLogs } from '../dataStore.js'
 import { createSchedule, listSchedule, type ScheduleRecord } from '../scheduleStore.js'
 
 
@@ -22,6 +22,8 @@ type AssistantDataRuntime = {
   createFinanceBudget: typeof createFinanceBudget
   createSchedule: typeof createSchedule
   listSchedule: typeof listSchedule
+  listHabits: typeof listHabits
+  listHabitLogs: typeof listHabitLogs
 }
 
 const defaultAssistantDataRuntime: AssistantDataRuntime = {
@@ -33,6 +35,8 @@ const defaultAssistantDataRuntime: AssistantDataRuntime = {
   createFinanceBudget,
   createSchedule,
   listSchedule,
+  listHabits,
+  listHabitLogs,
 }
 
 let assistantDataRuntime: AssistantDataRuntime = { ...defaultAssistantDataRuntime }
@@ -90,6 +94,18 @@ const baseTools = [
         endDate: { type: 'string', description: 'ISO date YYYY-MM-DD, same or after startDate.' },
       },
       required: ['startDate', 'endDate'],
+      additionalProperties: false,
+    },
+    strict: true,
+  },
+  {
+    type: 'function' as const,
+    name: 'get_habits',
+    description: 'Read active habits and their completion log for the last 7 days. Use this when the user asks about routines, habit consistency, or today habit progress.',
+    parameters: {
+      type: 'object',
+      properties: {},
+      required: [],
       additionalProperties: false,
     },
     strict: true,
@@ -373,6 +389,32 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
         deadline: item.activityDeadline ?? null,
       }))
     return { startDate, endDate, fixed, flexible }
+  }
+
+  if (name === 'get_habits') {
+    const today = todayInTimeZone()
+    const startDate = new Date(today + 'T00:00:00Z')
+    startDate.setUTCDate(startDate.getUTCDate() - 6)
+    const start = startDate.toISOString().slice(0, 10)
+    const [habits, logs] = await Promise.all([
+      assistantDataRuntime.listHabits(userId),
+      assistantDataRuntime.listHabitLogs(userId, start, today),
+    ])
+    const logMap = new Map<number, string[]>()
+    for (const log of logs) {
+      const dates = logMap.get(log.habitId) ?? []
+      dates.push(log.date)
+      logMap.set(log.habitId, dates)
+    }
+    return {
+      startDate: start,
+      endDate: today,
+      items: habits.slice(0, MAX_ITEMS).map((habit) => ({
+        name: habit.name,
+        targetDays: habit.targetDays,
+        completedDates: logMap.get(habit.id) ?? [],
+      })),
+    }
   }
 
   if (name === 'get_active_budgets') {
