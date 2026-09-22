@@ -14,6 +14,7 @@ const navigation: Array<{ id: View; label: string; icon: string }> = [
   { id: 'assistant', label: 'Assistant', icon: '✦' },
   { id: 'profile', label: 'Profile', icon: '●' },
   { id: 'insights', label: 'Insights', icon: '↗' },
+  { id: 'habits', label: 'Habits', icon: '◉' },
 ]
 
 export function Sidebar({ activeView, onNavigate }: SidebarProps) {
