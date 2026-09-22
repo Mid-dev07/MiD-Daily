@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FinanceEntry, Task, View } from '../../types'
-import type { ScheduleItem } from '../schedule/schedule.types'
-import { scheduleOccursOnDate } from '../schedule/schedule.date'
+import type { ScheduleItem } from '../../features/schedule/schedule.types'
+import { scheduleOccursOnDate } from '../../features/schedule/schedule.date'
 import { currency, formatDate } from '../../lib/format'
 
 interface GlobalSearchProps {
