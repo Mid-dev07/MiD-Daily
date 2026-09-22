@@ -673,7 +673,16 @@ function asyncHttpError(status: number, message: string) {
   return httpError(status, message)
 }
 
+type AuthenticatedUserResolver = (req: IncomingMessage) => Promise<string>
+let authenticatedUserResolver: AuthenticatedUserResolver | null = null
+
+export function configureAuthenticatedUserResolver(resolver: AuthenticatedUserResolver | null | undefined) {
+  authenticatedUserResolver = resolver ?? null
+}
+
 async function requireAuthenticatedUserId(req: IncomingMessage) {
+  if (authenticatedUserResolver) return authenticatedUserResolver(req)
+
   const authorization = req.headers.authorization
   if (!authorization?.startsWith('Bearer ')) throw asyncHttpError(401, 'Authentication is required.')
   if (!supabaseAuthClient) throw asyncHttpError(503, 'Supabase Auth is not configured.')
