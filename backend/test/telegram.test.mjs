@@ -18,6 +18,13 @@ test('parseCommand accepts bot username suffix', () => {
   })
 })
 
+test('parseCommand supports the AI command', () => {
+  assert.deepEqual(telegram.parseCommand('/ai What do I have today?'), {
+    command: 'ai',
+    args: 'What do I have today?',
+  })
+})
+
 test('parseCommand rejects ordinary text', () => {
   assert.equal(telegram.parseCommand('hello'), null)
 })
