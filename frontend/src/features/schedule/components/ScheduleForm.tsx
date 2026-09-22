@@ -214,10 +214,18 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
             </>
           )}
 
-          <label>Location<input disabled={saving} value={draft.location} onChange={(e) => setField('location', e.target.value)} placeholder="Optional" maxLength={200} /></label>
-          <label>Notes<textarea disabled={saving} value={draft.notes} onChange={(e) => setField('notes', e.target.value)} rows={3} placeholder="Optional notes" maxLength={5000} /></label>
+          <details className="form-disclosure">
+            <summary>
+              <span>More details</span>
+              <span className="form-disclosure-hint">location · notes</span>
+            </summary>
+            <div className="form-disclosure-body">
+              <label>Location<input disabled={saving} value={draft.location} onChange={(e) => setField('location', e.target.value)} placeholder="Optional" maxLength={200} /></label>
+              <label>Notes<textarea disabled={saving} value={draft.notes} onChange={(e) => setField('notes', e.target.value)} rows={3} placeholder="Optional notes" maxLength={5000} /></label>
+            </div>
+          </details>
 
-          {error && <div className="form-error" role="alert">{error}</div>}
+          {error && <div className="form-error" role="alert">          </div>}
           <div className="modal-actions"><button className="secondary-button" disabled={saving} type="button" onClick={onClose}>Cancel</button><button className="primary-button" disabled={saving} type="submit">{saving ? 'Saving…' : initialItem ? 'Save changes' : 'Add activity'}</button></div>
         </form>
       </section>
