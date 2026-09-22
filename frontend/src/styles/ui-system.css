@@ -32,7 +32,6 @@ button, input, select, textarea { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 
 body {
-  font-family: var(--ui-font-ui);
   min-width: 320px;
   background:
     radial-gradient(circle at 82% 0%, rgba(113,136,94,.08), transparent 28rem),
