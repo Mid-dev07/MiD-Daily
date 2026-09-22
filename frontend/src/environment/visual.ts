@@ -31,7 +31,7 @@ export function environmentCssVariables(environment: EnvironmentState): CSSPrope
     '--env-star-opacity': String(environment.visual.starOpacity),
     '--env-sun-opacity': String(environment.visual.sunOpacity),
     '--env-moon-opacity': String(environment.visual.moonOpacity),
-  }
+  } as CSSProperties
 }
 
 export function environmentLabel(environment: EnvironmentState) {
