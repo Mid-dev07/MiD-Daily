@@ -24,7 +24,7 @@ M2.6 establishes the Calendar integration boundary and a safe connection + one-w
 `supabase/migrations/20260920000000_create_google_calendar_connections.sql` creates the protected connection table.
 
 The table has:
-- `owner_id`: opaque browser owner key for the current pre-Auth stage
+- `owner_id`: legacy browser-owner key retained for compatibility
 - `encrypted_token`: encrypted OAuth token payload
 - `connected_at`
 - `updated_at`
@@ -33,9 +33,9 @@ RLS is enabled, access for `anon` and `authenticated` is revoked, and backend ad
 
 ### Important ownership limitation
 
-The current `owner_id` is intentionally an opaque browser-session identity, not a real application account. It gives us a persistent one-browser-to-one-Google-connection boundary while Auth is still pending.
+The current backend now supports authenticated user ownership through `user_id`. The legacy `owner_id` column remains for backward compatibility with earlier records, while new calendar connections are bound to the authenticated Supabase user.
 
-When MiD-Daily Auth is introduced, `owner_id` must be replaced or linked to the authenticated `user_id`, and all Schedule/Task/Finance resources must use the same user ownership chain.
+Calendar, Schedule, Task, and Finance resources should continue to use the authenticated Supabase `user_id` ownership chain. Do not reintroduce browser-session ownership for new records.
 
 ### Required environment
 
@@ -65,6 +65,7 @@ Never commit the resulting key.
 
 1. Create a Supabase project.
 2. Apply the migration under `supabase/migrations/`.
+3. Ensure Supabase Auth is configured for the deployment and leaked-password protection is enabled in the Auth settings.
 3. Copy `backend/.env.example` to `backend/.env`.
 4. Fill the Google OAuth credentials and Supabase values.
 5. Generate `TOKEN_ENCRYPTION_KEY_B64`.
@@ -74,7 +75,7 @@ Never commit the resulting key.
 
 ### Deployment note
 
-The current storage design is for a single backend service and is already persistent across process restarts because the token record lives in Supabase. It is not yet the final multi-user authorization model. Before public multi-user deployment, Auth must provide the user identity and calendar records must be bound to that user.
+The storage design is persistent across process restarts because token records live in Supabase. Calendar connections are now user-scoped through authenticated `user_id`; service-role access remains backend-only.
 
 ### Next step
 
