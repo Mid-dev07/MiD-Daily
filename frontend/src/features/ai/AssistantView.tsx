@@ -203,6 +203,30 @@ export function AssistantView() {
         </div>
       </section>
 
+      <section className="content-card planner-shortcuts-card">
+        <div className="card-heading">
+          <div>
+            <span className="section-kicker">PLANNER</span>
+            <h3>Start with a planning brief</h3>
+          </div>
+          <span className="card-meta">read-only until you enable actions</span>
+        </div>
+        <div className="planner-shortcuts">
+          <button className="planner-shortcut" type="button" onClick={() => setInput('Plan my day using my schedule, open tasks, deadlines, and flexible plans. Suggest a realistic order and point out conflicts.')}>
+            <strong>Plan today</strong>
+            <span>Build a practical focus sequence.</span>
+          </button>
+          <button className="planner-shortcut" type="button" onClick={() => setInput('Plan tomorrow using my existing calendar, open tasks, deadlines, and flexible plans. Suggest time blocks without creating anything yet.')}>
+            <strong>Plan tomorrow</strong>
+            <span>Prepare before the next day starts.</span>
+          </button>
+          <button className="planner-shortcut" type="button" onClick={() => setInput('Find the best available focus block in my next 3 days for the most urgent open task. Do not create anything.')}>
+            <strong>Find a focus block</strong>
+            <span>Use existing schedule constraints.</span>
+          </button>
+        </div>
+      </section>
+
       <section className="content-card ai-shell-card">
         <div className="ai-toolbar">
           <label className="ai-action-toggle">
