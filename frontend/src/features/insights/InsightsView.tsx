@@ -68,7 +68,7 @@ export function InsightsView({ tasks, schedule, finance, onNavigate }: InsightsV
       <div className="page-intro">
         <div>
           <span className="section-kicker">INSIGHTS</span>
-          <h2>Weekly review</h2>
+          <h2>Weekly snapshot</h2>
           <p>See your current workload, upcoming schedule, and finance context without pretending we have history we do not store.</p>
         </div>
         <button className="primary-button" type="button" onClick={() => onNavigate('assistant')}>Review with Assistant</button>
@@ -78,13 +78,13 @@ export function InsightsView({ tasks, schedule, finance, onNavigate }: InsightsV
         <article className="content-card insights-metric"><span>Task completion</span><strong>{tasks.length ? Math.round((completedTasks.length / tasks.length) * 100) : 0}%</strong><small>{completedTasks.length} done · {openTasks.length} open</small></article>
         <article className="content-card insights-metric"><span>Focus load</span><strong>{Math.round(fixedMinutes / 60 * 10) / 10}h</strong><small>fixed schedule in next 7 days</small></article>
         <article className="content-card insights-metric"><span>Near deadlines</span><strong>{dueSoon.length}</strong><small>{overdueTasks.length} overdue right now</small></article>
-        <article className="content-card insights-metric"><span>Finance window</span><strong className={windowExpense > windowIncome ? 'amount-negative' : 'amount-positive'}>{currency.format(windowIncome - windowExpense)}</strong><small>net recorded entries in the last 7 days</small></article>
+        <article className="content-card insights-metric"><span>7-day net</span><strong className={windowExpense > windowIncome ? 'amount-negative' : 'amount-positive'}>{currency.format(windowIncome - windowExpense)}</strong><small>recorded income minus expenses</small></article>
       </section>
 
       <div className="insights-grid">
         <section className="content-card">
           <div className="card-heading">
-            <div><span className="section-kicker">REVIEW</span><h3>What deserves attention</h3></div>
+            <div><span className="section-kicker">SIGNALS</span><h3>What deserves attention</h3></div>
             <button className="text-button" type="button" onClick={() => onNavigate('tasks')}>Open tasks</button>
           </div>
           <div className="review-note-list">
