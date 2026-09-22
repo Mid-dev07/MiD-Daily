@@ -12,7 +12,8 @@ interface DashboardViewProps {
   onNavigate: (view: View) => void
 }
 
-const getToday = () => new Intl.DateTimeFormat('sv-SE').format(new Date())
+const APP_TIMEZONE = 'Asia/Jakarta'
+const getToday = () => new Intl.DateTimeFormat('sv-SE', { timeZone: APP_TIMEZONE }).format(new Date())
 
 const TelegramIntegrationCard = lazy(() => import('./components/TelegramIntegrationCard').then((module) => ({ default: module.TelegramIntegrationCard })))
 const WhatsAppIntegrationCard = lazy(() => import('./components/WhatsAppIntegrationCard').then((module) => ({ default: module.WhatsAppIntegrationCard })))
@@ -59,7 +60,8 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
     .sort((a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? ''))
     .slice(0, 3), [tasks, today])
 
-  const currentMinutes = now.getHours() * 60 + now.getMinutes()
+  const nowParts = new Intl.DateTimeFormat('en-GB', { timeZone: APP_TIMEZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(now)
+  const currentMinutes = Number(nowParts.find((part) => part.type === 'hour')?.value ?? 0) * 60 + Number(nowParts.find((part) => part.type === 'minute')?.value ?? 0)
   const currentSchedule = todaySchedule.find((item) => {
     const start = Number(item.startTime.slice(0, 2)) * 60 + Number(item.startTime.slice(3, 5))
     const end = Number(item.endTime.slice(0, 2)) * 60 + Number(item.endTime.slice(3, 5))
@@ -95,7 +97,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
     month: 'short',
   })
 
-  const currentTimeLabel = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now)
+  const currentTimeLabel = new Intl.DateTimeFormat('id-ID', { timeZone: APP_TIMEZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now)
 
   return (
     <section className="workspace dashboard-page page-enter">
