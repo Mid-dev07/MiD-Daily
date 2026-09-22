@@ -60,12 +60,6 @@
 - [ ] Data remains isolated per authenticated user.
 - [ ] Refresh rehydrates remote data correctly.
 
-## Gate J — Productivity layer
-- [ ] Quick Capture creates only the explicitly requested Task, Expense, or Schedule item.
-- [ ] Quick Capture explains missing/ambiguous information without creating data.
-- [ ] Daily Briefing reflects current tasks, schedule, near deadlines, and today's spending.
-- [ ] Assistant planner shortcuts remain read-only until action permission is explicitly enabled.
-
 ## Gate G — Google Calendar
 - [ ] Connect Google Calendar.
 - [ ] Sync a Schedule item.
@@ -124,6 +118,17 @@
 - Total generated CSS must remain below 18 KiB gzip.
 - Optional provider UI must remain code-split from the initial Dashboard route.
 - Continuous polling in the idle shell should be avoided unless the feature explicitly requires it.
+
+## Final hardening evidence — 2026-09-22
+- ✅ Main CI completed successfully for merge commit `cbeea8083407273ad5e52fe6ed11f3f250026af7`.
+- ✅ Production frontend/backend deployment and smoke tests completed successfully for that release.
+- ✅ Supabase public-schema RLS is enabled, user-owned CRUD policies use `auth.uid()`, integration tables are client-denied, and profile avatar storage is owner-restricted.
+- ⚠️ Supabase security advisor still reports native leaked-password protection as disabled; the application-level password exposure proxy remains part of the production smoke test.
+- ℹ️ Supabase performance advisor currently reports 12 unused-index INFO findings; no destructive index changes were made solely from those advisories.
+- ✅ Final hardening branch adds a regression gate for modal behavior, canonical tokens, reduced motion, legacy CSS removal, and persistent-blur avoidance.
+- ✅ Final hardening branch standardizes Escape, scroll locking, focus trapping, and focus restoration for true modal dialogs.
+- ⚠️ Pixel-level browser visual inspection is not available in this execution environment; automated build, static QA, backend tests, Worker dry-run, and production smoke checks are the authoritative automated gates.
+- ⚠️ Credentialed end-user flows (email registration/recovery, Google OAuth, Telegram/Google Calendar interactive consent) require an interactive test account/session and are not fabricated here.
 
 ## Final state
 Do not call the release final until every applicable production gate passes. Deferred providers may remain unconfigured when they are explicitly out of scope for the current release, but the UI must state that boundary clearly. Core features and every in-scope integration must be operational. For Telegram AI, both the explicit `/ai` command and ordinary messages should use the shared Assistant gateway.
