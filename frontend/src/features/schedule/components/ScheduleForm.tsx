@@ -225,7 +225,7 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
             </div>
           </details>
 
-          {error && <div className="form-error" role="alert">          </div>}
+          {error && <div className="form-error" role="alert">{error}</div>}
           <div className="modal-actions"><button className="secondary-button" disabled={saving} type="button" onClick={onClose}>Cancel</button><button className="primary-button" disabled={saving} type="submit">{saving ? 'Saving…' : initialItem ? 'Save changes' : 'Add activity'}</button></div>
         </form>
       </section>
