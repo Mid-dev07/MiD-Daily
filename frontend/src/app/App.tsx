@@ -12,6 +12,7 @@ const SocialAnalyticsView = lazy(() => import('../features/social/SocialAnalytic
 const AssistantView = lazy(() => import('../features/ai/AssistantView').then((module) => ({ default: module.AssistantView })))
 const ProfileView = lazy(() => import('../features/profile/ProfileView').then((module) => ({ default: module.ProfileView })))
 const InsightsView = lazy(() => import('../features/insights/InsightsView').then((module) => ({ default: module.InsightsView })))
+const HabitsView = lazy(() => import('../features/habits/HabitsView').then((module) => ({ default: module.HabitsView })))
 import { normalizeTaskList } from '../features/tasks/task.migration'
 import { validateTaskDraft } from '../features/tasks/task.validation'
 import { createRemoteTask, updateRemoteTask, deleteRemoteTask } from '../features/tasks/tasksApi'
@@ -386,6 +387,7 @@ export function App() {
               </section>
             ))}
             {activeView === 'insights' && <InsightsView tasks={tasks} schedule={schedule} finance={finance} onNavigate={navigate} />}
+            {activeView === 'habits' && <HabitsView />}
           </div>
         </Suspense>
       </main>
