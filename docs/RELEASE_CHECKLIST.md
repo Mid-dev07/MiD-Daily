@@ -56,16 +56,12 @@
 - [ ] Verify supported commands.
 - [ ] Verify duplicate delivery does not duplicate writes.
 
-## Gate H — WhatsApp
-- [ ] Configure Cloud API credentials.
-- [ ] Register the production webhook.
-- [ ] Complete account linking.
-- [ ] Verify supported commands.
-- [ ] Verify duplicate-event handling.
-- [ ] Verify invalid signatures/challenges are rejected.
+## Gate H — WhatsApp (deferred)
+- [ ] Not applicable to the current production scope.
+- WhatsApp is intentionally skipped; do not treat missing WhatsApp credentials as a release failure.
 
 ## Gate I — Assistant
-- [ ] Configure the backend OpenAI key.
+- [ ] Verify the Cloudflare Workers AI binding is available in production.
 - [ ] Test read-only schedule/task/expense queries.
 - [ ] Confirm writes are unavailable in read-only mode.
 - [ ] Enable actions explicitly.
@@ -95,4 +91,4 @@
 - Continuous polling in the idle shell should be avoided unless the feature explicitly requires it.
 
 ## Final state
-Do not call the release final until every applicable production gate passes. Optional provider features may remain disabled when credentials or provider approval are unavailable, but the UI must state that boundary clearly.
+Do not call the release final until every applicable production gate passes. Deferred providers may remain unconfigured when they are explicitly out of scope for the current release, but the UI must state that boundary clearly. Core features and every in-scope integration must be operational.
