@@ -49,7 +49,7 @@ const appSource = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
 if (!/nav-index/.test(sidebarSource) || !/index: '001'/.test(sidebarSource) || !/index: '009'/.test(sidebarSource)) {
   failures.push('Field-guide navigation must keep explicit navigation indices.')
 }
-if (!/useRef\(null\)/.test(sidebarSource) || !/scrollIntoView/.test(sidebarSource)) {
+if (!/useRef(?:<[^>]+>)?\(null\)/.test(sidebarSource) || !/scrollIntoView/.test(sidebarSource)) {
   failures.push('Active field-guide navigation should remain discoverable when the mobile rail scrolls horizontally.')
 }
 if (!/grid-auto-flow:\s*column/.test(uiSystem) || !/grid-auto-columns:\s*minmax\(68px,\s*78px\)/.test(uiSystem) || !/overflow-x:\s*auto/.test(uiSystem)) {
