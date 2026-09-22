@@ -25,7 +25,7 @@ import {
   updateTask,
 } from './dataStore.js'
 import { claimTelegramUpdate, createTelegramLinkCode, deleteTelegramConnectionByUserId, getTelegramConnectionByChatId, getTelegramConnectionByUserId, redeemTelegramLinkCode, isTelegramPersistenceConfigured } from './integrations/telegramStore.js'
-import { isTelegramConfigured, parseCommand, sendTelegramMessage, verifyWebhookSecret } from './integrations/telegram.js'
+import { isTelegramConfigured, parseCommand, sendTelegramMessage, setTelegramWebhook, verifyWebhookSecret } from './integrations/telegram.js'
 import { dispatchNaturalLanguageMessage } from './integrations/gateway.js'
 import { getAccountInsights, getAccountProfile, isInstagramAnalyticsConfigured, normalizeAccountInsights } from './integrations/instagramAnalytics.js'
 import { getWhatsAppConfig, isWhatsAppConfigured, parseWhatsAppCommand, sendWhatsAppText, verifyWebhookChallenge, verifyWhatsAppSignature, buildWhatsAppUpdateHash } from './integrations/whatsapp.js'
@@ -1504,6 +1504,16 @@ async function handleTelegramLinkCode(req: IncomingMessage, res: ServerResponse)
   if (!isTelegramConfigured() || !isTelegramPersistenceConfigured()) {
     throw httpError(503, 'Telegram integration is not configured.')
   }
+
+  // Keep the Telegram integration self-healing: every connection attempt
+  // also ensures Telegram is pointing at the current production webhook.
+  try {
+    await setTelegramWebhook()
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Telegram webhook setup failed.'
+    throw httpError(503, message)
+  }
+
   const link = await createTelegramLinkCode(userId, process.env.TELEGRAM_BOT_USERNAME ?? '')
   sendJson(res, 200, link)
 }
