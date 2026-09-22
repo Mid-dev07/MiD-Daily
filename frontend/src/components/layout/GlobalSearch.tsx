@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useModalBehavior } from '../../lib/useModalBehavior'
 import type { FinanceEntry, Task, View } from '../../types'
 import type { ScheduleItem } from '../../features/schedule/schedule.types'
 import { scheduleOccursOnDate } from '../../features/schedule/schedule.date'
@@ -28,17 +29,9 @@ function today() {
 
 export function GlobalSearch({ tasks, finance, schedule, onNavigate, onClose }: GlobalSearchProps) {
   const [query, setQuery] = useState('')
-  const inputRef = useRef<HTMLInputElement>(null)
   const todayValue = today()
 
-  useEffect(() => {
-    inputRef.current?.focus()
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', handleEscape)
-    return () => window.removeEventListener('keydown', handleEscape)
-  }, [onClose])
+  const dialogRef = useModalBehavior(true, onClose)
 
   const results = useMemo<SearchResult[]>(() => {
     const normalized = query.trim().toLowerCase()
@@ -116,7 +109,7 @@ export function GlobalSearch({ tasks, finance, schedule, onNavigate, onClose }: 
     <div className="modal-backdrop search-backdrop" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget) onClose()
     }}>
-      <section className="global-search-dialog" role="dialog" aria-modal="true" aria-labelledby="global-search-title">
+      <section ref={dialogRef} className="global-search-dialog" role="dialog" aria-modal="true" aria-labelledby="global-search-title">
         <div className="global-search-header">
           <div>
             <span className="section-kicker">COMMAND CENTER</span>
