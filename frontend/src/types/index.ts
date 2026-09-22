@@ -1,4 +1,15 @@
-export type View = 'dashboard' | 'schedule' | 'tasks' | 'finance' | 'social' | 'assistant'
+export type View = 'dashboard' | 'schedule' | 'tasks' | 'finance' | 'social' | 'assistant' | 'profile'
+
+export interface Profile {
+  userId: string
+  displayName: string
+  username: string
+  bio: string
+  avatarPath: string | null
+  avatarUrl: string | null
+  createdAt: string
+  updatedAt: string
+}
 
 export type TaskStatus = 'todo' | 'in-progress' | 'done'
 export type TaskPriority = 'low' | 'medium' | 'high'
