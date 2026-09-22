@@ -115,10 +115,6 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
         <button className="primary-button" type="button" onClick={() => onNavigate('schedule')}>Open schedule</button>
       </div>
 
-      <Suspense fallback={null}>
-        <FeatureLandscape activeView="dashboard" onNavigate={onNavigate} />
-      </Suspense>
-
       <section className="dashboard-signal-grid" aria-label="Daily overview">
         <article className="dashboard-signal-card">
           <span>Now</span>
@@ -148,6 +144,10 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
         </article>
       </section>
 
+      <Suspense fallback={null}>
+        <FeatureLandscape activeView="dashboard" onNavigate={onNavigate} />
+      </Suspense>
+
       <div className="dashboard-overview">
         <section className="content-card dashboard-agenda">
           <div className="card-heading">
@@ -156,11 +156,6 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
               <h3>Agenda</h3>
             </div>
             <span className="card-meta">{todaySchedule.length} {todaySchedule.length === 1 ? 'activity' : 'activities'}</span>
-          </div>
-
-          <div className="dashboard-context">
-            <strong>{nextSchedule ? nextSchedule.startTime : '—'}</strong>
-            <span>{nextSchedule ? `Next: ${nextSchedule.title}` : 'No more scheduled today'}</span>
           </div>
 
           <div className="schedule-list">
@@ -226,32 +221,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
         <FocusMode tasks={tasks} onToggleTask={onToggleTask} />
       </Suspense>
 
-      <div className="dashboard-context-grid">
-        <section className="content-card dashboard-finance">
-          <div className="card-heading">
-            <div>
-              <span className="section-kicker">Finance</span>
-              <h3>This month</h3>
-            </div>
-            <button className="text-button" type="button" onClick={() => onNavigate('finance')}>Open finance</button>
-          </div>
-
-          <div className="dashboard-finance-values">
-            <div className="dashboard-finance-value">
-              <span>Income</span>
-              <strong className="amount-positive">{currency.format(monthIncome)}</strong>
-            </div>
-            <div className="dashboard-finance-value">
-              <span>Spent</span>
-              <strong className="amount-negative">{currency.format(monthExpense)}</strong>
-            </div>
-            <div className="dashboard-finance-value">
-              <span>Balance</span>
-              <strong className={monthBalance < 0 ? 'amount-negative' : 'amount-positive'}>{currency.format(monthBalance)}</strong>
-            </div>
-          </div>
-        </section>
-
+      <div className="dashboard-context-grid dashboard-secondary-grid">
         {flexiblePlans.length > 0 && (
           <section className="content-card dashboard-flexible">
             <div className="card-heading">
@@ -272,7 +242,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
           </section>
         )}
 
-        <section className="content-card dashboard-upcoming">
+        <section className="content-card dashboard-upcoming dashboard-secondary-upcoming">
           <div className="card-heading">
             <div>
               <span className="section-kicker">Next</span>
