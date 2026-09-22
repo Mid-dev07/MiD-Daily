@@ -117,8 +117,6 @@ jobs:
           test "$status" = "200"
           RESPONSE="$body" node -e 'const data=JSON.parse(process.env.RESPONSE); if (!data.ok || !data.authConfigured || !data.dataPersistenceConfigured || data.integrations?.ai !== true) process.exit(1); console.log("Integration readiness:", JSON.stringify(data.integrations ?? {}))'
           password_check=$(curl --fail --silent --show-error --location \
-            -H 'Content-Type: application/json' \
-            --data '{"hashPrefix":"5BAA6"}' \
-            https://mid-daily-api.e41262272.workers.dev/api/security/password-range)
+            https://mid-daily-api.e41262272.workers.dev/api/security/password-range/5BAA6)
           PASSWORD_CHECK="$password_check" node -e 'const data=JSON.parse(process.env.PASSWORD_CHECK); if (!data.ok || typeof data.suffixes !== "string" || !data.suffixes.includes("1E4C9B93F3F0682250B6CF8331B7EE68FD8:")) process.exit(1); console.log("Password exposure proxy smoke test passed.")'
           echo "Backend smoke test passed."

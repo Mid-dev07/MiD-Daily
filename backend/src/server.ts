@@ -400,9 +400,8 @@ async function readRequestJson(req: IncomingMessage) {
   })
 }
 
-async function handlePasswordExposureCheck(req: IncomingMessage, res: ServerResponse) {
-  const body = await readRequestJson(req)
-  const hashPrefix = typeof body.hashPrefix === 'string' ? body.hashPrefix.trim().toUpperCase() : ''
+async function handlePasswordExposureCheck(res: ServerResponse, url: URL) {
+  const hashPrefix = url.pathname.split('/').pop()?.trim().toUpperCase() ?? ''
 
   if (!/^[0-9A-F]{5}$/.test(hashPrefix)) {
     throw httpError(400, 'A valid 5-character SHA-1 hash prefix is required.')
@@ -1784,8 +1783,8 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
       return
     }
 
-    if (req.method === 'POST' && url.pathname === '/api/security/password-range') {
-      await handlePasswordExposureCheck(req, res)
+    if (req.method === 'GET' && url.pathname.startsWith('/api/security/password-range/')) {
+      await handlePasswordExposureCheck(res, url)
       return
     }
 
