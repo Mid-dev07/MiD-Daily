@@ -71,6 +71,14 @@ Use the publishable key only in the browser. Keep `SUPABASE_SECRET_KEY` server-s
 
 Password recovery uses Supabase Auth. The application never stores raw passwords.
 
+### Free leaked-password protection fallback
+
+Supabase's built-in leaked-password protection is a Pro Plan feature. MiD-Daily therefore uses a free fallback that checks new and recovery passwords against Have I Been Pwned's Pwned Passwords range API using k-anonymity.
+
+The browser computes the SHA-1 hash locally and sends only the first 5 hash characters to the MiD-Daily API. The backend forwards that prefix to HIBP with a documented application user-agent and returns the suffix list; the browser compares the remaining hash locally. The full password and complete hash are never sent to HIBP.
+
+The registration and password-recovery flows fail closed when this security check is unavailable, and compromised passwords are rejected before Supabase Auth receives them. This does not remove Supabase's platform-level security advisor warning; it is an application-level mitigation until the project uses a plan that supports Supabase's native setting.
+
 The current backend is intentionally lightweight and does not implement application-level rate limiting yet; deployment should place the API behind a provider/CDN rate limiter before exposing it publicly.
 
 ### Next step
