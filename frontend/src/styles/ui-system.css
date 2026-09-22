@@ -139,6 +139,15 @@ a { color: inherit; }
   background: var(--ui-accent);
 }
 
+.nav-index {
+  width: 22px;
+  flex: 0 0 22px;
+  color: rgba(226,235,216,.26);
+  font-size: 7px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .04em;
+}
+
 .nav-icon {
   width: 22px;
   color: var(--ui-accent);
@@ -1534,6 +1543,7 @@ textarea:focus {
     height: 2px;
   }
 
+  .nav-index { display: none; }
   .nav-icon { width: auto; font-size: 13px; }
 
   .main-content { padding-bottom: 0; }
