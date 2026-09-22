@@ -44,6 +44,20 @@ if (!/FeatureLandscape/.test(dashboard) || !/<FeatureLandscape/.test(dashboard))
 if (!tsxFiles.some((file) => file.endsWith('app/App.tsx') && /useEnvironment/.test(readFileSync(file, 'utf8')) && /EnvironmentScene/.test(readFileSync(file, 'utf8')))) {
   failures.push('Living environment must be wired into the application shell.')
 }
+const sidebarSource = readFileSync(join(srcDir, 'components/layout/Sidebar.tsx'), 'utf8')
+const appSource = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
+if (!/nav-index/.test(sidebarSource) || !/index: '001'/.test(sidebarSource)) {
+  failures.push('Field-guide navigation must keep explicit navigation indices.')
+}
+if (!/data-module=\{activeView\}/.test(appSource)) {
+  failures.push('Active module marker must remain wired to the view container.')
+}
+if (!/UNREAL Habitat Material System/.test(uiSystem)) {
+  failures.push('UNREAL habitat material system must remain present in the active UI stylesheet.')
+}
+if (!/environmentCssVariables/.test(readFileSync(join(srcDir, 'environment/visual.ts'), 'utf8'))) {
+  failures.push('Environment visual state must remain the source for live CSS variables.')
+}
 const missingEnvironmentFiles = environmentFiles.filter((relative) => !existsSync(join(srcDir, relative)))
 if (missingEnvironmentFiles.length) {
   for (const relative of missingEnvironmentFiles) failures.push('Missing environment foundation file: ' + relative)
