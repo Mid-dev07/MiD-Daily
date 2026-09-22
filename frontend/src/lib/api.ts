@@ -74,11 +74,7 @@ export async function checkPasswordExposure(password: string): Promise<void> {
   const hashSuffix = fullHash.slice(5)
 
   try {
-    const result = await apiRequest<{ ok: boolean; suffixes: string }>('/api/security/password-range', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ hashPrefix }),
-    })
+    const result = await apiRequest<{ ok: boolean; suffixes: string }>(`/api/security/password-range/${hashPrefix}`)
 
     const compromised = result.suffixes.split('\n').some((line) => {
       const [suffix, count] = line.trim().toUpperCase().split(':')
