@@ -23,6 +23,7 @@ function minutes(start: string, end: string) {
 export function InsightsView({ tasks, schedule, finance, onNavigate }: InsightsViewProps) {
   const date = today()
   const endDate = shiftDate(date, 6)
+  const financeStartDate = shiftDate(date, -6)
   const nextSevenDates = useMemo(() => Array.from({ length: 7 }, (_, index) => shiftDate(date, index)), [date])
 
   const openTasks = tasks.filter((task) => task.status !== 'done')
@@ -37,7 +38,7 @@ export function InsightsView({ tasks, schedule, finance, onNavigate }: InsightsV
   ), [nextSevenDates, schedule])
 
   const fixedMinutes = nextWeekSchedule.reduce((sum, entry) => sum + minutes(entry.item.startTime, entry.item.endTime), 0)
-  const expenseWindow = finance.filter((entry) => entry.date >= date && entry.date <= endDate)
+  const expenseWindow = finance.filter((entry) => entry.date >= financeStartDate && entry.date <= date)
   const windowExpense = expenseWindow.filter((entry) => entry.type === 'expense').reduce((sum, entry) => sum + entry.amount, 0)
   const windowIncome = expenseWindow.filter((entry) => entry.type === 'income').reduce((sum, entry) => sum + entry.amount, 0)
 
@@ -77,7 +78,7 @@ export function InsightsView({ tasks, schedule, finance, onNavigate }: InsightsV
         <article className="content-card insights-metric"><span>Task completion</span><strong>{tasks.length ? Math.round((completedTasks.length / tasks.length) * 100) : 0}%</strong><small>{completedTasks.length} done · {openTasks.length} open</small></article>
         <article className="content-card insights-metric"><span>Focus load</span><strong>{Math.round(fixedMinutes / 60 * 10) / 10}h</strong><small>fixed schedule in next 7 days</small></article>
         <article className="content-card insights-metric"><span>Near deadlines</span><strong>{dueSoon.length}</strong><small>{overdueTasks.length} overdue right now</small></article>
-        <article className="content-card insights-metric"><span>Finance window</span><strong className={windowExpense > windowIncome ? 'amount-negative' : 'amount-positive'}>{currency.format(windowIncome - windowExpense)}</strong><small>net entries in next 7 days of recorded data</small></article>
+        <article className="content-card insights-metric"><span>Finance window</span><strong className={windowExpense > windowIncome ? 'amount-negative' : 'amount-positive'}>{currency.format(windowIncome - windowExpense)}</strong><small>net recorded entries in the last 7 days</small></article>
       </section>
 
       <div className="insights-grid">
@@ -93,7 +94,7 @@ export function InsightsView({ tasks, schedule, finance, onNavigate }: InsightsV
 
         <section className="content-card">
           <div className="card-heading">
-            <div><span className="section-kicker">MONEY</span><h3>Recorded next 7 days</h3></div>
+            <div><span className="section-kicker">MONEY</span><h3>Recorded last 7 days</h3></div>
             <button className="text-button" type="button" onClick={() => onNavigate('finance')}>Open finance</button>
           </div>
           <div className="insights-finance-values">
