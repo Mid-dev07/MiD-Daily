@@ -10,6 +10,7 @@ const ScheduleView = lazy(() => import('../features/schedule/ScheduleView').then
 const TasksView = lazy(() => import('../features/tasks/TasksView').then((module) => ({ default: module.TasksView })))
 const SocialAnalyticsView = lazy(() => import('../features/social/SocialAnalyticsView').then((module) => ({ default: module.SocialAnalyticsView })))
 const AssistantView = lazy(() => import('../features/ai/AssistantView').then((module) => ({ default: module.AssistantView })))
+const ProfileView = lazy(() => import('../features/profile/ProfileView').then((module) => ({ default: module.ProfileView })))
 import { normalizeTaskList } from '../features/tasks/task.migration'
 import { validateTaskDraft } from '../features/tasks/task.validation'
 import { createRemoteTask, updateRemoteTask, deleteRemoteTask } from '../features/tasks/tasksApi'
@@ -28,7 +29,8 @@ import { hasCompletedRemoteSync, markRemoteSyncComplete } from '../lib/dataSync'
 import { useWorkspaceRealtime } from '../features/workspace/useWorkspaceRealtime'
 import { useAuth } from '../features/auth/AuthProvider'
 import { navigateToView, viewFromPath } from './routing'
-import type { FinanceBudget, FinanceBudgetDraft, FinanceDraft, FinanceEntry, Task, TaskDraft, View } from '../types'
+import { getProfile } from '../features/profile/profileApi'
+import type { FinanceBudget, FinanceBudgetDraft, FinanceDraft, FinanceEntry, Profile, Task, TaskDraft, View } from '../types'
 import type { ScheduleItem } from '../features/schedule/schedule.types'
 
 const TASK_STORAGE_KEY = 'mid-daily.tasks'
@@ -50,6 +52,8 @@ export function App() {
   const userId = user?.id
   const workspaceScope = userId ? userId : 'demo'
   const [activeView, setActiveView] = useState<View>(() => viewFromPath(window.location.pathname))
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [profileLoading, setProfileLoading] = useState(Boolean(userId))
 
   useEffect(() => {
     const handlePopState = () => setActiveView(viewFromPath(window.location.pathname))
@@ -61,6 +65,31 @@ export function App() {
     navigateToView(view)
     setActiveView(view)
   }
+
+  useEffect(() => {
+    if (!user) {
+      setProfile(null)
+      setProfileLoading(false)
+      return
+    }
+
+    let active = true
+    setProfile(null)
+    setProfileLoading(true)
+
+    void getProfile(user)
+      .then((next) => {
+        if (active) setProfile(next)
+      })
+      .catch((reason) => {
+        if (active) setToast(reportError(reason))
+      })
+      .finally(() => {
+        if (active) setProfileLoading(false)
+      })
+
+    return () => { active = false }
+  }, [user, userId])
   const [tasks, setTasks] = useState<Task[]>(() => normalizeTaskList(readUserStorage(TASK_STORAGE_KEY, userId, userId ? [] : initialTasks)))
   const [finance, setFinance] = useState<FinanceEntry[]>(() => normalizeFinanceList(readUserStorage(FINANCE_STORAGE_KEY, userId, userId ? [] : financeEntries)))
   const [schedule, setSchedule] = useState<ScheduleItem[]>(() => normalizeScheduleList(readUserStorage(SCHEDULE_STORAGE_KEY, userId, userId ? [] : initialScheduleItems)))
@@ -337,7 +366,7 @@ export function App() {
       <div className="atmosphere" aria-hidden="true" />
       <Sidebar activeView={activeView} onNavigate={navigate} />
       <main className="main-content">
-        <Topbar view={activeView} />
+        <Topbar view={activeView} profile={profile} onProfile={() => navigate('profile')} />
         <Suspense fallback={<section className="workspace view-loading" aria-live="polite"><span className="section-kicker">LOADING</span><h2>Opening your workspace…</h2></section>}>
           <div className="view-key">
             {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={finance} onToggleTask={(id) => void toggleTask(id)} onNavigate={navigate} />}
@@ -346,6 +375,17 @@ export function App() {
             {activeView === 'finance' && <FinanceView finance={finance} budgets={budgets} onSaveFinance={saveFinance} onDeleteFinance={(id) => void deleteFinance(id)} onSaveBudget={saveBudget} onDeleteBudget={(id) => void deleteBudget(id)} />}
             {activeView === 'social' && <SocialAnalyticsView />}
             {activeView === 'assistant' && <AssistantView />}
+            {activeView === 'profile' && (
+              user && profile ? (
+                <ProfileView user={user} profile={profile} onProfileChange={setProfile} onToast={setToast} />
+              ) : (
+                <section className="workspace view-loading" aria-live="polite">
+                  <span className="section-kicker">ACCOUNT</span>
+                  <h2>{profileLoading ? 'Loading your profile…' : 'Profile unavailable'}</h2>
+                  <p>{profileLoading ? 'Restoring your profile details.' : 'Sign in to manage your MiD-Daily profile.'}</p>
+                </section>
+              )
+            )}
           </div>
         </Suspense>
       </main>
