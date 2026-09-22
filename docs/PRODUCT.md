@@ -19,9 +19,14 @@ Personal use first, with a clear ownership model suitable for small-scale multi-
 - Insights / current workload and weekly context
 
 ### Product roadmap
-- Phase 1: Quick Capture + Daily Briefing
-- Phase 2: AI Planner + Insights
-- Phase 3: Habits / routines
+- Phase 1: Quick Capture + Daily Briefing — complete.
+- Phase 2: AI Planner + Insights — complete.
+- Phase 3: Habits / routines — complete.
+- Phase 4: UNREAL Living Environment — complete.
+- Phase 5: UNREAL Habitat Shell + ecosystem convergence — complete.
+- Phase 6: Production hardening and release certification — complete for the automated production gates described below.
+
+The roadmap is complete for the current product scope. Provider-specific setup and interactive account-consent checks remain explicit deployment/operations work, not hidden product phases.
 
 ## Connected modules
 - Browser/device reminders
@@ -29,9 +34,11 @@ Personal use first, with a clear ownership model suitable for small-scale multi-
 - Telegram
 - Assistant
 
-## Deferred providers
-- WhatsApp is intentionally out of the current production scope.
-- Instagram analytics remains an optional read-only foundation and is intentionally unconfigured until a provider account and current API permissions are available.
+## Deferred / operational boundaries
+- WhatsApp remains a separately configured provider; the adapter/foundation exists, but production certification depends on external Meta credentials, permissions, webhook configuration, and review state.
+- Instagram analytics remains an optional read-only foundation; live metrics depend on a Professional account and current provider permissions.
+- Google Calendar two-way sync and calendar selection remain future work because they require external-change detection, conflict resolution, and additional account UX.
+- Credentialed end-user acceptance flows (email recovery, Google OAuth, Telegram/Calendar consent) require a real interactive test session and are not represented as completed solely from automated CI evidence.
 
 ## Product principles
 1. Core data remains user-scoped.
