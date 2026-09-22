@@ -638,10 +638,15 @@ function assistantToolCalls(value: unknown): WorkersAiToolCall[] {
 }
 
 function workersAiTools(allowWrites: boolean) {
+  // GLM-4.7-Flash expects OpenAI-compatible wrapped function definitions
+  // when tools are passed through the Workers AI binding.
   return buildAssistantTools(allowWrites).map((tool) => ({
-    name: tool.name,
-    description: tool.description,
-    parameters: tool.parameters,
+    type: 'function' as const,
+    function: {
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.parameters,
+    },
   }))
 }
 
