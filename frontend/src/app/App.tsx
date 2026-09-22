@@ -381,7 +381,7 @@ export function App() {
       <main className="main-content">
         <Topbar view={activeView} profile={profile} onProfile={() => navigate('profile')} onSearch={() => setSearchOpen(true)} onNavigate={navigate} userId={userId} tasks={tasks} finance={finance} schedule={schedule} environment={environment} onEnvironmentAction={() => void (environment.location ? refreshEnvironment() : requestLocation())} />
         <Suspense fallback={<section className="workspace view-loading" aria-live="polite"><span className="section-kicker">LOADING</span><h2>Opening your workspace…</h2></section>}>
-          <div className="view-key">
+          <div className="view-key" data-module={activeView}>
             {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={finance} onToggleTask={(id) => void toggleTask(id)} onNavigate={navigate} timezone={environment.location?.timezone} />}
             {activeView === 'schedule' && <ScheduleView schedule={schedule} onScheduleChange={handleScheduleChange} demoMode={!userId} />}
             {activeView === 'tasks' && <TasksView tasks={tasks} onSaveTask={saveTask} onToggleTask={(id) => void toggleTask(id)} onDeleteTask={(id) => void deleteTask(id)} />}

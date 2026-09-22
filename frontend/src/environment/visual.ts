@@ -24,6 +24,7 @@ export function environmentCssVariables(environment: EnvironmentState): CSSPrope
     '--env-moon-x': `${screenX(moon.azimuth)}%`,
     '--env-moon-y': `${screenY(moon.altitude)}%`,
     '--env-light-angle': `${(sun.azimuth + 90) % 360}deg`,
+    '--light-angle': `${(sun.azimuth + 90) % 360}deg`,
     '--env-light-intensity': String(environment.visual.lightIntensity),
     '--env-cloud-opacity': String(environment.visual.cloudOpacity),
     '--env-fog-opacity': String(environment.visual.fogOpacity),

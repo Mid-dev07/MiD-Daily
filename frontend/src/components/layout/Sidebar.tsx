@@ -5,16 +5,16 @@ interface SidebarProps {
   onNavigate: (view: View) => void
 }
 
-const navigation: Array<{ id: View; label: string; icon: string }> = [
-  { id: 'dashboard', label: 'Today', icon: '⌂' },
-  { id: 'schedule', label: 'Schedule', icon: '◷' },
-  { id: 'tasks', label: 'Tasks', icon: '✓' },
-  { id: 'finance', label: 'Finance', icon: 'Rp' },
-  { id: 'social', label: 'Social', icon: '◎' },
-  { id: 'assistant', label: 'Assistant', icon: '✦' },
-  { id: 'profile', label: 'Profile', icon: '●' },
-  { id: 'insights', label: 'Insights', icon: '↗' },
-  { id: 'habits', label: 'Habits', icon: '◉' },
+const navigation: Array<{ id: View; label: string; icon: string; index: string }> = [
+  { id: 'dashboard', label: 'Today', icon: '⌂', index: '001' },
+  { id: 'schedule', label: 'Schedule', icon: '◷', index: '002' },
+  { id: 'tasks', label: 'Tasks', icon: '✓', index: '003' },
+  { id: 'finance', label: 'Finance', icon: 'Rp', index: '004' },
+  { id: 'social', label: 'Social', icon: '◎', index: '005' },
+  { id: 'assistant', label: 'Assistant', icon: '✦', index: '006' },
+  { id: 'profile', label: 'Profile', icon: '●', index: '007' },
+  { id: 'insights', label: 'Insights', icon: '↗', index: '008' },
+  { id: 'habits', label: 'Habits', icon: '◉', index: '009' },
 ]
 
 export function Sidebar({ activeView, onNavigate }: SidebarProps) {
@@ -37,6 +37,7 @@ export function Sidebar({ activeView, onNavigate }: SidebarProps) {
             aria-current={activeView === item.id ? 'page' : undefined}
             onClick={() => onNavigate(item.id)}
           >
+            <span className="nav-index" aria-hidden="true">{item.index}</span>
             <span className="nav-icon" aria-hidden="true">{item.icon}</span>
             <span>{item.label}</span>
           </button>

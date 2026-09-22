@@ -105,7 +105,8 @@ export function useEnvironment(): UseEnvironment {
   const [location, setLocation] = useState<EnvironmentState['location']>(() => readStoredLocation())
   const [weather, setWeather] = useState<WeatherSnapshot | null>(() => {
     const saved = readStoredLocation()
-    return saved ? getCachedWeather(saved) : null
+    const cached = saved ? getCachedWeather(saved) : null
+    return cached && !weatherCacheIsStale(cached) ? cached : null
   })
   const [status, setStatus] = useState<EnvironmentState['status']>(() => location ? 'degraded' : 'idle')
   const [error, setError] = useState<string | null>(null)
@@ -145,7 +146,9 @@ export function useEnvironment(): UseEnvironment {
     }
 
     const cached = getCachedWeather(activeLocation)
-    if (cached) setWeather(cached)
+    const usableCached = cached && !weatherCacheIsStale(cached) ? cached : null
+    if (usableCached) setWeather(usableCached)
+    else setWeather(null)
     setStatus('loading')
 
     const controller = new AbortController()
@@ -164,7 +167,7 @@ export function useEnvironment(): UseEnvironment {
       setError(null)
     } catch (reason) {
       if (version !== requestVersion.current) return
-      setStatus(cached ? 'degraded' : 'idle')
+      setStatus(usableCached ? 'degraded' : 'idle')
       setError(reason instanceof Error ? reason.message : 'Weather data is temporarily unavailable.')
     } finally {
       window.clearTimeout(timeout)

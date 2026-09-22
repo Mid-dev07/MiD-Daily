@@ -114,3 +114,22 @@ Future environment changes must preserve:
 - build/TypeScript checks
 - responsive rendering
 - no environment effect may obstruct interaction or reduce content readability
+
+
+## Habitat shell
+
+The Living Environment is now paired with a shared habitat material system:
+
+- navigation behaves like a numbered field guide rather than a conventional application rail
+- the active module is exposed through `data-module` so one visual system can give each module a different material response
+- dashboard, schedule, tasks, finance, social, assistant, profile, insights, and habits use restrained differences in surface radius, light response, and atmospheric tint
+- interactive content is never clipped for the sake of the material effect
+- mobile keeps the same environment model while simplifying navigation markers and preserving touch targets
+
+The material layer is deliberately implemented in CSS and existing DOM structure. It does not add a component library or visual dependency.
+
+The design rule is:
+
+> one world, different terrain.
+
+The shell should feel spatial and natural without pretending that each module is a separate application.
