@@ -85,7 +85,7 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
-  useModalBehavior(open, onClose, saving)
+  const dialogRef = useModalBehavior(open, onClose, saving)
 
   useEffect(() => {
     if (!open) return
@@ -135,7 +135,7 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !saving && onClose()}>
-      <section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="schedule-form-title">
+      <section ref={dialogRef} className="modal-card" role="dialog" aria-modal="true" aria-labelledby="schedule-form-title">
         <div className="modal-header">
           <div><span className="section-kicker">PLANNER</span><h3 id="schedule-form-title">{initialItem ? 'Edit activity' : 'Add activity'}</h3></div>
           <button className="icon-button" type="button" disabled={saving} onClick={onClose} aria-label="Close form">×</button>
