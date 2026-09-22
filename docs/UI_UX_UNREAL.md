@@ -100,3 +100,28 @@ Mobile: floating bottom navigation, touch-friendly controls, stacked forms, bott
 
 ## Anti-slop checklist
 Reject a change when it looks like a generic AI dashboard, introduces unexplained gradients or blobs, uses neon cyan to signal importance, adds glass everywhere without hierarchy, sacrifices readability for visual drama, breaks mobile layout, or adds motion without meaningful interaction feedback.
+
+
+## Final phase — ecosystem convergence
+
+The last visual phase treats each core module as terrain inside the same living environment rather than a collection of generic cards.
+
+- Dashboard = **clearing / orientation**: signal rail, current moment, and daily overview.
+- Schedule = **rhythm / temporal terrain**: a continuous path through time.
+- Tasks = **ground / focus blocks**: progress reads like a grounded work surface.
+- Finance = **resources / mineral layers**: budgets and spending use restrained warm material cues.
+- Social = **mist / signal**: analytics remain read-only and visually quiet.
+- Assistant = **guide / signal**: conversation and integrations share a subtle directional cue.
+- Profile = **personal shelter**: identity surfaces use linen/stone softness instead of generic account chrome.
+- Insights = **observatory**: metrics remain analytical while gaining a restrained circular observation motif.
+- Habits = **growth / cultivation**: repeated completion cells and weekly progress use organic growth cues.
+
+This phase deliberately avoids heavy illustration, 3D runtimes, or decorative assets. The final material layer remains CSS-driven, responsive, reduced-motion aware, and content-first.
+
+### Mobile contract — final
+
+The nine-module field guide uses a horizontally scrollable bottom rail on small screens. The active module is automatically brought into view so navigation never requires guessing which items are off-canvas.
+
+### Release contract
+
+A visual phase is not considered complete merely because the stylesheet builds. The release gate requires the final ecosystem selectors to remain wired, mobile navigation to remain reachable, interactive overflow clipping to stay disabled, and the existing build, static QA, backend tests, Worker dry-run, deployment, and smoke checks to remain green.
