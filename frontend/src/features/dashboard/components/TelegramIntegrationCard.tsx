@@ -67,13 +67,15 @@ export function TelegramIntegrationCard() {
           ? `Linked account${status.username ? ' @' + status.username : ''}. Use /task, /expense, /expenses, and /schedule in the private bot chat.`
           : status.configured
             ? 'Generate a one-time link to connect your Telegram private chat to this account.'
-            : 'Configure TELEGRAM_BOT_TOKEN, TELEGRAM_BOT_USERNAME, TELEGRAM_WEBHOOK_SECRET, and TELEGRAM_WEBHOOK_URL on the backend.')}
+            : <>Telegram bot access is not configured yet. Add TELEGRAM_BOT_TOKEN, TELEGRAM_BOT_USERNAME, TELEGRAM_WEBHOOK_SECRET, and TELEGRAM_WEBHOOK_URL to the backend, then refresh this card.</>)}
       </p>
       {link && !status.connected && <button className="text-button integration-link-button" type="button" onClick={() => window.open(link, '_blank', 'noopener,noreferrer')}>Open Telegram link again</button>}
       <div className="integration-actions">
         {status.connected
           ? <button className="secondary-button" disabled={loading} type="button" onClick={() => void disconnect()}>Disconnect</button>
-          : <button className="secondary-button" disabled={loading || !status.configured} type="button" onClick={() => void connect()}>Connect Telegram</button>}
+          : status.configured
+            ? <button className="secondary-button" disabled={loading} type="button" onClick={() => void connect()}>Connect Telegram</button>
+            : <button className="secondary-button" disabled={loading} type="button" onClick={() => window.open('https://t.me/BotFather', '_blank', 'noopener,noreferrer')}>Open Telegram setup</button>}
       </div>
     </section>
   )
