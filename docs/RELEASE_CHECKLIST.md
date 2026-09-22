@@ -95,6 +95,7 @@
 - [ ] Test one Task write and one Expense write.
 - [ ] Confirm the UI reports action results.
 - [ ] Verify the same Assistant/tool permission boundaries apply from Telegram.
+- [ ] Assistant can read active habit context without receiving habit write tools.
 
 ## Gate L — UX and reliability
 - [ ] Dashboard remains usable at desktop, tablet, and mobile widths.
