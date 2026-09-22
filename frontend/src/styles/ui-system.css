@@ -2,24 +2,27 @@
    Nature Cinematic is atmosphere, not content decoration. */
 
 :root {
-  --ui-bg: #0b100c;
-  --ui-surface: #141b15;
-  --ui-surface-2: #1a231a;
-  --ui-surface-3: #202b20;
-  --ui-border: rgba(226, 235, 216, 0.10);
-  --ui-border-strong: rgba(226, 235, 216, 0.17);
-  --ui-text: #eef2e9;
-  --ui-text-2: #b7c0b3;
-  --ui-text-3: #7f8a7b;
-  --ui-accent: #b7c98a;
-  --ui-accent-soft: rgba(183, 201, 138, 0.12);
-  --ui-success: #9fbd74;
-  --ui-warning: #d8b56c;
-  --ui-danger: #cf897b;
-  --ui-radius: 12px;
-  --ui-radius-lg: 16px;
-  --ui-shadow: 0 14px 40px rgba(0,0,0,.18);
-  --ui-content: 1160px;
+  /* Compatibility aliases. Canonical values live in tokens.css. */
+  --ui-bg: var(--bg-void);
+  --ui-surface: var(--surface-1);
+  --ui-surface-2: var(--surface-2);
+  --ui-surface-3: var(--surface-3);
+  --ui-border: var(--line);
+  --ui-border-strong: var(--line-strong);
+  --ui-text: var(--color-text);
+  --ui-text-2: var(--color-text-muted);
+  --ui-text-3: var(--color-text-faint);
+  --ui-accent: var(--accent);
+  --ui-accent-soft: var(--accent-soft);
+  --ui-success: var(--state-success);
+  --ui-warning: var(--state-warning);
+  --ui-danger: var(--state-danger);
+  --ui-radius: var(--radius-md);
+  --ui-radius-lg: var(--radius-lg);
+  --ui-shadow: var(--shadow-soft);
+  --ui-content: var(--content-max);
+  --ui-font-ui: var(--font-ui);
+  --ui-font-display: var(--font-display);
 }
 
 * { box-sizing: border-box; }
@@ -28,6 +31,7 @@ button, input, select, textarea { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 
 body {
+  font-family: var(--ui-font-ui);
   min-width: 320px;
   background:
     radial-gradient(circle at 82% 0%, rgba(113,136,94,.08), transparent 28rem),
@@ -62,9 +66,8 @@ a { color: inherit; }
   flex-direction: column;
   gap: 26px;
   padding: 24px 14px 18px;
-  background: rgba(18,25,19,.92);
+  background: rgba(18,25,19,.98);
   border-right: 1px solid var(--ui-border);
-  backdrop-filter: blur(14px);
 }
 
 .brand {
@@ -175,8 +178,7 @@ a { color: inherit; }
   gap: 18px;
   padding: 16px clamp(20px, 4vw, 54px);
   border-bottom: 1px solid var(--ui-border);
-  background: rgba(11,16,12,.76);
-  backdrop-filter: blur(14px);
+  background: rgba(11,16,12,.97);
 }
 
 .topbar-copy,
@@ -1249,8 +1251,7 @@ textarea:focus {
   display: grid;
   place-items: center;
   padding: 18px;
-  background: rgba(5,8,5,.74);
-  backdrop-filter: blur(8px);
+  background: rgba(5,8,5,.88);
 }
 
 .modal-card {
@@ -1497,10 +1498,9 @@ textarea:focus {
     height: 66px;
     display: block;
     padding: 6px max(8px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
-    background: rgba(18,25,19,.96);
+    background: rgba(18,25,19,.99);
     border-top: 1px solid var(--ui-border-strong);
     border-right: 0;
-    backdrop-filter: blur(16px);
   }
 
   .brand,
