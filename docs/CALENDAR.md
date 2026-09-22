@@ -64,7 +64,9 @@ Never commit the resulting key.
 ### Local setup
 
 1. Create a Supabase project.
-2. Apply the migration under `supabase/migrations/`.\n3. Ensure Supabase Auth is configured for the deployment and leaked-password protection is enabled in the Auth settings.\n4. Copy `backend/.env.example` to `backend/.env`.
+2. Apply the migration under `supabase/migrations/`.
+3. Ensure Supabase Auth is configured for the deployment and leaked-password protection is enabled in the Auth settings.
+4. Copy `backend/.env.example` to `backend/.env`.
 5. Fill the Google OAuth credentials and Supabase values.
 6. Generate `TOKEN_ENCRYPTION_KEY_B64`.
 7. Add `http://localhost:8787/auth/google/callback` as the Google OAuth redirect URI.
