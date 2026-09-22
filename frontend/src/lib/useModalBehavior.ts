@@ -43,7 +43,8 @@ export function useModalBehavior(open: boolean, onClose: () => void, disabled = 
 
       const previousActive = previousActiveRef.current
       previousActiveRef.current = null
-      if (previousActive?.isConnected) previousActive.focus()
+      const anotherModalOpen = document.querySelector('[role="dialog"][aria-modal="true"]')
+      if (!anotherModalOpen && previousActive?.isConnected) previousActive.focus()
     }
   }, [open])
 
@@ -62,7 +63,7 @@ export function useModalBehavior(open: boolean, onClose: () => void, disabled = 
       if (!dialog) return
 
       const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
-        .filter((element) => element.offsetParent !== null)
+        .filter((element) => element.getClientRects().length > 0)
 
       if (focusable.length === 0) {
         event.preventDefault()
@@ -72,6 +73,11 @@ export function useModalBehavior(open: boolean, onClose: () => void, disabled = 
 
       const first = focusable[0]
       const last = focusable[focusable.length - 1]
+      if (!dialog.contains(document.activeElement)) {
+        event.preventDefault()
+        first.focus()
+        return
+      }
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault()
         last.focus()
