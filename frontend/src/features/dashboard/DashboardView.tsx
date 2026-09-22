@@ -10,10 +10,11 @@ interface DashboardViewProps {
   finance: FinanceEntry[]
   onToggleTask: (id: number) => void
   onNavigate: (view: View) => void
+  timezone?: string
 }
 
-const APP_TIMEZONE = 'Asia/Jakarta'
-const getToday = () => new Intl.DateTimeFormat('sv-SE', { timeZone: APP_TIMEZONE }).format(new Date())
+const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+const getToday = (timezone: string) => new Intl.DateTimeFormat('sv-SE', { timeZone: timezone }).format(new Date())
 
 const TelegramIntegrationCard = lazy(() => import('./components/TelegramIntegrationCard').then((module) => ({ default: module.TelegramIntegrationCard })))
 const WhatsAppIntegrationCard = lazy(() => import('./components/WhatsAppIntegrationCard').then((module) => ({ default: module.WhatsAppIntegrationCard })))
@@ -22,9 +23,9 @@ const DailyBriefing = lazy(() => import('./components/DailyBriefing').then((modu
 const FocusMode = lazy(() => import('./components/FocusMode').then((module) => ({ default: module.FocusMode })))
 const FeatureLandscape = lazy(() => import('./components/FeatureLandscape').then((module) => ({ default: module.FeatureLandscape })))
 
-export function DashboardView({ tasks, schedule, finance, onToggleTask, onNavigate }: DashboardViewProps) {
+export function DashboardView({ tasks, schedule, finance, onToggleTask, onNavigate, timezone = LOCAL_TIMEZONE }: DashboardViewProps) {
   const [now, setNow] = useState(() => new Date())
-  const today = getToday()
+  const today = getToday(timezone)
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 60_000)
@@ -101,7 +102,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
     month: 'short',
   })
 
-  const currentTimeLabel = new Intl.DateTimeFormat('id-ID', { timeZone: APP_TIMEZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now)
+  const currentTimeLabel = new Intl.DateTimeFormat('id-ID', { timeZone: timezone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now)
 
   return (
     <section className="workspace dashboard-page page-enter">
