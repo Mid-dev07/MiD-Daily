@@ -38,6 +38,19 @@
 - [ ] Profile avatar upload, replacement, signed display, and removal work.
 - [ ] Avatar storage is private and restricted to the owning user.
 
+## Gate F1 — Productivity layer
+- [ ] Quick Capture creates only the explicitly requested Task, Expense, or Schedule item.
+- [ ] Quick Capture explains missing/ambiguous information without creating data.
+- [ ] Daily Briefing reflects current tasks, schedule, near deadlines, and today's spending.
+- [ ] Assistant planner shortcuts remain read-only until action permission is explicitly enabled.
+
+## Gate F2 — Habits
+- [ ] Create a habit with one or more target weekdays.
+- [ ] Mark and unmark completed days.
+- [ ] Streak and weekly progress update correctly.
+- [ ] Edit and archive habits.
+- [ ] Habit and log rows remain isolated to the authenticated owner.
+
 ## Gate F — Core data
 - [ ] Create, edit, complete, and delete a Task.
 - [ ] Create, edit, and delete Finance entries.
