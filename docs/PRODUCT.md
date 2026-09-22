@@ -12,6 +12,7 @@ Personal use first, with a clear ownership model suitable for small-scale multi-
 - Tasks / focus and progress
 - Finance / income and expenses
 - Authentication / account and recovery
+- Profile / photo, display name, username, and bio
 
 ## Connected modules
 - Browser/device reminders
