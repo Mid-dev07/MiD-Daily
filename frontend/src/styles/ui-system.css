@@ -3595,3 +3595,243 @@ textarea:focus {
     transition: none !important;
   }
 }
+
+
+/* FINAL PHASE — UNREAL ecosystem convergence.
+   Each module keeps the same world, but its primary content now has a distinct terrain cue. */
+.view-key[data-module="dashboard"] .dashboard-signal-card {
+  background:
+    linear-gradient(180deg, rgba(255,250,225,.018), transparent 58%),
+    rgba(16,23,17,.62);
+}
+
+.view-key[data-module="dashboard"] .dashboard-signal-card.is-alert {
+  box-shadow: inset 2px 0 0 rgba(207,137,123,.46);
+}
+
+.view-key[data-module="schedule"] .schedule-event-line::before {
+  background: linear-gradient(
+    var(--env-light-angle, 180deg),
+    rgba(226,235,216,.18),
+    var(--ui-border) 48%,
+    rgba(143,138,115,.12)
+  );
+}
+
+.view-key[data-module="schedule"] .schedule-event-line span {
+  width: 8px;
+  height: 8px;
+  left: 2.5px;
+  border: 1px solid rgba(217,197,141,.32);
+  box-shadow: 0 0 0 3px rgba(217,197,141,.045);
+}
+
+.view-key[data-module="tasks"] .task-item-card {
+  position: relative;
+  padding-left: 7px;
+}
+
+.view-key[data-module="tasks"] .task-item-card::before {
+  content: "";
+  position: absolute;
+  inset: 9px auto 9px 0;
+  width: 1px;
+  background: linear-gradient(
+    var(--env-light-angle, 180deg),
+    rgba(113,136,94,.05),
+    rgba(113,136,94,.42),
+    rgba(113,136,94,.06)
+  );
+}
+
+.view-key[data-module="tasks"] .task-progress-track {
+  height: 6px;
+  background: #202a21;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.view-key[data-module="tasks"] .task-progress-track > span {
+  background: linear-gradient(90deg, var(--nature-moss), var(--nature-sun));
+}
+
+.view-key[data-module="finance"] .finance-budget-row {
+  position: relative;
+  padding-inline: 9px;
+  border: 1px solid transparent;
+  border-bottom-color: var(--ui-border);
+}
+
+.view-key[data-module="finance"] .finance-budget-row:last-child {
+  border-bottom: 0;
+}
+
+.view-key[data-module="finance"] .finance-budget-meter {
+  height: 6px;
+  border-radius: 999px;
+  background: #2a281e;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.view-key[data-module="finance"] .finance-budget-meter > span {
+  background: linear-gradient(90deg, #9fbd74, #d8b56c);
+}
+
+.view-key[data-module="finance"] .finance-budget-row.is-over .finance-budget-meter > span {
+  background: linear-gradient(90deg, #d8b56c, var(--ui-danger));
+}
+
+.view-key[data-module="social"] .social-foundation-grid > div {
+  background:
+    linear-gradient(145deg, rgba(204,215,197,.035), transparent 52%),
+    var(--ui-surface-recessed);
+}
+
+.view-key[data-module="social"] .social-updated {
+  display: block;
+  margin-top: 12px;
+  color: var(--ui-text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.view-key[data-module="assistant"] .assistant-channel-card {
+  position: relative;
+}
+
+.view-key[data-module="assistant"] .assistant-channel-card::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(217,197,141,.42);
+  box-shadow: 0 0 0 3px rgba(217,197,141,.035);
+}
+
+.view-key[data-module="assistant"] .ai-message.assistant {
+  border-left: 2px solid rgba(183,201,138,.28);
+  background:
+    linear-gradient(135deg, rgba(183,201,138,.025), transparent 58%),
+    #111711;
+}
+
+.view-key[data-module="assistant"] .ai-message.user {
+  border-right: 2px solid rgba(143,138,115,.24);
+}
+
+.view-key[data-module="profile"] .profile-hero-card {
+  background:
+    radial-gradient(circle at 12% 50%, rgba(143,138,115,.05), transparent 36%),
+    var(--ui-surface);
+}
+
+.view-key[data-module="profile"] .profile-avatar-large-wrap {
+  position: relative;
+}
+
+.view-key[data-module="profile"] .profile-avatar-large-wrap::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border: 1px solid rgba(217,197,141,.14);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.view-key[data-module="insights"] .insights-metric {
+  position: relative;
+  overflow: hidden;
+  min-height: 132px;
+}
+
+.view-key[data-module="insights"] .insights-metric::after {
+  content: "";
+  position: absolute;
+  right: -20px;
+  bottom: -24px;
+  width: 92px;
+  height: 92px;
+  border: 1px solid rgba(204,215,197,.08);
+  border-radius: 50%;
+}
+
+.view-key[data-module="habits"] .habit-row {
+  position: relative;
+}
+
+.view-key[data-module="habits"] .habit-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(113,136,94,.14),
+    rgba(113,136,94,.42),
+    rgba(113,136,94,.08)
+  );
+}
+
+.view-key[data-module="habits"] .habit-check {
+  border-radius: 50%;
+}
+
+.view-key[data-module="habits"] .habit-check.is-done {
+  box-shadow: inset 0 0 0 2px rgba(24,32,19,.16);
+}
+
+.view-key[data-module="habits"] .habit-week-grid {
+  align-content: center;
+}
+
+.view-key[data-module="dashboard"] .dashboard-section-link,
+.view-key[data-module="schedule"] .text-button,
+.view-key[data-module="tasks"] .text-button,
+.view-key[data-module="finance"] .text-button,
+.view-key[data-module="social"] .text-button,
+.view-key[data-module="assistant"] .text-button,
+.view-key[data-module="profile"] .text-button,
+.view-key[data-module="insights"] .text-button,
+.view-key[data-module="habits"] .text-button {
+  transition:
+    color var(--duration-fast) ease,
+    background var(--duration-fast) ease,
+    transform var(--duration-fast) var(--ease-spring);
+}
+
+@media (max-width: 760px) {
+  .nav-list {
+    overflow-x: auto;
+    overflow-y: hidden;
+    grid-template-columns: none;
+    grid-template-rows: 1fr;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(68px, 78px);
+    justify-content: start;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+  }
+
+  .nav-list::-webkit-scrollbar { display: none; }
+
+  .nav-item {
+    width: auto;
+    min-width: 68px;
+  }
+
+  .view-key[data-module] > .workspace .content-card {
+    transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view-key[data-module] > .workspace .content-card,
+  .view-key[data-module] .text-button,
+  .nav-item {
+    transition: none !important;
+  }
+}
