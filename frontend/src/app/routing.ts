@@ -8,6 +8,7 @@ const viewPaths: Record<View, string> = {
   social: '/social',
   assistant: '/assistant',
   profile: '/profile',
+  insights: '/insights',
 }
 
 const pathViews = Object.fromEntries(
