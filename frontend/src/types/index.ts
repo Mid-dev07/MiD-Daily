@@ -1,4 +1,4 @@
-export type View = 'dashboard' | 'schedule' | 'tasks' | 'finance' | 'social' | 'assistant' | 'profile' | 'insights'
+export type View = 'dashboard' | 'schedule' | 'tasks' | 'finance' | 'social' | 'assistant' | 'profile' | 'insights' | 'habits'
 
 export interface Profile {
   userId: string
