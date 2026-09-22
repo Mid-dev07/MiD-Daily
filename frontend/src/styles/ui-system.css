@@ -3378,8 +3378,12 @@ textarea:focus {
     padding: 3px;
     justify-content: center;
   }
-  .environment-readout,
-  .environment-attribution-inline { display: none; }
+  .environment-readout { display: none; }
+  .environment-attribution-inline {
+    display: inline;
+    font-size: 6px;
+    letter-spacing: .06em;
+  }
   .environment-glyph { width: 32px; height: 32px; }
   .environment-attribution { right: 8px; bottom: 7px; font-size: 6px; }
 }
