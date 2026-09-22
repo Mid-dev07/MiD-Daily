@@ -15,6 +15,13 @@ Personal use first, with a clear ownership model suitable for small-scale multi-
 - Profile / photo, display name, username, and bio
 - Quick Capture / task, expense, and schedule capture from Today
 - Daily Briefing / current priorities and daily context
+- Habits / repeatable routines and weekly streaks
+- Insights / current workload and weekly context
+
+### Product roadmap
+- Phase 1: Quick Capture + Daily Briefing
+- Phase 2: AI Planner + Insights
+- Phase 3: Habits / routines
 
 ## Connected modules
 - Browser/device reminders
