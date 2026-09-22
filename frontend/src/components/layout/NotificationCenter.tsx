@@ -35,13 +35,20 @@ function nowMinutes() {
 export function NotificationCenter({ userId, tasks, schedule, finance, onNavigate }: NotificationCenterProps) {
   const [open, setOpen] = useState(false)
   const [dismissed, setDismissed] = useState<string[]>(() => readUserStorage(KEY, userId, []))
+  const [clock, setClock] = useState(() => Date.now())
   const ref = useRef<HTMLDivElement>(null)
   const date = today()
   const current = nowMinutes()
+  void clock
 
   useEffect(() => {
     setDismissed(readUserStorage(KEY, userId, []))
   }, [userId])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setClock(Date.now()), 60_000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   useEffect(() => {
     const handleOutside = (event: MouseEvent) => {
