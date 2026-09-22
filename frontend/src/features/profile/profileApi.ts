@@ -70,8 +70,18 @@ export async function getProfile(user: User): Promise<Profile> {
       .select('user_id,display_name,username,bio,avatar_path,created_at,updated_at')
       .single<ProfileRow>()
 
-    if (createError) throw new Error('Unable to initialize profile: ' + createError.message)
-    return mapProfile(created, null)
+    if (!createError && created) return mapProfile(created, null)
+
+    if (createError?.code === '23505') {
+      const { data: existing } = await supabase
+        .from('profiles')
+        .select('user_id,display_name,username,bio,avatar_path,created_at,updated_at')
+        .eq('user_id', user.id)
+        .single<ProfileRow>()
+      if (existing) return mapProfile(existing, await signedAvatarUrl(existing.avatar_path))
+    }
+
+    throw new Error('Unable to initialize profile: ' + (createError?.message ?? 'unknown error'))
   }
 
   return mapProfile(data, await signedAvatarUrl(data.avatar_path))
