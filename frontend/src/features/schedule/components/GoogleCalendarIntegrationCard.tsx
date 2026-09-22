@@ -87,9 +87,18 @@ export function GoogleCalendarIntegrationCard() {
             <span className="integration-badge">CONNECTED</span>
             <button className="secondary-button" type="button" disabled={loading} onClick={() => void disconnect()}>Disconnect</button>
           </>
-        ) : (
-          <button className="secondary-button" type="button" disabled={loading || !status.configured} onClick={() => void connect()}>
+        ) : status.configured ? (
+          <button className="secondary-button" type="button" disabled={loading} onClick={() => void connect()}>
             Connect Google
+          </button>
+        ) : (
+          <button
+            className="secondary-button"
+            type="button"
+            disabled={loading}
+            onClick={() => window.open('https://console.cloud.google.com/apis/credentials', '_blank', 'noopener,noreferrer')}
+          >
+            Open Google setup
           </button>
         )}
       </div>
