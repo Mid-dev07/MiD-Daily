@@ -64,6 +64,8 @@ export function TasksView({ tasks, onSaveTask, onToggleTask, onDeleteTask }: Tas
           <div className="empty-state"><strong>No matching tasks</strong><span>Adjust the filters or create a new task.</span></div>
         ) : filtered.map((task) => {
           const progress = task.progress ?? (task.status === 'done' ? 100 : 0)
+          const showProgress = typeof task.progress === 'number' || task.status === 'done'
+          const statusLabel = task.status === 'in-progress' ? 'In progress' : task.status === 'done' ? 'Complete' : 'To do'
           return (
             <article className="task-item-card" key={task.id}>
               <button className="task-row" type="button" onClick={() => onToggleTask(task.id)}>
@@ -72,11 +74,22 @@ export function TasksView({ tasks, onSaveTask, onToggleTask, onDeleteTask }: Tas
                 <span className={'priority-badge ' + task.priority}>{task.priority}</span>
               </button>
               <div className="task-item-footer">
-                <div className="task-progress-track" aria-label={'Progress ' + progress + '%'}><span style={{ width: progress + '%' }} /></div>
-                <span className="task-progress-label">{progress}%</span>
-                <button className="text-button" type="button" onClick={() => setDetailTask(task)}>Details</button>
-                <button className="text-button" type="button" onClick={() => openEdit(task)}>Edit</button>
-                <button className="text-button danger" type="button" onClick={() => remove(task.id)}>Delete</button>
+                {showProgress ? (
+                  <>
+                    <div className="task-progress-track" aria-label={'Progress ' + progress + '%'}><span style={{ width: progress + '%' }} /></div>
+                    <span className="task-progress-label">{progress}%</span>
+                  </>
+                ) : (
+                  <span className="task-status-label">{statusLabel}</span>
+                )}
+                <details className="task-actions-menu">
+                  <summary aria-label={'Manage ' + task.title}>•••</summary>
+                  <div>
+                    <button className="text-button" type="button" onClick={() => setDetailTask(task)}>Details</button>
+                    <button className="text-button" type="button" onClick={() => openEdit(task)}>Edit</button>
+                    <button className="text-button danger" type="button" onClick={() => remove(task.id)}>Delete</button>
+                  </div>
+                </details>
               </div>
             </article>
           )

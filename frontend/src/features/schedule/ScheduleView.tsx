@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { formatDateLong, scheduleOccursOnDate, shiftDate } from './schedule.date'
 import { normalizeScheduleList } from './schedule.migration'
@@ -30,10 +30,20 @@ interface ScheduleViewProps {
 export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: ScheduleViewProps) {
   const [date, setDate] = useState(getToday)
   const [filter, setFilter] = useState<ScheduleType | 'ALL'>('ALL')
+  const [now, setNow] = useState(() => new Date())
   const [formOpen, setFormOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<ScheduleItem>()
   const [detailItem, setDetailItem] = useState<ScheduleItem>()
   const [notificationSupport, setNotificationSupport] = useState(getNotificationSupport)
+
+  const today = getToday()
+  const isToday = date === today
+  const currentTimeLabel = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now)
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60_000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   const normalizedSchedule = useMemo(() => normalizeScheduleList(schedule), [schedule])
   const flexiblePlans = useMemo(() => normalizedSchedule
@@ -180,6 +190,15 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
         <div><strong>{formatDateLong(date)}</strong><span>{visibleItems.length} {visibleItems.length === 1 ? 'activity' : 'activities'}</span></div>
         <span>{reminderCount} reminder{reminderCount === 1 ? '' : 's'}</span>
       </div>
+
+      {isToday && (
+        <div className="schedule-now-strip" aria-label={'Current time ' + currentTimeLabel}>
+          <span className="schedule-now-label">NOW</span>
+          <strong>{currentTimeLabel}</strong>
+          <i aria-hidden="true" />
+          <span>live day marker</span>
+        </div>
+      )}
 
       <div className="content-card schedule-events-card">
         {visibleItems.length === 0

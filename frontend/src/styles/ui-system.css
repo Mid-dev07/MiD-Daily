@@ -3835,3 +3835,258 @@ textarea:focus {
     transition: none !important;
   }
 }
+
+
+/* UI REFINEMENT — LESS NOISE, MORE SIGNAL.
+   Keeps the UNREAL habitat language while giving each module one clear job. */
+
+/* Dashboard: the landscape is now a compact navigation compass, not the main content. */
+.dashboard-page .feature-landscape {
+  display: grid !important;
+  gap: 12px;
+  margin: 0 0 12px;
+  padding: 14px 15px 12px;
+  border-radius: 16px;
+  background:
+    linear-gradient(120deg, rgba(217,197,141,.035), transparent 48%),
+    rgba(14,21,15,.78);
+  box-shadow: inset 0 1px 0 rgba(255,250,225,.04), 0 18px 34px -30px rgba(0,0,0,.72);
+}
+.dashboard-page .feature-landscape-heading {
+  align-items: center;
+  gap: 14px;
+}
+.dashboard-page .feature-landscape-heading h3 {
+  max-width: none;
+  font-size: clamp(19px, 2vw, 27px);
+  line-height: 1;
+  letter-spacing: -.045em;
+}
+.dashboard-page .feature-landscape-heading h3 span,
+.dashboard-page .feature-landscape-heading h3 em { display: inline; }
+.dashboard-page .feature-landscape-heading h3 em {
+  padding-left: 5px;
+  color: var(--ui-text-2);
+}
+.dashboard-page .feature-landscape-heading p {
+  max-width: 60ch;
+  margin-top: 6px;
+  font-size: 9px;
+  line-height: 1.45;
+}
+.dashboard-page .feature-landscape-hint {
+  font-size: 7px;
+}
+.dashboard-page .feature-scene {
+  min-height: 150px;
+  grid-template-rows: repeat(3, minmax(42px, 1fr));
+  gap: 7px;
+}
+.dashboard-page .feature-node {
+  width: min(150px, 100%);
+  min-height: 52px;
+  padding: 8px 10px;
+  border-radius: 14px 16px 13px 15px;
+  box-shadow: inset 0 1px 0 rgba(255,252,230,.04), 0 12px 24px -22px rgba(0,0,0,.88);
+}
+.dashboard-page .feature-node-icon {
+  width: 23px;
+  height: 23px;
+}
+.dashboard-page .feature-node-title { font-size: 10px; }
+.dashboard-page .feature-node-meta { font-size: 8px; }
+.dashboard-page .feature-core { width: 94px; }
+.dashboard-page .feature-core-label strong { font-size: 22px; }
+.dashboard-page .feature-core-label span { font-size: 7px; }
+.dashboard-page .dashboard-context-grid { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
+.dashboard-page .dashboard-secondary-grid .dashboard-upcoming { min-width: 0; }
+
+/* Tasks: one row, one primary action, one compact overflow menu. */
+.task-item-footer { position: relative; }
+.task-status-label {
+  color: var(--ui-text-3);
+  font-size: 10px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.task-actions-menu {
+  position: relative;
+  justify-self: end;
+}
+.task-actions-menu > summary {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--ui-border);
+  border-radius: 9px;
+  color: var(--ui-text-3);
+  background: var(--ui-surface-recessed);
+  cursor: pointer;
+  list-style: none;
+  font-size: 13px;
+  letter-spacing: .12em;
+}
+.task-actions-menu > summary::-webkit-details-marker { display: none; }
+.task-actions-menu > summary:hover,
+.task-actions-menu[open] > summary {
+  color: var(--ui-text);
+  border-color: var(--ui-border-strong);
+  background: var(--ui-surface-2);
+}
+.task-actions-menu > div {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 7px);
+  z-index: 30;
+  min-width: 132px;
+  display: grid;
+  gap: 2px;
+  padding: 5px;
+  border: 1px solid var(--ui-border-strong);
+  border-radius: 10px;
+  background: #141b15;
+  box-shadow: var(--shadow-raised);
+}
+.task-actions-menu .text-button {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 8px 9px;
+  text-align: left;
+}
+
+/* Social: technical provider configuration stays available without dominating the product surface. */
+.provider-details {
+  margin-top: 12px;
+  border-top: 1px solid var(--ui-border);
+  padding-top: 10px;
+}
+.provider-details summary {
+  color: var(--ui-text-3);
+  font-size: 9px;
+  cursor: pointer;
+}
+.provider-details > span {
+  display: block;
+  margin-top: 7px;
+  color: var(--ui-text-3);
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+/* Schedule: a small live marker keeps the time terrain alive without turning it into a chart. */
+.schedule-now-strip {
+  display: grid;
+  grid-template-columns: auto auto minmax(36px,1fr) auto;
+  gap: 9px;
+  align-items: center;
+  margin: 0 1px 8px;
+  padding: 6px 8px;
+  border: 1px solid rgba(183,201,138,.12);
+  border-radius: 9px;
+  background: rgba(183,201,138,.025);
+  color: var(--ui-text-3);
+  font-size: 8px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.schedule-now-label { color: var(--ui-accent); font-weight: 800; }
+.schedule-now-strip strong { color: var(--ui-text); font-size: 10px; letter-spacing: .02em; }
+.schedule-now-strip i {
+  display: block;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(183,201,138,.35), transparent);
+}
+
+/* Finance: keep summary values visually quiet so the transaction list stays primary. */
+.finance-toolbar,
+.finance-budget-card,
+.finance-insights { background: linear-gradient(120deg, rgba(255,250,225,.012), transparent 42%), var(--ui-surface); }
+.stat-row { gap: 10px; }
+.stat-card { padding: 15px 16px; }
+
+/* Profile: personal information stays personal, not administrative. */
+.profile-hero-copy h3 { font-size: 22px; }
+.profile-account-row span { max-width: 46ch; }
+.profile-chip > .text-button {
+  padding-inline: 5px;
+  color: var(--ui-text-3);
+  font-size: 9px;
+}
+
+/* Insights: metrics describe the current snapshot, not fictional long-term analytics. */
+.insights-metric { min-height: 122px; }
+.insights-metric > small { max-width: 22ch; line-height: 1.45; }
+
+/* Habits: today's progress gets one calm piece of hierarchy above the weekly matrix. */
+.habit-week-summary {
+  display: grid;
+  gap: 2px;
+  justify-items: end;
+  text-align: right;
+}
+.habit-week-summary span,
+.habit-week-summary small {
+  color: var(--ui-text-3);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.habit-week-summary strong {
+  color: var(--ui-accent);
+  font-size: 17px;
+  line-height: 1;
+}
+
+@media (max-width: 760px) {
+  .dashboard-page .feature-landscape {
+    gap: 9px;
+    padding: 12px;
+    border-radius: 14px;
+  }
+  .dashboard-page .feature-landscape-heading { align-items: flex-start; }
+  .dashboard-page .feature-landscape-heading p,
+  .dashboard-page .feature-landscape-hint { display: none; }
+  .dashboard-page .feature-scene {
+    min-height: 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: auto;
+  }
+  .dashboard-page .feature-node,
+  .dashboard-page .feature-node[data-feature="dashboard"],
+  .dashboard-page .feature-node[data-feature="schedule"],
+  .dashboard-page .feature-node[data-feature="tasks"],
+  .dashboard-page .feature-node[data-feature="finance"],
+  .dashboard-page .feature-node[data-feature="social"],
+  .dashboard-page .feature-node[data-feature="assistant"] {
+    grid-column: auto;
+    grid-row: auto;
+    width: 100%;
+    min-height: 44px;
+  }
+  .dashboard-page .feature-core {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    width: 72px;
+    justify-self: center;
+  }
+  .dashboard-page .feature-core-label strong { font-size: 18px; }
+  .dashboard-page .feature-node-meta { display: none; }
+  .task-item-footer {
+    grid-template-columns: minmax(0,1fr) auto auto;
+    gap: 7px;
+    padding-left: 40px;
+  }
+  .task-actions-menu { grid-column: 3; grid-row: 1; }
+  .task-actions-menu > div {
+    top: calc(100% + 6px);
+    bottom: auto;
+  }
+  .schedule-now-strip { grid-template-columns: auto auto minmax(24px,1fr); }
+  .schedule-now-strip > span:last-child { display: none; }
+  .habit-week-header { grid-template-columns: minmax(180px,1fr) auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-actions-menu > summary { transition: none !important; }
+}

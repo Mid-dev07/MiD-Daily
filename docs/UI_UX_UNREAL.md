@@ -125,3 +125,25 @@ The nine-module field guide uses a horizontally scrollable bottom rail on small 
 ### Release contract
 
 A visual phase is not considered complete merely because the stylesheet builds. The release gate requires the final ecosystem selectors to remain wired, mobile navigation to remain reachable, interactive overflow clipping to stay disabled, and the existing build, static QA, backend tests, Worker dry-run, deployment, and smoke checks to remain green.
+
+
+## UI refinement — less noise, more signal
+
+The post-convergence refinement keeps the UNREAL world intact while treating information density as a product concern.
+
+### Page-level hierarchy
+- **Today**: the primary command center now opens with live signals and places the Feature Landscape as a compact system compass. Duplicated finance and next-activity summaries were removed from secondary areas, and integration management no longer competes with daily work.
+- **Schedule**: the timeline gains a lightweight live-time marker so the page communicates the current point in the day without becoming a chart-heavy calendar.
+- **Tasks**: row-level utility actions are consolidated into an overflow menu; progress is shown only when the task has meaningful progress data or is complete.
+- **Finance**: financial summaries remain prominent but quiet, protecting transaction review as the main working surface.
+- **Social**: provider configuration language is separated into a developer disclosure so the product surface remains user-oriented.
+- **Assistant**: assistant channels are limited to assistant-relevant surfaces; Instagram analytics stays in Social.
+- **Profile**: identity remains intentionally narrow and personal rather than becoming a general administration page.
+- **Insights**: the page is framed as a current weekly snapshot rather than implying historical analytics that are not stored.
+- **Habits**: today's completion ratio is surfaced above the weekly matrix to create immediate rhythm feedback.
+
+### Deletion rule
+A UI element should survive only when it helps the user understand state, choose an action, or move to the relevant workspace. Duplicated information, provider internals, and low-value row actions should move to secondary layers or disappear.
+
+### Responsive safeguard
+Refinement changes preserve the existing mobile field-guide navigation, reduced-motion behavior, touch targets, and no-persistent-blur performance contract.

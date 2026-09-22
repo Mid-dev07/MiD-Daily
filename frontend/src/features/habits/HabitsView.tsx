@@ -24,6 +24,8 @@ export function HabitsView() {
   const today = todayInAppTimezone()
   const dates = useMemo(() => weekDates(today), [today])
   const logSet = useMemo(() => new Set(logs.map((log) => log.habitId + ':' + log.date)), [logs])
+  const todayDue = useMemo(() => habits.filter((habit) => habit.targetDays.includes(weekday(today))), [habits, today])
+  const todayComplete = useMemo(() => todayDue.filter((habit) => logSet.has(habit.id + ':' + today)), [todayDue, logSet, today])
 
   const refresh = async () => {
     const start = dates[0]
@@ -157,6 +159,11 @@ export function HabitsView() {
             <div>
               <span className="section-kicker">THIS WEEK</span>
               <strong>{dates[0]} → {dates[6]}</strong>
+            </div>
+            <div className="habit-week-summary">
+              <span>Today</span>
+              <strong>{todayComplete.length}/{todayDue.length}</strong>
+              <small>due habits completed</small>
             </div>
             <div className="habit-week-days" aria-hidden="true">
               {dates.map((date, index) => <span key={date} className={date === today ? 'is-today' : ''}>{dayNames[index]}</span>)}

@@ -139,7 +139,7 @@ export function AssistantView() {
   return (
     <section className="workspace page-enter">
       <div className="page-intro">
-        <div><span className="section-kicker">ASSISTANT</span><h2>Work with your day.</h2><p>One assistant layer for the web app, Telegram, and WhatsApp. Instagram stays isolated as read-only social analytics.</p></div>
+        <div><span className="section-kicker">ASSISTANT</span><h2>Work with your day.</h2><p>One assistant layer for the web app, Telegram, and WhatsApp. Read-only Instagram analytics live in Social.</p></div>
       </div>
 
       <section className="content-card integration-panel assistant-channels-card">
@@ -184,22 +184,6 @@ export function AssistantView() {
             ) : integrations && <button className="secondary-button" type="button" onClick={() => window.open('https://developers.facebook.com/apps/', '_blank', 'noopener,noreferrer')}>Open setup</button>}
           </article>
 
-          <article className="assistant-channel-card">
-            <div className="assistant-channel-copy">
-              <span className="integration-label">Instagram</span>
-              <strong>{integrations?.instagram.configured ? 'Analytics configured' : 'Analytics setup needed'}</strong>
-              <small>Read-only Professional account analytics. Messaging stays separate from this integration.</small>
-            </div>
-            {integrations?.instagram.configured ? (
-              <span className="integration-badge">READY</span>
-            ) : integrations ? (
-              <button className="secondary-button" type="button" onClick={() => window.open('https://developers.facebook.com/apps/', '_blank', 'noopener,noreferrer')}>
-                Open setup
-              </button>
-            ) : (
-              <span className="integration-badge">CHECKING</span>
-            )}
-          </article>
         </div>
       </section>
 

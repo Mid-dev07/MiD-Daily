@@ -25,6 +25,7 @@ Personal use first, with a clear ownership model suitable for small-scale multi-
 - Phase 4: UNREAL Living Environment — complete.
 - Phase 5: UNREAL Habitat Shell + ecosystem convergence — complete.
 - Phase 6: Production hardening and release certification — complete for the automated production gates described below.
+- Phase 7: UI/UX Refinement — complete for the current interface scope: reduce information duplication, consolidate secondary actions, simplify provider setup surfaces, sharpen page-specific hierarchy, and preserve the UNREAL environment under responsive/reduced-motion constraints.
 
 The roadmap is complete for the current product scope. Provider-specific setup and interactive account-consent checks remain explicit deployment/operations work, not hidden product phases.
 
