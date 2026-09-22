@@ -49,8 +49,8 @@ test('AI chat route completes a UI-shaped read tool round-trip', async () => {
 
       if (aiCalls === 1) {
         assert.ok(Array.isArray(input.tools))
-        assert.ok(input.tools.some((tool) => tool.name === 'get_open_tasks'))
-        assert.ok(!input.tools.some((tool) => tool.name === 'create_task'))
+        assert.ok(input.tools.some((tool) => tool.type === 'function' && tool.function?.name === 'get_open_tasks'))
+        assert.ok(!input.tools.some((tool) => tool.type === 'function' && tool.function?.name === 'create_task'))
         return {
           tool_calls: [{
             name: 'get_open_tasks',
@@ -107,7 +107,7 @@ test('AI chat route completes a UI-shaped write tool round-trip only when action
 
       if (aiCalls === 1) {
         assert.ok(Array.isArray(toolList))
-        assert.ok(toolList.some((tool) => tool.name === 'create_task'))
+        assert.ok(toolList.some((tool) => tool.type === 'function' && tool.function?.name === 'create_task'))
         return {
           tool_calls: [{
             name: 'create_task',
