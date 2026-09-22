@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import type { View } from '../../types'
 
 interface SidebarProps {
@@ -18,6 +19,12 @@ const navigation: Array<{ id: View; label: string; icon: string; index: string }
 ]
 
 export function Sidebar({ activeView, onNavigate }: SidebarProps) {
+  const activeNavigationRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    activeNavigationRef.current?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' })
+  }, [activeView])
+
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -35,6 +42,7 @@ export function Sidebar({ activeView, onNavigate }: SidebarProps) {
             className={activeView === item.id ? 'nav-item is-active' : 'nav-item'}
             type="button"
             aria-current={activeView === item.id ? 'page' : undefined}
+            ref={activeView === item.id ? activeNavigationRef : undefined}
             onClick={() => onNavigate(item.id)}
           >
             <span className="nav-index" aria-hidden="true">{item.index}</span>
