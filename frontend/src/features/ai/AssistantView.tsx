@@ -260,12 +260,20 @@ export function AssistantView() {
         )}
 
         <div className="ai-composer">
-          <textarea disabled={!canSend} value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-              event.preventDefault()
-              void send()
-            }
-          }} rows={3} placeholder="Ask about schedule, tasks, expenses, budgets, or flexible plans…" aria-label="Message MiD-Daily Assistant" />
+          <textarea
+            disabled={loading}
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault()
+                if (canSend) void send()
+              }
+            }}
+            rows={3}
+            placeholder={aiConfigured === false ? 'AI is unavailable right now. You can still draft a message.' : 'Ask about schedule, tasks, expenses, budgets, or flexible plans…'}
+            aria-label="Message MiD-Daily Assistant"
+          />
           <button className="primary-button" disabled={!canSend} type="button" onClick={() => void send()}>{loading ? 'Working…' : 'Send'}</button>
         </div>
       </section>
