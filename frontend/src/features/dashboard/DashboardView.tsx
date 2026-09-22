@@ -20,6 +20,7 @@ const WhatsAppIntegrationCard = lazy(() => import('./components/WhatsAppIntegrat
 const QuickCapture = lazy(() => import('./components/QuickCapture').then((module) => ({ default: module.QuickCapture })))
 const DailyBriefing = lazy(() => import('./components/DailyBriefing').then((module) => ({ default: module.DailyBriefing })))
 const FocusMode = lazy(() => import('./components/FocusMode').then((module) => ({ default: module.FocusMode })))
+const FeatureLandscape = lazy(() => import('./components/FeatureLandscape').then((module) => ({ default: module.FeatureLandscape })))
 
 export function DashboardView({ tasks, schedule, finance, onToggleTask, onNavigate }: DashboardViewProps) {
   const [now, setNow] = useState(() => new Date())
@@ -111,6 +112,10 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
         </div>
         <button className="primary-button" type="button" onClick={() => onNavigate('schedule')}>Open schedule</button>
       </div>
+
+      <Suspense fallback={null}>
+        <FeatureLandscape activeView="dashboard" onNavigate={onNavigate} />
+      </Suspense>
 
       <section className="dashboard-signal-grid" aria-label="Daily overview">
         <article className="dashboard-signal-card">
