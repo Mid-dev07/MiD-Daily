@@ -13,6 +13,34 @@ export interface WorkersAiBinding {
 
 let assistantAi: WorkersAiBinding | null = null
 
+type AssistantDataRuntime = {
+  listTasks: typeof listTasks
+  createTask: typeof createTask
+  listFinance: typeof listFinance
+  createFinance: typeof createFinance
+  listFinanceBudgets: typeof listFinanceBudgets
+  createFinanceBudget: typeof createFinanceBudget
+  createSchedule: typeof createSchedule
+  listSchedule: typeof listSchedule
+}
+
+const defaultAssistantDataRuntime: AssistantDataRuntime = {
+  listTasks,
+  createTask,
+  listFinance,
+  createFinance,
+  listFinanceBudgets,
+  createFinanceBudget,
+  createSchedule,
+  listSchedule,
+}
+
+let assistantDataRuntime: AssistantDataRuntime = { ...defaultAssistantDataRuntime }
+
+export function configureAssistantDataRuntime(runtime: Partial<AssistantDataRuntime> | null | undefined) {
+  assistantDataRuntime = { ...defaultAssistantDataRuntime, ...(runtime ?? {}) }
+}
+
 export function configureAssistantRuntime(ai: WorkersAiBinding | null | undefined) {
   assistantAi = ai ?? null
 }
@@ -284,7 +312,7 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
 
   if (name === 'get_today_schedule') {
     const today = todayInTimeZone()
-    const items = (await listSchedule(userId))
+    const items = (await assistantDataRuntime.listSchedule(userId))
       .filter((item) => scheduleOccursOnDate(item, today))
       .slice(0, MAX_ITEMS)
       .map((item) => ({
@@ -305,7 +333,7 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
     if (end < start) throw new Error('Schedule range end cannot be before start.')
     if ((end - start) / 86_400_000 > 13) throw new Error('Schedule range cannot exceed 14 days.')
 
-    const all = await listSchedule(userId)
+    const all = await assistantDataRuntime.listSchedule(userId)
     const fixed: Array<{
       date: string
       title: string
@@ -349,7 +377,7 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
 
   if (name === 'get_active_budgets') {
     const today = todayInTimeZone()
-    const items = (await listFinanceBudgets(userId))
+    const items = (await assistantDataRuntime.listFinanceBudgets(userId))
       .filter((budget) => budget.startsOn <= today && (!budget.endsOn || budget.endsOn >= today))
       .slice(0, MAX_ITEMS)
       .map((budget) => ({
@@ -364,7 +392,7 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
   }
 
   if (name === 'get_open_tasks') {
-    const items = (await listTasks(userId))
+    const items = (await assistantDataRuntime.listTasks(userId))
       .filter((task) => task.status !== 'done')
       .slice(0, MAX_ITEMS)
       .map((task) => ({
@@ -380,7 +408,7 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
 
   if (name === 'get_expense_summary') {
     const today = todayInTimeZone()
-    const entries = (await listFinance(userId)).filter((entry) => entry.date === today)
+    const entries = (await assistantDataRuntime.listFinance(userId)).filter((entry) => entry.date === today)
     const income = entries.filter((entry) => entry.type === 'income').reduce((sum, entry) => sum + entry.amount, 0)
     const expenses = entries.filter((entry) => entry.type === 'expense')
     const expenseTotal = expenses.reduce((sum, entry) => sum + entry.amount, 0)
@@ -417,7 +445,7 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
     if (mode !== 'FLEXIBLE') {
       if (!timePattern.test(startTime) || !timePattern.test(endTime)) throw new Error('Fixed activities require valid start and end times.')
       if (startTime >= endTime) throw new Error('Activity end time must be after start time.')
-      const existing = await listSchedule(userId)
+      const existing = await assistantDataRuntime.listSchedule(userId)
       if (hasScheduleConflict(existing, { date, startTime, endTime })) {
         throw new Error('This time overlaps another activity.')
       }
@@ -455,7 +483,7 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
     const persistedDurationMinutes = mode === 'FLEXIBLE' ? Number(durationMinutes) : durationMinutes
 
     return {
-      created: await createSchedule(userId, {
+      created: await assistantDataRuntime.createSchedule(userId, {
         title,
         type,
         activityMode: mode,
@@ -496,7 +524,7 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
     if (endsOn && endsOn < startsOn) throw new Error('Budget end date cannot be before start date.')
 
     return {
-      created: await createFinanceBudget(userId, {
+      created: await assistantDataRuntime.createFinanceBudget(userId, {
         name: nameValue,
         category,
         amount,
@@ -515,7 +543,7 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
     const dueDate = assertOptionalDate(args.dueDate, 'Task due date')
 
     return {
-      created: await createTask(userId, {
+      created: await assistantDataRuntime.createTask(userId, {
         title,
         category,
         priority,
@@ -533,7 +561,7 @@ async function executeTool(userId: string, name: string, rawArguments: string) {
     const date = assertOptionalDate(args.date, 'Expense date') ?? todayInTimeZone()
 
     return {
-      created: await createFinance(userId, {
+      created: await assistantDataRuntime.createFinance(userId, {
         type: 'expense',
         amount,
         category,
