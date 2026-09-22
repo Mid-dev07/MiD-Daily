@@ -9,7 +9,7 @@ interface TaskDetailProps {
 }
 
 export function TaskDetail({ task, onClose, onEdit }: TaskDetailProps) {
-  useModalBehavior(Boolean(task), onClose)
+  const dialogRef = useModalBehavior(Boolean(task), onClose)
   if (!task) return null
 
   const progress = task.progress ?? (task.status === 'done' ? 100 : 0)
@@ -17,7 +17,7 @@ export function TaskDetail({ task, onClose, onEdit }: TaskDetailProps) {
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <section className="modal-card detail-card" role="dialog" aria-modal="true" aria-labelledby="task-detail-title">
+      <section ref={dialogRef} className="modal-card detail-card" role="dialog" aria-modal="true" aria-labelledby="task-detail-title">
         <div className="modal-header">
           <div><span className="section-kicker">TASK</span><h3 id="task-detail-title">{task.title}</h3></div>
           <button className="icon-button" type="button" onClick={onClose} aria-label="Close task details">×</button>
