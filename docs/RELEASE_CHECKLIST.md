@@ -31,7 +31,14 @@
 - [ ] Sign out.
 - [ ] Protected API calls reject unauthenticated access.
 
-## Gate E — Core data
+## Gate E — Profile
+- [ ] Profile is created for an authenticated user on first open.
+- [ ] Display name, username, and bio save and reload correctly.
+- [ ] Username format and uniqueness validation work.
+- [ ] Profile avatar upload, replacement, signed display, and removal work.
+- [ ] Avatar storage is private and restricted to the owning user.
+
+## Gate F — Core data
 - [ ] Create, edit, complete, and delete a Task.
 - [ ] Create, edit, and delete Finance entries.
 - [ ] Create, edit, and delete Schedule items.
@@ -40,7 +47,7 @@
 - [ ] Data remains isolated per authenticated user.
 - [ ] Refresh rehydrates remote data correctly.
 
-## Gate F — Google Calendar
+## Gate G — Google Calendar
 - [ ] Connect Google Calendar.
 - [ ] Sync a Schedule item.
 - [ ] Edit and update the remote event.
@@ -48,7 +55,7 @@
 - [ ] Recover from a remote 404.
 - [ ] Verify access-token refresh behavior.
 
-## Gate G — Telegram
+## Gate H — Telegram
 - [ ] Configure bot + webhook secret.
 - [ ] Set the production webhook.
 - [ ] Generate a one-time link code.
@@ -57,11 +64,11 @@
 - [ ] Verify duplicate delivery does not duplicate writes.
 - [ ] Verify `/ai <request>` and normal natural-language messages reach the shared Assistant.
 
-## Gate H — WhatsApp (deferred)
+## Gate I — WhatsApp (deferred)
 - [ ] Not applicable to the current production scope.
 - WhatsApp is intentionally skipped; do not treat missing WhatsApp credentials as a release failure.
 
-## Gate I — Assistant
+## Gate J — Assistant
 - [ ] Verify the Cloudflare Workers AI binding is available in production.
 - [ ] Test read-only schedule/task/expense queries.
 - [ ] Confirm writes are unavailable in read-only mode.
@@ -70,7 +77,7 @@
 - [ ] Confirm the UI reports action results.
 - [ ] Verify the same Assistant/tool permission boundaries apply from Telegram.
 
-## Gate J — UX and reliability
+## Gate K — UX and reliability
 - [ ] Dashboard remains usable at desktop, tablet, and mobile widths.
 - [ ] Mobile navigation remains reachable while scrolling.
 - [ ] Browser URL reflects the active workspace view and Back/Forward restores it.
