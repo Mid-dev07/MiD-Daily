@@ -63,6 +63,7 @@ export function Topbar({ view, profile, onProfile, onSearch, onNavigate, userId,
   const environmentTitle = environment.location
     ? 'Refresh MiD environment from your current location'
     : 'Use your location to personalize MiD weather and daylight'
+  const searchShortcut = /Mac|iPhone|iPad/i.test(navigator.platform) ? '⌘K' : 'Ctrl K'
 
   return (
     <header className="topbar">
