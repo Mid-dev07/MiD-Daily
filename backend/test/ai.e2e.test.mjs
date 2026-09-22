@@ -172,3 +172,64 @@ test('AI chat route completes a UI-shaped write tool round-trip only when action
   assert.equal(tasks[0].title, 'Review AI integration')
   assert.equal(aiCalls, 2)
 })
+
+
+test('AI chat route can read habit context without write tools', async () => {
+  configureAssistantDataRuntime({
+    listHabits: async () => [{
+      id: 301,
+      name: 'Study Python',
+      targetDays: [1, 3, 5],
+      active: true,
+      createdAt: '2026-09-20T00:00:00Z',
+      updatedAt: '2026-09-21T00:00:00Z',
+    }],
+    listHabitLogs: async () => [
+      { habitId: 301, date: '2026-09-21' },
+    ],
+  })
+
+  let aiCalls = 0
+  configureAssistantRuntime({
+    async run(_model, input) {
+      aiCalls += 1
+      if (aiCalls === 1) {
+        assert.ok(input.tools.some((tool) => tool.type === 'function' && tool.function?.name === 'get_habits'))
+        assert.ok(!input.tools.some((tool) => tool.type === 'function' && tool.function?.name === 'create_habit'))
+        return {
+          choices: [{
+            message: {
+              role: 'assistant',
+              content: null,
+              tool_calls: [{
+                id: 'call_habits',
+                type: 'function',
+                function: { name: 'get_habits', arguments: '{}' },
+              }],
+            },
+          }],
+        }
+      }
+
+      const toolMessage = input.messages.find((message) => message.role === 'tool')
+      assert.ok(toolMessage)
+      assert.match(String(toolMessage?.content), /Study Python/)
+      return { response: 'Study Python is your active habit, with one completion in the recent window.' }
+    },
+  })
+
+  const response = await fetch(baseUrl + '/api/ai/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: [{ role: 'user', content: 'How is my habit progress?' }],
+      allowWrites: false,
+    }),
+  })
+
+  assert.equal(response.status, 200)
+  const data = await response.json()
+  assert.equal(data.text, 'Study Python is your active habit, with one completion in the recent window.')
+  assert.deepEqual(data.actions, [{ tool: 'get_habits', ok: true }])
+  assert.equal(aiCalls, 2)
+})
