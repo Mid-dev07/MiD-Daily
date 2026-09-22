@@ -208,7 +208,7 @@ export function AssistantView() {
         {integrations?.ai.configured === false && !integrationError && (
           <div className="ai-availability-note" role="status">
             <strong>Assistant is not configured on this deployment.</strong>
-            <span>The core workspace remains fully usable without AI. Add the server-side OpenAI configuration to enable this module.</span>
+            <span>The core workspace remains fully usable without AI. The Assistant will activate when the Cloudflare Workers AI binding is available on this deployment.</span>
           </div>
         )}
 
