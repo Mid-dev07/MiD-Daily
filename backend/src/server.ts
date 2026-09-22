@@ -27,7 +27,7 @@ import {
 import { claimTelegramUpdate, createTelegramLinkCode, deleteTelegramConnectionByUserId, getTelegramConnectionByChatId, getTelegramConnectionByUserId, redeemTelegramLinkCode, isTelegramPersistenceConfigured } from './integrations/telegramStore.js'
 import { isTelegramConfigured, parseCommand, sendTelegramMessage, verifyWebhookSecret } from './integrations/telegram.js'
 import { dispatchNaturalLanguageMessage } from './integrations/gateway.js'
-import { isInstagramAnalyticsConfigured } from './integrations/instagramAnalytics.js'
+import { getAccountInsights, getAccountProfile, isInstagramAnalyticsConfigured, normalizeAccountInsights } from './integrations/instagramAnalytics.js'
 import { getWhatsAppConfig, isWhatsAppConfigured, parseWhatsAppCommand, sendWhatsAppText, verifyWebhookChallenge, verifyWhatsAppSignature, buildWhatsAppUpdateHash } from './integrations/whatsapp.js'
 import { createWhatsAppLinkCode, deleteWhatsAppConnectionByUserId, getWhatsAppConnectionByUserId, getWhatsAppConnectionByWaId, redeemWhatsAppLinkCode, claimWhatsAppUpdate, isWhatsAppPersistenceConfigured } from './integrations/whatsappStore.js'
 import {
@@ -1445,6 +1445,20 @@ function formatTelegramExpenses(items: Array<{ title: string; amount: number; ca
   ).join('\n')
 }
 
+async function handleInstagramInsights(req: IncomingMessage, res: ServerResponse) {
+  await requireAuthenticatedUserId(req)
+  if (!isInstagramAnalyticsConfigured()) {
+    throw httpError(503, 'Instagram Analytics is not configured.')
+  }
+
+  const [profile, insights] = await Promise.all([
+    getAccountProfile(),
+    getAccountInsights(),
+  ])
+
+  sendJson(res, 200, normalizeAccountInsights(profile, insights.data ?? []))
+}
+
 async function handleIntegrationStatus(req: IncomingMessage, res: ServerResponse) {
   const userId = await requireAuthenticatedUserId(req)
   const [telegram, whatsapp] = await Promise.all([
@@ -1767,6 +1781,11 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
 
     if (req.method === 'GET' && url.pathname === '/api/integrations/status') {
       await handleIntegrationStatus(req, res)
+      return
+    }
+
+    if (req.method === 'GET' && url.pathname === '/api/integrations/instagram/insights') {
+      await handleInstagramInsights(req, res)
       return
     }
 
