@@ -376,16 +376,15 @@ export function App() {
             {activeView === 'finance' && <FinanceView finance={finance} budgets={budgets} onSaveFinance={saveFinance} onDeleteFinance={(id) => void deleteFinance(id)} onSaveBudget={saveBudget} onDeleteBudget={(id) => void deleteBudget(id)} />}
             {activeView === 'social' && <SocialAnalyticsView />}
             {activeView === 'assistant' && <AssistantView />}
-            {activeView === 'profile' && (
             {activeView === 'profile' && (user && profile ? (
-                <ProfileView user={user} profile={profile} onProfileChange={setProfile} onToast={setToast} />
-              ) : (
-                <section className="workspace view-loading" aria-live="polite">
-                  <span className="section-kicker">ACCOUNT</span>
-                  <h2>{profileLoading ? 'Loading your profile…' : 'Profile unavailable'}</h2>
-                  <p>{profileLoading ? 'Restoring your profile details.' : 'Sign in to manage your MiD-Daily profile.'}</p>
-                </section>
-              ))}
+              <ProfileView user={user} profile={profile} onProfileChange={setProfile} onToast={setToast} />
+            ) : (
+              <section className="workspace view-loading" aria-live="polite">
+                <span className="section-kicker">ACCOUNT</span>
+                <h2>{profileLoading ? 'Loading your profile…' : 'Profile unavailable'}</h2>
+                <p>{profileLoading ? 'Restoring your profile details.' : 'Sign in to manage your profile.'}</p>
+              </section>
+            ))}
             {activeView === 'insights' && <InsightsView tasks={tasks} schedule={schedule} finance={finance} onNavigate={navigate} />}
           </div>
         </Suspense>
