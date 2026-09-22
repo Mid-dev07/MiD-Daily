@@ -68,12 +68,16 @@ export function SocialAnalyticsView() {
               {error || 'Connect an Instagram Professional account to load live analytics.'}
             </p>
             <div className="social-setup-panel">
-              <strong>Provider setup</strong>
-              <span>MiD-Daily is ready for a server-side Instagram access token. Configure <code>INSTAGRAM_ACCESS_TOKEN</code>, <code>INSTAGRAM_GRAPH_VERSION</code>, and <code>INSTAGRAM_ACCOUNT_ID</code>.</span>
+              <strong>Connect a Professional account</strong>
+              <span>MiD-Daily is ready to read your Instagram analytics. Provider credentials are configured on the deployment, not entered into this page.</span>
               <div className="integration-actions">
-                <button className="secondary-button" type="button" onClick={() => window.open('https://developers.facebook.com/apps/', '_blank', 'noopener,noreferrer')}>Open Instagram setup</button>
+                <button className="secondary-button" type="button" onClick={() => window.open('https://developers.facebook.com/apps/', '_blank', 'noopener,noreferrer')}>Open provider setup</button>
                 <a href="https://developers.facebook.com/docs/instagram-platform/" target="_blank" rel="noreferrer">Read Meta Instagram Platform docs ↗</a>
               </div>
+              <details className="provider-details">
+                <summary>Developer setup details</summary>
+                <span>Server configuration uses INSTAGRAM_ACCESS_TOKEN, INSTAGRAM_GRAPH_VERSION, and INSTAGRAM_ACCOUNT_ID. These values stay out of the user-facing form.</span>
+              </details>
             </div>
           </>
         )}
