@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { sendAIMessage, type AIMessage } from '../../integrations/aiApi'
+import { getAIStatus, sendAIMessage, type AIMessage } from '../../integrations/aiApi'
 import {
   createTelegramLink,
   createWhatsAppLink,
@@ -24,16 +24,33 @@ export function AssistantView() {
   const [integrationLoading, setIntegrationLoading] = useState(true)
   const [integrationBusy, setIntegrationBusy] = useState<'telegram' | 'whatsapp' | null>(null)
   const [integrationError, setIntegrationError] = useState('')
+  const [aiConfigured, setAiConfigured] = useState<boolean | null>(null)
+  const [aiStatusError, setAiStatusError] = useState('')
 
   const refreshIntegrations = async () => {
     setIntegrationLoading(true)
+    setAiStatusError('')
     try {
-      setIntegrations(await getIntegrationStatus())
+      const [nextIntegrations, nextAi] = await Promise.all([
+        getIntegrationStatus(),
+        getAIStatus(),
+      ])
+      setIntegrations(nextIntegrations)
       setIntegrationError('')
+      setAiConfigured(nextAi.configured)
     } catch (reason) {
       const message = reason instanceof Error ? reason.message : 'Unable to load integration status.'
       setIntegrations(null)
       setIntegrationError(message)
+      // Integration status and AI status are logically independent. A
+      // connector failure must never disable the assistant composer.
+      try {
+        const nextAi = await getAIStatus()
+        setAiConfigured(nextAi.configured)
+      } catch (aiReason) {
+        setAiConfigured(null)
+        setAiStatusError(aiReason instanceof Error ? aiReason.message : 'Unable to load AI status.')
+      }
     } finally {
       setIntegrationLoading(false)
     }
@@ -43,7 +60,7 @@ export function AssistantView() {
     void refreshIntegrations()
   }, [])
 
-  const canSend = useMemo(() => input.trim().length > 0 && !loading && integrations?.ai.configured === true, [input, loading, integrations])
+  const canSend = useMemo(() => input.trim().length > 0 && !loading && aiConfigured === true, [input, loading, aiConfigured])
 
   const openConnectionLink = async (channel: 'telegram' | 'whatsapp') => {
     const popup = window.open('', '_blank')
@@ -191,7 +208,7 @@ export function AssistantView() {
           <label className="ai-action-toggle">
             <input
               type="checkbox"
-              disabled={integrations?.ai.configured !== true}
+              disabled={aiConfigured !== true}
               checked={allowWrites}
               onChange={(event) => {
                 if (event.target.checked && !window.confirm('Allow MiD-Daily Assistant to create Tasks, Expenses, Activities, and Budgets only when you explicitly ask it to?')) {
@@ -203,17 +220,17 @@ export function AssistantView() {
             <span>Allow actions</span>
           </label>
           <span className="card-meta">
-            {integrationError
-              ? 'AI service status unavailable'
-              : integrations?.ai.configured === undefined
+            {aiStatusError
+              ? 'AI status unavailable'
+              : aiConfigured === null
                 ? 'Checking AI service…'
-                : integrations.ai.configured
-                ? (allowWrites ? 'Write actions enabled' : 'Read-only mode')
-                : 'AI service not configured'}
+                : aiConfigured
+                  ? (allowWrites ? 'Write actions enabled' : 'Read-only mode')
+                  : 'AI service not configured'}
           </span>
         </div>
 
-        {integrations?.ai.configured === false && !integrationError && (
+        {aiConfigured === false && !aiStatusError && (
           <div className="ai-availability-note" role="status">
             <strong>Assistant is not configured on this deployment.</strong>
             <span>The core workspace remains fully usable without AI. The Assistant will activate when the Cloudflare Workers AI binding is available on this deployment.</span>
