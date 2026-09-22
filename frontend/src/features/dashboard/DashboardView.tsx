@@ -16,8 +16,6 @@ interface DashboardViewProps {
 const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
 const getToday = (timezone: string) => new Intl.DateTimeFormat('sv-SE', { timeZone: timezone }).format(new Date())
 
-const TelegramIntegrationCard = lazy(() => import('./components/TelegramIntegrationCard').then((module) => ({ default: module.TelegramIntegrationCard })))
-const WhatsAppIntegrationCard = lazy(() => import('./components/WhatsAppIntegrationCard').then((module) => ({ default: module.WhatsAppIntegrationCard })))
 const QuickCapture = lazy(() => import('./components/QuickCapture').then((module) => ({ default: module.QuickCapture })))
 const DailyBriefing = lazy(() => import('./components/DailyBriefing').then((module) => ({ default: module.DailyBriefing })))
 const FocusMode = lazy(() => import('./components/FocusMode').then((module) => ({ default: module.FocusMode })))
@@ -290,18 +288,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
         </section>
       )}
 
-      <details className="dashboard-connections">
-        <summary className="connections-toggle">
-          <span><strong>Connections</strong></span>
-          <span className="connections-toggle-icon" aria-hidden="true">+</span>
-        </summary>
-        <div className="dashboard-integration-grid">
-          <Suspense fallback={<div className="content-card connection-loading">Opening connections…</div>}>
-            <TelegramIntegrationCard />
-            <WhatsAppIntegrationCard />
-          </Suspense>
-        </div>
-      </details>
+
     </section>
   )
 }
