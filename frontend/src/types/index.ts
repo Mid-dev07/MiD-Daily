@@ -14,6 +14,20 @@ export interface Profile {
 export type TaskStatus = 'todo' | 'in-progress' | 'done'
 export type TaskPriority = 'low' | 'medium' | 'high'
 
+export interface Habit {
+  id: number
+  name: string
+  targetDays: number[]
+  active: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface HabitLog {
+  habitId: number
+  date: string
+}
+
 export interface Task {
   id: number
   title: string
