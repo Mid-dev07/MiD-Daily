@@ -170,10 +170,18 @@ export function AssistantView() {
           <article className="assistant-channel-card">
             <div className="assistant-channel-copy">
               <span className="integration-label">Instagram</span>
-              <strong>{integrations?.instagram.configured ? 'Analytics configured' : 'Analytics foundation'}</strong>
-              <small>Read-only social analytics. Provider OAuth/account mapping is kept separate from messaging.</small>
+              <strong>{integrations?.instagram.configured ? 'Analytics configured' : 'Analytics setup needed'}</strong>
+              <small>Read-only Professional account analytics. Messaging stays separate from this integration.</small>
             </div>
-            <span className="integration-badge">{integrations?.instagram.configured ? 'READY' : 'FOUNDATION'}</span>
+            {integrations?.instagram.configured ? (
+              <span className="integration-badge">READY</span>
+            ) : integrations ? (
+              <button className="secondary-button" type="button" onClick={() => window.open('https://developers.facebook.com/apps/', '_blank', 'noopener,noreferrer')}>
+                Open setup
+              </button>
+            ) : (
+              <span className="integration-badge">CHECKING</span>
+            )}
           </article>
         </div>
       </section>
