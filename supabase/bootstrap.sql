@@ -590,6 +590,7 @@ create table if not exists public.habit_logs (
 
 create index if not exists habit_logs_user_date_idx on public.habit_logs (user_id, log_date desc);
 create index if not exists habit_logs_habit_date_idx on public.habit_logs (habit_id, log_date desc);
+create index if not exists habit_logs_habit_user_idx on public.habit_logs (habit_id, user_id);
 
 alter table public.habit_logs enable row level security;
 revoke all on table public.habit_logs from anon;
