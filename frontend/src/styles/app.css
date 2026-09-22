@@ -4234,3 +4234,45 @@ textarea {
   .insights-schedule-row { grid-template-columns: 82px 50px minmax(0, 1fr); gap: 8px; }
   .insights-finance-values { grid-template-columns: 1fr 1fr; }
 }
+
+
+/* M13 Habits */
+.habit-composer { display: grid; gap: 13px; }
+.habit-compose-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px; }
+.habit-compose-row input { width: 100%; min-height: 42px; border: 1px solid #253848; border-radius: 10px; padding: 10px 11px; color: var(--color-text); background: #0a141d; outline: 0; font: inherit; }
+.habit-compose-row input:focus { border-color: #4bbecf; box-shadow: 0 0 0 3px rgba(103,232,249,.08); }
+.habit-days { display: flex; flex-wrap: wrap; gap: 6px; }
+.habit-day { min-width: 50px; min-height: 34px; padding: 0 10px; border: 1px solid var(--color-border); border-radius: 999px; color: #72869a; background: transparent; font-size: 9px; cursor: pointer; }
+.habit-day.is-selected { color: #eaffff; border-color: #1d5362; background: var(--color-accent-soft); }
+.habit-empty { min-height: 150px; place-content: center; }
+.habit-board { overflow-x: auto; }
+.habit-week-header { display: grid; grid-template-columns: minmax(240px, 1fr) minmax(350px, 1fr); gap: 16px; align-items: end; padding-bottom: 13px; border-bottom: 1px solid var(--color-border); }
+.habit-week-header > div:first-child { display: grid; gap: 3px; }
+.habit-week-header > div:first-child > strong { color: #cbd9e2; font-size: 11px; }
+.habit-week-days, .habit-week-grid { display: grid; grid-template-columns: repeat(7, minmax(36px, 1fr)); gap: 5px; }
+.habit-week-days span { color: #53697c; font-size: 8px; text-align: center; text-transform: uppercase; letter-spacing: .08em; }
+.habit-week-days span.is-today { color: var(--color-accent); }
+.habit-list { display: grid; }
+.habit-row { display: grid; grid-template-columns: minmax(240px, 1fr) minmax(350px, 1fr); gap: 16px; align-items: center; padding: 14px 0; border-top: 1px solid var(--color-border-soft); }
+.habit-row:first-child { border-top: 0; }
+.habit-main { min-width: 0; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.habit-main > div:first-child { min-width: 0; }
+.habit-main strong, .habit-main small { display: block; }
+.habit-main strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #cbd9e2; font-size: 12px; }
+.habit-main small { margin-top: 4px; color: #607488; font-size: 9px; }
+.habit-row-actions { display: flex; gap: 4px; flex: 0 0 auto; }
+.habit-week-grid { align-items: center; }
+.habit-check { width: 100%; aspect-ratio: 1; min-width: 32px; max-width: 44px; justify-self: center; border: 1px solid #213442; border-radius: 11px; color: #607488; background: #0b141d; cursor: pointer; font-size: 11px; }
+.habit-check:hover:enabled { border-color: #36576a; background: #0d1923; }
+.habit-check.is-done { border-color: #1d5362; color: #06232b; background: var(--color-accent); font-weight: 900; }
+.habit-check.is-today { box-shadow: 0 0 0 2px rgba(103,232,249,.08); }
+.habit-check.is-off { color: #344653; background: #0a1118; cursor: default; }
+.habit-check:disabled { opacity: 1; }
+@media (max-width: 760px) {
+  .habit-week-header, .habit-row { grid-template-columns: 1fr; gap: 11px; min-width: 620px; }
+  .habit-board { padding-bottom: 18px; }
+}
+@media (max-width: 640px) {
+  .habit-compose-row { grid-template-columns: 1fr; }
+  .habit-compose-row .primary-button { width: 100%; }
+}
