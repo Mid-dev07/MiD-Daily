@@ -4168,3 +4168,34 @@ textarea {
   .profile-hero-card { align-items: flex-start; flex-direction: column; padding: 22px; }
   .profile-avatar-large { width: 96px; height: 96px; }
 }
+
+
+/* M11 Productivity command layer */
+.daily-briefing-card { display: grid; gap: 16px; }
+.daily-briefing-card .card-heading { margin-bottom: 0; }
+.briefing-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
+.briefing-item { min-width: 0; display: grid; gap: 4px; padding: 13px; border: 1px solid #1d2d3a; border-radius: 12px; color: inherit; background: #0b141d; text-align: left; cursor: pointer; transition: border-color var(--duration-fast) ease, transform var(--duration-fast) var(--ease-standard), background var(--duration-fast) ease; }
+.briefing-item:hover { border-color: #2c4758; background: #0d1923; transform: translateY(-1px); }
+.briefing-item span { color: #63778b; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; }
+.briefing-item strong { color: #d7e5ee; font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.briefing-item small { color: #53697c; font-size: 9px; line-height: 1.45; }
+.quick-capture-card { display: grid; gap: 14px; }
+.quick-capture-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px; align-items: stretch; }
+.quick-capture-row textarea { width: 100%; min-height: 58px; resize: vertical; border: 1px solid #253848; border-radius: 10px; padding: 10px 11px; color: var(--color-text); background: #0a141d; outline: 0; font: inherit; }
+.quick-capture-row textarea:focus { border-color: #4bbecf; box-shadow: 0 0 0 3px rgba(103,232,249,.08); }
+.quick-capture-message { margin: 0; color: #7d92a5; font-size: 10px; line-height: 1.55; }
+.planner-shortcuts-card { display: grid; gap: 14px; }
+.planner-shortcuts-card .card-heading { margin-bottom: 0; }
+.planner-shortcuts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.planner-shortcut { display: grid; gap: 5px; padding: 13px; border: 1px solid #1d2d3a; border-radius: 12px; color: inherit; background: #0b141d; text-align: left; cursor: pointer; transition: border-color var(--duration-fast) ease, transform var(--duration-fast) var(--ease-standard), background var(--duration-fast) ease; }
+.planner-shortcut:hover { border-color: #2c4758; background: #0d1923; transform: translateY(-1px); }
+.planner-shortcut strong { color: #cbd9e2; font-size: 11px; }
+.planner-shortcut span { color: #607488; font-size: 9px; line-height: 1.5; }
+@media (max-width: 800px) {
+  .briefing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .planner-shortcuts { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .quick-capture-row { grid-template-columns: 1fr; }
+  .briefing-grid { grid-template-columns: 1fr 1fr; }
+}
