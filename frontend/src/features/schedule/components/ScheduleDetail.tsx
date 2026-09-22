@@ -15,7 +15,7 @@ interface ScheduleDetailProps {
 export function ScheduleDetail({ item, onClose, onEdit, onSync }: ScheduleDetailProps) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  useModalBehavior(Boolean(item), onClose, busy)
+  const dialogRef = useModalBehavior(Boolean(item), onClose, busy)
 
   if (!item) return null
 
@@ -46,7 +46,7 @@ export function ScheduleDetail({ item, onClose, onEdit, onSync }: ScheduleDetail
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !busy && onClose()}>
-      <section className="modal-card detail-card" role="dialog" aria-modal="true" aria-labelledby="schedule-detail-title">
+      <section ref={dialogRef} className="modal-card detail-card" role="dialog" aria-modal="true" aria-labelledby="schedule-detail-title">
         <div className="modal-header">
           <div><span className="section-kicker">{item.activityMode} · {item.type}</span><h3 id="schedule-detail-title">{item.title}</h3></div>
           <button className="icon-button" type="button" disabled={busy} onClick={onClose} aria-label="Close details">×</button>

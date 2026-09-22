@@ -24,7 +24,7 @@ export function FinanceForm({ open, initialEntry, defaultDate, onClose, onSubmit
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
-  useModalBehavior(open, onClose, saving)
+  const dialogRef = useModalBehavior(open, onClose, saving)
 
   useEffect(() => {
     if (!open) return
@@ -67,7 +67,7 @@ export function FinanceForm({ open, initialEntry, defaultDate, onClose, onSubmit
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !saving && onClose()}>
-      <section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="finance-form-title">
+      <section ref={dialogRef} className="modal-card" role="dialog" aria-modal="true" aria-labelledby="finance-form-title">
         <div className="modal-header">
           <div><span className="section-kicker">FINANCE</span><h3 id="finance-form-title">{initialEntry ? 'Edit transaction' : 'Add transaction'}</h3></div>
           <button className="icon-button" type="button" disabled={saving} onClick={onClose} aria-label="Close finance form">×</button>

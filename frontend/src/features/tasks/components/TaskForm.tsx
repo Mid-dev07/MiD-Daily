@@ -24,7 +24,7 @@ export function TaskForm({ open, initialTask, onClose, onSubmit }: TaskFormProps
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
-  useModalBehavior(open, onClose, saving)
+  const dialogRef = useModalBehavior(open, onClose, saving)
 
   useEffect(() => {
     if (!open) return
@@ -68,7 +68,7 @@ export function TaskForm({ open, initialTask, onClose, onSubmit }: TaskFormProps
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !saving && onClose()}>
-      <section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="task-form-title">
+      <section ref={dialogRef} className="modal-card" role="dialog" aria-modal="true" aria-labelledby="task-form-title">
         <div className="modal-header">
           <div><span className="section-kicker">TASK</span><h3 id="task-form-title">{initialTask ? 'Edit task' : 'Add task'}</h3></div>
           <button className="icon-button" type="button" disabled={saving} onClick={onClose} aria-label="Close task form">×</button>
