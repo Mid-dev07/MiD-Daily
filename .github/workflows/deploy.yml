@@ -38,6 +38,9 @@ jobs:
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
         run: npm run build
 
+      - name: Static frontend QA
+        run: npm run qa:static
+
       - name: Deploy frontend Worker
         uses: cloudflare/wrangler-action@v4
         with:
