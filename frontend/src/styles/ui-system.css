@@ -7,6 +7,7 @@
   --ui-surface: var(--surface-1);
   --ui-surface-2: var(--surface-2);
   --ui-surface-3: var(--surface-3);
+  --ui-surface-recessed: var(--surface-recessed);
   --ui-border: var(--line);
   --ui-border-strong: var(--line-strong);
   --ui-text: var(--color-text);
