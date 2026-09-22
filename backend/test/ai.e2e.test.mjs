@@ -5,8 +5,10 @@ process.env.SUPABASE_URL = ''
 process.env.SUPABASE_SECRET_KEY = ''
 process.env.COOKIE_SECURE = 'false'
 
-const { server } = await import('../dist/server.js')
+const { configureAuthenticatedUserResolver, server } = await import('../dist/server.js')
 const { configureAssistantDataRuntime, configureAssistantRuntime } = await import('../dist/ai/assistant.js')
+
+configureAuthenticatedUserResolver(async () => 'e2e-user')
 
 await new Promise((resolve, reject) => {
   server.once('error', reject)
@@ -20,6 +22,7 @@ const baseUrl = 'http://127.0.0.1:' + address.port
 after(async () => {
   configureAssistantRuntime(null)
   configureAssistantDataRuntime(null)
+  configureAuthenticatedUserResolver(null)
   await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()))
 })
 
