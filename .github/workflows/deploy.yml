@@ -122,4 +122,7 @@ jobs:
           password_check=$(curl --fail --silent --show-error --location \
             https://mid-daily-api.e41262272.workers.dev/api/security/password-range/5BAA6)
           PASSWORD_CHECK="$password_check" node -e 'const data=JSON.parse(process.env.PASSWORD_CHECK); if (!data.ok || typeof data.suffixes !== "string" || !data.suffixes.includes("1E4C9B93F3F0682250B6CF8331B7EE68FD8:")) process.exit(1); console.log("Password exposure proxy smoke test passed.")'
+          protected=$(curl --silent --show-error --location --write-out '%{http_code}' --output /tmp/mid-daily-protected.json https://mid-daily-api.e41262272.workers.dev/api/workspace/bootstrap)
+          test "$protected" = "401"
+          echo "Unauthenticated workspace API correctly rejected with HTTP 401."
           echo "Backend smoke test passed."
