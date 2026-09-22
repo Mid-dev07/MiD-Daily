@@ -15,6 +15,13 @@ interface HabitLogRow {
   log_date: string
 }
 
+async function currentUserId() {
+  if (!supabase) throw new Error('Habit storage is not configured.')
+  const { data, error } = await supabase.auth.getUser()
+  if (error || !data.user) throw new Error('Authentication is required to manage habits.')
+  return data.user.id
+}
+
 function mapHabit(row: HabitRow): Habit {
   return {
     id: Number(row.id),
@@ -57,9 +64,10 @@ export async function createHabit(name: string, targetDays: number[]): Promise<H
   if (normalized.length < 1 || normalized.length > 80) throw new Error('Habit name must be between 1 and 80 characters.')
   if (days.length < 1 || days.some((day) => !Number.isInteger(day) || day < 1 || day > 7)) throw new Error('Choose at least one valid day.')
 
+  const userId = await currentUserId()
   const { data, error } = await supabase
     .from('habits')
-    .insert({ name: normalized, target_days: days })
+    .insert({ user_id: userId, name: normalized, target_days: days })
     .select('id,name,target_days,active,created_at,updated_at')
     .single<HabitRow>()
 
@@ -100,7 +108,8 @@ export async function archiveHabit(habitId: number) {
 export async function toggleHabitLog(habitId: number, date: string, completed: boolean) {
   if (!supabase) throw new Error('Habit storage is not configured.')
   if (completed) {
-    const { error } = await supabase.from('habit_logs').insert({ habit_id: habitId, log_date: date })
+    const userId = await currentUserId()
+    const { error } = await supabase.from('habit_logs').insert({ user_id: userId, habit_id: habitId, log_date: date })
     if (error && error.code !== '23505') throw new Error('Unable to mark habit complete: ' + error.message)
     return
   }
