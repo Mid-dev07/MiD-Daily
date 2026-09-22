@@ -21,6 +21,20 @@ export interface FinanceRecord {
   notes?: string | null
 }
 
+export interface HabitRecord {
+  id: number
+  name: string
+  targetDays: number[]
+  active: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface HabitLogRecord {
+  habitId: number
+  date: string
+}
+
 export interface FinanceBudgetRecord {
   id: number
   name: string
@@ -236,4 +250,42 @@ export async function deleteFinanceBudget(userId: string, id: number) {
     .maybeSingle()
   if (error) throw new Error(`Finance budget delete failed: ${error.message}`)
   return Boolean(data)
+}
+
+
+function habitFromRow(row: Record<string, unknown>): HabitRecord {
+  return {
+    id: Number(row.id),
+    name: String(row.name),
+    targetDays: Array.isArray(row.target_days) ? row.target_days.map(Number) : [],
+    active: Boolean(row.active),
+    createdAt: String(row.created_at),
+    updatedAt: String(row.updated_at),
+  }
+}
+
+export async function listHabits(userId: string) {
+  const { data, error } = await db()
+    .from('habits')
+    .select('id,name,target_days,active,created_at,updated_at')
+    .eq('user_id', userId)
+    .eq('active', true)
+    .order('created_at', { ascending: true })
+  if (error) throw new Error(`Habit read failed: ${error.message}`)
+  return (data ?? []).map(habitFromRow)
+}
+
+export async function listHabitLogs(userId: string, startDate: string, endDate: string) {
+  const { data, error } = await db()
+    .from('habit_logs')
+    .select('habit_id,log_date')
+    .eq('user_id', userId)
+    .gte('log_date', startDate)
+    .lte('log_date', endDate)
+    .order('log_date', { ascending: true })
+  if (error) throw new Error(`Habit history read failed: ${error.message}`)
+  return (data ?? []).map((row) => ({
+    habitId: Number(row.habit_id),
+    date: String(row.log_date),
+  })) as HabitLogRecord[]
 }
