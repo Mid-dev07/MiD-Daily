@@ -3413,3 +3413,182 @@ textarea:focus {
     transition: none !important;
   }
 }
+
+
+/* UNREAL Habitat Material System — modules share one world, each with a distinct surface character. */
+.view-key {
+  position: relative;
+  isolation: isolate;
+}
+
+.view-key::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  z-index: -1;
+  background: linear-gradient(90deg, transparent, rgba(226,235,216,.08), transparent);
+  opacity: .8;
+}
+
+.view-key > .workspace {
+  position: relative;
+}
+
+/* A quiet material response lets the environment tint the workspace without sacrificing contrast. */
+.view-key > .workspace .content-card,
+.view-key > .workspace .glass-panel {
+  position: relative;
+  overflow: clip;
+  box-shadow:
+    inset 0 1px 0 var(--spec-highlight),
+    0 18px 46px -38px var(--ao-shadow);
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms var(--ease-spring);
+}
+
+.view-key > .workspace .content-card::after,
+.view-key > .workspace .glass-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .48;
+  background:
+    linear-gradient(var(--light-angle), rgba(255,250,225,.022), transparent 19%, transparent 74%, rgba(0,0,0,.045));
+}
+
+.view-key > .workspace .content-card:hover {
+  border-color: rgba(226,235,216,.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255,250,225,.07),
+    0 24px 54px -40px rgba(0,0,0,.68);
+}
+
+/* Module character: no new components, only a controlled change in light/material language. */
+.view-key[data-module="dashboard"] .content-card {
+  background:
+    radial-gradient(circle at 86% 12%, rgba(217,197,141,.035), transparent 28%),
+    var(--ui-surface);
+}
+
+.view-key[data-module="schedule"] .content-card {
+  border-radius: 15px 19px 15px 18px;
+  background:
+    linear-gradient(90deg, rgba(143,138,115,.035), transparent 16%),
+    var(--ui-surface);
+}
+
+.view-key[data-module="tasks"] .content-card {
+  border-radius: 12px 15px 13px 17px;
+  background:
+    radial-gradient(circle at 7% 90%, rgba(82,106,79,.04), transparent 22%),
+    var(--ui-surface);
+}
+
+.view-key[data-module="finance"] .content-card {
+  border-radius: 14px 13px 17px 12px;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(217,197,141,.045), transparent 22%),
+    var(--ui-surface);
+}
+
+.view-key[data-module="social"] .content-card {
+  border-radius: 17px 12px 15px 14px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(204,215,197,.04), transparent 22%),
+    var(--ui-surface);
+}
+
+.view-key[data-module="assistant"] .content-card {
+  border-radius: 18px 14px 16px 12px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(183,201,138,.045), transparent 30%),
+    var(--ui-surface);
+}
+
+.view-key[data-module="profile"] .content-card {
+  background:
+    linear-gradient(120deg, rgba(143,138,115,.025), transparent 32%),
+    var(--ui-surface);
+}
+
+.view-key[data-module="insights"] .content-card {
+  background:
+    radial-gradient(circle at 72% 8%, rgba(204,215,197,.035), transparent 26%),
+    var(--ui-surface);
+}
+
+.view-key[data-module="habits"] .content-card {
+  border-radius: 16px 18px 13px 17px;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(113,136,94,.04), transparent 24%),
+    var(--ui-surface);
+}
+
+/* Navigation becomes a field guide rather than a conventional product rail. */
+.sidebar {
+  background:
+    linear-gradient(180deg, rgba(18,25,19,.99), rgba(13,19,14,.99));
+}
+
+.brand {
+  position: relative;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.brand::after {
+  content: "FIELD GUIDE / 001";
+  position: absolute;
+  left: 45px;
+  bottom: 0;
+  transform: translateY(50%);
+  padding: 0 5px;
+  background: rgba(13,19,14,.99);
+  color: var(--ui-text-3);
+  font-size: 6px;
+  letter-spacing: .14em;
+}
+
+.nav-item {
+  border-radius: 7px 11px 8px 10px;
+}
+
+.nav-item.is-active {
+  background:
+    linear-gradient(90deg, rgba(183,201,138,.09), rgba(183,201,138,.025) 70%, transparent);
+  border-color: rgba(183,201,138,.13);
+}
+
+.nav-item.is-active::after {
+  content: "";
+  position: absolute;
+  right: 9px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ui-accent);
+  box-shadow: 0 0 0 4px rgba(183,201,138,.07);
+}
+
+/* Desktop workspace gets more landscape breathing room without becoming a floating card wall. */
+@media (min-width: 981px) {
+  .workspace {
+    padding-top: 40px;
+  }
+
+  .page-intro {
+    padding-bottom: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view-key > .workspace .content-card,
+  .view-key > .workspace .glass-panel {
+    transition: none !important;
+  }
+}
