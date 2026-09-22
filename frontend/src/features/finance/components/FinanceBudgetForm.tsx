@@ -30,7 +30,7 @@ export function FinanceBudgetForm({ open, initialBudget, defaultDate, onClose, o
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
-  useModalBehavior(open, onClose, saving)
+  const dialogRef = useModalBehavior(open, onClose, saving)
 
   useEffect(() => {
     if (!open) return
@@ -67,7 +67,7 @@ export function FinanceBudgetForm({ open, initialBudget, defaultDate, onClose, o
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !saving && onClose()}>
-      <section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="budget-form-title">
+      <section ref={dialogRef} className="modal-card" role="dialog" aria-modal="true" aria-labelledby="budget-form-title">
         <div className="modal-header">
           <div><span className="section-kicker">FINANCE</span><h3 id="budget-form-title">{initialBudget ? 'Edit budget' : 'Add budget'}</h3></div>
           <button className="icon-button" type="button" disabled={saving} onClick={onClose} aria-label="Close form">×</button>
