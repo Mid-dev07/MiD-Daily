@@ -1550,13 +1550,38 @@ async function handleTelegramDisconnect(req: IncomingMessage, res: ServerRespons
 async function telegramHelp(chatId: number) {
   await sendTelegramMessage(chatId, [
     'MiD-Daily Telegram commands:',
+    '/ai <question or request>',
     '/task <title>',
     '/expense <amount> <category> <title>',
     '/expenses',
     '/schedule',
     '/schedule tomorrow',
     '/disconnect',
+    '',
+    'Tip: you can also send a normal message to talk to MiD-Daily Assistant.',
   ].join('\n'))
+}
+
+async function handleTelegramAiMessage(chatId: number, userId: string, textValue: string) {
+  const prompt = textValue.trim()
+  if (!prompt) {
+    await sendTelegramMessage(chatId, 'Usage: /ai <question or request>')
+    return
+  }
+
+  try {
+    const result = await dispatchNaturalLanguageMessage({
+      channel: 'telegram',
+      userId,
+      text: prompt,
+    })
+    await sendTelegramMessage(chatId, result.text)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'MiD-Daily Assistant could not process this message.'
+    await sendTelegramMessage(chatId, message === 'AI integration is not configured.'
+      ? 'MiD-Daily Assistant is not configured on this deployment yet.'
+      : 'MiD-Daily Assistant could not process that request right now.')
+  }
 }
 
 async function handleTelegramUpdate(req: IncomingMessage, res: ServerResponse) {
@@ -1601,25 +1626,15 @@ async function handleTelegramUpdate(req: IncomingMessage, res: ServerResponse) {
   }
 
   const parsed = parseCommand(textValue)
+  const connection = await getTelegramConnectionByChatId(chatId)
+  if (!connection) {
+    await sendTelegramMessage(chatId, 'Telegram is not linked. Open MiD-Daily and generate a Telegram connection link first.')
+    sendJson(res, 200, { ok: true })
+    return
+  }
+
   if (!parsed) {
-    const connection = await getTelegramConnectionByChatId(chatId)
-    if (!connection) {
-      await sendTelegramMessage(chatId, 'Telegram is not linked. Open MiD-Daily and generate a Telegram connection link first.')
-    } else {
-      try {
-        const result = await dispatchNaturalLanguageMessage({
-          channel: 'telegram',
-          userId: connection.user_id,
-          text: textValue,
-        })
-        await sendTelegramMessage(chatId, result.text)
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'MiD-Daily Assistant could not process this message.'
-        await sendTelegramMessage(chatId, message === 'AI integration is not configured.'
-          ? 'MiD-Daily Assistant is not configured on this deployment yet.'
-          : 'MiD-Daily Assistant could not process that request right now.')
-      }
-    }
+    await handleTelegramAiMessage(chatId, connection.user_id, textValue)
     sendJson(res, 200, { ok: true })
     return
   }
@@ -1646,6 +1661,8 @@ async function handleTelegramUpdate(req: IncomingMessage, res: ServerResponse) {
 
   if (parsed.command === 'help') {
     await telegramHelp(chatId)
+  } else if (parsed.command === 'ai') {
+    await handleTelegramAiMessage(chatId, connection.user_id, parsed.args)
   } else if (parsed.command === 'task') {
     if (!parsed.args) {
       await sendTelegramMessage(chatId, 'Usage: /task <title>')
