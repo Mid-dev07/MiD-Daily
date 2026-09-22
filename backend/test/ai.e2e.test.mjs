@@ -118,7 +118,7 @@ test('AI chat route completes a UI-shaped write tool round-trip only when action
         }
       }
 
-      const messages = input.messages as Array<{ role?: string; content?: unknown }>
+      const messages = input.messages
       const toolMessage = messages.find((message) => message.role === 'tool')
       assert.ok(toolMessage)
       assert.match(String(toolMessage?.content), /Review AI integration/)
