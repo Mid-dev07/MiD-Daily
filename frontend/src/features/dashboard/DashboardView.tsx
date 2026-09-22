@@ -65,7 +65,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
     .sort((a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? ''))
     .slice(0, 3), [tasks, today])
 
-  const nowParts = new Intl.DateTimeFormat('en-GB', { timeZone: APP_TIMEZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(now)
+  const nowParts = new Intl.DateTimeFormat('en-GB', { timeZone: timezone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(now)
   const currentMinutes = Number(nowParts.find((part) => part.type === 'hour')?.value ?? 0) * 60 + Number(nowParts.find((part) => part.type === 'minute')?.value ?? 0)
   const currentSchedule = todaySchedule.find((item) => {
     const start = Number(item.startTime.slice(0, 2)) * 60 + Number(item.startTime.slice(3, 5))
