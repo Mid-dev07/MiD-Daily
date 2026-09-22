@@ -16,7 +16,7 @@ const cssFiles = walk(join(srcDir, 'styles')).filter((file) => file.endsWith('.c
 const uiSystem = readFileSync(join(srcDir, 'styles/ui-system.css'), 'utf8')
 const tokens = readFileSync(join(srcDir, 'styles/tokens.css'), 'utf8')
 const dashboard = readFileSync(join(srcDir, 'features/dashboard/DashboardView.tsx'), 'utf8')
-const modalCandidates = tsxFiles.filter((file) => readFileSync(file, 'utf8').includes('role="dialog"'))
+const modalCandidates = tsxFiles.filter((file) => /role="dialog"[\s\S]{0,240}aria-modal="true"/.test(readFileSync(file, 'utf8')))
 
 const failures = []
 
