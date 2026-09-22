@@ -13,6 +13,7 @@ const AssistantView = lazy(() => import('../features/ai/AssistantView').then((mo
 const ProfileView = lazy(() => import('../features/profile/ProfileView').then((module) => ({ default: module.ProfileView })))
 const InsightsView = lazy(() => import('../features/insights/InsightsView').then((module) => ({ default: module.InsightsView })))
 const HabitsView = lazy(() => import('../features/habits/HabitsView').then((module) => ({ default: module.HabitsView })))
+const GlobalSearch = lazy(() => import('../components/layout/GlobalSearch').then((module) => ({ default: module.GlobalSearch })))
 import { normalizeTaskList } from '../features/tasks/task.migration'
 import { validateTaskDraft } from '../features/tasks/task.validation'
 import { createRemoteTask, updateRemoteTask, deleteRemoteTask } from '../features/tasks/tasksApi'
@@ -56,6 +57,18 @@ export function App() {
   const [activeView, setActiveView] = useState<View>(() => viewFromPath(window.location.pathname))
   const [profile, setProfile] = useState<Profile | null>(null)
   const [profileLoading, setProfileLoading] = useState(Boolean(userId))
+  const [searchOpen, setSearchOpen] = useState(false)
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setSearchOpen(true)
+      }
+    }
+    window.addEventListener('keydown', handleShortcut)
+    return () => window.removeEventListener('keydown', handleShortcut)
+  }, [])
 
   useEffect(() => {
     const handlePopState = () => setActiveView(viewFromPath(window.location.pathname))
@@ -368,7 +381,7 @@ export function App() {
       <div className="atmosphere" aria-hidden="true" />
       <Sidebar activeView={activeView} onNavigate={navigate} />
       <main className="main-content">
-        <Topbar view={activeView} profile={profile} onProfile={() => navigate('profile')} />
+        <Topbar view={activeView} profile={profile} onProfile={() => navigate('profile')} onSearch={() => setSearchOpen(true)} />
         <Suspense fallback={<section className="workspace view-loading" aria-live="polite"><span className="section-kicker">LOADING</span><h2>Opening your workspace…</h2></section>}>
           <div className="view-key">
             {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={finance} onToggleTask={(id) => void toggleTask(id)} onNavigate={navigate} />}
@@ -392,6 +405,11 @@ export function App() {
         </Suspense>
       </main>
       {toast && <Toast message={toast} />}
+      {searchOpen && (
+        <Suspense fallback={null}>
+          <GlobalSearch tasks={tasks} finance={finance} schedule={schedule} onNavigate={navigate} onClose={() => setSearchOpen(false)} />
+        </Suspense>
+      )}
     </div>
   )
 }
