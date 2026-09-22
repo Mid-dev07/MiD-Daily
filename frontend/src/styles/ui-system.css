@@ -2388,9 +2388,6 @@ textarea:focus {
     var(--ui-surface);
   border-color: rgba(226,235,216,.095);
 }
-.content-card:hover {
-  border-color: rgba(226,235,216,.13);
-}
 .content-card h3 {
   font-family: var(--ui-font-display);
   font-weight: 560;
