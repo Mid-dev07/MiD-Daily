@@ -51,6 +51,14 @@ export function NotificationCenter({ userId, tasks, schedule, finance, onNavigat
   }, [])
 
   useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [])
+
+  useEffect(() => {
     const handleOutside = (event: MouseEvent) => {
       if (open && ref.current && !ref.current.contains(event.target as Node)) setOpen(false)
     }
@@ -92,12 +100,12 @@ export function NotificationCenter({ userId, tasks, schedule, finance, onNavigat
 
   return (
     <div className="notification-center" ref={ref}>
-      <button className="notification-trigger" type="button" aria-label={'Notifications' + (active.length ? ', ' + active.length + ' unread' : '')} onClick={() => setOpen((value) => !value)}>
+      <button className="notification-trigger" type="button" aria-expanded={open} aria-controls="mid-notification-popover" aria-label={'Notifications' + (active.length ? ', ' + active.length + ' unread' : '')} onClick={() => setOpen((value) => !value)}>
         <span aria-hidden="true">◌</span>
         {active.length > 0 && <b>{Math.min(active.length, 9)}</b>}
       </button>
       {open && (
-        <section className="notification-popover" role="dialog" aria-label="Notification center">
+        <section className="notification-popover" id="mid-notification-popover" role="dialog" aria-label="Notification center">
           <div className="notification-header">
             <div><span className="section-kicker">INBOX</span><strong>Attention</strong></div>
             <button className="text-button" type="button" onClick={clearAll} disabled={active.length === 0}>Clear all</button>

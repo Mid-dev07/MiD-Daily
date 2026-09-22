@@ -28,10 +28,11 @@ frontend/src/
 
 1. No legacy duplicate root-level `App.tsx`, `data.ts`, or `types.ts` implementations.
 2. Feature-specific UI, data, validation, and domain types stay inside their feature.
-3. Shared UI primitives stay in `components/ui`.
-4. Layout components never own business logic.
-5. Provider-specific integrations are implemented as adapters outside feature presentation code.
-6. Do not add a dependency for an effect that can be handled by native CSS or the platform.
+3. `styles/tokens.css` is the canonical design-token source; `styles/ui-system.css` owns active shared UI composition.
+4. Shared UI primitives stay in `components/ui`.
+5. Layout components never own business logic.
+6. Provider-specific integrations are implemented as adapters outside feature presentation code.
+7. Do not add a dependency for an effect that can be handled by native CSS or the platform.
 
 ## Schedule boundary
 
