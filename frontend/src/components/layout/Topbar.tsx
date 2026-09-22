@@ -17,6 +17,18 @@ interface TopbarProps {
   schedule: ScheduleItem[]
 }
 
+const viewIndices: Record<View, string> = {
+  dashboard: '001',
+  schedule: '002',
+  tasks: '003',
+  finance: '004',
+  social: '005',
+  assistant: '006',
+  profile: '007',
+  insights: '008',
+  habits: '009',
+}
+
 const titles: Record<View, string> = {
   dashboard: 'Today',
   schedule: 'Schedule',
@@ -46,7 +58,15 @@ export function Topbar({ view, profile, onProfile, onSearch, onNavigate, userId,
 
   return (
     <header className="topbar">
-      <div className="topbar-title"><h1>{titles[view]}</h1></div>
+      <div className="topbar-title">
+        <div className="topbar-heading">
+          <span className="topbar-kicker">PERSONAL OPERATING LANDSCAPE</span>
+          <div className="topbar-title-row">
+            <span className="topbar-index" aria-hidden="true">{viewIndices[view]}</span>
+            <h1>{titles[view]}</h1>
+          </div>
+        </div>
+      </div>
 
       <div className="topbar-actions">
         <button className="search-trigger" type="button" onClick={onSearch} aria-label="Search MiD-Daily">
