@@ -68,13 +68,15 @@ export function WhatsAppIntegrationCard() {
           ? `Linked account${status.displayName ? ' ' + status.displayName : ''}. Use /task, /expense, /expenses, and /schedule in the WhatsApp chat.`
           : status.configured
             ? 'Generate a one-time link to connect this WhatsApp account.'
-            : 'Configure WhatsApp Cloud API credentials on the backend before connecting.')}
+            : <>WhatsApp Cloud API is not configured yet. Add the backend credentials, then refresh this card. <a href="https://developers.facebook.com/apps/" target="_blank" rel="noreferrer">Open Meta Developer Console ↗</a></>)}
       </p>
       {link && !status.connected && <button className="text-button integration-link-button" type="button" onClick={() => window.open(link, '_blank', 'noopener,noreferrer')}>Open WhatsApp link again</button>}
       <div className="integration-actions">
         {status.connected
           ? <button className="secondary-button" disabled={loading} type="button" onClick={() => void disconnect()}>Disconnect</button>
-          : <button className="secondary-button" disabled={loading || !status.configured} type="button" onClick={() => void connect()}>Connect WhatsApp</button>}
+          : status.configured
+            ? <button className="secondary-button" disabled={loading} type="button" onClick={() => void connect()}>Connect WhatsApp</button>
+            : <button className="secondary-button" disabled={loading} type="button" onClick={() => window.open('https://developers.facebook.com/apps/', '_blank', 'noopener,noreferrer')}>Open WhatsApp setup</button>}
       </div>
     </section>
   )
