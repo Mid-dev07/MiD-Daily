@@ -19,6 +19,7 @@ const TelegramIntegrationCard = lazy(() => import('./components/TelegramIntegrat
 const WhatsAppIntegrationCard = lazy(() => import('./components/WhatsAppIntegrationCard').then((module) => ({ default: module.WhatsAppIntegrationCard })))
 const QuickCapture = lazy(() => import('./components/QuickCapture').then((module) => ({ default: module.QuickCapture })))
 const DailyBriefing = lazy(() => import('./components/DailyBriefing').then((module) => ({ default: module.DailyBriefing })))
+const FocusMode = lazy(() => import('./components/FocusMode').then((module) => ({ default: module.FocusMode })))
 
 export function DashboardView({ tasks, schedule, finance, onToggleTask, onNavigate }: DashboardViewProps) {
   const [now, setNow] = useState(() => new Date())
@@ -215,6 +216,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
       <Suspense fallback={<section className="content-card connection-loading">Preparing your daily briefing…</section>}>
         <DailyBriefing tasks={tasks} schedule={schedule} finance={finance} onNavigate={onNavigate} />
         <QuickCapture />
+        <FocusMode tasks={tasks} onToggleTask={onToggleTask} />
       </Suspense>
 
       <div className="dashboard-context-grid">
