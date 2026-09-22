@@ -95,7 +95,7 @@ returns trigger
 language plpgsql
 security invoker
 set search_path = public, pg_catalog
-as $
+as $$
 begin
   new.updated_at = now();
   return new;
