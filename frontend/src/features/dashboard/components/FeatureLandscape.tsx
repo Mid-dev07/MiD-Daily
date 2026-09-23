@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { View } from '../../../types'
 
 interface FeatureLandscapeProps {
@@ -15,8 +16,11 @@ const features: Array<{ id: View; label: string; meta: string; icon: string }> =
 ]
 
 export function FeatureLandscape({ activeView, onNavigate }: FeatureLandscapeProps) {
+  const [focusedFeature, setFocusedFeature] = useState<View | null>(null)
+  const focused = features.find((feature) => feature.id === focusedFeature)
+
   return (
-    <section className="feature-landscape motion-card" aria-labelledby="feature-landscape-title">
+    <section className={focused ? 'feature-landscape motion-card is-interacting' : 'feature-landscape motion-card'} aria-labelledby="feature-landscape-title">
       <div className="feature-landscape-heading">
         <div>
           <div className="feature-level" aria-hidden="true"><span>LVLL 002</span><i>/</i><strong>LANDSCAPE</strong></div>
@@ -28,13 +32,27 @@ export function FeatureLandscape({ activeView, onNavigate }: FeatureLandscapePro
       </div>
 
       <div className="feature-scene">
-        {features.map((feature) => (
+        {features.map((feature) => {
+          const isFocused = focusedFeature === feature.id
+          const isDimmed = Boolean(focusedFeature) && !isFocused
+          const classes = [
+            'feature-node',
+            activeView === feature.id ? 'is-active' : '',
+            isFocused ? 'is-focused' : '',
+            isDimmed ? 'is-dimmed' : '',
+          ].filter(Boolean).join(' ')
+
+          return (
           <button
             key={feature.id}
             type="button"
-            className={activeView === feature.id ? 'feature-node is-active' : 'feature-node'}
+            className={classes}
             data-feature={feature.id}
             aria-current={activeView === feature.id ? 'page' : undefined}
+            onPointerEnter={() => setFocusedFeature(feature.id)}
+            onPointerLeave={() => setFocusedFeature(null)}
+            onFocus={() => setFocusedFeature(feature.id)}
+            onBlur={() => setFocusedFeature(null)}
             onClick={() => onNavigate(feature.id)}
           >
             <span className="feature-node-label">
@@ -43,13 +61,15 @@ export function FeatureLandscape({ activeView, onNavigate }: FeatureLandscapePro
             </span>
             <span className="feature-node-meta">{feature.meta}</span>
           </button>
-        ))}
+          )
+        })}
 
-        <div className="feature-core" aria-hidden="true">
+        <div className={focused ? 'feature-core is-focused' : 'feature-core'} aria-hidden="true">
           <div className="feature-core-glass" />
           <div className="feature-core-label">
-            <strong>MiD</strong>
-            <span>daily rhythm</span>
+            <strong>{focused?.label ?? 'MiD'}</strong>
+            <span>{focused?.meta ?? 'daily rhythm'}</span>
+            {focused && <small>select to open</small>}
           </div>
         </div>
 

@@ -4254,3 +4254,188 @@ textarea:focus {
     animation: none !important;
   }
 }
+
+
+/* LIVING INTERACTION LAYER — response replaces decoration.
+   Pointer input is sampled only on capable fine pointers; touch stays clean. */
+.app-frame {
+  --pointer-x: 50%;
+  --pointer-y: 50%;
+  --environment-parallax-x: 0px;
+  --environment-parallax-y: 0px;
+}
+
+.environment-light-shafts {
+  transform: translate3d(var(--environment-parallax-x), var(--environment-parallax-y), 0) rotate(-7deg);
+}
+
+.environment-terrain {
+  transform: translate3d(calc(var(--environment-parallax-x) * -.45), calc(var(--environment-parallax-y) * -.30), 0) scale(1.012);
+  transform-origin: center bottom;
+  transition: transform 420ms var(--ease-standard);
+}
+
+.environment-canopy {
+  transform: translate3d(calc(var(--environment-parallax-x) * .32), calc(var(--environment-parallax-y) * .20), 0);
+  transition: transform 520ms var(--ease-standard);
+}
+
+.environment-sun,
+.environment-moon,
+.environment-stars {
+  transition: transform 700ms var(--ease-standard);
+}
+
+.environment-sun { transform: translate3d(calc(var(--environment-parallax-x) * .18), calc(var(--environment-parallax-y) * .12), 0) translate(-50%, -50%); }
+.environment-moon { transform: translate3d(calc(var(--environment-parallax-x) * .13), calc(var(--environment-parallax-y) * .09), 0) translate(-50%, -50%); }
+.environment-stars { transform: translate3d(calc(var(--environment-parallax-x) * .08), calc(var(--environment-parallax-y) * .05), 0); }
+
+/* The landscape behaves like a scene: focus one node, quieten the rest, change the hub. */
+.feature-landscape.is-interacting .feature-scene::before {
+  border-color: rgba(224, 218, 185, .16);
+  box-shadow:
+    0 0 0 22px rgba(223, 215, 177, .024),
+    inset 0 0 58px rgba(197, 199, 157, .055);
+}
+
+.feature-landscape .feature-node {
+  background:
+    radial-gradient(circle at var(--surface-x, 24%) var(--surface-y, 16%), rgba(255,250,225,.12), transparent 36%),
+    radial-gradient(circle at 22% 16%, rgba(255, 248, 216, .10), transparent 39%),
+    linear-gradient(145deg, rgba(52, 67, 51, .72), rgba(16, 23, 17, .74));
+  transition:
+    transform .4s var(--ease-spring),
+    opacity .28s ease,
+    filter .28s ease,
+    border-color .32s ease,
+    background .32s ease,
+    box-shadow .32s ease;
+}
+
+.feature-landscape .feature-node.is-focused {
+  transform: translateY(-8px) scale(1.035) rotate(-.7deg);
+  border-color: rgba(225, 219, 184, .32);
+  filter: saturate(1.04);
+  box-shadow:
+    0 1px 0 rgba(255, 252, 230, .10) inset,
+    0 28px 46px -23px rgba(0, 0, 0, .94),
+    0 0 52px -28px rgba(217, 197, 141, .34);
+}
+
+.feature-landscape .feature-node.is-dimmed {
+  opacity: .45;
+  filter: saturate(.70);
+  transform: scale(.97);
+}
+
+.feature-core.is-focused {
+  transform: rotate(-2deg) scale(1.06);
+  border-color: rgba(217, 197, 141, .36);
+}
+
+.feature-core-label small {
+  display: block;
+  margin-top: 2px;
+  color: rgba(226, 230, 216, .54);
+  font-size: 7px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.feature-landscape.is-interacting .feature-scene-caption {
+  color: rgba(236, 236, 221, .62);
+}
+
+/* Local light-catching surfaces. The effect is painted, not blurred, so it stays cheap. */
+.view-key > .workspace .content-card,
+.view-key > .workspace .glass-panel,
+.view-key > .workspace .stat-card {
+  background-image:
+    radial-gradient(circle at var(--surface-x, 20%) var(--surface-y, 0%), rgba(255,250,225,.075), transparent 34%),
+    linear-gradient(128deg, rgba(223,219,188,.035), transparent 34%),
+    linear-gradient(180deg, rgba(24,34,23,.80), rgba(11,18,12,.76));
+  transition:
+    border-color .22s ease,
+    box-shadow .26s var(--ease-standard),
+    transform .26s var(--ease-standard);
+}
+
+.view-key > .workspace .content-card:hover,
+.view-key > .workspace .glass-panel:hover,
+.view-key > .workspace .stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.primary-button {
+  background:
+    radial-gradient(circle at var(--surface-x, 50%) var(--surface-y, 0%), rgba(255,252,232,.18), transparent 34%),
+    var(--ui-accent);
+  transition: transform .18s var(--ease-spring), background .22s ease, box-shadow .22s ease;
+}
+.primary-button:hover {
+  box-shadow: 0 10px 24px -18px rgba(217,197,141,.72);
+}
+
+.secondary-button {
+  background:
+    radial-gradient(circle at var(--surface-x, 50%) var(--surface-y, 0%), rgba(255,250,225,.10), transparent 36%),
+    var(--ui-surface-2);
+}
+
+.nav-item {
+  background:
+    radial-gradient(circle at var(--surface-x, 50%) var(--surface-y, 50%), rgba(255,250,225,.065), transparent 38%),
+    transparent;
+}
+.nav-item.is-active {
+  background:
+    radial-gradient(circle at var(--surface-x, 50%) var(--surface-y, 50%), rgba(255,250,225,.09), transparent 42%),
+    var(--ui-accent-soft);
+}
+
+@media (hover: none), (pointer: coarse) {
+  .environment-terrain,
+  .environment-canopy,
+  .environment-sun,
+  .environment-moon,
+  .environment-stars {
+    transform: none;
+  }
+
+  .view-key > .workspace .content-card:hover,
+  .view-key > .workspace .glass-panel:hover,
+  .view-key > .workspace .stat-card:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .environment-light-shafts,
+  .environment-terrain,
+  .environment-canopy,
+  .environment-sun,
+  .environment-moon,
+  .environment-stars,
+  .feature-landscape .feature-node,
+  .feature-core,
+  .view-key > .workspace .content-card,
+  .view-key > .workspace .glass-panel,
+  .view-key > .workspace .stat-card,
+  .primary-button,
+  .secondary-button {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+
+.feature-core-label strong {
+  max-width: 88%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.feature-core.is-focused .feature-core-label strong {
+  font-size: clamp(14px, 2.1vw, 22px);
+  letter-spacing: -.045em;
+}
