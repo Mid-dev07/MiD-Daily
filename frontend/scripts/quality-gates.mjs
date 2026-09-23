@@ -53,6 +53,9 @@ if (!/--font-ui\s*:/.test(tokens) || !/--font-display\s*:/.test(tokens) || !/--e
 if (!/feature-landscape/.test(featureLandscape) || !/onNavigate/.test(featureLandscape)) {
   failures.push('Feature Landscape field guide must remain available as a real navigation surface.')
 }
+if (!/FeatureLandscape/.test(dashboard) || !/<FeatureLandscape/.test(dashboard)) {
+  failures.push('Dashboard must expose the spatial workspace compass as a live navigation surface.')
+}
 if (!tsxFiles.some((file) => file.endsWith('app/App.tsx') && /useEnvironment/.test(readFileSync(file, 'utf8')) && /EnvironmentScene/.test(readFileSync(file, 'utf8')))) {
   failures.push('Living environment must be wired into the application shell.')
 }
