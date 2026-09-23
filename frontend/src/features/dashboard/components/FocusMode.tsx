@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import type { Task } from '../../../types'
 
 interface FocusModeProps {
@@ -47,6 +47,7 @@ export function FocusMode({ tasks, onToggleTask }: FocusModeProps) {
   }
   const minutes = Math.floor(seconds / 60)
   const remainder = String(seconds % 60).padStart(2, '0')
+  const progress = ((FOCUS_SECONDS - seconds) / FOCUS_SECONDS) * 100
 
   return (
     <section className="content-card focus-mode-card">
@@ -61,7 +62,7 @@ export function FocusMode({ tasks, onToggleTask }: FocusModeProps) {
               {focusable.map((task) => <option key={task.id} value={task.id}>{task.title}</option>)}
             </select>
           </div>
-          <div className="focus-timer" aria-live="polite">
+          <div className="focus-timer" style={{ '--focus-progress': progress + '%' } as CSSProperties} aria-live="polite">
             <strong>{minutes}:{remainder}</strong>
             <span>{seconds === 0 ? 'Session complete' : running ? 'Stay with this task.' : 'Ready when you are.'}</span>
           </div>
