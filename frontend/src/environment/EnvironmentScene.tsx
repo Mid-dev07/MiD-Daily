@@ -19,6 +19,20 @@ export function EnvironmentScene({ environment }: EnvironmentSceneProps) {
   return (
     <div className="environment-scene" data-day-phase={environment.dayPhase} data-weather={environment.weather?.condition ?? 'clear'} style={vars} aria-hidden="true">
       <div className="environment-sky" />
+      <picture className="environment-photograph" aria-hidden="true">
+        <source
+          media="(max-width: 760px)"
+          srcSet="https://images.unsplash.com/photo-1738237290887-9e70351567d4?fm=avif&q=55&w=900&fit=crop&crop=entropy"
+          type="image/avif"
+        />
+        <img
+          src="https://images.unsplash.com/photo-1738237290887-9e70351567d4?fm=avif&q=55&w=1600&fit=crop&crop=entropy"
+          alt=""
+          loading="eager"
+          fetchPriority="low"
+          decoding="async"
+        />
+      </picture>
       <div className="environment-stars">
         {stars.map(([left, top, opacity], index) => (
           <i key={index} style={{ left: left + '%', top: top + '%', opacity }} />
@@ -66,7 +80,7 @@ export function EnvironmentScene({ environment }: EnvironmentSceneProps) {
       <div className="environment-rain" />
       <div className="environment-vignette" />
       <span className="environment-attribution">
-        {environment.weather ? 'Weather data: Open-Meteo · CC BY 4.0' : 'MiD local environment'}
+        {environment.weather ? 'Nature photo: Nicholas Bullett / Unsplash · Weather: Open-Meteo' : 'Nature photo: Nicholas Bullett / Unsplash'}
       </span>
     </div>
   )

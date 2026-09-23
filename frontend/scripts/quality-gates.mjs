@@ -17,6 +17,7 @@ const uiSystem = readFileSync(join(srcDir, 'styles/ui-system.css'), 'utf8')
 const tokens = readFileSync(join(srcDir, 'styles/tokens.css'), 'utf8')
 const dashboard = readFileSync(join(srcDir, 'features/dashboard/DashboardView.tsx'), 'utf8')
 const modalCandidates = tsxFiles.filter((file) => /role="dialog"[\s\S]{0,240}aria-modal="true"/.test(readFileSync(file, 'utf8')))
+const environmentScene = readFileSync(join(srcDir, 'environment/EnvironmentScene.tsx'), 'utf8')
 const environmentFiles = [
   'environment/types.ts',
   'environment/astronomy.ts',
@@ -73,6 +74,12 @@ if (/overflow:\s*clip/.test(uiSystem)) {
 }
 if (!/environmentCssVariables/.test(readFileSync(join(srcDir, 'environment/visual.ts'), 'utf8'))) {
   failures.push('Environment visual state must remain the source for live CSS variables.')
+}
+if (!/className="environment-photograph"/.test(environmentScene) || !/fm=avif/.test(environmentScene) || !/q=55/.test(environmentScene) || !/w=1600/.test(environmentScene) || !/w=900/.test(environmentScene)) {
+  failures.push('Real nature environment must use the bounded AVIF photographic layer (900px mobile / 1600px desktop, quality 55).')
+}
+if (/pointermove/.test(environmentScene) || existsSync(join(srcDir, 'hooks/useLivingInteractions.ts'))) {
+  failures.push('Environment shell must not reintroduce pointermove JavaScript interaction handlers.')
 }
 const missingEnvironmentFiles = environmentFiles.filter((relative) => !existsSync(join(srcDir, relative)))
 if (missingEnvironmentFiles.length) {
