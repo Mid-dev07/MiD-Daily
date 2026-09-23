@@ -116,6 +116,8 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
         </div>
       </div>
 
+      <FeatureLandscape activeView="dashboard" onNavigate={onNavigate} />
+
       <section className="dashboard-signal-grid" aria-label="Daily overview">
         <article className="dashboard-signal-card">
           <span>Now</span>
@@ -211,8 +213,6 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
           )}
         </section>
       </div>
-
-      <FeatureLandscape activeView="dashboard" onNavigate={onNavigate} />
 
       <Suspense fallback={<section className="content-card connection-loading">Preparing quick capture…</section>}>
         <QuickCapture />
