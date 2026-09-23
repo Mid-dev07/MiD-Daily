@@ -5511,14 +5511,7 @@ textarea:focus {
 @keyframes mid-task-complete{0%{transform:scale(.8)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
 .schedule-now-strip::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ui-accent);box-shadow:0 0 0 5px rgba(84,118,63,.08);animation:mid-now-pulse 1.8s ease-in-out infinite}
 @keyframes mid-now-pulse{0%,100%{transform:scale(.92);opacity:.78}50%{transform:scale(1.18);opacity:1}}
-.focus-timer{--focus-progress:0%;position:relative;isolation:isolate;background:radial-gradient(circle at 50% 35%,rgba(255,255,250,.78),transparent 31%),linear-gradient(145deg,#eef2e7,#dce6d8)}
-.focus-timer::before{content:"";position:absolute;inset:9px;border-radius:16px;padding:2px;background:conic-gradient(from -90deg,#54763f 0 var(--focus-progress),rgba(84,118,63,.1) var(--focus-progress) 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;opacity:.82;pointer-events:none}
-.focus-timer>*{position:relative;z-index:1}.quick-capture-card:focus-within{border-color:rgba(84,118,63,.46);box-shadow:0 20px 40px rgba(52,71,51,.14),0 0 0 4px rgba(84,118,63,.05)}
-.ai-action-chip.is-ok{animation:mid-chip-in 220ms var(--ease-spring) both}
-@keyframes mid-chip-in{from{opacity:0;transform:translateY(4px) scale(.96)}to{opacity:1;transform:none}}
-.toast{animation:mid-toast-in 220ms var(--ease-spring) both}
-@keyframes mid-toast-in{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.feature-landscape,.content-card,.glass-panel,.stat-card,.dashboard-signal-card,.feature-directory-item,.feature-node,.secondary-button,.filter-button,.icon-button,.profile-chip,.environment-control,.search-trigger,.connections-toggle,.task-check.is-done,.schedule-now-strip::before,.ai-action-chip.is-ok,.toast{transition:none!important;animation:none!important;transform:none!important}.feature-core::before,.feature-node::after{display:none}}
+@media (prefers-reduced-motion:reduce){.feature-landscape,.content-card,.glass-panel,.stat-card,.dashboard-signal-card,.feature-directory-item,.feature-node,.secondary-button,.filter-button,.icon-button,.profile-chip,.environment-control,.search-trigger,.connections-toggle,.task-check.is-done,.schedule-now-strip::before{transition:none!important;animation:none!important;transform:none!important}.feature-core::before,.feature-node::after{display:none}}
 /* SIDEBAR VISIBILITY — user-controlled workspace chrome. */
 .app-frame {
   transition: grid-template-columns 260ms var(--ease-standard);
