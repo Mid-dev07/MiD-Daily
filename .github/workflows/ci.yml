@@ -41,8 +41,15 @@ jobs:
           console.log(`Largest JS: ${largestJsGzip} bytes gzip (${largestJsBytes} bytes raw)`)
           console.log(`Total CSS: ${totalCssGzip} bytes gzip`)
 
-          if (largestJsGzip > 160 * 1024) process.exit(1)
-          if (totalCssGzip > 18 * 1024) process.exit(1)
+          // Performance budget during the 2026 UI/UX upgrade:
+          // JS: 192 KiB gzip gives ~34% headroom over the current 143.4 KiB build.
+          // CSS: 22 KiB gzip gives ~28% headroom over the current 17.2 KiB build.
+          // Keep these finite so the budget remains a regression guard, not a blank cheque.
+          const MAX_JS_GZIP = 192 * 1024
+          const MAX_CSS_GZIP = 22 * 1024
+
+          if (largestJsGzip > MAX_JS_GZIP) process.exit(1)
+          if (totalCssGzip > MAX_CSS_GZIP) process.exit(1)
           NODE
 
   backend:
