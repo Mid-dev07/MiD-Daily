@@ -17,9 +17,7 @@ const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
 const getToday = (timezone: string) => new Intl.DateTimeFormat('sv-SE', { timeZone: timezone }).format(new Date())
 
 const QuickCapture = lazy(() => import('./components/QuickCapture').then((module) => ({ default: module.QuickCapture })))
-const DailyBriefing = lazy(() => import('./components/DailyBriefing').then((module) => ({ default: module.DailyBriefing })))
 const FocusMode = lazy(() => import('./components/FocusMode').then((module) => ({ default: module.FocusMode })))
-const FeatureLandscape = lazy(() => import('./components/FeatureLandscape').then((module) => ({ default: module.FeatureLandscape })))
 
 export function DashboardView({ tasks, schedule, finance, onToggleTask, onNavigate, timezone = LOCAL_TIMEZONE }: DashboardViewProps) {
   const [now, setNow] = useState(() => new Date())
@@ -76,7 +74,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
     return start >= currentMinutes
   })
 
-  const upcomingSchedule = useMemo(() => {
+
     const results: Array<{ item: ScheduleItem; date: string }> = []
     for (let days = 1; days <= 3 && results.length < 4; days += 1) {
       const date = shiftDate(today, days)
@@ -107,10 +105,14 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
     <section className="workspace dashboard-page page-enter">
       <div className="page-intro">
         <div>
+          <span className="section-kicker">TODAY · {currentTimeLabel}</span>
           <h2>Today</h2>
-          <p>{formatDate(today)} · everything important, in one view.</p>
+          <p>{formatDate(today)} · your day at a glance.</p>
         </div>
-        <button className="primary-button" type="button" onClick={() => onNavigate('schedule')}>Open schedule</button>
+        <div className="dashboard-hero-actions">
+          <button className="primary-button" type="button" onClick={() => onNavigate('tasks')}>Work on a task</button>
+          <button className="secondary-button" type="button" onClick={() => onNavigate('schedule')}>Open schedule</button>
+        </div>
       </div>
 
       <section className="dashboard-signal-grid" aria-label="Daily overview">
@@ -141,10 +143,6 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
           <small>month balance · {currency.format(todayExpense)} spent today</small>
         </article>
       </section>
-
-      <Suspense fallback={null}>
-        <FeatureLandscape activeView="dashboard" onNavigate={onNavigate} />
-      </Suspense>
 
       <div className="dashboard-overview">
         <section className="content-card dashboard-agenda">
@@ -213,13 +211,13 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
         </section>
       </div>
 
-      <Suspense fallback={<section className="content-card connection-loading">Preparing your daily briefing…</section>}>
-        <DailyBriefing tasks={tasks} schedule={schedule} finance={finance} onNavigate={onNavigate} />
+      <Suspense fallback={<section className="content-card connection-loading">Preparing quick capture…</section>}>
         <QuickCapture />
-        <FocusMode tasks={tasks} onToggleTask={onToggleTask} />
       </Suspense>
 
-      <div className="dashboard-context-grid dashboard-secondary-grid">
+      <details className="dashboard-secondary-details">
+        <summary><span>More context</span><small>Upcoming, flexible plans, and attention details</small><b>+</b></summary>
+        <div className="dashboard-context-grid dashboard-secondary-grid">
         {flexiblePlans.length > 0 && (
           <section className="content-card dashboard-flexible">
             <div className="card-heading">
@@ -266,10 +264,8 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
             </div>
           )}
         </section>
-      </div>
-
-      {overdueTasks.length > 0 && (
-        <section className="content-card dashboard-attention">
+        {overdueTasks.length > 0 && (
+          <section className="content-card dashboard-attention">
           <div className="card-heading">
             <div>
               <span className="section-kicker">Attention</span>
@@ -285,10 +281,17 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
               </button>
             ))}
           </div>
-        </section>
-      )}
+          </section>
+        )}
+        </div>
+      </details>
 
-
+      <details className="dashboard-focus-disclosure">
+        <summary><span>Focus mode</span><small>25-minute session on one task</small><b>+</b></summary>
+        <Suspense fallback={null}>
+          <FocusMode tasks={tasks} onToggleTask={onToggleTask} />
+        </Suspense>
+      </details>
     </section>
   )
 }
