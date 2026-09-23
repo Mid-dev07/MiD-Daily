@@ -237,3 +237,18 @@ The visual system was rebuilt as a single composition rather than layered onto t
 ### Performance intent
 The visual budget is a ceiling, not a target. New visual effects must first remove or consolidate an existing effect before adding payload. The 256 KiB largest-JS / 32 KiB total-CSS hard ceiling remains the temporary development gate.
 
+## Layout rhythm — 4pt foundation
+
+The visual system now uses a strict 4pt spacing grid so interface objects feel intentionally measured rather than individually positioned.
+
+- **4px** is the micro unit for icon/text relationships, separators, and compact metadata.
+- **8px** is the primary tight gap for controls, chips, navigation items, and button internals.
+- **12px** is the standard content gap for rows and secondary metadata.
+- **16px** is the component boundary for cards, forms, and primary control groups.
+- **24px** is the section boundary.
+- **32px** is reserved for larger scene/hero spacing.
+
+Controls use 44px height and 48px touch targets. Corner radii are also snapped to the 4pt grid. The active stylesheet contains a dedicated 4pt rhythm layer, and static QA validates that this layer does not introduce off-grid pixel spacing.
+
+The purpose is practical, not cosmetic: consistent spacing prevents labels, pills, icons, and neighboring surfaces from visually colliding while preserving the cinematic material language.
+
