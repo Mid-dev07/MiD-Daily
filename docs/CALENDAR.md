@@ -73,6 +73,25 @@ Never commit the resulting key.
 8. Run the backend with `npm install` and `npm run dev`.
 9. Run the frontend with `npm install` and `npm run dev.
 
+### Production setup (Cloudflare Workers)
+
+Use a dedicated **Web application** OAuth client for Calendar in the same Google Cloud project or a dedicated project. Enable the Google Calendar API, configure Google Auth Platform branding/audience, and add the account(s) used for testing under **Audience → Test users** when the app is External. Google requires verification for many public apps using sensitive Calendar scopes; keep the app in testing while validating the integration.
+
+Production OAuth redirect URI:
+
+https://mid-daily-api.e41262272.workers.dev/auth/google/callback
+
+Cloudflare Worker configuration:
+
+- `GOOGLE_CLIENT_ID` — OAuth client ID
+- `GOOGLE_CLIENT_SECRET` — OAuth client secret (keep as a Worker secret)
+- `GOOGLE_REDIRECT_URI` — already wired as a non-secret Worker variable in `backend/wrangler.jsonc`
+- `TOKEN_ENCRYPTION_KEY_B64` — existing 32-byte encryption key used to encrypt stored Google tokens
+
+MiD-Daily currently requests `https://www.googleapis.com/auth/calendar.events`, which allows viewing and editing events across the user's calendars. This is the current scope required by the create/update/delete feature, but it is a user-data scope and can require Google verification for a public app.
+
+The storage design is persistent across process restarts because token records live in Supabase. Calendar connections are user-scoped through authenticated `user_id`; the connection table is RLS-enabled and client roles have no SELECT privilege.
+
 ### Deployment note
 
 The storage design is persistent across process restarts because token records live in Supabase. Calendar connections are now user-scoped through authenticated `user_id`; service-role access remains backend-only.
