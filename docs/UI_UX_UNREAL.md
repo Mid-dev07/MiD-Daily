@@ -17,7 +17,7 @@ The cinematic layer is intentionally lightweight for normal devices:
 - no remote photographic background is required for the Dashboard Feature Landscape;
 - backdrop-filter rendering is disabled in the production material layer;
 - full-screen ambient motion is static instead of continuously repainting;
-- pointer-tracking JavaScript is not used in the shell; interaction is expressed through CSS hover/focus/active states and bounded transforms; touch devices and reduced-motion users receive simpler static states;
+- bounded pointer interaction is used only on foreground material surfaces through one delegated listener and requestAnimationFrame; the environment shell itself does not track the pointer; touch devices and reduced-motion users receive simpler static states;
 - procedural grain is not rendered in the DOM;
 - entry transitions use opacity/transform rather than animated blur.
 
