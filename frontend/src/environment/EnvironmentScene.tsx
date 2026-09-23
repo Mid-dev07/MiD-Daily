@@ -20,11 +20,11 @@ export function EnvironmentScene({ environment }: EnvironmentSceneProps) {
       <picture className="environment-photograph">
         <source
           media="(max-width: 760px)"
-          srcSet="https://images.unsplash.com/photo-1707500879906-a5d6268e09d8?auto=format&fm=avif&q=56&w=900&fit=crop&crop=entropy"
+          srcSet="https://images.unsplash.com/photo-1707500879906-a5d6268e09d8?auto=format&fm=avif&q=60&w=900&fit=crop&crop=entropy"
           type="image/avif"
         />
         <img
-          src="https://images.unsplash.com/photo-1707500879906-a5d6268e09d8?auto=format&fm=avif&q=56&w=1600&fit=crop&crop=entropy"
+          src="https://images.unsplash.com/photo-1707500879906-a5d6268e09d8?auto=format&fm=avif&q=60&w=1600&fit=crop&crop=entropy"
           alt=""
           loading="eager"
           fetchPriority="high"
