@@ -19,6 +19,8 @@ interface TopbarProps {
   schedule: ScheduleItem[]
   environment: EnvironmentState
   onEnvironmentAction: () => void
+  sidebarHidden: boolean
+  onToggleSidebar: () => void
 }
 
 const viewIndices: Record<View, string> = {
@@ -50,7 +52,7 @@ function initials(name: string) {
   return letters.toUpperCase() || 'M'
 }
 
-export function Topbar({ view, profile, onProfile, onSearch, onNavigate, userId, tasks, finance, schedule, environment, onEnvironmentAction }: TopbarProps) {
+export function Topbar({ view, profile, onProfile, onSearch, onNavigate, userId, tasks, finance, schedule, environment, onEnvironmentAction, sidebarHidden, onToggleSidebar }: TopbarProps) {
   const { configured, user, signOut } = useAuth()
 
   const logout = async () => {
@@ -67,6 +69,17 @@ export function Topbar({ view, profile, onProfile, onSearch, onNavigate, userId,
 
   return (
     <header className="topbar">
+      <button
+        className="sidebar-toggle topbar-sidebar-toggle"
+        type="button"
+        onClick={onToggleSidebar}
+        aria-label={sidebarHidden ? 'Show navigation menu' : 'Hide navigation menu'}
+        aria-expanded={!sidebarHidden}
+        title={sidebarHidden ? 'Show navigation (Ctrl+B)' : 'Hide navigation (Ctrl+B)'}
+      >
+        <span aria-hidden="true">{sidebarHidden ? '→' : '←'}</span>
+        <span className="sidebar-toggle-copy">{sidebarHidden ? 'Menu' : 'Hide'}</span>
+      </button>
       <div className="topbar-title">
         <div className="topbar-heading">
           <span className="topbar-kicker">PERSONAL OPERATING LANDSCAPE</span>
