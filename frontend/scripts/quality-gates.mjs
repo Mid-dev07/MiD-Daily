@@ -16,6 +16,7 @@ const cssFiles = walk(join(srcDir, 'styles')).filter((file) => file.endsWith('.c
 const uiSystem = readFileSync(join(srcDir, 'styles/ui-system.css'), 'utf8')
 const tokens = readFileSync(join(srcDir, 'styles/tokens.css'), 'utf8')
 const dashboard = readFileSync(join(srcDir, 'features/dashboard/DashboardView.tsx'), 'utf8')
+const featureLandscape = readFileSync(join(srcDir, 'features/dashboard/components/FeatureLandscape.tsx'), 'utf8')
 const modalCandidates = tsxFiles.filter((file) => /role="dialog"[\s\S]{0,240}aria-modal="true"/.test(readFileSync(file, 'utf8')))
 const environmentScene = readFileSync(join(srcDir, 'environment/EnvironmentScene.tsx'), 'utf8')
 const environmentFiles = [
@@ -39,8 +40,8 @@ if (uiSystem.includes('backdrop-filter')) {
 if (!/--font-ui\s*:/.test(tokens) || !/--font-display\s*:/.test(tokens) || !/--ease-spring\s*:/.test(tokens)) {
   failures.push('Canonical MiD design tokens are missing from tokens.css.')
 }
-if (!/FeatureLandscape/.test(dashboard) || !/<FeatureLandscape/.test(dashboard)) {
-  failures.push('Dashboard signature FeatureLandscape must remain wired into DashboardView.')
+if (!/feature-landscape/.test(featureLandscape) || !/onNavigate/.test(featureLandscape)) {
+  failures.push('Feature Landscape field guide must remain available as a real navigation surface.')
 }
 if (!tsxFiles.some((file) => file.endsWith('app/App.tsx') && /useEnvironment/.test(readFileSync(file, 'utf8')) && /EnvironmentScene/.test(readFileSync(file, 'utf8')))) {
   failures.push('Living environment must be wired into the application shell.')
