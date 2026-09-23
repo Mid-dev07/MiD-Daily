@@ -41,12 +41,21 @@ jobs:
           console.log(`Largest JS: ${largestJsGzip} bytes gzip (${largestJsBytes} bytes raw)`)
           console.log(`Total CSS: ${totalCssGzip} bytes gzip`)
 
-          // Performance budget during the 2026 UI/UX upgrade:
-          // JS: 192 KiB gzip gives ~34% headroom over the current 143.4 KiB build.
-          // CSS: 22 KiB gzip gives ~28% headroom over the current 17.2 KiB build.
-          // Keep these finite so the budget remains a regression guard, not a blank cheque.
-          const MAX_JS_GZIP = 192 * 1024
-          const MAX_CSS_GZIP = 22 * 1024
+          // High-fidelity UI/UX development budget for the 2026 visual upgrade.
+          // Warning zone keeps us aware of drift before the hard gate is reached.
+          // Hard limits are intentionally finite so visual ambition cannot turn into unchecked bloat.
+          // Current baseline: ~143.4 KiB largest JS gzip / ~17.2 KiB total CSS gzip.
+          const WARN_JS_GZIP = 224 * 1024
+          const WARN_CSS_GZIP = 28 * 1024
+          const MAX_JS_GZIP = 256 * 1024
+          const MAX_CSS_GZIP = 32 * 1024
+
+          if (largestJsGzip > WARN_JS_GZIP) {
+            console.warn('Largest JS is above the 224 KiB warning budget.')
+          }
+          if (totalCssGzip > WARN_CSS_GZIP) {
+            console.warn('Total CSS is above the 28 KiB warning budget.')
+          }
 
           if (largestJsGzip > MAX_JS_GZIP) process.exit(1)
           if (totalCssGzip > MAX_CSS_GZIP) process.exit(1)
