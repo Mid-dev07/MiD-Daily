@@ -6,10 +6,10 @@ MiD Daily should feel like a calm digital place inspired by cinematic nature pho
 The goal is not to place a forest image behind a conventional dashboard. Nature is the visual environment in which the interface exists.
 
 ## Visual ratio
-- Cinematic forest: ~70%
-- Natural luxury: ~30%
+- Daylight nature environment: ~70%
+- Natural luxury material system: ~30%
 
-Cinematic forest carries the default dark, immersive mood. Natural luxury appears through warm stone, sage, linen-like softness, and sunlight during calmer or more premium moments.
+Daylight nature is the default mood. Forest, moss, stone, fog, foliage, and sunlight remain visible as the environment; the workspace uses ivory, linen, sage, mineral, and warm-earth materials for information surfaces. Dark tones are contrast accents, not the dominant UI.
 
 ## Performance direction
 
@@ -17,7 +17,7 @@ The cinematic layer is intentionally lightweight for normal devices:
 - no remote photographic background is required for the Dashboard Feature Landscape;
 - backdrop-filter rendering is disabled in the production material layer;
 - full-screen ambient motion is static instead of continuously repainting;
-- pointer response is sampled only on fine pointers and limited to cheap CSS-variable parallax/light response; touch devices and reduced-motion users get the static composition;
+- pointer-tracking JavaScript is not used in the shell; interaction is expressed through CSS hover/focus/active states and bounded transforms; touch devices and reduced-motion users receive simpler static states;
 - procedural grain is not rendered in the DOM;
 - entry transitions use opacity/transform rather than animated blur.
 
@@ -184,3 +184,35 @@ The UNREAL environment now reacts to the user without turning the app into a gam
 - visual exploration uses CSS hover/focus state and bounded transform transitions;
 - procedural SVG remains low opacity and exists only to preserve depth when photography is unavailable or loading;
 - environment motion is limited to transform/opacity and remains disabled for coarse pointers/reduced motion.
+
+
+## Final contrast contract
+Readability outranks visual drama. No nature treatment may reduce the legibility of primary content.
+
+- Primary text uses deep forest text and targets at least 4.5:1 contrast on ordinary UI surfaces.
+- Secondary and muted text use dedicated daylight tokens selected to retain AA-sized contrast on ivory surfaces.
+- Primary actions use dark moss surfaces with light text rather than pale green text-on-green.
+- Warning and danger states use restrained ochre/clay surfaces with darker text; color is never the only state cue.
+- Inputs, cards, navigation, modals, popovers, and badges retain visible surface separation even when the photographic environment is bright.
+- Important content never sits directly on the photograph without a controlled surface layer.
+- Focus indicators use a visible 2px outline with an offset against both light materials and the environment.
+
+## Unreal material hierarchy
+UNREAL is expressed through material behavior rather than decorative overload:
+
+1. **Dew glass** — translucent painted surfaces, luminous inner rim, restrained depth shadow, no persistent blur.
+2. **Natural stone** — matte ivory/sage body, tactile border, directional highlight, grounded shadow.
+3. **Recessed earth** — mineral input wells with inward shadow and a clear focus lift.
+4. **Living objects** — feature nodes and signal cards respond with lift, border catch, and subtle tonal change; no continuous floating animation.
+
+A component must have a clear material role. Glass is not applied indiscriminately.
+
+## Interaction contract
+Interaction is CSS-first:
+- hover = lift + light catch;
+- focus-visible = explicit outline + edge highlight;
+- active = small press/lower state;
+- disabled = reduced contrast only where semantics permit, never unreadable;
+- reduced-motion removes non-essential transforms and transitions.
+
+The nature photograph remains atmospheric context. Information surfaces create the readable foreground, preserving a convincing sense that the workspace occupies the environment rather than sitting on top of a generic wallpaper.
