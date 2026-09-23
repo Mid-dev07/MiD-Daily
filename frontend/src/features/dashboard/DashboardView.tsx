@@ -54,7 +54,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
       if (priorityDelta !== 0) return priorityDelta
       return (a.dueDate ?? '9999-12-31').localeCompare(b.dueDate ?? '9999-12-31')
     })
-    .slice(0, 5), [tasks])
+    .slice(0, 4), [tasks])
 
   const overdueTasks = useMemo(() => [...tasks]
     .filter((task) => task.status !== 'done' && task.dueDate && task.dueDate < today)
@@ -74,7 +74,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
     return start >= currentMinutes
   })
 
-
+  const upcomingSchedule = useMemo(() => {
     const results: Array<{ item: ScheduleItem; date: string }> = []
     for (let days = 1; days <= 3 && results.length < 4; days += 1) {
       const date = shiftDate(today, days)
