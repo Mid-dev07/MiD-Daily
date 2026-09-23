@@ -1,3 +1,46 @@
+/* Canonical palette bridge: keeps every existing module on the same natural material system. */
+:root {
+  --bg-void: #e8eadb;
+  --bg-deep: #d9dfce;
+  --surface-0: #f7f5eb;
+  --surface-1: #f2f3e9;
+  --surface-2: #e7ebdf;
+  --surface-3: #dce5d5;
+  --line: rgba(42, 65, 46, .16);
+  --line-strong: rgba(42, 65, 46, .28);
+  --accent: #6f8f58;
+  --accent-soft: rgba(102, 132, 81, .14);
+  --accent-glow: rgba(112, 146, 91, .20);
+  --nature-moss: #668451;
+  --nature-sage: #8fae83;
+  --nature-fern: #6d9270;
+  --nature-stone: #8c8a76;
+  --nature-sun: #c59a52;
+  --nature-fog: #dce4d7;
+  --state-success: #5f8956;
+  --state-warning: #b07e3c;
+  --state-danger: #aa6256;
+  --color-bg: #e8eadb;
+  --color-surface: #f2f3e9;
+  --color-surface-strong: #f7f5eb;
+  --color-border: rgba(42, 65, 46, .16);
+  --color-border-soft: rgba(42, 65, 46, .08);
+  --color-text: #203125;
+  --color-text-muted: #5f6d60;
+  --color-text-faint: #7d887b;
+  --color-accent: #6f8f58;
+  --color-accent-soft: rgba(102, 132, 81, .14);
+  --color-success: #5f8956;
+  --color-warning: #b07e3c;
+  --color-danger: #aa6256;
+  --surface-card: rgba(249, 247, 237, .92);
+  --surface-raised: rgba(255, 253, 246, .96);
+  --surface-recessed: #e0e5d8;
+  --shadow-soft: 0 18px 42px rgba(45, 59, 42, .13);
+  --shadow-raised: 0 24px 56px rgba(45, 59, 42, .17);
+  --spec-highlight: rgba(255, 255, 245, .66);
+  --ao-shadow: rgba(38, 53, 39, .17);
+}
 /* MiD-Daily Nature Living Layer
    Color and interaction pass: daylight surfaces, botanical states, tactile controls.
    Keeps the existing layout/behavior contract and avoids persistent blur or JS pointer tracking. */
