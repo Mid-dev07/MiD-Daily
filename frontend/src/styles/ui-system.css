@@ -5477,311 +5477,112 @@ textarea:focus {
 }
 
 
-/* MiD-Daily v6 — IMMERSIVE INTERACTION LAYER. */
-/* Unreal is expressed through responsive material behavior, not extra assets or JS. */
+/* MiD-Daily v7 — LIVING MATERIAL INTERACTION. */
+/* One delegated pointer stream drives local light, bounded tilt, and focus isolation.
+   No per-card listeners, canvas, WebGL, blur, or continuous animation loops. */
 
-.content-card,
-.glass-panel,
-.stat-card,
-.dashboard-signal-card,
-.feature-node,
-.feature-directory-item,
-.secondary-button,
-.filter-button,
-.icon-button,
-.profile-chip,
-.environment-control,
-.search-trigger,
-.connections-toggle,
-.ai-message,
-.briefing-item,
-.planner-shortcut {
-  will-change: auto;
-}
+.content-card,.glass-panel,.stat-card,.dashboard-signal-card,.feature-directory-item,.feature-node,
+.secondary-button,.filter-button,.icon-button,.profile-chip,.environment-control,.search-trigger,
+.connections-toggle,.briefing-item,.planner-shortcut{position:relative;--ux-x:50%;--ux-y:50%}
 
-@media (hover:hover) and (pointer:fine) {
-  .content-card,
-  .glass-panel,
-  .stat-card,
-  .dashboard-signal-card,
-  .feature-node,
-  .feature-directory-item,
-  .secondary-button,
-  .filter-button,
-  .icon-button,
-  .profile-chip,
-  .environment-control,
-  .search-trigger,
-  .connections-toggle,
-  .briefing-item,
-  .planner-shortcut {
-    transition:
-      transform 220ms var(--ease-spring),
-      border-color 180ms ease,
-      box-shadow 220ms ease,
-      background 220ms ease;
-  }
-
-  .content-card:hover,
-  .glass-panel:hover,
-  .stat-card:hover {
-    transform: translate3d(0,-3px,0);
-  }
-
-  .dashboard-signal-card:hover {
-    transform: translate3d(0,-5px,0);
-  }
-
-  .feature-directory-item:hover {
-    transform: translate3d(0,-3px,0);
-  }
-
-  .briefing-item:hover,
-  .planner-shortcut:hover {
-    transform: translate3d(0,-3px,0);
-  }
-
-  .content-card:hover .card-heading h3,
-  .glass-panel:hover .card-heading h3 {
-    transform: translateX(2px);
-  }
-
-  .card-heading h3 {
-    transition: transform 180ms var(--ease-spring), color 180ms ease;
-  }
-
-  .primary-button:hover,
-  .secondary-button:hover,
-  .filter-button:hover,
-  .icon-button:hover,
-  .search-trigger:hover,
-  .environment-control:hover {
-    transform: translate3d(0,-2px,0);
-  }
-
-  .nav-item:hover {
-    transform: translate3d(3px,0,0);
-  }
-
-  .task-row:hover .task-check,
-  .schedule-item:hover .timeline-dot {
-    transform: scale(1.12);
-  }
-
-  .task-check,
-  .timeline-dot,
-  .environment-glyph {
-    transition:
-      transform 180ms var(--ease-spring),
-      box-shadow 180ms ease,
-      background 180ms ease;
-  }
-
-  .environment-control:hover .environment-glyph {
-    transform: rotate(-8deg) scale(1.06);
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,250,.55),
-      0 0 0 5px rgba(84,118,63,.08);
-  }
-
-  .task-row:hover .priority-badge,
-  .schedule-item:hover .meta-chip,
-  .dashboard-signal-card:hover .priority-badge {
-    transform: translateX(2px);
-  }
-
-  .priority-badge,
-  .integration-badge,
-  .meta-chip,
-  .schedule-event-status {
-    transition:
-      transform 170ms var(--ease-spring),
-      box-shadow 170ms ease,
-      background 170ms ease;
-  }
-}
-
-/* Material sheen: one short light event on interaction instead of permanent glow. */
-.content-card::after,
-.glass-panel::after,
-.dashboard-signal-card::after,
-.feature-node::after,
-.feature-directory-item::after,
-.briefing-item::after,
-.planner-shortcut::after {
-  content: "";
-  position: absolute;
-  inset: 1px;
-  border-radius: inherit;
-  pointer-events: none;
-  background:
-    linear-gradient(
-      118deg,
-      transparent 0%,
-      transparent 42%,
-      rgba(255,255,250,.38) 49%,
-      transparent 56%,
-      transparent 100%
-    );
-  background-size: 240% 100%;
-  background-position: 135% 0;
-  opacity: 0;
-  transition: opacity 160ms ease;
-}
-
-@media (hover:hover) and (pointer:fine) {
-  .content-card:hover::after,
-  .glass-panel:hover::after,
-  .dashboard-signal-card:hover::after,
-  .feature-node:hover::after,
-  .feature-directory-item:hover::after,
-  .briefing-item:hover::after,
-  .planner-shortcut:hover::after {
-    opacity: .8;
-    animation: mid-sheen 520ms var(--ease-standard) both;
-  }
-}
-
-@keyframes mid-sheen {
-  from { background-position: 135% 0; }
-  to { background-position: -35% 0; }
-}
-
-/* Task completion has a physical snap instead of an instant color swap. */
-.task-check.is-done {
-  animation: mid-task-complete 300ms var(--ease-spring) both;
+[data-ux-lit="true"]{
+  border-color:rgba(84,118,63,.48)!important;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,250,.55),
-    0 0 0 5px rgba(84,118,63,.09),
-    0 7px 16px rgba(52,71,51,.13);
+    inset 0 1px 0 rgba(255,255,250,.96),
+    0 24px 48px rgba(52,71,51,.18),
+    0 0 0 1px rgba(84,118,63,.045);
 }
 
-@keyframes mid-task-complete {
-  0% { transform: scale(.78); }
-  58% { transform: scale(1.12); }
-  100% { transform: scale(1); }
-}
-
-/* Live schedule marker: restrained pulse communicates time without becoming a distraction. */
-.schedule-now-strip {
-  position: relative;
-  overflow: hidden;
-}
-
-.schedule-now-strip::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--ui-accent);
-  box-shadow: 0 0 0 5px rgba(84,118,63,.08);
-  animation: mid-now-pulse 1.8s ease-in-out infinite;
-}
-
-@keyframes mid-now-pulse {
-  0%,100% { transform: scale(.92); opacity: .78; }
-  50% { transform: scale(1.18); opacity: 1; }
-}
-
-/* Focus timer becomes an instrument panel using a CSS-only progress ring. */
-.focus-timer {
-  --focus-progress: 0%;
-  position: relative;
-  min-height: 150px;
-  isolation: isolate;
+.content-card::before,.glass-panel::before,.stat-card::before,.dashboard-signal-card::before,
+.feature-directory-item::before,.feature-node::before,.briefing-item::before,.planner-shortcut::before,
+.secondary-button::before,.filter-button::before,.icon-button::before,.profile-chip::before,
+.environment-control::before,.search-trigger::before,.connections-toggle::before{
   background:
-    radial-gradient(circle at 50% 35%,rgba(255,255,250,.78),transparent 31%),
-    linear-gradient(145deg,#eef2e7,#dce6d8);
+    radial-gradient(190px 130px at var(--ux-x) var(--ux-y),rgba(255,255,250,.38),transparent 66%),
+    linear-gradient(142deg,rgba(255,255,250,.34),transparent 34%,rgba(105,142,88,.05));
 }
 
-.focus-timer::before {
-  content: "";
-  position: absolute;
-  inset: 9px;
-  border-radius: 16px;
-  padding: 2px;
-  background:
-    conic-gradient(
-      from -90deg,
-      #54763f 0 var(--focus-progress),
-      rgba(84,118,63,.10) var(--focus-progress) 100%
-    );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  opacity: .82;
-  pointer-events: none;
-}
+[data-ux-lit="true"]::before{opacity:1!important}
 
-.focus-timer > * {
-  position: relative;
-  z-index: 1;
-}
-
-.focus-timer strong {
-  text-shadow: 0 1px 0 rgba(255,255,250,.80);
-}
-
-.quick-capture-card:focus-within {
-  border-color: rgba(84,118,63,.46);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,250,.94),
-    0 22px 42px rgba(52,71,51,.15),
-    0 0 0 4px rgba(84,118,63,.055);
-}
-
-.quick-capture-card:focus-within .card-heading h3 {
-  color: #3f6539;
-}
-
-.ai-action-chip.is-ok {
-  animation: mid-chip-in 220ms var(--ease-spring) both;
-}
-
-@keyframes mid-chip-in {
-  from { opacity: 0; transform: translateY(4px) scale(.96); }
-  to { opacity: 1; transform: none; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .content-card::after,
-  .glass-panel::after,
-  .dashboard-signal-card::after,
-  .feature-node::after,
-  .feature-directory-item::after,
-  .briefing-item::after,
-  .planner-shortcut::after,
-  .task-check.is-done,
-  .schedule-now-strip::before,
-  .ai-action-chip.is-ok {
-    animation: none !important;
-    opacity: 0 !important;
-    transition: none !important;
+@media (hover:hover) and (pointer:fine){
+  .content-card,.glass-panel,.stat-card,.dashboard-signal-card,.feature-directory-item,.feature-node,
+  .secondary-button,.filter-button,.icon-button,.profile-chip,.environment-control,.search-trigger,
+  .connections-toggle,.briefing-item,.planner-shortcut{
+    transition:transform 220ms var(--ease-spring),border-color 180ms ease,box-shadow 220ms ease,background 220ms ease;
   }
-
-  .content-card:hover,
-  .glass-panel:hover,
-  .stat-card:hover,
-  .dashboard-signal-card:hover,
-  .feature-node:hover,
-  .feature-directory-item:hover,
-  .briefing-item:hover,
-  .planner-shortcut:hover,
-  .primary-button:hover,
-  .secondary-button:hover,
-  .filter-button:hover,
-  .icon-button:hover,
-  .search-trigger:hover,
-  .environment-control:hover,
-  .nav-item:hover,
-  .task-check,
-  .timeline-dot,
-  .environment-glyph {
-    transform: none !important;
+  .content-card:hover,.glass-panel:hover,.stat-card:hover{transform:translate3d(0,-3px,0)}
+  .dashboard-signal-card:hover{transform:translate3d(0,-5px,0)}
+  .feature-directory-item:hover,.briefing-item:hover,.planner-shortcut:hover{transform:translate3d(0,-3px,0)}
+  .feature-directory:has(.feature-directory-item:hover,.feature-directory-item:focus-visible) .feature-directory-item:not(:hover):not(:focus-visible){
+    opacity:.54;filter:saturate(.72)
   }
+  .feature-directory-item:hover .feature-directory-mark,
+  .feature-directory-item:focus-visible .feature-directory-mark{color:var(--nature-sun);transform:translate3d(3px,0,0)}
+  .feature-directory-item .feature-directory-mark{transition:transform 180ms var(--ease-spring),color 180ms ease}
+  .task-row:hover .task-check,.schedule-item:hover .timeline-dot{transform:scale(1.12)}
+  .task-check,.timeline-dot,.environment-glyph{transition:transform 180ms var(--ease-spring),box-shadow 180ms ease,background 180ms ease}
+  .environment-control:hover .environment-glyph{transform:rotate(-8deg) scale(1.06);box-shadow:inset 0 1px 0 rgba(255,255,250,.55),0 0 0 5px rgba(84,118,63,.08)}
+  .task-row:hover .priority-badge,.schedule-item:hover .meta-chip{transform:translateX(2px)}
+  .priority-badge,.integration-badge,.meta-chip,.schedule-event-status{transition:transform 170ms var(--ease-spring),box-shadow 170ms ease}
+  .dashboard-secondary-details>summary:hover,.dashboard-focus-disclosure>summary:hover{background:rgba(84,118,63,.065);padding-left:6px}
+}
+
+.feature-landscape{
+  --ux-tilt-x:0deg;--ux-tilt-y:0deg;
+  transform:perspective(1200px) rotateX(var(--ux-tilt-y)) rotateY(var(--ux-tilt-x));
+  transition:transform 280ms var(--ease-spring),box-shadow 240ms ease,border-color 180ms ease;
+}
+.feature-landscape[data-ux-lit="true"]{
+  box-shadow:inset 0 1px 0 rgba(255,255,250,.90),0 28px 58px rgba(52,71,51,.16);
+}
+.feature-landscape::after{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;opacity:0;
+  background:radial-gradient(360px 240px at var(--ux-x,50%) var(--ux-y,50%),rgba(255,252,235,.22),transparent 66%);
+  transition:opacity 180ms ease;
+}
+.feature-landscape[data-ux-lit="true"]::after{opacity:1}
+
+.ai-message.assistant,.ai-message.user{box-shadow:inset 0 1px 0 rgba(255,255,250,.78),0 8px 20px rgba(52,71,51,.08)}
+
+.task-check.is-done{
+  animation:mid-task-complete 300ms var(--ease-spring) both;
+  box-shadow:inset 0 1px 0 rgba(255,255,250,.55),0 0 0 5px rgba(84,118,63,.09),0 7px 16px rgba(52,71,51,.13)
+}
+@keyframes mid-task-complete{0%{transform:scale(.78)}58%{transform:scale(1.12)}100%{transform:scale(1)}}
+
+.schedule-now-strip{position:relative;overflow:hidden}
+.schedule-now-strip::before{
+  content:"";width:6px;height:6px;border-radius:50%;background:var(--ui-accent);
+  box-shadow:0 0 0 5px rgba(84,118,63,.08);animation:mid-now-pulse 1.8s ease-in-out infinite
+}
+@keyframes mid-now-pulse{0%,100%{transform:scale(.92);opacity:.78}50%{transform:scale(1.18);opacity:1}}
+
+.focus-timer{
+  --focus-progress:0%;position:relative;min-height:150px;isolation:isolate;
+  background:radial-gradient(circle at 50% 35%,rgba(255,255,250,.78),transparent 31%),linear-gradient(145deg,#eef2e7,#dce6d8)
+}
+.focus-timer::before{
+  content:"";position:absolute;inset:9px;border-radius:16px;padding:2px;
+  background:conic-gradient(from -90deg,#54763f 0 var(--focus-progress),rgba(84,118,63,.10) var(--focus-progress) 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;opacity:.82;pointer-events:none
+}
+.focus-timer>*{position:relative;z-index:1}
+.quick-capture-card:focus-within{
+  border-color:rgba(84,118,63,.46);
+  box-shadow:inset 0 1px 0 rgba(255,255,250,.94),0 22px 42px rgba(52,71,51,.15),0 0 0 4px rgba(84,118,63,.055)
+}
+.ai-action-chip.is-ok{animation:mid-chip-in 220ms var(--ease-spring) both}
+@keyframes mid-chip-in{from{opacity:0;transform:translateY(4px) scale(.96)}to{opacity:1;transform:none}}
+
+.toast{animation:mid-toast-in 220ms var(--ease-spring) both}
+@keyframes mid-toast-in{from{opacity:0;transform:translate3d(0,10px,0) scale(.98)}to{opacity:1;transform:none}}
+
+@media (prefers-reduced-motion:reduce){
+  .feature-landscape,.content-card,.glass-panel,.stat-card,.dashboard-signal-card,.feature-directory-item,.feature-node,
+  .secondary-button,.filter-button,.icon-button,.profile-chip,.environment-control,.search-trigger,.connections-toggle,
+  .briefing-item,.planner-shortcut,.task-check.is-done,.schedule-now-strip::before,.ai-action-chip.is-ok,.toast{
+    transition:none!important;animation:none!important;transform:none!important
+  }
+  .feature-landscape::after{display:none}
 }
