@@ -61,3 +61,29 @@ input:not([type=checkbox]):not([type=radio]),select,textarea{width:100%;min-heig
 @media (max-width:820px){.sidebar{inset:auto 12px 12px;width:auto;height:64px;padding:7px;flex-direction:row;align-items:center;border-radius:20px;background:rgba(7,16,10,.93)}.sidebar .brand{display:none}.nav-list{width:100%;display:flex;overflow-x:auto;gap:4px;padding:0;scrollbar-width:none}.nav-list::-webkit-scrollbar{display:none}.nav-item{flex:0 0 auto;width:auto;min-width:72px;height:50px;min-height:50px;grid-template-columns:1fr;justify-items:center;gap:3px;padding:6px 8px;text-align:center}.nav-item .nav-index{display:none}.nav-item>span:last-child{font-size:9px}.main-content{margin-left:0;width:100%;padding-bottom:70px}.sidebar-hidden .sidebar{transform:translateY(calc(100% + 18px));opacity:.4}.topbar{grid-template-columns:auto 1fr auto;min-height:70px;padding:10px 14px}.topbar-title .topbar-kicker{display:none}.topbar-title-row h1{font-size:21px}.profile-email,.search-trigger>span:nth-child(2),.search-trigger kbd{display:none}.search-trigger{width:44px;justify-content:center;padding:0}.environment-control{max-width:none;padding:0 9px}.environment-readout small{display:none}.page-intro{align-items:flex-start;flex-direction:column}.page-intro h2{font-size:38px}.feature-landscape{min-height:600px;padding:18px}.feature-landscape-hint{display:none}.feature-scene{margin-top:25px;grid-template-columns:repeat(2,1fr)}.feature-core{width:92px;height:92px}.feature-directory{grid-template-columns:repeat(2,1fr)}.dashboard-overview,.dashboard-context-grid,.dashboard-secondary-grid{grid-template-columns:1fr}.assistant-channel-grid,.planner-shortcuts{grid-template-columns:1fr}.form-grid,.form-fields,.schedule-form-grid,.finance-form-grid,.profile-form-grid{grid-template-columns:1fr}.form-field.full,.field.full{grid-column:auto}}
 @media (max-width:560px){.workspace{padding:18px 14px 108px}.page-intro h2{font-size:34px}.dashboard-signal-grid{grid-template-columns:1fr 1fr;gap:7px}.dashboard-signal-card{min-height:108px;padding:12px}.dashboard-signal-card strong{font-size:20px}.feature-scene{padding:8px;gap:7px}.feature-node{min-height:76px;padding:10px}.feature-node-meta{display:none}.feature-directory{grid-template-columns:1fr}.quick-capture-row,.ai-composer{grid-template-columns:1fr}.finance-row{grid-template-columns:1fr auto}.finance-row-actions{grid-column:1/-1}.notification-popover{right:-45px}}
 @media (prefers-reduced-motion:reduce){.page-enter{animation:none}.nav-item:hover,.feature-node:hover,.primary-button:hover,.secondary-button:hover{transform:none}}
+
+/* UNREAL Habitat Material System
+   Terrain selectors remain explicit so each workspace can tune its habitat without
+   forking the component system. */
+[data-module="dashboard"] .content-card,
+[data-module="schedule"] .content-card,
+[data-module="tasks"] .content-card,
+[data-module="finance"] .content-card,
+[data-module="social"] .content-card,
+[data-module="assistant"] .content-card,
+[data-module="profile"] .content-card,
+[data-module="insights"] .content-card,
+[data-module="habits"] .content-card { --module-depth: 1; }
+
+.feature-directory:has(.feature-directory-item.is-active) { border-color: rgba(215,231,183,.04); }
+
+@media (max-width:820px) {
+  .nav-list {
+    display:grid;
+    grid-auto-flow:column;
+    grid-auto-columns:minmax(68px,78px);
+    grid-template-rows:1fr;
+    overflow-x:auto;
+    overflow-y:hidden;
+  }
+}
