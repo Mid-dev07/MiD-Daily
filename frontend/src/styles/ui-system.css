@@ -5050,3 +5050,428 @@ textarea:focus {
     display: none;
   }
 }
+
+
+/* MiD-Daily v5 — CONTRAST FORTRESS + LIVING INTERACTION. */
+/* Readability is structural: dense content gets an opaque daylight plane.
+   Atmosphere stays visible around the workspace, never through primary text. */
+
+:root {
+  --mid-ink: #203125;
+  --mid-ink-secondary: #45564a;
+  --mid-ink-muted: #5b695f;
+  --mid-surface: #faf9f1;
+  --mid-surface-raised: #f4f4ea;
+  --mid-surface-soft: #e8ede2;
+  --mid-surface-recessed: #dbe3d4;
+  --mid-line: rgba(42,65,46,.25);
+  --mid-line-strong: rgba(42,65,46,.38);
+}
+
+.workspace {
+  position: relative;
+  isolation: isolate;
+}
+
+.workspace::before {
+  content: "";
+  position: absolute;
+  inset: -18px -18px 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg,rgba(250,249,241,.74),rgba(239,243,231,.68) 62%,rgba(232,237,226,.42));
+  border-radius: 28px;
+}
+
+.content-card,
+.glass-panel,
+.stat-card,
+.daily-briefing-card,
+.quick-capture-card,
+.focus-mode-card,
+.planner-shortcuts-card,
+.finance-toolbar,
+.finance-budget-card,
+.finance-insights,
+.profile-form-section,
+.notification-card,
+.ai-shell-card,
+.auth-card,
+.global-search-dialog,
+.notification-popover,
+.task-actions-menu > div,
+.schedule-more-menu,
+.secondary-panel,
+.social-foundation-grid > div,
+.assistant-channel-card,
+.feature-landscape,
+.feature-directory-item,
+.feature-node {
+  color: var(--mid-ink);
+  border-color: var(--mid-line);
+}
+
+.content-card,
+.glass-panel,
+.stat-card,
+.daily-briefing-card,
+.quick-capture-card,
+.focus-mode-card,
+.planner-shortcuts-card,
+.finance-toolbar,
+.finance-budget-card,
+.finance-insights,
+.profile-form-section,
+.notification-card,
+.ai-shell-card,
+.auth-card,
+.global-search-dialog,
+.notification-popover,
+.task-actions-menu > div,
+.schedule-more-menu,
+.secondary-panel {
+  background:
+    linear-gradient(145deg,#fcfbf4 0%,#f4f4ea 56%,#e8ede2 100%);
+  border-color: var(--mid-line-strong);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,250,.90),
+    inset 0 -1px 0 rgba(58,77,56,.09),
+    0 16px 34px rgba(52,71,51,.13);
+}
+
+.content-card::before,
+.glass-panel::before,
+.stat-card::before {
+  background:
+    linear-gradient(142deg,rgba(255,255,250,.42),transparent 32%,rgba(105,142,88,.06));
+}
+
+.content-card:hover,
+.glass-panel:hover,
+.stat-card:hover,
+.feature-node:hover,
+.feature-directory-item:hover,
+.feature-directory-item:focus-visible {
+  border-color: var(--mid-line-strong);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,250,.96),
+    0 24px 48px rgba(52,71,51,.17);
+}
+
+.section-kicker,
+.card-meta,
+.nav-index,
+.topbar-index,
+.feature-directory-mark,
+.task-status-label,
+.schedule-time span,
+.schedule-event-time span,
+.provider-details summary,
+.provider-details > span,
+.profile-field-hint,
+.profile-counter,
+.profile-photo-hint {
+  color: var(--mid-ink-muted);
+}
+
+.page-intro p,
+.schedule-copy span,
+.task-copy small,
+.module-main span,
+.notification-copy > span:last-child,
+.schedule-date-caption span,
+.schedule-summary,
+.schedule-event-body > p,
+.insights-metric > span,
+.insights-metric > small,
+.habit-main small,
+.notification-kind,
+.notification-main small {
+  color: var(--mid-ink-secondary);
+}
+
+.dashboard-signal-card span,
+.dashboard-signal-card small,
+.dashboard-secondary-details > summary small,
+.dashboard-focus-disclosure > summary small {
+  color: var(--mid-ink-secondary);
+}
+
+.priority-badge,
+.integration-badge,
+.meta-chip,
+.schedule-event-status,
+.ai-action-chip {
+  min-height: 22px;
+  padding: 3px 8px;
+  border-radius: 7px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .015em;
+  box-shadow: inset 0 1px 0 rgba(255,255,250,.62);
+}
+
+.priority-badge.low,
+.integration-badge,
+.meta-chip {
+  color: #3f5b45;
+  background: #e4ecdf;
+  border-color: rgba(70,101,63,.30);
+}
+
+.schedule-event-status {
+  color: #435548;
+  background: #edf1e9;
+}
+
+.priority-badge.high {
+  color: #7a3e37;
+  background: #f3e0dc;
+  border-color: rgba(146,80,70,.36);
+}
+
+.priority-badge.medium {
+  color: #755222;
+  background: #f2e5c9;
+  border-color: rgba(138,97,45,.34);
+}
+
+.profile-chip,
+.environment-control,
+.search-trigger,
+.connections-toggle {
+  color: var(--mid-ink-secondary);
+  background: linear-gradient(145deg,#fbfaf2,#e8eee1);
+  border-color: var(--mid-line-strong);
+}
+
+.profile-chip,
+.environment-control,
+.search-trigger {
+  border-radius: 12px;
+}
+
+.connections-toggle {
+  border-radius: 12px;
+}
+
+.profile-chip:hover,
+.environment-control:hover,
+.search-trigger:hover,
+.connections-toggle:hover {
+  color: var(--mid-ink);
+  border-color: rgba(84,118,63,.44);
+  background: linear-gradient(145deg,#fffdf6,#e3ecdc);
+}
+
+.feature-landscape {
+  background:
+    linear-gradient(145deg,rgba(250,249,240,.94),rgba(228,236,219,.88));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,250,.82),
+    0 18px 38px rgba(52,71,51,.10);
+}
+
+.feature-directory-item {
+  background: rgba(248,248,240,.92);
+}
+
+.feature-node {
+  background: linear-gradient(145deg,#fbfaf3,#e3ebdd);
+}
+
+.dashboard-signal-card {
+  overflow: hidden;
+}
+
+.dashboard-signal-card:hover {
+  transform: translateY(-4px);
+}
+
+.schedule-item,
+.task-row,
+.upcoming-item,
+.attention-item,
+.dashboard-flexible-item,
+.global-search-result,
+.notification-main,
+.insights-schedule-row {
+  transition:
+    transform 170ms var(--ease-spring),
+    background 170ms ease,
+    border-color 170ms ease,
+    color 170ms ease;
+}
+
+.schedule-item:hover,
+.task-row:hover,
+.upcoming-item:hover,
+.attention-item:hover,
+.dashboard-flexible-item:hover,
+.global-search-result:hover,
+.notification-main:hover,
+.insights-schedule-row:hover {
+  transform: translateX(3px);
+}
+
+.schedule-item:active,
+.task-row:active,
+.upcoming-item:active,
+.attention-item:active,
+.dashboard-flexible-item:active,
+.global-search-result:active,
+.notification-main:active,
+.insights-schedule-row:active {
+  transform: translateX(1px) scale(.995);
+}
+
+.primary-button,
+.secondary-button,
+.filter-button,
+.icon-button,
+.text-button,
+.profile-chip,
+.environment-control,
+.search-trigger,
+.connections-toggle,
+.nav-item,
+.task-actions-menu > summary {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.primary-button,
+.secondary-button,
+.filter-button,
+.icon-button,
+.profile-chip,
+.environment-control,
+.search-trigger,
+.connections-toggle,
+.nav-item,
+.task-actions-menu > summary {
+  transition:
+    transform 170ms var(--ease-spring),
+    box-shadow 180ms ease,
+    border-color 170ms ease,
+    background 170ms ease,
+    color 170ms ease;
+}
+
+.primary-button:active,
+.secondary-button:active,
+.filter-button:active,
+.icon-button:active,
+.profile-chip:active,
+.environment-control:active,
+.search-trigger:active,
+.connections-toggle:active,
+.nav-item:active,
+.task-actions-menu > summary:active {
+  transform: translateY(1px) scale(.985);
+}
+
+.primary-button:hover,
+.secondary-button:hover,
+.filter-button:hover,
+.icon-button:hover,
+.profile-chip:hover,
+.environment-control:hover,
+.search-trigger:hover,
+.connections-toggle:hover,
+.task-actions-menu > summary:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,250,.90),
+    0 10px 22px rgba(52,71,51,.11);
+}
+
+.nav-item:focus-visible,
+.primary-button:focus-visible,
+.secondary-button:focus-visible,
+.filter-button:focus-visible,
+.icon-button:focus-visible,
+.profile-trigger:focus-visible,
+.environment-control:focus-visible,
+.search-trigger:focus-visible,
+.connections-toggle:focus-visible,
+.task-actions-menu > summary:focus-visible {
+  outline: 2px solid #54763f;
+  outline-offset: 3px;
+}
+
+.dashboard-secondary-details > summary,
+.dashboard-focus-disclosure > summary {
+  transition:
+    color 170ms ease,
+    background 170ms ease,
+    padding-left 170ms var(--ease-spring);
+  border-radius: 9px;
+}
+
+.dashboard-secondary-details > summary:hover,
+.dashboard-focus-disclosure > summary:hover {
+  padding-left: 6px;
+  background: rgba(84,118,63,.065);
+}
+
+.dashboard-secondary-details > summary b,
+.dashboard-focus-disclosure > summary b {
+  transition: transform 180ms var(--ease-spring), color 170ms ease;
+}
+
+.ai-message.assistant,
+.ai-message.user {
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,250,.78),
+    0 8px 20px rgba(52,71,51,.08);
+}
+
+.ai-message-role {
+  color: var(--mid-ink-muted);
+}
+
+.toast {
+  border: 1px solid rgba(42,65,46,.24);
+  border-radius: 12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,250,.22),
+    0 16px 34px rgba(52,71,51,.20);
+  animation: mid-toast-in 220ms var(--ease-spring) both;
+}
+
+@keyframes mid-toast-in {
+  from { opacity: 0; transform: translate3d(0,10px,0) scale(.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .schedule-item,
+  .task-row,
+  .upcoming-item,
+  .attention-item,
+  .dashboard-flexible-item,
+  .global-search-result,
+  .notification-main,
+  .insights-schedule-row,
+  .primary-button,
+  .secondary-button,
+  .filter-button,
+  .icon-button,
+  .text-button,
+  .profile-chip,
+  .environment-control,
+  .search-trigger,
+  .connections-toggle,
+  .nav-item,
+  .task-actions-menu > summary,
+  .dashboard-secondary-details > summary,
+  .dashboard-focus-disclosure > summary,
+  .dashboard-secondary-details > summary b,
+  .dashboard-focus-disclosure > summary b,
+  .toast {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
