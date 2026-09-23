@@ -5585,3 +5585,116 @@ textarea:focus {
   }
   .feature-landscape::after{display:none}
 }
+
+
+/* SIDEBAR VISIBILITY — user-controlled workspace chrome. */
+.app-frame {
+  transition: grid-template-columns 260ms var(--ease-standard);
+}
+
+.sidebar {
+  transform: translateX(0);
+  opacity: 1;
+  transition: transform 260ms var(--ease-spring), opacity 180ms ease;
+  will-change: transform;
+}
+
+.app-frame.sidebar-hidden {
+  grid-template-columns: 0 minmax(0, 1fr);
+}
+
+.app-frame.sidebar-hidden .sidebar {
+  transform: translateX(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  min-width: 38px;
+  padding: 7px 10px;
+  border: 1px solid var(--mid-line, var(--ui-border));
+  border-radius: 10px;
+  background: linear-gradient(145deg,#fbfaf2,#e8eee1);
+  color: var(--mid-ink-secondary, var(--ui-text-2));
+  cursor: pointer;
+  transition:
+    transform 170ms var(--ease-spring),
+    border-color 170ms ease,
+    background 170ms ease,
+    color 170ms ease,
+    box-shadow 180ms ease;
+}
+
+.sidebar-toggle:hover {
+  color: var(--mid-ink, var(--ui-text));
+  border-color: rgba(84,118,63,.44);
+  background: linear-gradient(145deg,#fffdf6,#e3ecdc);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,250,.90),
+    0 10px 22px rgba(52,71,51,.11);
+  transform: translateY(-1px);
+}
+
+.sidebar-toggle:active { transform: translateY(1px) scale(.985); }
+
+.sidebar-toggle:focus-visible {
+  outline: 2px solid #54763f;
+  outline-offset: 3px;
+}
+
+.topbar-sidebar-toggle {
+  flex: 0 0 auto;
+}
+
+.sidebar-toggle-copy {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.app-frame.sidebar-hidden .topbar-sidebar-toggle span:first-child {
+  font-size: 16px;
+}
+
+@media (max-width: 760px) {
+  .app-frame {
+    transition: none;
+  }
+
+  .app-frame.sidebar-hidden {
+    padding-bottom: 0;
+  }
+
+  .app-frame.sidebar-hidden .sidebar {
+    transform: translateY(120%);
+  }
+
+  .sidebar {
+    transform: translateY(0);
+    opacity: 1;
+    transition: transform 260ms var(--ease-spring), opacity 180ms ease;
+  }
+
+  .topbar-sidebar-toggle {
+    min-width: 38px;
+    padding-inline: 9px;
+  }
+
+  .topbar-sidebar-toggle .sidebar-toggle-copy {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-frame,
+  .sidebar,
+  .sidebar-toggle {
+    transition: none !important;
+  }
+}
