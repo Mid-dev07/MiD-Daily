@@ -19,6 +19,7 @@ const dashboard = readFileSync(join(srcDir, 'features/dashboard/DashboardView.ts
 const featureLandscape = readFileSync(join(srcDir, 'features/dashboard/components/FeatureLandscape.tsx'), 'utf8')
 const modalCandidates = tsxFiles.filter((file) => /role="dialog"[\s\S]{0,240}aria-modal="true"/.test(readFileSync(file, 'utf8')))
 const environmentScene = readFileSync(join(srcDir, 'environment/EnvironmentScene.tsx'), 'utf8')
+const appSourceForInteraction = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
 const environmentFiles = [
   'environment/types.ts',
   'environment/astronomy.ts',
@@ -36,6 +37,15 @@ if (existsSync(join(srcDir, 'styles/app.css'))) {
 }
 if (uiSystem.includes('backdrop-filter')) {
   failures.push('Active ui-system.css must not use persistent backdrop-filter.')
+}
+if (!/data-ux-lit/.test(uiSystem) || !/feature-directory:has/.test(uiSystem) || !/prefers-reduced-motion:\\s*reduce/.test(uiSystem)) {
+  failures.push('Living material interaction contract is missing from the active UI stylesheet.')
+}
+if (!/surfaceSelector/.test(appSourceForInteraction) || !/requestAnimationFrame/.test(appSourceForInteraction) || !/pointermove/.test(appSourceForInteraction)) {
+  failures.push('Foreground material interaction must use one delegated pointer stream with requestAnimationFrame.')
+}
+if (/pointermove/.test(environmentScene)) {
+  failures.push('EnvironmentScene must not own pointermove handlers; keep pointer interaction bounded to foreground surfaces.')
 }
 if (!/--font-ui\s*:/.test(tokens) || !/--font-display\s*:/.test(tokens) || !/--ease-spring\s*:/.test(tokens)) {
   failures.push('Canonical MiD design tokens are missing from tokens.css.')
