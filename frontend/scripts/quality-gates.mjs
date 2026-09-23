@@ -59,10 +59,10 @@ if (/\.feature-landscape\s*\{[^}]*display:\s*none\s*!important/.test(uiSystem) |
 if (!/FeatureLandscape/.test(dashboard) || !/<FeatureLandscape/.test(dashboard)) {
   failures.push('Dashboard must expose the spatial workspace compass as a live navigation surface.')
 }
-if (!/SIDEBAR_HIDDEN_STORAGE_KEY/.test(appSource) || !/setSidebarHidden/.test(appSource) || !/sidebarHidden/.test(appSource)) {
+if (!/SIDEBAR_HIDDEN_STORAGE_KEY/.test(appSourceForInteraction) || !/setSidebarHidden/.test(appSourceForInteraction) || !/sidebarHidden/.test(appSourceForInteraction)) {
   failures.push('Workspace navigation visibility must remain user-controllable and persisted.')
 }
-if (!/sidebarHidden={sidebarHidden}/.test(appSource) || !/onToggleSidebar={toggleSidebar}/.test(appSource)) {
+if (!/sidebarHidden={sidebarHidden}/.test(appSourceForInteraction) || !/onToggleSidebar={toggleSidebar}/.test(appSourceForInteraction)) {
   failures.push('Topbar must remain wired to the sidebar visibility controller.')
 }
 if (!/sidebar-hidden/.test(uiSystem) || !/\.app-frame\.sidebar-hidden/.test(uiSystem) || !/\.sidebar-hidden \.sidebar/.test(uiSystem)) {
@@ -82,7 +82,7 @@ if (!/useRef(?:<[^>]+>)?\(null\)/.test(sidebarSource) || !/scrollIntoView/.test(
 if (!/grid-auto-flow:\s*column/.test(uiSystem) || !/grid-auto-columns:\s*minmax\(68px,\s*78px\)/.test(uiSystem) || !/overflow-x:\s*auto/.test(uiSystem)) {
   failures.push('Mobile field-guide navigation must remain horizontally scrollable and touch-sized.')
 }
-if (!/data-module=\{activeView\}/.test(appSource)) {
+if (!/data-module=\{activeView\}/.test(appSourceForInteraction)) {
   failures.push('Active module marker must remain wired to the view container.')
 }
 if (!/UNREAL Habitat Material System/.test(uiSystem)) {
