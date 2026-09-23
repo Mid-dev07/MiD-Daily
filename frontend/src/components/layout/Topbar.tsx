@@ -87,7 +87,7 @@ export function Topbar({ view, profile, onProfile, onSearch, onNavigate, userId,
         </button>
         <span className="environment-attribution-inline" aria-label="Weather data source">{environment.weather ? 'Open-Meteo' : 'MiD local'}</span>
         <button className="search-trigger" type="button" onClick={onSearch} aria-label="Search MiD-Daily">
-          <span aria-hidden="true">⌕</span><span>Search</span><kbd>⌘K</kbd>
+          <span aria-hidden="true">⌕</span><span>Search</span><kbd>{searchShortcut}</kbd>
         </button>
         <Suspense fallback={<span className="notification-loading" aria-hidden="true" />}>
           <NotificationCenter userId={userId} tasks={tasks} schedule={schedule} finance={finance} onNavigate={onNavigate} />
