@@ -82,7 +82,6 @@
   --duration-normal: 220ms;
   --ease-standard: cubic-bezier(.2, .8, .2, 1);
 
-  /* superseded above: keep spacing aliases 4px-aligned */
 
   --content-max: 1320px;
   --content-gutter: clamp(16px, 3.6vw, 56px);
