@@ -32,6 +32,22 @@ const environmentFiles = [
 
 const failures = []
 
+const rhythmSection = uiSystem.split('/* 4PT RHYTHM CONTRACT')[1] ?? ''
+if (!/--rhythm-micro:\s*4px/.test(tokens) || !/--rhythm-tight:\s*8px/.test(tokens) || !/--rhythm-component:\s*16px/.test(tokens)) {
+  failures.push('Canonical 4pt spacing tokens are missing from tokens.css.')
+}
+if (!/4PT RHYTHM CONTRACT/.test(uiSystem)) {
+  failures.push('Active UI stylesheet must include the canonical 4pt rhythm contract.')
+} else {
+  const spacingDeclarations = [...rhythmSection.matchAll(/(?:gap|row-gap|column-gap|padding(?:-[a-z]+)?|margin(?:-[a-z]+)?|min-height|height|width):\s*(-?\d+)px/g)]
+  const offGrid = spacingDeclarations
+    .map((match) => Number(match[1]))
+    .filter((value) => value !== 0 && value % 4 !== 0)
+  if (offGrid.length) {
+    failures.push('4pt rhythm section contains off-grid pixel values: ' + [...new Set(offGrid)].join(', '))
+  }
+}
+
 if (existsSync(join(srcDir, 'styles/app.css'))) {
   failures.push('Legacy styles/app.css must remain removed from the active stylesheet tree.')
 }
