@@ -5,32 +5,71 @@ interface FeatureLandscapeProps {
   onNavigate: (view: View) => void
 }
 
-const features: Array<{ id: View; index: string; label: string; meta: string }> = [
-  { id: 'dashboard', index: '01', label: 'Today', meta: 'orientation & daily signals' },
-  { id: 'schedule', index: '02', label: 'Schedule', meta: 'time, rhythm & commitments' },
-  { id: 'tasks', index: '03', label: 'Tasks', meta: 'focus, progress & priorities' },
-  { id: 'finance', index: '04', label: 'Finance', meta: 'spending, budgets & resources' },
-  { id: 'social', index: '05', label: 'Social', meta: 'read-only digital pulse' },
-  { id: 'assistant', index: '06', label: 'Assistant', meta: 'guided next actions' },
-  { id: 'profile', index: '07', label: 'Profile', meta: 'identity & preferences' },
-  { id: 'insights', index: '08', label: 'Insights', meta: 'current patterns & signals' },
-  { id: 'habits', index: '09', label: 'Habits', meta: 'rhythm & consistency' },
+const features: Array<{ id: View; index: string; label: string; meta: string; icon: string }> = [
+  { id: 'dashboard', index: '01', label: 'Today', meta: 'orientation & daily signals', icon: '⌂' },
+  { id: 'schedule', index: '02', label: 'Schedule', meta: 'time, rhythm & commitments', icon: '◷' },
+  { id: 'tasks', index: '03', label: 'Tasks', meta: 'focus, progress & priorities', icon: '✓' },
+  { id: 'finance', index: '04', label: 'Finance', meta: 'spending, budgets & resources', icon: 'Rp' },
+  { id: 'social', index: '05', label: 'Social', meta: 'read-only digital pulse', icon: '◎' },
+  { id: 'assistant', index: '06', label: 'Assistant', meta: 'guided next actions', icon: '✦' },
+  { id: 'profile', index: '07', label: 'Profile', meta: 'identity & preferences', icon: '●' },
+  { id: 'insights', index: '08', label: 'Insights', meta: 'current patterns & signals', icon: '↗' },
+  { id: 'habits', index: '09', label: 'Habits', meta: 'rhythm & consistency', icon: '◉' },
 ]
 
+const spatialFeatures = features.slice(0, 6)
+
 export function FeatureLandscape({ activeView, onNavigate }: FeatureLandscapeProps) {
+  const activeFeature = features.find((feature) => feature.id === activeView) ?? features[0]
+
   return (
     <section className="feature-landscape" aria-labelledby="feature-landscape-title">
       <div className="feature-landscape-heading">
         <div>
-          <div className="feature-level" aria-hidden="true"><span>FIELD GUIDE 001</span><i>/</i><strong>MIÐ DAILY</strong></div>
-          <span className="section-kicker">NAVIGATE THE ENVIRONMENT</span>
+          <div className="feature-level" aria-hidden="true"><span>FIELD GUIDE 001</span><i>/</i><strong>MIĐ DAILY</strong></div>
+          <span className="section-kicker">SYSTEM COMPASS</span>
           <h3 id="feature-landscape-title">Everything has a place.</h3>
-          <p>Move through your day from one calm workspace. Each module belongs to the same system, but serves a different purpose.</p>
+          <p>Move through your day from one living workspace. Focused modules catch light; the rest recede into the environment.</p>
         </div>
-        <span className="feature-landscape-hint">Select a workspace</span>
+        <span className="feature-landscape-hint">Hover a workspace</span>
       </div>
 
-      <nav className="feature-directory" aria-label="MiD Daily workspaces">
+      <div className="feature-scene" aria-label="Core workspace compass">
+        {spatialFeatures.map((feature) => {
+          const active = activeView === feature.id
+          return (
+            <button
+              key={feature.id}
+              type="button"
+              className={active ? 'feature-node is-active' : 'feature-node'}
+              data-feature={feature.id}
+              aria-current={active ? 'page' : undefined}
+              onClick={() => onNavigate(feature.id)}
+            >
+              <span className="feature-node-label">
+                <span className="feature-node-icon" aria-hidden="true">{feature.icon}</span>
+                <span className="feature-node-title">{feature.label}</span>
+              </span>
+              <span className="feature-node-meta">{feature.meta}</span>
+            </button>
+          )
+        })}
+
+        <button className="feature-core" type="button" onClick={() => onNavigate('dashboard')} aria-label="Open Today dashboard">
+          <span className="feature-core-label">
+            <strong>M</strong>
+            <span>{activeFeature.label}</span>
+          </span>
+        </button>
+
+        <div className="feature-scene-caption" aria-hidden="true">
+          <span className="scene-caption-line" />
+          <span>ACTIVE TERRAIN</span>
+          <strong>{activeFeature.index} · {activeFeature.label}</strong>
+        </div>
+      </div>
+
+      <nav className="feature-directory" aria-label="All MiD Daily workspaces">
         {features.map((feature) => {
           const active = activeView === feature.id
           return (
