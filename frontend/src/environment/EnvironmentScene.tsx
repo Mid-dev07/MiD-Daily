@@ -22,11 +22,11 @@ export function EnvironmentScene({ environment }: EnvironmentSceneProps) {
       <picture className="environment-photograph" aria-hidden="true">
         <source
           media="(max-width: 760px)"
-          srcSet="https://images.unsplash.com/photo-1738237290887-9e70351567d4?fm=avif&q=55&w=900&fit=crop&crop=entropy"
+          srcSet="https://images.unsplash.com/photo-1707056144916-b72bf15e45c2?auto=format&fm=avif&q=58&w=900&fit=crop&crop=entropy"
           type="image/avif"
         />
         <img
-          src="https://images.unsplash.com/photo-1738237290887-9e70351567d4?fm=avif&q=55&w=1600&fit=crop&crop=entropy"
+          src="https://images.unsplash.com/photo-1707056144916-b72bf15e45c2?auto=format&fm=avif&q=58&w=1600&fit=crop&crop=entropy"
           alt=""
           loading="eager"
           fetchPriority="low"
@@ -80,7 +80,7 @@ export function EnvironmentScene({ environment }: EnvironmentSceneProps) {
       <div className="environment-rain" />
       <div className="environment-vignette" />
       <span className="environment-attribution">
-        {environment.weather ? 'Nature photo: Nicholas Bullett / Unsplash · Weather: Open-Meteo' : 'Nature photo: Nicholas Bullett / Unsplash'}
+        {environment.weather ? 'Nature photo: Unsplash · Weather: Open-Meteo' : 'Nature photo: Unsplash'}
       </span>
     </div>
   )
