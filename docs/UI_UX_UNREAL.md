@@ -65,7 +65,14 @@ Semantic states: muted green success, warm ochre warning, muted clay-red danger.
 Avoid bright cyan as a primary visual identity.
 
 ## Environmental photography
-Nature photography is optional rather than required on the critical application path. When used in future surface treatments, it should be local or otherwise optimized, darkened for legibility, and kept out of the initial critical render.
+The production shell now uses one real nature photograph as the visual source of truth, with the procedural landscape retained only as low-opacity depth support. The photo is served through Unsplash's dynamic image transformation parameters as AVIF at bounded responsive widths and quality, with the procedural scene remaining a visual fallback.
+
+The image treatment is intentionally subdued for product readability:
+- the photograph carries realistic tree, moss, mist, and sunlight texture;
+- CSS overlays provide day-phase, weather, and legibility modulation;
+- module state changes crop/position by a few percent instead of running a camera system;
+- no second photo is loaded merely for decoration.
+
 
 ## Feature landscape
 Feature navigation should behave as part of the environment:
@@ -166,3 +173,14 @@ The UNREAL environment now reacts to the user without turning the app into a gam
 - content surfaces catch a local painted highlight based on pointer position;
 - navigation remains semantic and click/keyboard driven; visual motion never carries essential meaning alone;
 - the interaction layer uses event delegation + requestAnimationFrame and does not introduce a canvas, WebGL runtime, external animation library, or persistent blur.
+
+
+## Performance contract — realism without payload bloat
+
+- one environment photograph only;
+- AVIF, bounded to 900px mobile / 1600px desktop variants;
+- quality capped at 55;
+- no pointermove JavaScript in the shell;
+- visual exploration uses CSS hover/focus state and bounded transform transitions;
+- procedural SVG remains low opacity and exists only to preserve depth when photography is unavailable or loading;
+- environment motion is limited to transform/opacity and remains disabled for coarse pointers/reduced motion.
