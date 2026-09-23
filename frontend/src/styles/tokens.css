@@ -1,59 +1,63 @@
 :root {
-  --bg-void: #e8eadb;
-  --bg-deep: #d9dfce;
-  --surface-0: #f7f5eb;
-  --surface-1: #f2f3e9;
-  --surface-2: #e7ebdf;
-  --surface-3: #dce5d5;
+  --bg-void: #07100b;
+  --bg-deep: #0b1710;
+  --surface-0: rgba(12, 24, 16, .88);
+  --surface-1: rgba(16, 31, 20, .78);
+  --surface-2: rgba(24, 43, 28, .66);
+  --surface-3: rgba(34, 57, 37, .58);
 
-  --line: rgba(42, 65, 46, .16);
-  --line-strong: rgba(42, 65, 46, .28);
+  --line: rgba(226, 235, 214, .12);
+  --line-strong: rgba(240, 247, 228, .24);
 
-  --accent: #54763f;
-  --accent-soft: rgba(84, 118, 63, .14);
-  --accent-glow: rgba(84, 118, 63, .18);
+  --accent: #c3d88f;
+  --accent-soft: rgba(195, 216, 143, .15);
+  --accent-glow: rgba(195, 216, 143, .23);
 
-  --nature-moss: #5f7d49;
-  --nature-sage: #8eaa82;
-  --nature-fern: #648766;
-  --nature-stone: #8c8a76;
-  --nature-sun: #a87432;
-  --nature-fog: #dce4d7;
+  --nature-moss: #778d58;
+  --nature-sage: #a8b98a;
+  --nature-fern: #557257;
+  --nature-stone: #9a9683;
+  --nature-sun: #e7b56b;
+  --nature-fog: #dce8d7;
 
-  --state-success: #4b7545;
-  --state-warning: #8a612d;
-  --state-danger: #925046;
+  --state-success: #9fca83;
+  --state-warning: #e0ae62;
+  --state-danger: #e88a7a;
 
-  --light-angle: 142deg;
-  --spec-highlight: rgba(255, 255, 245, .66);
-  --ao-shadow: rgba(38, 53, 39, .17);
+  --light-angle: 145deg;
+  --spec-highlight: rgba(255, 255, 236, .16);
+  --ao-shadow: rgba(0, 0, 0, .38);
 
   --color-bg: var(--bg-void);
-  --color-surface: var(--surface-1);
-  --color-surface-strong: var(--surface-0);
+  --color-surface: #132117;
+  --color-surface-strong: #1a2a1d;
   --color-border: var(--line);
-  --color-border-soft: rgba(42, 65, 46, .08);
-  --color-text: #203125;
-  --color-text-muted: #4f604f;
-  --color-text-faint: #56645a;
+  --color-border-soft: rgba(226, 235, 214, .07);
+  --color-text: #f1f3e8;
+  --color-text-muted: #c5ceb9;
+  --color-text-faint: #99a693;
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-success: var(--state-success);
   --color-warning: var(--state-warning);
   --color-danger: var(--state-danger);
 
-  --radius-sm: 9px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --shadow-soft: 0 18px 42px rgba(45, 59, 42, .13), inset 0 1px 0 rgba(255,255,245,.58);
-  --shadow-raised: 0 24px 56px rgba(45, 59, 42, .17), inset 0 1px 0 rgba(255,255,245,.64);
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+
+  --shadow-soft: 0 18px 42px rgba(0, 0, 0, .23);
+  --shadow-raised: 0 28px 72px rgba(0, 0, 0, .32);
+  --shadow-inset: inset 0 1px 0 rgba(255,255,255,.08);
 
   --font-ui: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-display: ui-serif, Georgia, Cambria, "Times New Roman", serif;
-  --ease-spring: cubic-bezier(.18, .9, .22, 1);
+  --font-display: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --ease-spring: cubic-bezier(.18, .88, .22, 1);
 
-  --duration-fast: 160ms;
-  --duration-normal: 240ms;
+  --duration-fast: 140ms;
+  --duration-normal: 220ms;
   --ease-standard: cubic-bezier(.2, .8, .2, 1);
 
   --space-1: 4px;
@@ -66,27 +70,27 @@
   --space-8: 40px;
   --space-9: 48px;
   --space-10: 64px;
+  --space-11: 80px;
 
-  --content-max: 1160px;
-  --content-gutter: clamp(14px, 3vw, 44px);
+  --content-max: 1320px;
+  --content-gutter: clamp(16px, 3.6vw, 56px);
 
   --text-xs: 10px;
   --text-sm: 12px;
   --text-md: 14px;
   --text-lg: 18px;
-  --text-xl: 24px;
-  --text-display: clamp(30px, 4vw, 42px);
+  --text-xl: 25px;
+  --text-display: clamp(38px, 5.5vw, 76px);
 
-  --control-h: 42px;
-  --touch-target: 44px;
+  --control-h: 44px;
+  --touch-target: 46px;
 
-  --surface-card: rgba(249, 247, 237, .92);
-  --surface-raised: rgba(255, 253, 246, .96);
-  --surface-recessed: #e0e5d8;
+  --surface-card: rgba(12, 23, 16, .82);
+  --surface-raised: rgba(22, 38, 25, .92);
+  --surface-recessed: rgba(3, 10, 6, .48);
 
-  /* Contrast contract: primary 12.8:1, secondary 6.3:1, muted 4.9:1 on ivory. */
+  --surface-border-visible: rgba(238, 245, 223, .18);
+  --surface-highlight: rgba(255, 255, 238, .13);
+  --surface-shadow: rgba(0, 0, 0, .34);
   --contrast-min-ui: 4.5;
-  --surface-border-visible: rgba(42, 65, 46, .24);
-  --surface-highlight: rgba(255, 255, 245, .68);
-  --surface-shadow: rgba(52, 71, 51, .16);
 }

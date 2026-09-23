@@ -216,3 +216,24 @@ Interaction is CSS-first:
 - reduced-motion removes non-essential transforms and transitions.
 
 The nature photograph remains atmospheric context. Information surfaces create the readable foreground, preserving a convincing sense that the workspace occupies the environment rather than sitting on top of a generic wallpaper.
+## Rebuild — cinematic nature vNext
+
+The visual system was rebuilt as a single composition rather than layered onto the previous card system.
+
+### Runtime shape
+- one responsive AVIF nature photograph as the environmental source;
+- CSS atmosphere, lighting and vignette instead of a canvas/WebGL scene;
+- foreground surfaces use painted translucency, directional rim highlights and grounded shadows;
+- persistent backdrop-filter, procedural grain DOM, continuous parallax and repeated glow animation are intentionally absent;
+- the large legacy UI stylesheet is replaced by a compact component-oriented material layer.
+
+### Interaction shape
+- foreground pointer lighting remains delegated through the existing app-level pointermove + requestAnimationFrame path;
+- environmental photography itself remains pointer-independent;
+- workspace nodes catch focus/hover through CSS and do not require a separate interaction runtime;
+- mobile navigation stays touch-sized and horizontally discoverable;
+- reduced-motion users receive the same information hierarchy without decorative motion.
+
+### Performance intent
+The visual budget is a ceiling, not a target. New visual effects must first remove or consolidate an existing effect before adding payload. The 256 KiB largest-JS / 32 KiB total-CSS hard ceiling remains the temporary development gate.
+
