@@ -147,3 +147,12 @@ A UI element should survive only when it helps the user understand state, choose
 
 ### Responsive safeguard
 Refinement changes preserve the existing mobile field-guide navigation, reduced-motion behavior, touch targets, and no-persistent-blur performance contract.
+
+
+## Environment visibility refinement
+
+The living environment is now an explicit visual layer rather than a subtle color wash:
+- the scene contains layered procedural ridges, a near ground plane, tree silhouettes, canopy depth, mist, and daylight shafts;
+- the shell and workspace surfaces are semi-opaque so environmental depth can remain visible through the interface without sacrificing text contrast;
+- day-phase and weather state modulate the landscape tone and atmospheric layers;
+- no external photographic asset or heavy 3D engine is required for the environment surface.
