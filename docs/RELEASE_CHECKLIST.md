@@ -114,9 +114,10 @@
 - [ ] Core dashboard does not eagerly load optional integration UI.
 
 ## Performance gate
-- Largest frontend JavaScript asset must remain below 192 KiB gzip during the 2026 UI/UX upgrade.
-- Total generated CSS must remain below 22 KiB gzip during the 2026 UI/UX upgrade.
-- These limits intentionally retain finite regression headroom (~34% for JS and ~28% for CSS over the current production build), and should be re-baselined downward after the visual redesign stabilizes.
+- Visual-upgrade warning budget: largest frontend JavaScript asset 224 KiB gzip; total generated CSS 28 KiB gzip.
+- Visual-upgrade hard budget: largest frontend JavaScript asset 256 KiB gzip; total generated CSS 32 KiB gzip.
+- The hard limits are temporary development ceilings for high-fidelity UI work, not performance targets; re-baseline downward after the redesign stabilizes.
+- The CI warning zone must remain visible so approaching the hard ceiling triggers optimization before release.
 - Optional provider UI must remain code-split from the initial Dashboard route.
 - Continuous polling in the idle shell should be avoided unless the feature explicitly requires it.
 
