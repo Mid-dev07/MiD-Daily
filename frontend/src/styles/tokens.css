@@ -20,7 +20,7 @@
   --nature-sun: #a87432;
   --nature-fog: #dce4d7;
 
-  --state-success: #5f8956;
+  --state-success: #4b7545;
   --state-warning: #8a612d;
   --state-danger: #925046;
 
@@ -35,7 +35,7 @@
   --color-border-soft: rgba(42, 65, 46, .08);
   --color-text: #203125;
   --color-text-muted: #4f604f;
-  --color-text-faint: #637064;
+  --color-text-faint: #56645a;
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-success: var(--state-success);

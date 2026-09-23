@@ -5,7 +5,7 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-bottom: 112px;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 :root {
@@ -29,11 +29,11 @@ body {
 
 button, input, select, textarea { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
-button, input, select, textarea { color-scheme: dark; }
+button, input, select, textarea { color-scheme: light; }
 
 ::selection {
-  background: rgba(183,201,138,.24);
-  color: #f5f3e8;
+  background: rgba(84,118,63,.18);
+  color: var(--color-text);
 }
 
 :focus-visible {
