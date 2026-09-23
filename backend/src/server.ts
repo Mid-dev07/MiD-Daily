@@ -1833,6 +1833,7 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
           telegram: isTelegramConfigured() && isTelegramPersistenceConfigured(),
           whatsapp: isWhatsAppConfigured() && isWhatsAppPersistenceConfigured(),
           instagram: isInstagramAnalyticsConfigured(),
+          googleCalendar: Boolean(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET && isGooglePersistenceConfigured() && GOOGLE_REDIRECT_URI.startsWith("https://")),
         },
       })
       return
