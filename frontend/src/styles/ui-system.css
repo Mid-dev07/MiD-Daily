@@ -4439,3 +4439,105 @@ textarea:focus {
   font-size: clamp(14px, 2.1vw, 22px);
   letter-spacing: -.045em;
 }
+
+
+/* REAL NATURE LAYER — photography becomes the actual world, procedural terrain stays as depth support. */
+.environment-photograph {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  background: #101610;
+}
+.environment-photograph img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center 48%;
+  transform: scale(1.035);
+  filter: saturate(.82) contrast(1.08) brightness(.58);
+  opacity: .93;
+  transition: transform 900ms var(--ease-standard), filter 900ms ease, opacity 900ms ease;
+}
+.environment-photograph::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(7,11,8,.24) 0%, rgba(8,13,9,.08) 34%, rgba(6,10,7,.46) 78%, rgba(4,7,5,.84) 100%),
+    linear-gradient(90deg, rgba(5,9,6,.56), transparent 42%, rgba(5,9,6,.34));
+  mix-blend-mode: multiply;
+}
+.environment-terrain {
+  height: 42%;
+  opacity: .42;
+  filter: saturate(.72);
+}
+.environment-trees-back { opacity: .20; }
+.environment-trees-front { opacity: .44; }
+.environment-light-shafts {
+  opacity: clamp(.06, calc(var(--env-light-intensity) * .24), .20);
+}
+.environment-canopy span { opacity: .44; }
+
+/* CSS-only exploration response: no pointermove JavaScript, only declarative state. */
+@media (hover: hover) and (pointer: fine) {
+  .app-frame:has(.feature-node[data-feature="dashboard"]:hover) .environment-photograph img {
+    transform: scale(1.045) translate3d(-.4%, -.1%, 0);
+  }
+  .app-frame:has(.feature-node[data-feature="schedule"]:hover) .environment-photograph img {
+    transform: scale(1.047) translate3d(.5%, -.2%, 0);
+  }
+  .app-frame:has(.feature-node[data-feature="tasks"]:hover) .environment-photograph img {
+    transform: scale(1.05) translate3d(.8%, .2%, 0);
+  }
+  .app-frame:has(.feature-node[data-feature="finance"]:hover) .environment-photograph img {
+    transform: scale(1.047) translate3d(.2%, .6%, 0);
+  }
+  .app-frame:has(.feature-node[data-feature="social"]:hover) .environment-photograph img {
+    transform: scale(1.046) translate3d(-.7%, .3%, 0);
+  }
+  .app-frame:has(.feature-node[data-feature="assistant"]:hover) .environment-photograph img {
+    transform: scale(1.052) translate3d(-.2%, -.6%, 0);
+  }
+}
+
+.environment-scene[data-day-phase="morning"] .environment-photograph img {
+  filter: saturate(.88) contrast(1.04) brightness(.67);
+}
+.environment-scene[data-day-phase="day"] .environment-photograph img {
+  filter: saturate(.84) contrast(1.06) brightness(.63);
+}
+.environment-scene[data-day-phase="golden-hour"] .environment-photograph img {
+  filter: saturate(.92) contrast(1.08) brightness(.62) sepia(.05);
+}
+.environment-scene[data-day-phase="dusk"] .environment-photograph img {
+  filter: saturate(.64) contrast(1.10) brightness(.43) hue-rotate(7deg);
+}
+.environment-scene[data-day-phase="night"] .environment-photograph img {
+  filter: saturate(.48) contrast(1.14) brightness(.25) hue-rotate(12deg);
+}
+.environment-scene[data-weather="fog"] .environment-photograph img,
+.environment-scene[data-weather="rain"] .environment-photograph img,
+.environment-scene[data-weather="heavy-rain"] .environment-photograph img {
+  filter: saturate(.68) contrast(.98) brightness(.52);
+}
+.environment-scene[data-weather="rain"] .environment-photograph::after,
+.environment-scene[data-weather="heavy-rain"] .environment-photograph::after,
+.environment-scene[data-weather="fog"] .environment-photograph::after {
+  background:
+    linear-gradient(180deg, rgba(174,187,174,.10), rgba(8,13,9,.16) 40%, rgba(4,7,5,.76) 100%),
+    linear-gradient(90deg, rgba(5,9,6,.50), transparent 46%, rgba(5,9,6,.42));
+}
+@media (max-width: 760px) {
+  .environment-photograph img {
+    object-position: 55% 48%;
+    transform: scale(1.055);
+  }
+  .environment-terrain { height: 32%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .environment-photograph img { transition: none !important; }
+}
