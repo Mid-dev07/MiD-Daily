@@ -1427,8 +1427,7 @@ textarea:focus {
 
 /* Existing classes kept intentionally quiet so unused legacy modules do not reintroduce visual noise. */
 .welcome-card,
-.daily-pulse,
-.feature-landscape { display: none !important; }
+.daily-pulse { display: none !important; }
 
 .assistant-channels-card {
   margin-bottom: 12px;
