@@ -59,6 +59,15 @@ if (/\.feature-landscape\s*\{[^}]*display:\s*none\s*!important/.test(uiSystem) |
 if (!/FeatureLandscape/.test(dashboard) || !/<FeatureLandscape/.test(dashboard)) {
   failures.push('Dashboard must expose the spatial workspace compass as a live navigation surface.')
 }
+if (!/SIDEBAR_HIDDEN_STORAGE_KEY/.test(appSource) || !/setSidebarHidden/.test(appSource) || !/sidebarHidden/.test(appSource)) {
+  failures.push('Workspace navigation visibility must remain user-controllable and persisted.')
+}
+if (!/sidebarHidden={sidebarHidden}/.test(appSource) || !/onToggleSidebar={toggleSidebar}/.test(appSource)) {
+  failures.push('Topbar must remain wired to the sidebar visibility controller.')
+}
+if (!/sidebar-hidden/.test(uiSystem) || !/\.app-frame\.sidebar-hidden/.test(uiSystem) || !/\.sidebar-hidden \.sidebar/.test(uiSystem)) {
+  failures.push('Sidebar visibility state must have bounded desktop/mobile presentation rules.')
+}
 if (!tsxFiles.some((file) => file.endsWith('app/App.tsx') && /useEnvironment/.test(readFileSync(file, 'utf8')) && /EnvironmentScene/.test(readFileSync(file, 'utf8')))) {
   failures.push('Living environment must be wired into the application shell.')
 }
