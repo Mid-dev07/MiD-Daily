@@ -43,6 +43,7 @@ const TASK_STORAGE_KEY = 'mid-daily.tasks'
 const FINANCE_STORAGE_KEY = 'mid-daily.finance'
 const SCHEDULE_STORAGE_KEY = 'mid-daily.schedule'
 const BUDGET_STORAGE_KEY = 'mid-daily.finance-budgets'
+const SIDEBAR_HIDDEN_STORAGE_KEY = 'mid-daily.sidebar-hidden'
 
 const reportError = (reason: unknown) => reason instanceof Error ? reason.message : 'Remote data sync failed.'
 
@@ -54,6 +55,7 @@ export function App() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [profileLoading, setProfileLoading] = useState(Boolean(userId))
   const [searchOpen, setSearchOpen] = useState(false)
+  const [sidebarHidden, setSidebarHidden] = useState(() => readUserStorage(SIDEBAR_HIDDEN_STORAGE_KEY, userId, false))
   useEffect(() => {
     const frame = document.querySelector('.app-frame')
     if (!(frame instanceof HTMLElement)) return
@@ -158,10 +160,24 @@ export function App() {
         event.preventDefault()
         setSearchOpen(true)
       }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'b') {
+        event.preventDefault()
+        setSidebarHidden((current) => !current)
+      }
     }
     window.addEventListener('keydown', handleShortcut)
     return () => window.removeEventListener('keydown', handleShortcut)
   }, [])
+
+  useEffect(() => {
+    setSidebarHidden(readUserStorage(SIDEBAR_HIDDEN_STORAGE_KEY, userId, false))
+  }, [userId])
+
+  useEffect(() => {
+    writeUserStorage(SIDEBAR_HIDDEN_STORAGE_KEY, userId, sidebarHidden)
+  }, [sidebarHidden, userId])
+
+  const toggleSidebar = () => setSidebarHidden((current) => !current)
 
   useEffect(() => {
     const handlePopState = () => setActiveView(viewFromPath(window.location.pathname))
@@ -466,7 +482,7 @@ export function App() {
 
   return (
     <div
-      className="app-frame"
+      className={sidebarHidden ? "app-frame sidebar-hidden" : "app-frame"}
       data-view={activeView}
       data-day-phase={environment.dayPhase}
       data-weather={environment.weather?.condition ?? 'clear'}
@@ -476,7 +492,7 @@ export function App() {
       <EnvironmentScene environment={environment} />
       <Sidebar activeView={activeView} onNavigate={navigate} />
       <main className="main-content">
-        <Topbar view={activeView} profile={profile} onProfile={() => navigate('profile')} onSearch={() => setSearchOpen(true)} onNavigate={navigate} userId={userId} tasks={tasks} finance={finance} schedule={schedule} environment={environment} onEnvironmentAction={() => void (environment.location ? refreshEnvironment() : requestLocation())} />
+        <Topbar view={activeView} profile={profile} onProfile={() => navigate('profile')} onSearch={() => setSearchOpen(true)} sidebarHidden={sidebarHidden} onToggleSidebar={toggleSidebar} onNavigate={navigate} userId={userId} tasks={tasks} finance={finance} schedule={schedule} environment={environment} onEnvironmentAction={() => void (environment.location ? refreshEnvironment() : requestLocation())} />
         <Suspense fallback={<section className="workspace view-loading" aria-live="polite"><span className="section-kicker">LOADING</span><h2>Opening your workspace…</h2></section>}>
           <div className="view-key" data-module={activeView}>
             {activeView === 'dashboard' && <DashboardView tasks={tasks} schedule={schedule} finance={finance} onToggleTask={(id) => void toggleTask(id)} onNavigate={navigate} timezone={environment.location?.timezone} />}
