@@ -4541,3 +4541,22 @@ textarea:focus {
 @media (prefers-reduced-motion: reduce) {
   .environment-photograph img { transition: none !important; }
 }
+
+
+/* The active workspace subtly selects a different photographic composition.
+   It is a camera crop, not a separate asset or runtime scene. */
+.app-frame[data-view="dashboard"] .environment-photograph img { object-position: 50% 48%; }
+.app-frame[data-view="schedule"] .environment-photograph img { object-position: 44% 46%; }
+.app-frame[data-view="tasks"] .environment-photograph img { object-position: 57% 50%; }
+.app-frame[data-view="finance"] .environment-photograph img { object-position: 52% 57%; }
+.app-frame[data-view="social"] .environment-photograph img { object-position: 62% 44%; }
+.app-frame[data-view="assistant"] .environment-photograph img { object-position: 40% 42%; }
+.app-frame[data-view="profile"] .environment-photograph img { object-position: 55% 52%; }
+.app-frame[data-view="insights"] .environment-photograph img { object-position: 48% 40%; }
+.app-frame[data-view="habits"] .environment-photograph img { object-position: 58% 54%; }
+
+.environment-scene[data-weather="clear"] .environment-photograph::after {
+  background:
+    linear-gradient(180deg, rgba(7,11,8,.14), rgba(8,13,9,.04) 34%, rgba(6,10,7,.40) 78%, rgba(4,7,5,.82) 100%),
+    linear-gradient(90deg, rgba(5,9,6,.46), transparent 46%, rgba(5,9,6,.28));
+}
