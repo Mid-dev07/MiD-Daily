@@ -4286,8 +4286,8 @@ textarea:focus {
   transition: transform 700ms var(--ease-standard);
 }
 
-.environment-sun { transform: translate3d(calc(var(--environment-parallax-x) * .18), calc(var(--environment-parallax-y) * .12), 0); }
-.environment-moon { transform: translate3d(calc(var(--environment-parallax-x) * .13), calc(var(--environment-parallax-y) * .09), 0); }
+.environment-sun { transform: translate3d(calc(var(--environment-parallax-x) * .18), calc(var(--environment-parallax-y) * .12), 0) translate(-50%, -50%); }
+.environment-moon { transform: translate3d(calc(var(--environment-parallax-x) * .13), calc(var(--environment-parallax-y) * .09), 0) translate(-50%, -50%); }
 .environment-stars { transform: translate3d(calc(var(--environment-parallax-x) * .08), calc(var(--environment-parallax-y) * .05), 0); }
 
 /* The landscape behaves like a scene: focus one node, quieten the rest, change the hub. */
