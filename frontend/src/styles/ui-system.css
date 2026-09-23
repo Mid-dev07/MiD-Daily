@@ -4481,3 +4481,398 @@ textarea:focus {
     linear-gradient(180deg, rgba(7,11,8,.14), rgba(8,13,9,.04) 34%, rgba(6,10,7,.40) 78%, rgba(4,7,5,.82) 100%),
     linear-gradient(90deg, rgba(5,9,6,.46), transparent 46%, rgba(5,9,6,.28));
 }
+
+
+/* =========================================================
+   UNREAL NATURE EDITORIAL — visual reset
+   The photograph is the environment. UI is an overlay, not a game HUD.
+   ========================================================= */
+
+body {
+  background: #071009;
+}
+
+.app-frame {
+  background: transparent;
+}
+
+/* Remove the procedural/game-like scene symbols from the normal composition. */
+.environment-sky,
+.environment-terrain,
+.environment-canopy,
+.environment-light-shafts,
+.environment-horizon,
+.environment-sun,
+.environment-moon,
+.environment-stars,
+.environment-clouds {
+  display: none;
+}
+
+.environment-photograph {
+  display: block;
+  opacity: 1;
+  z-index: 0;
+}
+
+.environment-photograph img {
+  object-position: center 48%;
+  transform: scale(1.015);
+  filter: saturate(.72) contrast(1.10) brightness(.60);
+  opacity: .98;
+}
+
+.environment-photograph::after {
+  background:
+    linear-gradient(180deg, rgba(3,8,5,.08), rgba(4,8,5,.02) 28%, rgba(4,8,5,.32) 66%, rgba(2,6,4,.88) 100%),
+    linear-gradient(90deg, rgba(2,7,4,.62), rgba(2,7,4,.12) 38%, rgba(2,7,4,.40));
+  mix-blend-mode: multiply;
+}
+
+.environment-scene::before {
+  background:
+    linear-gradient(180deg, rgba(1,4,2,.02), transparent 38%, rgba(1,4,2,.30) 100%),
+    radial-gradient(ellipse at 20% 74%, rgba(106,132,96,.10), transparent 38%);
+}
+
+/* Natural grade by time of day. */
+.environment-scene[data-day-phase="dawn"] .environment-photograph img {
+  filter: saturate(.78) contrast(1.06) brightness(.63) sepia(.04);
+}
+.environment-scene[data-day-phase="morning"] .environment-photograph img {
+  filter: saturate(.78) contrast(1.08) brightness(.66);
+}
+.environment-scene[data-day-phase="day"] .environment-photograph img {
+  filter: saturate(.74) contrast(1.10) brightness(.64);
+}
+.environment-scene[data-day-phase="golden-hour"] .environment-photograph img {
+  filter: saturate(.86) contrast(1.10) brightness(.66) sepia(.07);
+}
+.environment-scene[data-day-phase="dusk"] .environment-photograph img {
+  filter: saturate(.60) contrast(1.14) brightness(.43) hue-rotate(5deg);
+}
+.environment-scene[data-day-phase="night"] .environment-photograph img {
+  filter: saturate(.42) contrast(1.16) brightness(.26) hue-rotate(10deg);
+}
+
+/* Shell: translucent enough to reveal real texture, dark enough for reading. */
+.sidebar {
+  background:
+    linear-gradient(180deg, rgba(7,15,10,.70), rgba(4,10,6,.74)),
+    rgba(4,10,6,.34);
+  border-right-color: rgba(229,236,222,.10);
+  box-shadow: 24px 0 58px -52px rgba(0,0,0,.88);
+}
+
+.topbar {
+  background:
+    linear-gradient(180deg, rgba(5,11,7,.62), rgba(4,9,6,.52)),
+    rgba(4,9,6,.26);
+  border-bottom-color: rgba(229,236,222,.10);
+}
+
+.workspace {
+  padding-top: 40px;
+}
+
+.page-intro {
+  margin-bottom: 30px;
+}
+
+.page-intro h2,
+.dashboard-page .page-intro h2 {
+  font-family: var(--ui-font-display);
+  font-weight: 500;
+  letter-spacing: -.045em;
+  text-shadow: 0 8px 30px rgba(0,0,0,.26);
+}
+
+.page-intro p,
+.dashboard-page .page-intro p {
+  color: rgba(229,235,225,.66);
+  max-width: 58ch;
+}
+
+.section-kicker {
+  color: rgba(216,225,205,.52);
+  letter-spacing: .18em;
+}
+
+/* Mature material language: quiet surfaces, sharper geometry, restrained depth. */
+.content-card,
+.glass-panel,
+.stat-card {
+  border-radius: 10px;
+  border-color: rgba(229,236,222,.11);
+  background:
+    linear-gradient(135deg, rgba(225,224,199,.045), transparent 28%),
+    linear-gradient(180deg, rgba(14,24,15,.64), rgba(5,13,8,.58));
+  box-shadow:
+    inset 0 1px 0 rgba(255,252,233,.055),
+    0 28px 70px -56px rgba(0,0,0,.92);
+}
+
+.content-card:hover,
+.glass-panel:hover,
+.stat-card:hover {
+  border-color: rgba(229,236,222,.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255,252,233,.075),
+    0 30px 76px -52px rgba(0,0,0,.94);
+  transform: none !important;
+}
+
+.primary-button,
+.secondary-button,
+.filter-button,
+.icon-button,
+.environment-control,
+.search-trigger {
+  border-radius: 8px;
+}
+
+.primary-button {
+  background: #c5d19f;
+  color: #142013;
+  box-shadow: 0 10px 24px -20px rgba(197,209,159,.55);
+}
+.primary-button:hover {
+  background: #d0daaf;
+}
+
+.secondary-button,
+.filter-button,
+.icon-button {
+  background: rgba(10,20,12,.58);
+  border: 1px solid rgba(229,236,222,.12);
+}
+
+input,
+select,
+textarea {
+  border-radius: 8px;
+  background: rgba(3,10,6,.72);
+  border-color: rgba(229,236,222,.12);
+}
+
+/* Strip out pill-heavy UI where a line or label communicates better. */
+.priority-badge,
+.integration-badge,
+.meta-chip,
+.schedule-event-status {
+  border-radius: 5px;
+  background: transparent;
+  padding-inline: 6px;
+}
+
+/* Editorial field guide — replaces bubble/node composition. */
+.feature-landscape {
+  display: grid !important;
+  grid-template-columns: minmax(220px, .75fr) minmax(0, 1.45fr);
+  gap: 40px;
+  min-height: 0 !important;
+  padding: 28px 0 34px !important;
+  margin: 0 0 26px !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(229,236,222,.11) !important;
+  border-bottom: 1px solid rgba(229,236,222,.10) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.feature-landscape::before,
+.feature-landscape::after,
+.feature-scene::before,
+.feature-scene::after {
+  display: none !important;
+}
+
+.feature-landscape-heading {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 13px;
+}
+
+.feature-level {
+  color: rgba(229,236,222,.40);
+}
+
+.feature-landscape-heading h3 {
+  max-width: 10ch;
+  font-family: var(--ui-font-display);
+  font-size: clamp(30px, 4vw, 48px);
+  line-height: .98;
+  font-weight: 500;
+  letter-spacing: -.055em;
+  color: #eef1e6;
+}
+
+.feature-landscape-heading p {
+  max-width: 34ch;
+  margin-top: 0;
+  color: rgba(220,228,214,.60);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.feature-landscape-hint {
+  color: rgba(229,236,222,.38);
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.feature-directory {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  align-content: start;
+  gap: 0;
+  border-top: 1px solid rgba(229,236,222,.08);
+}
+
+.feature-directory-item {
+  min-height: 94px;
+  display: grid;
+  grid-template-columns: 28px minmax(0,1fr) 18px;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 10px;
+  border: 0;
+  border-bottom: 1px solid rgba(229,236,222,.08);
+  border-right: 1px solid rgba(229,236,222,.07);
+  border-radius: 0;
+  background: transparent;
+  color: #edf1e7;
+  cursor: pointer;
+  text-align: left;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.feature-directory-item:nth-child(3n) {
+  border-right: 0;
+}
+
+.feature-directory-item:hover,
+.feature-directory-item:focus-visible,
+.feature-directory-item.is-active {
+  background: rgba(184,199,156,.065);
+}
+
+.feature-directory-index {
+  align-self: start;
+  padding-top: 3px;
+  color: rgba(229,236,222,.34);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+
+.feature-directory-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.feature-directory-copy strong {
+  font-family: var(--ui-font-display);
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -.02em;
+}
+
+.feature-directory-copy small {
+  overflow: hidden;
+  color: rgba(216,225,205,.48);
+  font-size: 9px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feature-directory-mark {
+  color: rgba(229,236,222,.30);
+  font-size: 13px;
+  transition: color 180ms ease, transform 180ms var(--ease-spring);
+}
+
+.feature-directory-item:hover .feature-directory-mark,
+.feature-directory-item:focus-visible .feature-directory-mark,
+.feature-directory-item.is-active .feature-directory-mark {
+  color: var(--nature-sun);
+  transform: translate(2px,-2px);
+}
+
+.feature-directory-item.is-active {
+  box-shadow: inset 2px 0 0 var(--nature-sun);
+}
+
+/* Remove the old central hub semantics entirely. */
+.feature-core,
+.feature-scene-caption {
+  display: none !important;
+}
+
+/* Keep workspace-specific atmosphere without adding more objects. */
+.app-frame[data-view="schedule"] .environment-photograph img { object-position: 43% 46%; }
+.app-frame[data-view="tasks"] .environment-photograph img { object-position: 57% 50%; }
+.app-frame[data-view="finance"] .environment-photograph img { object-position: 52% 56%; }
+.app-frame[data-view="social"] .environment-photograph img { object-position: 61% 44%; }
+.app-frame[data-view="assistant"] .environment-photograph img { object-position: 40% 42%; }
+.app-frame[data-view="profile"] .environment-photograph img { object-position: 54% 52%; }
+.app-frame[data-view="insights"] .environment-photograph img { object-position: 48% 40%; }
+.app-frame[data-view="habits"] .environment-photograph img { object-position: 58% 54%; }
+
+@media (max-width: 960px) {
+  .feature-landscape {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .feature-landscape-heading h3 {
+    max-width: 14ch;
+  }
+}
+
+@media (max-width: 760px) {
+  .workspace { padding-top: 28px; }
+  .feature-landscape {
+    gap: 20px;
+    padding: 22px 0 26px !important;
+  }
+  .feature-directory {
+    grid-template-columns: 1fr 1fr;
+  }
+  .feature-directory-item:nth-child(3n) {
+    border-right: 1px solid rgba(229,236,222,.07);
+  }
+  .feature-directory-item:nth-child(2n) {
+    border-right: 0;
+  }
+  .feature-directory-item {
+    min-height: 76px;
+  }
+  .feature-directory-copy strong { font-size: 15px; }
+  .feature-directory-copy small { font-size: 8px; }
+}
+
+@media (max-width: 440px) {
+  .feature-directory {
+    grid-template-columns: 1fr;
+  }
+  .feature-directory-item,
+  .feature-directory-item:nth-child(2n),
+  .feature-directory-item:nth-child(3n) {
+    border-right: 0;
+  }
+}
+
+/* Reduced-motion: no transition dependency for comprehension. */
+@media (prefers-reduced-motion: reduce) {
+  .feature-directory-item,
+  .feature-directory-mark,
+  .environment-photograph img {
+    transition: none !important;
+  }
+}
