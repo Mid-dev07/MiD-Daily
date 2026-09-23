@@ -42,7 +42,6 @@ export function useLivingInteractions(rootRef: RefObject<InteractionRoot>) {
       const localY = ((event.clientY - rect.top) / rect.height) * 100
       target.style.setProperty('--surface-x', localX.toFixed(2) + '%')
       target.style.setProperty('--surface-y', localY.toFixed(2) + '%')
-      target.style.setProperty('--surface-glow', '1')
     }
 
     const clearSurface = (event: PointerEvent) => {
@@ -50,7 +49,6 @@ export function useLivingInteractions(rootRef: RefObject<InteractionRoot>) {
         '.content-card, .stat-card, .feature-node, .primary-button, .secondary-button, .nav-item',
       )
       if (!target) return
-      target.style.setProperty('--surface-glow', '0')
     }
 
     const handlePointerLeave = () => {
