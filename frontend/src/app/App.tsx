@@ -55,6 +55,104 @@ export function App() {
   const [profileLoading, setProfileLoading] = useState(Boolean(userId))
   const [searchOpen, setSearchOpen] = useState(false)
   useEffect(() => {
+    const frame = document.querySelector('.app-frame')
+    if (!(frame instanceof HTMLElement)) return
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
+
+    const surfaceSelector = [
+      '.content-card',
+      '.glass-panel',
+      '.stat-card',
+      '.dashboard-signal-card',
+      '.feature-directory-item',
+      '.feature-node',
+      '.secondary-button',
+      '.filter-button',
+      '.icon-button',
+      '.profile-chip',
+      '.environment-control',
+      '.search-trigger',
+      '.connections-toggle',
+      '.briefing-item',
+      '.planner-shortcut',
+    ].join(',')
+
+    let activeSurface: HTMLElement | null = null
+    let animationFrame = 0
+
+    const clearSurface = () => {
+      if (!activeSurface) return
+      activeSurface.removeAttribute('data-ux-lit')
+      activeSurface.style.removeProperty('--ux-x')
+      activeSurface.style.removeProperty('--ux-y')
+      activeSurface = null
+    }
+
+    const onPointerMove = (event: PointerEvent) => {
+      const target = event.target instanceof Element ? event.target : null
+      const surface = target?.closest(surfaceSelector)
+      const landscape = target?.closest('.feature-landscape')
+      if (!(surface instanceof HTMLElement) && !(landscape instanceof HTMLElement)) {
+        clearSurface()
+        return
+      }
+
+      if (surface instanceof HTMLElement && surface !== activeSurface) {
+        clearSurface()
+        activeSurface = surface
+        activeSurface.setAttribute('data-ux-lit', 'true')
+      }
+
+      if (surface instanceof HTMLElement) {
+        const rect = surface.getBoundingClientRect()
+        const x = Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100))
+        const y = Math.max(0, Math.min(100, ((event.clientY - rect.top) / rect.height) * 100))
+        const node = surface
+        window.cancelAnimationFrame(animationFrame)
+        animationFrame = window.requestAnimationFrame(() => {
+          node.style.setProperty('--ux-x', x + '%')
+          node.style.setProperty('--ux-y', y + '%')
+        })
+      }
+
+      if (landscape instanceof HTMLElement) {
+        const rect = landscape.getBoundingClientRect()
+        const nx = ((event.clientX - rect.left) / rect.width) - 0.5
+        const ny = ((event.clientY - rect.top) / rect.height) - 0.5
+        landscape.style.setProperty('--ux-tilt-x', (nx * 0.9).toFixed(2) + 'deg')
+        landscape.style.setProperty('--ux-tilt-y', (-ny * 0.7).toFixed(2) + 'deg')
+        landscape.setAttribute('data-ux-lit', 'true')
+      }
+    }
+
+    const onPointerLeave = () => {
+      window.cancelAnimationFrame(animationFrame)
+      clearSurface()
+      const landscape = frame.querySelector('.feature-landscape')
+      if (landscape instanceof HTMLElement) {
+        landscape.removeAttribute('data-ux-lit')
+        landscape.style.removeProperty('--ux-tilt-x')
+        landscape.style.removeProperty('--ux-tilt-y')
+      }
+    }
+
+    frame.addEventListener('pointermove', onPointerMove, { passive: true })
+    frame.addEventListener('pointerleave', onPointerLeave)
+    return () => {
+      window.cancelAnimationFrame(animationFrame)
+      frame.removeEventListener('pointermove', onPointerMove)
+      frame.removeEventListener('pointerleave', onPointerLeave)
+      clearSurface()
+      const landscape = frame.querySelector('.feature-landscape')
+      if (landscape instanceof HTMLElement) {
+        landscape.removeAttribute('data-ux-lit')
+        landscape.style.removeProperty('--ux-tilt-x')
+        landscape.style.removeProperty('--ux-tilt-y')
+      }
+    }
+  }, [])
+
+  useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault()
