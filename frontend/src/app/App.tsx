@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { Sidebar } from '../components/layout/Sidebar'
 import { Topbar } from '../components/layout/Topbar'
 import { Toast } from '../components/ui/Toast'
@@ -29,7 +29,6 @@ import { useReminderScheduler } from '../features/schedule/hooks/useReminderSche
 import { useEnvironment } from '../environment/useEnvironment'
 import { environmentCssVariables } from '../environment/visual'
 import { EnvironmentScene } from '../environment/EnvironmentScene'
-import { useLivingInteractions } from '../hooks/useLivingInteractions'
 import { registerBrowserServiceWorker } from '../integrations/notifications/serviceWorker'
 import { readUserStorage, writeUserStorage, hasUserStorage } from '../lib/userStorage'
 import { hasCompletedRemoteSync, markRemoteSyncComplete } from '../lib/dataSync'
@@ -55,9 +54,6 @@ export function App() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [profileLoading, setProfileLoading] = useState(Boolean(userId))
   const [searchOpen, setSearchOpen] = useState(false)
-  const appFrameRef = useRef<HTMLDivElement>(null)
-  useLivingInteractions(appFrameRef)
-
   useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
@@ -372,7 +368,6 @@ export function App() {
 
   return (
     <div
-      ref={appFrameRef}
       className="app-frame"
       data-view={activeView}
       data-day-phase={environment.dayPhase}
