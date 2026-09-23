@@ -17,7 +17,7 @@ The cinematic layer is intentionally lightweight for normal devices:
 - no remote photographic background is required for the Dashboard Feature Landscape;
 - backdrop-filter rendering is disabled in the production material layer;
 - full-screen ambient motion is static instead of continuously repainting;
-- pointer-following specular tracking is not used in the main application shell;
+- pointer response is sampled only on fine pointers and limited to cheap CSS-variable parallax/light response; touch devices and reduced-motion users get the static composition;
 - procedural grain is not rendered in the DOM;
 - entry transitions use opacity/transform rather than animated blur.
 
@@ -156,3 +156,13 @@ The living environment is now an explicit visual layer rather than a subtle colo
 - the shell and workspace surfaces are semi-opaque so environmental depth can remain visible through the interface without sacrificing text contrast;
 - day-phase and weather state modulate the landscape tone and atmospheric layers;
 - no external photographic asset or heavy 3D engine is required for the environment surface.
+
+
+## Living interaction layer
+
+The UNREAL environment now reacts to the user without turning the app into a game-like scene:
+- the pointer shifts environmental light shafts, terrain depth, canopy, sun, moon, and stars by a few pixels;
+- feature nodes become a focus system: one node rises and brightens, surrounding nodes quieten, and the central hub reflects the focused workspace;
+- content surfaces catch a local painted highlight based on pointer position;
+- navigation remains semantic and click/keyboard driven; visual motion never carries essential meaning alone;
+- the interaction layer uses event delegation + requestAnimationFrame and does not introduce a canvas, WebGL runtime, external animation library, or persistent blur.
