@@ -44,13 +44,6 @@ export function useLivingInteractions(rootRef: RefObject<InteractionRoot>) {
       target.style.setProperty('--surface-y', localY.toFixed(2) + '%')
     }
 
-    const clearSurface = (event: PointerEvent) => {
-      const target = (event.target as Element | null)?.closest<HTMLElement>(
-        '.content-card, .stat-card, .feature-node, .primary-button, .secondary-button, .nav-item',
-      )
-      if (!target) return
-    }
-
     const handlePointerLeave = () => {
       pointerX = 50
       pointerY = 50
@@ -58,12 +51,10 @@ export function useLivingInteractions(rootRef: RefObject<InteractionRoot>) {
     }
 
     root.addEventListener('pointermove', handlePointerMove, { passive: true })
-    root.addEventListener('pointerout', clearSurface, { passive: true })
     root.addEventListener('pointerleave', handlePointerLeave, { passive: true })
 
     return () => {
       root.removeEventListener('pointermove', handlePointerMove)
-      root.removeEventListener('pointerout', clearSurface)
       root.removeEventListener('pointerleave', handlePointerLeave)
       if (frame) window.cancelAnimationFrame(frame)
     }
