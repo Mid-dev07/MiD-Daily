@@ -3,6 +3,7 @@ import type { FinanceEntry, Task, View } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
 import { scheduleOccursOnDate, shiftDate } from '../schedule/schedule.date'
 import { currency, formatDate } from '../../lib/format'
+import { FeatureLandscape } from './components/FeatureLandscape'
 
 interface DashboardViewProps {
   tasks: Task[]
@@ -210,6 +211,8 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
           )}
         </section>
       </div>
+
+      <FeatureLandscape activeView="dashboard" onNavigate={onNavigate} />
 
       <Suspense fallback={<section className="content-card connection-loading">Preparing quick capture…</section>}>
         <QuickCapture />
