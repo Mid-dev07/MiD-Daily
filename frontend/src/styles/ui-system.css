@@ -87,3 +87,19 @@ input:not([type=checkbox]):not([type=radio]),select,textarea{width:100%;min-heig
     overflow-y:hidden;
   }
 }
+
+.app-frame.sidebar-hidden .main-content { margin-left:0; width:100%; }
+.content-card[data-ux-lit="true"],
+.glass-panel[data-ux-lit="true"],
+.stat-card[data-ux-lit="true"],
+.dashboard-signal-card[data-ux-lit="true"],
+.feature-node[data-ux-lit="true"],
+.secondary-button[data-ux-lit="true"],
+.filter-button[data-ux-lit="true"],
+.icon-button[data-ux-lit="true"],
+.profile-chip[data-ux-lit="true"],
+.environment-control[data-ux-lit="true"],
+.search-trigger[data-ux-lit="true"],
+.connections-toggle[data-ux-lit="true"],
+.briefing-item[data-ux-lit="true"],
+.planner-shortcut[data-ux-lit="true"] { border-color:rgba(232,243,207,.22); }
