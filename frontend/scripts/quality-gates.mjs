@@ -38,7 +38,7 @@ if (existsSync(join(srcDir, 'styles/app.css'))) {
 if (uiSystem.includes('backdrop-filter')) {
   failures.push('Active ui-system.css must not use persistent backdrop-filter.')
 }
-if (!/data-ux-lit/.test(uiSystem) || !/feature-directory:has/.test(uiSystem) || !/prefers-reduced-motion:\\s*reduce/.test(uiSystem)) {
+if (!/data-ux-lit/.test(uiSystem) || !/feature-directory:has/.test(uiSystem) || !/prefers-reduced-motion:\s*reduce/.test(uiSystem)) {
   failures.push('Living material interaction contract is missing from the active UI stylesheet.')
 }
 if (!/surfaceSelector/.test(appSourceForInteraction) || !/requestAnimationFrame/.test(appSourceForInteraction) || !/pointermove/.test(appSourceForInteraction)) {
