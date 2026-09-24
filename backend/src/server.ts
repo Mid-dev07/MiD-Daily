@@ -1489,24 +1489,39 @@ async function handleIntegrationStatus(req: IncomingMessage, res: ServerResponse
     getWhatsAppConnectionByUserId(userId),
   ])
 
+  const aiConfigured = isAssistantConfigured()
+  const telegramConfigured = isTelegramConfigured() && isTelegramPersistenceConfigured()
+  const whatsappConfigured = isWhatsAppConfigured() && isWhatsAppPersistenceConfigured()
+  const instagramConfigured = isInstagramAnalyticsConfigured()
+
   sendJson(res, 200, {
-    ai: { configured: isAssistantConfigured() },
+    ai: {
+      configured: aiConfigured,
+      state: aiConfigured ? 'READY' : 'NOT_CONFIGURED',
+      mode: 'workers-ai',
+      writeActions: 'explicit-confirmation-required',
+    },
     telegram: {
-      configured: isTelegramConfigured() && isTelegramPersistenceConfigured(),
+      configured: telegramConfigured,
+      state: !telegramConfigured ? 'NOT_CONFIGURED' : telegram ? 'CONNECTED' : 'CONNECTABLE',
       connected: Boolean(telegram),
       connectedAt: telegram?.connected_at ?? null,
       username: telegram?.telegram_username ?? null,
     },
     whatsapp: {
-      configured: isWhatsAppConfigured() && isWhatsAppPersistenceConfigured(),
+      configured: whatsappConfigured,
+      state: !whatsappConfigured ? 'NOT_CONFIGURED' : whatsapp ? 'CONNECTED' : 'CONNECTABLE',
       connected: Boolean(whatsapp),
       connectedAt: whatsapp?.connected_at ?? null,
       displayName: whatsapp?.display_name ?? null,
       businessPhoneNumber: getWhatsAppConfig().businessPhoneNumber || null,
     },
     instagram: {
-      configured: isInstagramAnalyticsConfigured(),
+      configured: instagramConfigured,
+      state: instagramConfigured ? 'DEPLOYMENT_ACCOUNT' : 'NOT_CONFIGURED',
       mode: 'analytics-read-only',
+      scope: 'deployment',
+      connectable: false,
     },
   })
 }
