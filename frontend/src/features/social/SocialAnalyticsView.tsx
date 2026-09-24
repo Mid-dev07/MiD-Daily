@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react'
-import { disconnectInstagram, getInstagramInsights, type InstagramInsightsResponse } from '../../integrations/instagramApi'
+import {
+  disconnectInstagram,
+  getInstagramInsights,
+  startInstagramAuthentication,
+  type InstagramInsightsResponse,
+} from '../../integrations/instagramApi'
+import { getIntegrationStatus, type IntegrationStatus } from '../../integrations/integrationsApi'
 
 function formatNumber(value: number | undefined) {
   return typeof value === 'number' ? new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(value) : '—'
@@ -7,14 +13,22 @@ function formatNumber(value: number | undefined) {
 
 export function SocialAnalyticsView() {
   const [data, setData] = useState<InstagramInsightsResponse | null>(null)
+  const [integration, setIntegration] = useState<IntegrationStatus | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [connecting, setConnecting] = useState(false)
   const [disconnecting, setDisconnecting] = useState(false)
+  const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
 
   const refresh = async () => {
     setLoading(true)
     try {
-      setData(await getInstagramInsights())
+      const [nextIntegration, nextData] = await Promise.all([
+        getIntegrationStatus(),
+        getInstagramInsights().catch(() => null),
+      ])
+      setIntegration(nextIntegration)
+      setData(nextData)
       setError('')
     } catch (reason) {
       setData(null)
@@ -25,8 +39,25 @@ export function SocialAnalyticsView() {
   }
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const result = params.get('instagram')
+    if (result === 'connected') setNotice('Instagram connected. Live analytics are now scoped to your account.')
+    if (result === 'error') setError('Instagram connection could not be completed. Please try again.')
+    if (result) window.history.replaceState({}, '', window.location.pathname)
     void refresh()
   }, [])
+
+  const handleConnect = async () => {
+    setConnecting(true)
+    setError('')
+    try {
+      const result = await startInstagramAuthentication()
+      window.location.assign(result.authorizationUrl)
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Unable to start Instagram connection.')
+      setConnecting(false)
+    }
+  }
 
   const handleDisconnect = async () => {
     if (!window.confirm('Disconnect Instagram from MiD-Daily?')) return
@@ -34,6 +65,7 @@ export function SocialAnalyticsView() {
     setError('')
     try {
       await disconnectInstagram()
+      setNotice('Instagram disconnected.')
       await refresh()
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Unable to disconnect Instagram.')
@@ -42,15 +74,21 @@ export function SocialAnalyticsView() {
     }
   }
 
+  const userConnected = data?.scope === 'user' || integration?.instagram.state === 'CONNECTED'
+  const connectable = integration?.instagram.connectable === true
+
   return (
     <section className="workspace page-enter">
       <div className="page-intro">
         <div>
           <span className="section-kicker">SOCIAL ANALYTICS</span>
           <h2>See the signal.</h2>
-          <p>Read-only Instagram Professional account analytics, kept separate from your Tasks, Finance, and Schedule data.</p>
+          <p>Read-only Instagram Professional analytics, kept separate from your Tasks, Finance, and Schedule data.</p>
         </div>
       </div>
+
+      {notice && <div className="ai-availability-note" role="status"><strong>{notice}</strong><span>You can disconnect the account at any time from this workspace.</span></div>}
+      {error && <div className="form-error" role="alert">{error}</div>}
 
       <div className="content-card integration-panel social-foundation-card">
         <div className="card-heading">
@@ -59,13 +97,19 @@ export function SocialAnalyticsView() {
             <h3>{data?.username ? '@' + data.username : 'Professional account analytics'}</h3>
           </div>
           <div className="integration-actions">
-            <span className="integration-badge">{loading ? 'CHECKING' : data ? (data.scope === 'user' ? 'CONNECTED' : 'DEPLOYMENT READ') : 'SETUP NEEDED'}</span>
-            {data?.scope === 'user' && (
+            <span className="integration-badge">
+              {loading ? 'CHECKING' : userConnected ? 'CONNECTED' : data?.scope === 'deployment' ? 'DEPLOYMENT READ' : connectable ? 'READY TO CONNECT' : 'SETUP NEEDED'}
+            </span>
+            {userConnected ? (
               <button className="text-button danger" type="button" disabled={loading || disconnecting} onClick={() => void handleDisconnect()}>
                 {disconnecting ? 'Disconnecting…' : 'Disconnect'}
               </button>
-            )}
-            <button className="text-button" type="button" disabled={loading || disconnecting} onClick={() => void refresh()}>
+            ) : connectable ? (
+              <button className="secondary-button" type="button" disabled={loading || connecting} onClick={() => void handleConnect()}>
+                {connecting ? 'Opening…' : 'Connect Instagram'}
+              </button>
+            ) : null}
+            <button className="text-button" type="button" disabled={loading || connecting || disconnecting} onClick={() => void refresh()}>
               {loading ? 'Checking…' : 'Refresh'}
             </button>
           </div>
@@ -80,26 +124,37 @@ export function SocialAnalyticsView() {
               <div><span>Engaged</span><strong>{formatNumber(data.accountsEngaged)}</strong><small>Accounts engaged today.</small></div>
               <div><span>Interactions</span><strong>{formatNumber(data.totalInteractions)}</strong><small>Total interactions today.</small></div>
             </div>
-            <small className="social-updated">{data.scope === 'user' ? 'Connected to your Instagram account · ' : 'Deployment analytics · '}Updated {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(data.updatedAt))}</small>
+            <small className="social-updated">
+              {data.scope === 'user' ? 'Connected to your Instagram account · ' : 'Deployment analytics · '}
+              Updated {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(data.updatedAt))}
+            </small>
           </>
         ) : (
-          <>
-            <p className="integration-description">
-              {error || 'Connect an Instagram Professional account to load live analytics.'}
-            </p>
-            <div className="social-setup-panel">
-              <strong>Connect a Professional account</strong>
-              <span>MiD-Daily is ready to read your Instagram analytics. Provider credentials are configured on the deployment, not entered into this page.</span>
-              <div className="integration-actions">
+          <div className="social-setup-panel">
+            <strong>{connectable ? 'Connect your Instagram Professional account' : 'Instagram analytics needs provider setup'}</strong>
+            <span>
+              {connectable
+                ? 'MiD will send you to Instagram to authorize access. Provider tokens remain server-side and are encrypted before storage.'
+                : error || 'Live analytics are not available until Instagram credentials are configured on this deployment.'}
+            </span>
+            <div className="integration-actions">
+              {connectable && (
+                <button className="primary-button" type="button" disabled={connecting} onClick={() => void handleConnect()}>
+                  {connecting ? 'Opening…' : 'Connect Instagram'}
+                </button>
+              )}
+              {!connectable && (
                 <button className="secondary-button" type="button" onClick={() => window.open('https://developers.facebook.com/apps/', '_blank', 'noopener,noreferrer')}>Open provider setup</button>
-                <a href="https://developers.facebook.com/docs/instagram-platform/" target="_blank" rel="noreferrer">Read Meta Instagram Platform docs ↗</a>
-              </div>
+              )}
+              <a href="https://developers.facebook.com/docs/instagram-platform/" target="_blank" rel="noreferrer">Read Meta Instagram Platform docs ↗</a>
+            </div>
+            {!connectable && (
               <details className="provider-details">
                 <summary>Developer setup details</summary>
-                <span>Server configuration uses INSTAGRAM_ACCESS_TOKEN, INSTAGRAM_GRAPH_VERSION, and INSTAGRAM_ACCOUNT_ID. These values stay out of the user-facing form.</span>
+                <span>Instagram OAuth requires INSTAGRAM_CLIENT_ID, INSTAGRAM_CLIENT_SECRET, INSTAGRAM_REDIRECT_URI, and INSTAGRAM_GRAPH_VERSION. Deployment analytics can still use the legacy INSTAGRAM_ACCESS_TOKEN and INSTAGRAM_ACCOUNT_ID fallback.</span>
               </details>
-            </div>
-          </>
+            )}
+          </div>
         )}
       </div>
     </section>
