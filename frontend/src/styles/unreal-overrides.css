@@ -46,11 +46,6 @@
    Purpose: make the product identity visibly Unreal-grade without WebGL,
    persistent backdrop-filter, image backgrounds, or heavy runtime effects.
 */
-
-   Purpose: make the product identity visibly Unreal-grade without WebGL,
-   persistent backdrop-filter, image backgrounds, or heavy runtime effects.
-*/
-
 :root {
   --unreal-void: #050913;
   --unreal-deep: #08111d;
