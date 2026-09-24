@@ -62,25 +62,18 @@ export function App() {
     if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
 
     const surfaceSelector = [
-      '.content-card',
-      '.glass-panel',
-      '.stat-card',
-      '.dashboard-signal-card',
-      '.feature-directory-item',
-      '.feature-node',
-      '.secondary-button',
-      '.filter-button',
-      '.icon-button',
-      '.profile-chip',
-      '.environment-control',
-      '.search-trigger',
-      '.connections-toggle',
-      '.briefing-item',
-      '.planner-shortcut',
+      '.content-card','.glass-panel','.stat-card','.dashboard-signal-card','.feature-directory-item',
+      '.feature-node','.secondary-button','.filter-button','.icon-button','.profile-chip','.environment-control',
+      '.search-trigger','.connections-toggle','.briefing-item','.planner-shortcut','.global-search-result',
+      '.toast','.finance-budget-row','.task-item-card','.notification-card','.flexible-plan','.schedule-now-strip',
+      '.insights-metric','.habit-check','.habit-day','.dashboard-section-link'
     ].join(',')
 
     let activeSurface: HTMLElement | null = null
+    let landscape: HTMLElement | null = null
     let animationFrame = 0
+    let pointerX = 0
+    let pointerY = 0
 
     const clearSurface = () => {
       if (!activeSurface) return
@@ -90,67 +83,78 @@ export function App() {
       activeSurface = null
     }
 
-    const onPointerMove = (event: PointerEvent) => {
-      const target = event.target instanceof Element ? event.target : null
-      const surface = target?.closest(surfaceSelector)
-      const landscape = target?.closest('.feature-landscape')
-      if (!(surface instanceof HTMLElement) && !(landscape instanceof HTMLElement)) {
-        clearSurface()
-        return
-      }
+    const clearLandscape = () => {
+      if (!landscape) return
+      landscape.removeAttribute('data-ux-lit')
+      landscape.style.removeProperty('--ux-tilt-x')
+      landscape.style.removeProperty('--ux-tilt-y')
+      landscape = null
+    }
 
-      if (surface instanceof HTMLElement && surface !== activeSurface) {
+    const schedule = () => {
+      if (animationFrame) return
+      animationFrame = window.requestAnimationFrame(() => {
+        animationFrame = 0
+        if (activeSurface) {
+          const rect = activeSurface.getBoundingClientRect()
+          const x = Math.max(0, Math.min(100, ((pointerX - rect.left) / Math.max(1, rect.width)) * 100))
+          const y = Math.max(0, Math.min(100, ((pointerY - rect.top) / Math.max(1, rect.height)) * 100))
+          activeSurface.style.setProperty('--ux-x', x + '%')
+          activeSurface.style.setProperty('--ux-y', y + '%')
+        }
+        if (landscape) {
+          const rect = landscape.getBoundingClientRect()
+          const nx = ((pointerX - rect.left) / Math.max(1, rect.width)) - .5
+          const ny = ((pointerY - rect.top) / Math.max(1, rect.height)) - .5
+          landscape.style.setProperty('--ux-tilt-x', (nx * .9).toFixed(2) + 'deg')
+          landscape.style.setProperty('--ux-tilt-y', (-ny * .7).toFixed(2) + 'deg')
+        }
+      })
+    }
+
+    const onPointerOver = (event: PointerEvent) => {
+      const target = event.target instanceof Element ? event.target : null
+      const nextSurface = target?.closest(surfaceSelector)
+      const nextLandscape = target?.closest('.feature-landscape')
+      if (!(nextSurface instanceof HTMLElement) && !(nextLandscape instanceof HTMLElement)) return
+      if (nextSurface instanceof HTMLElement && nextSurface !== activeSurface) {
         clearSurface()
-        activeSurface = surface
+        activeSurface = nextSurface
         activeSurface.setAttribute('data-ux-lit', 'true')
       }
-
-      if (surface instanceof HTMLElement) {
-        const rect = surface.getBoundingClientRect()
-        const x = Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100))
-        const y = Math.max(0, Math.min(100, ((event.clientY - rect.top) / rect.height) * 100))
-        const node = surface
-        window.cancelAnimationFrame(animationFrame)
-        animationFrame = window.requestAnimationFrame(() => {
-          node.style.setProperty('--ux-x', x + '%')
-          node.style.setProperty('--ux-y', y + '%')
-        })
-      }
-
-      if (landscape instanceof HTMLElement) {
-        const rect = landscape.getBoundingClientRect()
-        const nx = ((event.clientX - rect.left) / rect.width) - 0.5
-        const ny = ((event.clientY - rect.top) / rect.height) - 0.5
-        landscape.style.setProperty('--ux-tilt-x', (nx * 0.9).toFixed(2) + 'deg')
-        landscape.style.setProperty('--ux-tilt-y', (-ny * 0.7).toFixed(2) + 'deg')
+      if (nextLandscape instanceof HTMLElement && nextLandscape !== landscape) {
+        clearLandscape()
+        landscape = nextLandscape
         landscape.setAttribute('data-ux-lit', 'true')
       }
+      pointerX = event.clientX
+      pointerY = event.clientY
+      schedule()
+    }
+
+    const onPointerMove = (event: PointerEvent) => {
+      pointerX = event.clientX
+      pointerY = event.clientY
+      if (activeSurface || landscape) schedule()
     }
 
     const onPointerLeave = () => {
       window.cancelAnimationFrame(animationFrame)
+      animationFrame = 0
       clearSurface()
-      const landscape = frame.querySelector('.feature-landscape')
-      if (landscape instanceof HTMLElement) {
-        landscape.removeAttribute('data-ux-lit')
-        landscape.style.removeProperty('--ux-tilt-x')
-        landscape.style.removeProperty('--ux-tilt-y')
-      }
+      clearLandscape()
     }
 
+    frame.addEventListener('pointerover', onPointerOver, { passive: true })
     frame.addEventListener('pointermove', onPointerMove, { passive: true })
     frame.addEventListener('pointerleave', onPointerLeave)
     return () => {
       window.cancelAnimationFrame(animationFrame)
+      frame.removeEventListener('pointerover', onPointerOver)
       frame.removeEventListener('pointermove', onPointerMove)
       frame.removeEventListener('pointerleave', onPointerLeave)
       clearSurface()
-      const landscape = frame.querySelector('.feature-landscape')
-      if (landscape instanceof HTMLElement) {
-        landscape.removeAttribute('data-ux-lit')
-        landscape.style.removeProperty('--ux-tilt-x')
-        landscape.style.removeProperty('--ux-tilt-y')
-      }
+      clearLandscape()
     }
   }, [])
 

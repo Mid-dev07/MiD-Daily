@@ -36,16 +36,31 @@ const rhythmSection = uiSystem.split('/* 4PT RHYTHM CONTRACT')[1] ?? ''
 if (!/--rhythm-micro:\s*4px/.test(tokens) || !/--rhythm-tight:\s*8px/.test(tokens) || !/--rhythm-component:\s*16px/.test(tokens)) {
   failures.push('Canonical 4pt spacing tokens are missing from tokens.css.')
 }
-if (!/4PT RHYTHM CONTRACT/.test(uiSystem)) {
-  failures.push('Active UI stylesheet must include the canonical 4pt rhythm contract.')
-} else {
-  const spacingDeclarations = [...rhythmSection.matchAll(/(?:gap|row-gap|column-gap|padding(?:-[a-z]+)?|margin(?:-[a-z]+)?|min-height|height|width):\s*(-?\d+)px/g)]
-  const offGrid = spacingDeclarations
-    .map((match) => Number(match[1]))
-    .filter((value) => value !== 0 && value % 4 !== 0)
-  if (offGrid.length) {
-    failures.push('4pt rhythm section contains off-grid pixel values: ' + [...new Set(offGrid)].join(', '))
+if (!/4PT RHYTHM CONTRACT/.test(uiSystem) || !/FINAL UI SYSTEM CLEANUP/.test(uiSystem)) {
+  failures.push('Active UI stylesheet must include the canonical 4pt rhythm and final cleanup layers.')
+}
+
+const spatialDeclarations = [...uiSystem.matchAll(/(?:^|[;{}])\s*(gap|row-gap|column-gap|padding(?:-[a-z]+)?|margin(?:-[a-z]+)?|min-height|max-height|min-width|max-width|height|width|top|right|bottom|left|inset|border-radius|grid-template-columns|grid-template-rows):\s*([^;{}]+)/gm)]
+const offGridValues = []
+for (const match of spatialDeclarations) {
+  const prop = match[1]
+  const raw = match[2]
+  for (const px of raw.matchAll(/(-?\d+(?:\.\d+)?)px/g)) {
+    const value = Number(px[1])
+    if (value === 0) continue
+    if (prop === 'border-radius' && Math.abs(value) >= 90) continue
+    if ((prop === 'height' || prop === 'width' || prop === 'min-height' || prop === 'min-width') && Math.abs(value) === 1) continue
+    if (value % 4 !== 0) offGridValues.push(prop + '=' + value)
   }
+}
+if (offGridValues.length) {
+  failures.push('Active UI stylesheet contains off-grid spatial values: ' + [...new Set(offGridValues)].join(', '))
+}
+
+const requiredUiClasses = ["global-search-dialog","global-search-result","global-search-copy","global-search-footer","toast","dashboard-section-link","connection-loading","finance-toolbar-controls","stat-row","finance-budget-row","schedule-date-caption","schedule-now-strip","flexible-plan","secondary-panel","notification-card","task-item-card","task-item-footer","task-progress-track","task-actions-menu","profile-layout","profile-avatar-large","profile-form","profile-account-row","insights-metric-grid","insights-grid","review-note","insights-category-row","insights-schedule-row","habit-composer","habit-days","habit-board","habit-row","habit-week-grid","social-foundation-card","provider-details"]
+for (const className of requiredUiClasses) {
+  const selector = new RegExp('\\.' + className + '(?=[^A-Za-z0-9_-]|$)')
+  if (!selector.test(uiSystem)) failures.push('Missing component UI selector: ' + className)
 }
 
 if (existsSync(join(srcDir, 'styles/app.css'))) {
