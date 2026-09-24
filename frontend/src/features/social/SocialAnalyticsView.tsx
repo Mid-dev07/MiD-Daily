@@ -80,7 +80,7 @@ export function SocialAnalyticsView() {
               <div><span>Engaged</span><strong>{formatNumber(data.accountsEngaged)}</strong><small>Accounts engaged today.</small></div>
               <div><span>Interactions</span><strong>{formatNumber(data.totalInteractions)}</strong><small>Total interactions today.</small></div>
             </div>
-            <small className="social-updated">Updated {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(data.updatedAt))}</small>
+            <small className="social-updated">{data.scope === 'user' ? 'Connected to your Instagram account · ' : 'Deployment analytics · '}Updated {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(data.updatedAt))}</small>
           </>
         ) : (
           <>
