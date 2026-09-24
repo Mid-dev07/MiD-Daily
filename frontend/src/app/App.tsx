@@ -36,6 +36,7 @@ import { useWorkspaceRealtime } from '../features/workspace/useWorkspaceRealtime
 import { useAuth } from '../features/auth/AuthProvider'
 import { navigateToView, viewFromPath } from './routing'
 import { getProfile } from '../features/profile/profileApi'
+import { getToday as getAppToday, APP_TIMEZONE } from '../lib/dateTime'
 import type { FinanceBudget, FinanceBudgetDraft, FinanceDraft, FinanceEntry, Profile, Task, TaskDraft, View } from '../types'
 import type { ScheduleItem } from '../features/schedule/schedule.types'
 
@@ -484,6 +485,16 @@ export function App() {
     setSchedule(normalizeScheduleList(resolved))
   }
 
+  const appToday = getAppToday(APP_TIMEZONE)
+  const overdueCount = tasks.filter((task) => task.status !== 'done' && task.dueDate && task.dueDate < appToday).length
+  const openTaskCount = tasks.filter((task) => task.status !== 'done').length
+  const todayActivityCount = schedule.filter((item) => item.date === appToday && item.activityMode !== 'FLEXIBLE').length
+  const workload = overdueCount >= 3 || openTaskCount >= 9 || todayActivityCount >= 8
+    ? 'high'
+    : overdueCount > 0 || openTaskCount >= 5 || todayActivityCount >= 5
+      ? 'medium'
+      : 'low'
+
   return (
     <div
       className={sidebarHidden ? "app-frame sidebar-hidden" : "app-frame"}
@@ -491,6 +502,7 @@ export function App() {
       data-day-phase={environment.dayPhase}
       data-weather={environment.weather?.condition ?? 'clear'}
       data-environment-status={environment.status}
+      data-workload={workload}
       style={environmentCssVariables(environment)}
     >
       <EnvironmentScene environment={environment} />
