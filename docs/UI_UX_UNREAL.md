@@ -1,262 +1,210 @@
-# MiD Daily — Nature Cinematic UI/UX Direction
+# MiD Daily — Unreal-Grade Native UI/UX Direction
 
 ## North star
-MiD Daily should feel like a calm digital place inspired by cinematic nature photography: forest shade, fog, moss, wet stone, soft daylight, and warm natural light.
 
-The goal is not to place a forest image behind a conventional dashboard. Nature is the visual environment in which the interface exists.
+MiD Daily is a daily-management workspace first. **UNREAL is the material and interaction quality bar, not a reskin.**
 
-## Visual ratio
-- Daylight nature environment: ~70%
-- Natural luxury material system: ~30%
+The interface must remain recognisably MiD:
+- same core workspace structure and navigation;
+- same editorial hierarchy and daily-management purpose;
+- same living environment as contextual atmosphere;
+- same readable, calm information density.
 
-Daylight nature is the default mood. Forest, moss, stone, fog, foliage, and sunlight remain visible as the environment; the workspace uses ivory, linen, sage, mineral, and warm-earth materials for information surfaces. Dark tones are contrast accents, not the dominant UI.
+UNREAL means the interface feels intentionally manufactured: depth, material response, lighting, hierarchy, spatial separation and interaction quality.
 
-## Performance direction
+## Identity contract
 
-The cinematic layer is intentionally lightweight for normal devices:
-- no remote photographic background is required for the Dashboard Feature Landscape;
-- backdrop-filter rendering is disabled in the production material layer;
-- full-screen ambient motion is static instead of continuously repainting;
-- bounded pointer interaction is used only on foreground material surfaces through one delegated listener and requestAnimationFrame; the environment shell itself does not track the pointer; touch devices and reduced-motion users receive simpler static states;
-- procedural grain is not rendered in the DOM;
-- entry transitions use opacity/transform rather than animated blur.
+The visual identity is built from five persistent constants:
 
-The visual goal remains cinematic, but the runtime budget takes priority over decorative effects.
+1. **MiD dark base** — `#0a1119`
+2. **MiD surface family** — deep blue-grey / mineral surfaces, not saturated blue.
+3. **Electric cyan** — `#4fd1ff` as the interaction/signature color, not the page background.
+4. **Semantic accents** — success `#4ade80`, warning `#fbbf24`, danger `#fb7185`.
+5. **145deg key light** — the same directional light logic informs rims, bevels, highlights and raised surfaces.
 
-## Editorial spatial layer
+A screen should read as dark neutral material first and accent second.
 
-MiD Daily now uses an editorial composition layer inspired by premium interactive portfolios without copying a specific site.
+## Material system
 
-Principles:
-- numbered levels ("LVLL 001", "LVLL 002", etc.) give each workspace view a sense of place and sequence;
-- oversized display typography is used as a visual anchor while utility copy stays compact;
-- generous negative space separates hierarchy instead of adding more cards;
-- the Dashboard hero and Feature Landscape act as an environment first, interface second;
-- motion remains restrained and progressively degrades on touch and reduced-motion contexts;
-- responsive behavior is contract-driven: no critical positioning depends on absolute coordinates, and the mobile layout collapses into a single-column flow with bottom navigation.
+UNREAL uses three principal material roles:
 
-This layer is intentionally lightweight: CSS gradients, transforms, controlled blur, and one photographic environment are preferred over persistent 3D canvases or heavy animation runtimes.
+### 1. Glass panel
+Painted translucency, not mandatory GPU blur.
 
-## Material language
-1. **Dew glass**
-   - translucent appearance without mandatory GPU blur
-   - subtle highlight
-   - lightweight painted surfaces by default
-   - no cyan neon glow
+Use:
+- layered gradients;
+- subtle inner rim;
+- soft occlusion shadow;
+- controlled transparency;
+- local pointer highlight.
 
-2. **Natural stone / wood surface**
-   - matte body
-   - warm edge light
-   - deep ambient shadow
-   - tactile borders
+Do not:
+- cover every component in glass;
+- use persistent blur;
+- create a uniformly glossy interface.
 
-3. **Recessed earth**
-   - used for inputs, empty slots, and quiet controls
-   - inward shadow
-   - minimal highlight until focus
+### 2. Emissive
+Reserved for meaningful attention:
+- primary action;
+- active navigation;
+- focused module;
+- progress signal;
+- live state.
+
+Emission must remain local. A primary button can glow; the entire page must not.
+
+### 3. Recessed
+Used for:
+- inputs;
+- search fields;
+- quiet controls;
+- empty slots;
+- secondary data wells.
+
+The visual language is inward shadow + restrained edge highlight + strong focus state.
 
 ## Lighting
-One consistent natural key light should inform surface gradients, highlights, borders, active states, and hover response.
-Light should feel like sunlight or diffused canopy light rather than an artificial neon emitter.
 
-## Color direction
-Primary: deep forest, moss, muted sage, stone, fog, warm sunlight.
-Semantic states: muted green success, warm ochre warning, muted clay-red danger.
-Avoid bright cyan as a primary visual identity.
+The light model is one directional 145deg key light plus restrained ambient fill.
 
-## Environmental photography
-The production shell now uses one real nature photograph as the visual source of truth, with the procedural landscape retained only as low-opacity depth support. The photo is served through Unsplash's dynamic image transformation parameters as AVIF at bounded responsive widths and quality, with the procedural scene remaining a visual fallback.
+Lighting hierarchy:
+1. information readability;
+2. material separation;
+3. interaction highlight;
+4. atmosphere.
 
-The image treatment is intentionally subdued for product readability:
-- the photograph carries realistic tree, moss, mist, and sunlight texture;
-- CSS overlays provide day-phase, weather, and legibility modulation;
-- module state changes crop/position by a few percent instead of running a camera system;
-- no second photo is loaded merely for decoration.
+Never reverse that order.
 
+## Color ratio
 
-## Feature landscape
-Feature navigation should behave as part of the environment:
-- feature nodes are material objects, not floating labels
-- hover catches light and shifts depth
-- active state uses warm natural light, not glow
-- metadata reveals slightly on interaction
-- click navigates to the real feature
-- desktop uses spatial grouping
-- tablet uses a tighter grid
-- mobile uses stacked/two-column touch targets
+A healthy default composition is approximately:
 
-Never depend on absolute pixel coordinates for critical navigation.
+- 75–85% dark neutral / mineral material;
+- 8–12% environmental/natural tone;
+- 3–7% cyan interaction/signature;
+- semantic colors only where state requires them.
+
+This prevents the interface from becoming a cyan theme or a rainbow dashboard.
+
+## Module terrain
+
+Modules share one MiD material system but receive restrained local accents:
+
+- Dashboard — cyan / orientation
+- Schedule — violet / temporal rhythm
+- Tasks — green / progress
+- Finance — amber / resources
+- Social — rose / signal
+- Assistant — cyan-light / guidance
+- Profile — silver / identity
+- Insights — indigo / observation
+- Habits — soft growth green
+
+The module accent changes small details: active rail, kicker, indicator, progress and local light. It must not recolor the entire screen.
+
+## Environment
+
+The existing MiD living environment remains part of the identity.
+
+The environment is:
+- contextual rather than decorative wallpaper;
+- responsive to day/weather/workload state;
+- subdued enough to protect content;
+- lightweight and CSS-driven;
+- allowed to retain natural texture and warm light.
+
+The environment is not replaced by a sci-fi blue gradient.
+
+## Spatial language
+
+The existing editorial composition remains intact:
+- numbered workspace system;
+- oversized display type;
+- generous negative space;
+- Feature Landscape as spatial navigation;
+- focused module hierarchy.
+
+UNREAL is introduced by the **quality of the surfaces and transitions**, not by rearranging the product into a generic sci-fi dashboard.
+
+## Interaction
+
+Interaction follows:
+
+- hover → local light catch + 1–2px lift;
+- focus → visible edge + keyboard-safe outline;
+- active → subtle press;
+- selected → local emissive rim;
+- disabled → reduced energy, not invisible;
+- reduced motion → retain hierarchy without non-essential motion.
+
+Pointer lighting stays delegated through the existing application interaction stream and requestAnimationFrame. No new per-component pointer listeners.
+
+## Typography
+
+Keep Inter for UI and display. Use mono typography only for:
+- indices;
+- timestamps;
+- telemetry;
+- compact metadata.
+
+Do not overuse monospace as decoration.
+
+## Rhythm
+
+The whole UI uses a strict 4pt foundation:
+
+- 4px micro relation;
+- 8px tight relation;
+- 12px standard row spacing;
+- 16px component boundary;
+- 24px section boundary;
+- 32px hero / scene spacing.
+
+Controls remain 44px high and touch targets remain 48px.
 
 ## Motion
-Preferred: soft lift, subtle rotation, light catch, fog/atmosphere drift, short spring-like easing.
-Avoid constant floating, large parallax, aggressive scale, repeated glow pulses, and generic ease-in-out everywhere.
-Respect reduced-motion preferences.
 
-## Responsive contract
-Desktop: persistent sidebar, wide landscape modules, spacious composition.
-Tablet: compact sidebar, single-column content when required, feature scene collapses gracefully.
-Mobile: floating bottom navigation, touch-friendly controls, stacked forms, bottom-sheet style modal presentation, and sufficient content padding above fixed navigation.
+Preferred:
+- opacity;
+- transform;
+- short spring lift;
+- local light catch;
+- restrained scale;
+- short enter/exit transition.
 
-## Accessibility
-- visible focus states
-- semantic labels
-- state not communicated by color alone
-- keyboard Escape for modal dismissal
-- background scroll lock while modal is open
-- reduced-motion preference support
+Avoid:
+- constant floating;
+- giant parallax;
+- repeated glow pulses;
+- scroll-jacking;
+- full-screen blur animation;
+- game-like motion for ordinary task management.
 
-## Anti-slop checklist
-Reject a change when it looks like a generic AI dashboard, introduces unexplained gradients or blobs, uses neon cyan to signal importance, adds glass everywhere without hierarchy, sacrifices readability for visual drama, breaks mobile layout, or adds motion without meaningful interaction feedback.
+## Performance contract
 
+UNREAL is an art direction constraint, not a runtime excuse.
 
-## Final phase — ecosystem convergence
+Required:
+- no WebGL/canvas runtime for ordinary UI;
+- no persistent blur;
+- no new animation dependency unless justified;
+- no image added solely for decoration;
+- keep the existing asset budgets;
+- use CSS compositing before JavaScript;
+- reuse the existing delegated interaction system.
 
-The last visual phase treats each core module as terrain inside the same living environment rather than a collection of generic cards.
+## Acceptance criteria
 
-- Dashboard = **clearing / orientation**: signal rail, current moment, and daily overview.
-- Schedule = **rhythm / temporal terrain**: a continuous path through time.
-- Tasks = **ground / focus blocks**: progress reads like a grounded work surface.
-- Finance = **resources / mineral layers**: budgets and spending use restrained warm material cues.
-- Social = **mist / signal**: analytics remain read-only and visually quiet.
-- Assistant = **guide / signal**: conversation and integrations share a subtle directional cue.
-- Profile = **personal shelter**: identity surfaces use linen/stone softness instead of generic account chrome.
-- Insights = **observatory**: metrics remain analytical while gaining a restrained circular observation motif.
-- Habits = **growth / cultivation**: repeated completion cells and weekly progress use organic growth cues.
+A visual change is rejected when:
 
-This phase deliberately avoids heavy illustration, 3D runtimes, or decorative assets. The final material layer remains CSS-driven, responsive, reduced-motion aware, and content-first.
+- MiD identity becomes unrecognisable;
+- the page reads as a blue/cyan theme;
+- module accents recolor whole screens;
+- every card becomes glass;
+- effects are visible before content;
+- spacing breaks the 4/8 rhythm;
+- mobile hierarchy becomes weaker;
+- interaction exists only for spectacle;
+- performance budget worsens without a clear product benefit.
 
-### Mobile contract — final
-
-The nine-module field guide uses a horizontally scrollable bottom rail on small screens. The active module is automatically brought into view so navigation never requires guessing which items are off-canvas.
-
-### Release contract
-
-A visual phase is not considered complete merely because the stylesheet builds. The release gate requires the final ecosystem selectors to remain wired, mobile navigation to remain reachable, interactive overflow clipping to stay disabled, and the existing build, static QA, backend tests, Worker dry-run, deployment, and smoke checks to remain green.
-
-
-## UI refinement — less noise, more signal
-
-The post-convergence refinement keeps the UNREAL world intact while treating information density as a product concern.
-
-### Page-level hierarchy
-- **Today**: the primary command center now opens with live signals and places the Feature Landscape as a compact system compass. Duplicated finance and next-activity summaries were removed from secondary areas, and integration management no longer competes with daily work.
-- **Schedule**: the timeline gains a lightweight live-time marker so the page communicates the current point in the day without becoming a chart-heavy calendar.
-- **Tasks**: row-level utility actions are consolidated into an overflow menu; progress is shown only when the task has meaningful progress data or is complete.
-- **Finance**: financial summaries remain prominent but quiet, protecting transaction review as the main working surface.
-- **Social**: provider configuration language is separated into a developer disclosure so the product surface remains user-oriented.
-- **Assistant**: assistant channels are limited to assistant-relevant surfaces; Instagram analytics stays in Social.
-- **Profile**: identity remains intentionally narrow and personal rather than becoming a general administration page.
-- **Insights**: the page is framed as a current weekly snapshot rather than implying historical analytics that are not stored.
-- **Habits**: today's completion ratio is surfaced above the weekly matrix to create immediate rhythm feedback.
-
-### Deletion rule
-A UI element should survive only when it helps the user understand state, choose an action, or move to the relevant workspace. Duplicated information, provider internals, and low-value row actions should move to secondary layers or disappear.
-
-### Responsive safeguard
-Refinement changes preserve the existing mobile field-guide navigation, reduced-motion behavior, touch targets, and no-persistent-blur performance contract.
-
-
-## Environment visibility refinement
-
-The living environment is now an explicit visual layer rather than a subtle color wash:
-- the scene contains layered procedural ridges, a near ground plane, tree silhouettes, canopy depth, mist, and daylight shafts;
-- the shell and workspace surfaces are semi-opaque so environmental depth can remain visible through the interface without sacrificing text contrast;
-- day-phase and weather state modulate the landscape tone and atmospheric layers;
-- no external photographic asset or heavy 3D engine is required for the environment surface.
-
-
-## State-driven atmosphere
-
-The environment can respond to real workspace state without continuous animation:
-- workload density subtly changes environmental vignette strength;
-- high-attention states reduce shaft intensity instead of adding flashing alerts;
-- all state-driven effects remain CSS-only and bounded;
-- visual state never becomes the sole source of meaning.
-
-## Living interaction layer
-
-The UNREAL environment now reacts to the user without turning the app into a game-like scene:
-- the pointer shifts environmental light shafts, terrain depth, canopy, sun, moon, and stars by a few pixels;
-- feature nodes become a focus system: one node rises and brightens, surrounding nodes quieten, and the central hub reflects the focused workspace;
-- content surfaces catch a local painted highlight based on pointer position;
-- navigation remains semantic and click/keyboard driven; visual motion never carries essential meaning alone;
-- the interaction layer uses event delegation + requestAnimationFrame and does not introduce a canvas, WebGL runtime, external animation library, or persistent blur.
-
-
-## Performance contract — realism without payload bloat
-
-- one environment photograph only;
-- AVIF, bounded to 900px mobile / 1600px desktop variants;
-- quality capped at 55;
-- no pointermove JavaScript in the shell;
-- visual exploration uses CSS hover/focus state and bounded transform transitions;
-- procedural SVG remains low opacity and exists only to preserve depth when photography is unavailable or loading;
-- environment motion is limited to transform/opacity and remains disabled for coarse pointers/reduced motion.
-
-
-## Final contrast contract
-Readability outranks visual drama. No nature treatment may reduce the legibility of primary content.
-
-- Primary text uses deep forest text and targets at least 4.5:1 contrast on ordinary UI surfaces.
-- Secondary and muted text use dedicated daylight tokens selected to retain AA-sized contrast on ivory surfaces.
-- Primary actions use dark moss surfaces with light text rather than pale green text-on-green.
-- Warning and danger states use restrained ochre/clay surfaces with darker text; color is never the only state cue.
-- Inputs, cards, navigation, modals, popovers, and badges retain visible surface separation even when the photographic environment is bright.
-- Important content never sits directly on the photograph without a controlled surface layer.
-- Focus indicators use a visible 2px outline with an offset against both light materials and the environment.
-
-## Unreal material hierarchy
-UNREAL is expressed through material behavior rather than decorative overload:
-
-1. **Dew glass** — translucent painted surfaces, luminous inner rim, restrained depth shadow, no persistent blur.
-2. **Natural stone** — matte ivory/sage body, tactile border, directional highlight, grounded shadow.
-3. **Recessed earth** — mineral input wells with inward shadow and a clear focus lift.
-4. **Living objects** — feature nodes and signal cards respond with lift, border catch, and subtle tonal change; no continuous floating animation.
-
-A component must have a clear material role. Glass is not applied indiscriminately.
-
-## Interaction contract
-Interaction is CSS-first:
-- hover = lift + light catch;
-- focus-visible = explicit outline + edge highlight;
-- active = small press/lower state;
-- disabled = reduced contrast only where semantics permit, never unreadable;
-- reduced-motion removes non-essential transforms and transitions.
-
-The nature photograph remains atmospheric context. Information surfaces create the readable foreground, preserving a convincing sense that the workspace occupies the environment rather than sitting on top of a generic wallpaper.
-## Rebuild — cinematic nature vNext
-
-The visual system was rebuilt as a single composition rather than layered onto the previous card system.
-
-### Runtime shape
-- one responsive AVIF nature photograph as the environmental source;
-- CSS atmosphere, lighting and vignette instead of a canvas/WebGL scene;
-- foreground surfaces use painted translucency, directional rim highlights and grounded shadows;
-- persistent backdrop-filter, procedural grain DOM, continuous parallax and repeated glow animation are intentionally absent;
-- the large legacy UI stylesheet is replaced by a compact component-oriented material layer.
-
-### Interaction shape
-- foreground pointer lighting remains delegated through the existing app-level pointermove + requestAnimationFrame path;
-- environmental photography itself remains pointer-independent;
-- workspace nodes catch focus/hover through CSS and do not require a separate interaction runtime;
-- mobile navigation stays touch-sized and horizontally discoverable;
-- reduced-motion users receive the same information hierarchy without decorative motion.
-
-### Performance intent
-The visual budget is a ceiling, not a target. New visual effects must first remove or consolidate an existing effect before adding payload. The 256 KiB largest-JS / 32 KiB total-CSS hard ceiling remains the temporary development gate.
-
-## Layout rhythm — 4pt foundation
-
-The visual system now uses a strict 4pt spacing grid so interface objects feel intentionally measured rather than individually positioned.
-
-- **4px** is the micro unit for icon/text relationships, separators, and compact metadata.
-- **8px** is the primary tight gap for controls, chips, navigation items, and button internals.
-- **12px** is the standard content gap for rows and secondary metadata.
-- **16px** is the component boundary for cards, forms, and primary control groups.
-- **24px** is the section boundary.
-- **32px** is reserved for larger scene/hero spacing.
-
-Controls use 44px height and 48px touch targets. Corner radii are also snapped to the 4pt grid. The active stylesheet contains a dedicated 4pt rhythm layer, and static QA validates that this layer does not introduce off-grid pixel spacing.
-
-The purpose is practical, not cosmetic: consistent spacing prevents labels, pills, icons, and neighboring surfaces from visually colliding while preserving the cinematic material language.
-
+The correct result should feel like **MiD, but materially elevated** — not like a different application wearing the MiD logo.
