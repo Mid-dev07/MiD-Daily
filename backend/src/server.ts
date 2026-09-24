@@ -1787,6 +1787,7 @@ async function handleAiChat(req: IncomingMessage, res: ServerResponse) {
   const body = await readRequestJson(req)
   const messagesValue = body.messages
   const allowWrites = body.allowWrites === true
+  const executionMode = body.executionMode === 'preview' ? 'preview' : 'execute'
 
   if (!Array.isArray(messagesValue) || messagesValue.length === 0) throw httpError(400, 'At least one AI message is required.')
 
@@ -1801,7 +1802,7 @@ async function handleAiChat(req: IncomingMessage, res: ServerResponse) {
   })
 
   try {
-    const result = await runAssistant(userId, messages, allowWrites)
+    const result = await runAssistant(userId, messages, allowWrites, allowWrites ? executionMode : 'execute')
     sendJson(res, 200, result)
   } catch (error) {
     const status = error instanceof Error && 'status' in error && typeof (error as { status?: unknown }).status === 'number'
