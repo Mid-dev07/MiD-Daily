@@ -1,20 +1,21 @@
 import type { View } from '../../../types'
+import { MiDIcon, type MiDIconName } from '../../../components/ui/MiDIcon'
 
 interface FeatureLandscapeProps {
   activeView: View
   onNavigate: (view: View) => void
 }
 
-const features: Array<{ id: View; index: string; label: string; meta: string; icon: string }> = [
-  { id: 'dashboard', index: '01', label: 'Today', meta: 'orientation & daily signals', icon: '⌂' },
-  { id: 'schedule', index: '02', label: 'Schedule', meta: 'time, rhythm & commitments', icon: '◷' },
-  { id: 'tasks', index: '03', label: 'Tasks', meta: 'focus, progress & priorities', icon: '✓' },
-  { id: 'finance', index: '04', label: 'Finance', meta: 'spending, budgets & resources', icon: 'Rp' },
-  { id: 'social', index: '05', label: 'Social', meta: 'read-only digital pulse', icon: '◎' },
-  { id: 'assistant', index: '06', label: 'Assistant', meta: 'guided next actions', icon: '✦' },
-  { id: 'profile', index: '07', label: 'Profile', meta: 'identity & preferences', icon: '●' },
-  { id: 'insights', index: '08', label: 'Insights', meta: 'current patterns & signals', icon: '↗' },
-  { id: 'habits', index: '09', label: 'Habits', meta: 'rhythm & consistency', icon: '◉' },
+const features: Array<{ id: View; index: string; label: string; meta: string; icon: MiDIconName }> = [
+  { id: 'dashboard', index: '01', label: 'Today', meta: 'orientation & daily signals', icon: 'home' },
+  { id: 'schedule', index: '02', label: 'Schedule', meta: 'time, rhythm & commitments', icon: 'clock' },
+  { id: 'tasks', index: '03', label: 'Tasks', meta: 'focus, progress & priorities', icon: 'check' },
+  { id: 'finance', index: '04', label: 'Finance', meta: 'spending, budgets & resources', icon: 'wallet' },
+  { id: 'social', index: '05', label: 'Social', meta: 'read-only digital pulse', icon: 'pulse' },
+  { id: 'assistant', index: '06', label: 'Assistant', meta: 'guided next actions', icon: 'spark' },
+  { id: 'profile', index: '07', label: 'Profile', meta: 'identity & preferences', icon: 'user' },
+  { id: 'insights', index: '08', label: 'Insights', meta: 'current patterns & signals', icon: 'chart' },
+  { id: 'habits', index: '09', label: 'Habits', meta: 'rhythm & consistency', icon: 'habit' },
 ]
 
 const spatialFeatures = features.slice(0, 6)
@@ -47,7 +48,7 @@ export function FeatureLandscape({ activeView, onNavigate }: FeatureLandscapePro
               onClick={() => onNavigate(feature.id)}
             >
               <span className="feature-node-label">
-                <span className="feature-node-icon" aria-hidden="true">{feature.icon}</span>
+                <span className="feature-node-icon"><MiDIcon name={feature.icon} size={20} /></span>
                 <span className="feature-node-title">{feature.label}</span>
               </span>
               <span className="feature-node-meta">{feature.meta}</span>

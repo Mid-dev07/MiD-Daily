@@ -15,14 +15,13 @@ interface DashboardViewProps {
 }
 
 const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
-const getToday = (timezone: string) => new Intl.DateTimeFormat('sv-SE', { timeZone: timezone }).format(new Date())
 
 const QuickCapture = lazy(() => import('./components/QuickCapture').then((module) => ({ default: module.QuickCapture })))
 const FocusMode = lazy(() => import('./components/FocusMode').then((module) => ({ default: module.FocusMode })))
 
 export function DashboardView({ tasks, schedule, finance, onToggleTask, onNavigate, timezone = LOCAL_TIMEZONE }: DashboardViewProps) {
   const [now, setNow] = useState(() => new Date())
-  const today = getToday(timezone)
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: timezone }).format(new Date())
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 60_000)
@@ -115,8 +114,6 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
           <button className="secondary-button" type="button" onClick={() => onNavigate('schedule')}>Open schedule</button>
         </div>
       </div>
-
-      <FeatureLandscape activeView="dashboard" onNavigate={onNavigate} />
 
       <section className="dashboard-signal-grid" aria-label="Daily overview">
         <article className="dashboard-signal-card">
@@ -217,6 +214,8 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
       <Suspense fallback={<section className="content-card connection-loading">Preparing quick capture…</section>}>
         <QuickCapture />
       </Suspense>
+
+      <FeatureLandscape activeView="dashboard" onNavigate={onNavigate} />
 
       <details className="dashboard-secondary-details">
         <summary><span>More context</span><small>Upcoming, flexible plans, and attention details</small><b>+</b></summary>

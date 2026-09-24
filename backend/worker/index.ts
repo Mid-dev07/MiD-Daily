@@ -1,5 +1,6 @@
 import { httpServerHandler } from 'cloudflare:node'
 import { configureAssistantRuntime, type WorkersAiBinding } from '../src/ai/index.js'
+import { refreshInstagramConnections } from '../src/integrations/instagramRefresh.js'
 import { server } from '../src/server.js'
 
 server.listen(8787)
@@ -67,7 +68,12 @@ export default {
     return handler.fetch(...args)
   },
   async scheduled(controller: { scheduledTime: number }) {
+    const scheduledAt = new Date(controller.scheduledTime)
     const { runBackgroundReminderDispatch } = await import('../src/backgroundReminders.js')
-    await runBackgroundReminderDispatch(new Date(controller.scheduledTime))
+    await runBackgroundReminderDispatch(scheduledAt)
+
+    if (scheduledAt.getUTCMinutes() === 0 && scheduledAt.getUTCHours() % 6 === 0) {
+      await refreshInstagramConnections(scheduledAt)
+    }
   },
 }

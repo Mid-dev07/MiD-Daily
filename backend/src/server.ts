@@ -1,7 +1,7 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto'
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
 import { createClient } from '@supabase/supabase-js'
-import { isAssistantConfigured, runAssistant } from './ai/index.js'
+import { executeAssistantProposals, isAssistantConfigured, runAssistant, type AssistantProposal } from './ai/index.js'
 import {
   deleteGoogleConnection,
   getGoogleConnection,
@@ -27,7 +27,9 @@ import {
 import { claimTelegramUpdate, createTelegramLinkCode, deleteTelegramConnectionByUserId, getTelegramConnectionByChatId, getTelegramConnectionByUserId, redeemTelegramLinkCode, isTelegramPersistenceConfigured } from './integrations/telegramStore.js'
 import { isTelegramConfigured, parseCommand, sendTelegramMessage, setTelegramWebhook, verifyWebhookSecret } from './integrations/telegram.js'
 import { dispatchNaturalLanguageMessage } from './integrations/gateway.js'
-import { getAccountInsights, getAccountProfile, isInstagramAnalyticsConfigured, normalizeAccountInsights } from './integrations/instagramAnalytics.js'
+import { getAccountInsights, getAccountProfile, getEnvironmentCredentials, isInstagramAnalyticsConfigured, normalizeAccountInsights } from './integrations/instagramAnalytics.js'
+import { deleteInstagramConnectionByUserId, getInstagramConnectionByUserId, isInstagramConnectionPersistenceConfigured, createInstagramOAuthState, consumeInstagramOAuthState, saveInstagramConnection } from './integrations/instagramStore.js'
+import { buildInstagramAuthorizationUrl, exchangeForLongLivedInstagramToken, exchangeInstagramCode, isInstagramOAuthConfigured } from './integrations/instagramOAuth.js'
 import { getWhatsAppConfig, isWhatsAppConfigured, parseWhatsAppCommand, sendWhatsAppText, verifyWebhookChallenge, verifyWhatsAppSignature, buildWhatsAppUpdateHash } from './integrations/whatsapp.js'
 import { createWhatsAppLinkCode, deleteWhatsAppConnectionByUserId, getWhatsAppConnectionByUserId, getWhatsAppConnectionByWaId, redeemWhatsAppLinkCode, claimWhatsAppUpdate, isWhatsAppPersistenceConfigured } from './integrations/whatsappStore.js'
 import {
@@ -1468,45 +1470,163 @@ function formatTelegramExpenses(items: Array<{ title: string; amount: number; ca
   ).join('\n')
 }
 
+async function handleInstagramStart(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  if (!isInstagramConnectionPersistenceConfigured() || !isInstagramOAuthConfigured()) {
+    throw httpError(503, 'Instagram Connect is not configured on this deployment.')
+  }
+
+  const { state, expiresAt } = await createInstagramOAuthState(userId)
+  sendJson(res, 200, {
+    authorizationUrl: buildInstagramAuthorizationUrl(state),
+    expiresAt,
+  })
+}
+
+async function handleInstagramCallback(_req: IncomingMessage, url: URL, res: ServerResponse) {
+  const code = url.searchParams.get('code') ?? ''
+  const state = url.searchParams.get('state') ?? ''
+  const redirectError = new URL('/social', FRONTEND_URL)
+
+  if (!code || !state) {
+    redirectError.searchParams.set('instagram', 'error')
+    sendRedirect(res, redirectError.toString())
+    return
+  }
+
+  let userId: string | null = null
+  try {
+    userId = await consumeInstagramOAuthState(state)
+    if (!userId) {
+      redirectError.searchParams.set('instagram', 'error')
+      sendRedirect(res, redirectError.toString())
+      return
+    }
+
+    const shortLived = await exchangeInstagramCode(code)
+    const longLived = await exchangeForLongLivedInstagramToken(shortLived.accessToken)
+    const graphCredentials = {
+      accessToken: longLived.accessToken,
+      apiVersion: process.env.INSTAGRAM_GRAPH_VERSION ?? '',
+      accountId: shortLived.accountId,
+      host: process.env.INSTAGRAM_GRAPH_HOST ?? 'https://graph.instagram.com',
+    }
+
+    let username: string | null = null
+    try {
+      const profile = await getAccountProfile(graphCredentials)
+      username = profile.username ?? null
+    } catch {
+      // The connection is still valid even when profile enrichment is temporarily unavailable.
+    }
+
+    await saveInstagramConnection({
+      userId,
+      providerAccountId: shortLived.accountId,
+      username,
+      accessToken: longLived.accessToken,
+      tokenExpiresAt: longLived.expiresIn > 0
+        ? new Date(Date.now() + longLived.expiresIn * 1000).toISOString()
+        : null,
+    })
+
+    const success = new URL('/social', FRONTEND_URL)
+    success.searchParams.set('instagram', 'connected')
+    sendRedirect(res, success.toString())
+  } catch {
+    const failure = new URL('/social', FRONTEND_URL)
+    failure.searchParams.set('instagram', 'error')
+    sendRedirect(res, failure.toString())
+  }
+}
+
 async function handleInstagramInsights(req: IncomingMessage, res: ServerResponse) {
-  await requireAuthenticatedUserId(req)
-  if (!isInstagramAnalyticsConfigured()) {
-    throw httpError(503, 'Instagram Analytics is not configured.')
+  const userId = await requireAuthenticatedUserId(req)
+  const connection = isInstagramConnectionPersistenceConfigured()
+    ? await getInstagramConnectionByUserId(userId)
+    : null
+  const environment = getEnvironmentCredentials()
+  const credentials = connection && connection.status !== 'revoked'
+    ? (environment
+      ? { ...environment, accessToken: connection.accessToken, accountId: connection.providerAccountId }
+      : null)
+    : environment
+
+  if (!credentials) {
+    throw httpError(503, 'Instagram Analytics is not connected for this account.')
   }
 
   const [profile, insights] = await Promise.all([
-    getAccountProfile(),
-    getAccountInsights(),
+    getAccountProfile(credentials),
+    getAccountInsights(credentials),
   ])
 
-  sendJson(res, 200, normalizeAccountInsights(profile, insights.data ?? []))
+  const normalized = normalizeAccountInsights(profile, insights.data ?? [])
+  sendJson(res, 200, {
+    ...normalized,
+    scope: connection ? 'user' : 'deployment',
+  })
+}
+
+async function handleInstagramDisconnect(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  if (!isInstagramConnectionPersistenceConfigured()) {
+    throw httpError(503, 'Instagram connection storage is not configured.')
+  }
+  await deleteInstagramConnectionByUserId(userId)
+  sendJson(res, 200, { connected: false })
 }
 
 async function handleIntegrationStatus(req: IncomingMessage, res: ServerResponse) {
   const userId = await requireAuthenticatedUserId(req)
-  const [telegram, whatsapp] = await Promise.all([
+  const [telegram, whatsapp, instagramConnection] = await Promise.all([
     getTelegramConnectionByUserId(userId),
     getWhatsAppConnectionByUserId(userId),
+    isInstagramConnectionPersistenceConfigured() ? getInstagramConnectionByUserId(userId) : Promise.resolve(null),
   ])
 
+  const aiConfigured = isAssistantConfigured()
+  const telegramConfigured = isTelegramConfigured() && isTelegramPersistenceConfigured()
+  const whatsappConfigured = isWhatsAppConfigured() && isWhatsAppPersistenceConfigured()
+  const instagramDeploymentConfigured = isInstagramAnalyticsConfigured()
+  const instagramOAuthReady = isInstagramOAuthConfigured() && isInstagramConnectionPersistenceConfigured()
+  const instagramConnected = Boolean(instagramConnection && instagramConnection.status !== 'revoked')
+  const instagramConfigured = instagramConnected || instagramDeploymentConfigured || instagramOAuthReady
+
   sendJson(res, 200, {
-    ai: { configured: isAssistantConfigured() },
+    ai: {
+      configured: aiConfigured,
+      state: aiConfigured ? 'READY' : 'NOT_CONFIGURED',
+      mode: 'workers-ai',
+      writeActions: 'explicit-confirmation-required',
+    },
     telegram: {
-      configured: isTelegramConfigured() && isTelegramPersistenceConfigured(),
+      configured: telegramConfigured,
+      state: !telegramConfigured ? 'NOT_CONFIGURED' : telegram ? 'CONNECTED' : 'CONNECTABLE',
       connected: Boolean(telegram),
       connectedAt: telegram?.connected_at ?? null,
       username: telegram?.telegram_username ?? null,
     },
     whatsapp: {
-      configured: isWhatsAppConfigured() && isWhatsAppPersistenceConfigured(),
+      configured: whatsappConfigured,
+      state: !whatsappConfigured ? 'NOT_CONFIGURED' : whatsapp ? 'CONNECTED' : 'CONNECTABLE',
       connected: Boolean(whatsapp),
       connectedAt: whatsapp?.connected_at ?? null,
       displayName: whatsapp?.display_name ?? null,
       businessPhoneNumber: getWhatsAppConfig().businessPhoneNumber || null,
     },
     instagram: {
-      configured: isInstagramAnalyticsConfigured(),
+      configured: instagramConfigured,
+      state: instagramConnected
+        ? 'CONNECTED'
+        : instagramDeploymentConfigured
+          ? 'DEPLOYMENT_ACCOUNT'
+          : instagramOAuthReady
+            ? 'CONNECTABLE'
+            : 'NOT_CONFIGURED',
       mode: 'analytics-read-only',
+      scope: instagramConnected ? 'user' : 'deployment',
+      connectable: instagramOAuthReady,
     },
   })
 }
@@ -1734,11 +1854,45 @@ function handleAiStatus(req: IncomingMessage, res: ServerResponse) {
   sendJson(res, 200, { configured: isAssistantConfigured() })
 }
 
+async function handleAiProposalExecution(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  const body = await readRequestJson(req)
+  const proposalsValue = body.proposals
+
+  if (!Array.isArray(proposalsValue) || proposalsValue.length === 0 || proposalsValue.length > 10) {
+    throw httpError(400, 'AI proposals are invalid.')
+  }
+
+  const proposals = proposalsValue.map((value) => {
+    if (!value || typeof value !== 'object') throw httpError(400, 'AI proposal is invalid.')
+    const item = value as Record<string, unknown>
+    if (typeof item.tool !== 'string' || !item.tool.trim()) throw httpError(400, 'AI proposal tool is invalid.')
+    if (!item.arguments || typeof item.arguments !== 'object' || Array.isArray(item.arguments)) {
+      throw httpError(400, 'AI proposal arguments are invalid.')
+    }
+    return {
+      tool: item.tool.trim(),
+      arguments: item.arguments as Record<string, unknown>,
+    } satisfies AssistantProposal
+  })
+
+  try {
+    const result = await executeAssistantProposals(userId, proposals)
+    sendJson(res, 200, result)
+  } catch (error) {
+    const status = error instanceof Error && 'status' in error && typeof (error as { status?: unknown }).status === 'number'
+      ? Number((error as { status?: unknown }).status)
+      : 500
+    sendJson(res, status, { error: error instanceof Error ? error.message : 'AI action execution failed.' })
+  }
+}
+
 async function handleAiChat(req: IncomingMessage, res: ServerResponse) {
   const userId = await requireAuthenticatedUserId(req)
   const body = await readRequestJson(req)
   const messagesValue = body.messages
   const allowWrites = body.allowWrites === true
+  const executionMode = body.executionMode === 'preview' ? 'preview' : 'execute'
 
   if (!Array.isArray(messagesValue) || messagesValue.length === 0) throw httpError(400, 'At least one AI message is required.')
 
@@ -1753,7 +1907,7 @@ async function handleAiChat(req: IncomingMessage, res: ServerResponse) {
   })
 
   try {
-    const result = await runAssistant(userId, messages, allowWrites)
+    const result = await runAssistant(userId, messages, allowWrites, allowWrites ? executionMode : 'execute')
     sendJson(res, 200, result)
   } catch (error) {
     const status = error instanceof Error && 'status' in error && typeof (error as { status?: unknown }).status === 'number'
@@ -1820,6 +1974,11 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
       return
     }
 
+    if (req.method === 'POST' && url.pathname === '/api/ai/proposals/execute') {
+      await handleAiProposalExecution(req, res)
+      return
+    }
+
     if (req.method === 'GET' && url.pathname === '/health') {
       sendJson(res, 200, {
         ok: true,
@@ -1844,8 +2003,23 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
       return
     }
 
+    if (req.method === 'POST' && url.pathname === '/api/integrations/instagram/start') {
+      await handleInstagramStart(req, res)
+      return
+    }
+
+    if (req.method === 'GET' && url.pathname === '/auth/instagram/callback') {
+      await handleInstagramCallback(req, url, res)
+      return
+    }
+
     if (req.method === 'GET' && url.pathname === '/api/integrations/instagram/insights') {
       await handleInstagramInsights(req, res)
+      return
+    }
+
+    if (req.method === 'POST' && url.pathname === '/api/integrations/instagram/disconnect') {
+      await handleInstagramDisconnect(req, res)
       return
     }
 

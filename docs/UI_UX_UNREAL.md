@@ -165,6 +165,14 @@ The living environment is now an explicit visual layer rather than a subtle colo
 - no external photographic asset or heavy 3D engine is required for the environment surface.
 
 
+## State-driven atmosphere
+
+The environment can respond to real workspace state without continuous animation:
+- workload density subtly changes environmental vignette strength;
+- high-attention states reduce shaft intensity instead of adding flashing alerts;
+- all state-driven effects remain CSS-only and bounded;
+- visual state never becomes the sole source of meaning.
+
 ## Living interaction layer
 
 The UNREAL environment now reacts to the user without turning the app into a game-like scene:

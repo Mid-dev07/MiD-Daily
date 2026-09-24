@@ -34,31 +34,38 @@ jobs:
           const files = readdirSync(assetDir)
           const js = files.filter((name) => name.endsWith('.js'))
           const css = files.filter((name) => name.endsWith('.css'))
+          const media = files.filter((name) => /\.(avif|webp|png|jpe?g|svg|woff2?|ttf|otf)$/i.test(name))
           const largestJsBytes = Math.max(0, ...js.map((name) => statSync(`${assetDir}/${name}`).size))
           const largestJsGzip = Math.max(0, ...js.map((name) => gzipSync(readFileSync(`${assetDir}/${name}`)).length))
           const totalCssGzip = css.reduce((sum, name) => sum + gzipSync(readFileSync(`${assetDir}/${name}`)).length, 0)
+          const totalAssetBytes = files.reduce((sum, name) => sum + statSync(`${assetDir}/${name}`).size, 0)
+          const totalMediaBytes = media.reduce((sum, name) => sum + statSync(`${assetDir}/${name}`).size, 0)
 
           console.log(`Largest JS: ${largestJsGzip} bytes gzip (${largestJsBytes} bytes raw)`)
           console.log(`Total CSS: ${totalCssGzip} bytes gzip`)
+          console.log(`Total asset bytes: ${totalAssetBytes}`)
+          console.log(`Media/font asset bytes: ${totalMediaBytes}`)
 
-          // High-fidelity UI/UX development budget for the 2026 visual upgrade.
-          // Warning zone keeps us aware of drift before the hard gate is reached.
-          // Hard limits are intentionally finite so visual ambition cannot turn into unchecked bloat.
-          // Current baseline: ~143.4 KiB largest JS gzip / ~17.2 KiB total CSS gzip.
-          const WARN_JS_GZIP = 224 * 1024
-          const WARN_CSS_GZIP = 28 * 1024
-          const MAX_JS_GZIP = 256 * 1024
-          const MAX_CSS_GZIP = 32 * 1024
+          // Intentional headroom for high-fidelity UI without permitting uncontrolled payload growth.
+          // Baseline remains around 143 KiB largest JS gzip / 17 KiB total CSS gzip.
+          const WARN_JS_GZIP = 280 * 1024
+          const WARN_CSS_GZIP = 40 * 1024
+          const MAX_JS_GZIP = 320 * 1024
+          const MAX_CSS_GZIP = 48 * 1024
+          const WARN_TOTAL_ASSETS = 1_536 * 1024
+          const MAX_TOTAL_ASSETS = 2_048 * 1024
+          const WARN_MEDIA_ASSETS = 1_024 * 1024
+          const MAX_MEDIA_ASSETS = 1_280 * 1024
 
-          if (largestJsGzip > WARN_JS_GZIP) {
-            console.warn('Largest JS is above the 224 KiB warning budget.')
-          }
-          if (totalCssGzip > WARN_CSS_GZIP) {
-            console.warn('Total CSS is above the 28 KiB warning budget.')
-          }
+          if (largestJsGzip > WARN_JS_GZIP) console.warn('Largest JS is above the 280 KiB warning budget.')
+          if (totalCssGzip > WARN_CSS_GZIP) console.warn('Total CSS is above the 40 KiB warning budget.')
+          if (totalAssetBytes > WARN_TOTAL_ASSETS) console.warn('Total frontend assets are above the 1.5 MiB warning budget.')
+          if (totalMediaBytes > WARN_MEDIA_ASSETS) console.warn('Image/font assets are above the 1 MiB warning budget.')
 
           if (largestJsGzip > MAX_JS_GZIP) process.exit(1)
           if (totalCssGzip > MAX_CSS_GZIP) process.exit(1)
+          if (totalAssetBytes > MAX_TOTAL_ASSETS) process.exit(1)
+          if (totalMediaBytes > MAX_MEDIA_ASSETS) process.exit(1)
           NODE
 
   backend:

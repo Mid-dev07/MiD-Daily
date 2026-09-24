@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getAIStatus, sendAIMessage, type AIMessage } from '../../integrations/aiApi'
+import { executeAIProposals, getAIStatus, sendAIMessage, type AIMessage, type AIProposal } from '../../integrations/aiApi'
 import {
   createTelegramLink,
   createWhatsAppLink,
@@ -20,6 +20,8 @@ export function AssistantView() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [lastActions, setLastActions] = useState<Array<{ tool: string; ok: boolean }>>([])
+  const [pendingProposals, setPendingProposals] = useState<AIProposal[]>([])
+  const [confirming, setConfirming] = useState(false)
   const [integrations, setIntegrations] = useState<IntegrationStatus | null>(null)
   const [integrationLoading, setIntegrationLoading] = useState(true)
   const [integrationBusy, setIntegrationBusy] = useState<'telegram' | 'whatsapp' | null>(null)
@@ -105,16 +107,35 @@ export function AssistantView() {
     setInput('')
     setError('')
     setLastActions([])
+    setPendingProposals([])
     setLoading(true)
 
     try {
-      const result = await sendAIMessage(nextMessages.slice(-10), allowWrites)
+      const result = await sendAIMessage(nextMessages.slice(-10), allowWrites, allowWrites ? 'preview' : 'execute')
       setMessages((current) => [...current, { role: 'assistant' as const, content: result.text }].slice(-10))
       setLastActions(result.actions)
+      setPendingProposals(result.proposals ?? [])
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Assistant request failed.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const confirmProposals = async () => {
+    if (!pendingProposals.length || confirming) return
+
+    setConfirming(true)
+    setError('')
+    try {
+      const result = await executeAIProposals(pendingProposals)
+      setPendingProposals([])
+      setLastActions(result.actions)
+      setMessages((current) => [...current, { role: 'assistant' as const, content: 'Confirmed. The proposed changes have been applied to your MiD workspace.' }].slice(-10))
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Unable to execute the proposed actions.')
+    } finally {
+      setConfirming(false)
     }
   }
 
@@ -136,6 +157,12 @@ export function AssistantView() {
     integrations?.whatsapp.displayName || '',
   )
 
+  const integrationSummary = integrations ? [
+    ['Telegram', integrations.telegram.state],
+    ['WhatsApp', integrations.whatsapp.state],
+    ['AI', integrations.ai.state],
+  ] as const : []
+
   return (
     <section className="workspace page-enter">
       <div className="page-intro">
@@ -148,6 +175,12 @@ export function AssistantView() {
           <button className="text-button" type="button" disabled={integrationLoading} onClick={() => void refreshIntegrations()}>{integrationLoading ? 'Checking…' : 'Refresh'}</button>
         </div>
         {integrationError && <div className="ai-availability-note" role="alert"><strong>Integration status could not be checked.</strong><span>{integrationError} Refresh the status before troubleshooting provider setup.</span></div>}
+
+        <div className="assistant-health-strip" aria-label="Integration health">
+          {integrationSummary.map(([label, state]) => (
+            <span key={label}><b>{label}</b><small>{state.replaceAll('_', ' ')}</small></span>
+          ))}
+        </div>
 
         <div className="assistant-channel-grid">
           <article className="assistant-channel-card">
@@ -238,6 +271,13 @@ export function AssistantView() {
           </span>
         </div>
 
+        {integrations?.instagram.state === 'DEPLOYMENT_ACCOUNT' && (
+          <div className="ai-availability-note" role="status">
+            <strong>Instagram analytics is deployment-scoped.</strong>
+            <span>This account can be read from the current deployment, but per-user Connect is not enabled yet. It will remain separate from your personal Tasks, Finance, and Schedule data.</span>
+          </div>
+        )}
+
         {aiConfigured === false && !aiStatusError && (
           <div className="ai-availability-note" role="status">
             <strong>Assistant is not configured on this deployment.</strong>
@@ -256,6 +296,33 @@ export function AssistantView() {
         </div>
 
         {error && <div className="form-error" role="alert">{error}</div>}
+
+        {pendingProposals.length > 0 && (
+          <div className="ai-proposal-panel" aria-label="Proposed MiD actions">
+            <div className="ai-proposal-heading">
+              <div>
+                <span className="section-kicker">ACTION REVIEW</span>
+                <strong>Review before MiD changes your workspace</strong>
+              </div>
+              <span className="card-meta">{pendingProposals.length} proposed</span>
+            </div>
+            <div className="ai-proposal-list">
+              {pendingProposals.map((proposal, index) => (
+                <div className="ai-proposal-item" key={proposal.tool + index}>
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                  <div>
+                    <strong>{proposal.tool.replace(/_/g, ' ')}</strong>
+                    <small>{Object.entries(proposal.arguments).filter(([, value]) => value !== null && value !== '').slice(0, 3).map(([key, value]) => key + ': ' + String(value)).join(' · ')}</small>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="ai-proposal-actions">
+              <button className="secondary-button" type="button" disabled={confirming} onClick={() => setPendingProposals([])}>Keep draft</button>
+              <button className="primary-button" type="button" disabled={confirming} onClick={() => void confirmProposals()}>{confirming ? 'Applying…' : 'Confirm & apply'}</button>
+            </div>
+          </div>
+        )}
 
         {lastActions.length > 0 && (
           <div className="ai-action-summary" aria-label="Assistant action results">

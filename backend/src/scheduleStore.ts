@@ -65,6 +65,31 @@ function fromRow(row: Record<string, unknown>): ScheduleRecord {
 
 const columns = 'id,title,type,activity_mode,event_date,start_time,end_time,location,notes,reminder_enabled,reminder_offset,recurrence,target_count,target_period,duration_minutes,preferred_start_time,preferred_end_time,activity_deadline,google_calendar'
 
+export function normalizeScheduleWrite(item: Omit<ScheduleRecord, 'id'> | Partial<Omit<ScheduleRecord, 'id'>>) {
+  const activityMode = item.activityMode ?? 'ONE_TIME'
+  const flexible = activityMode === 'FLEXIBLE'
+  return {
+    ...(item.title === undefined ? {} : { title: item.title }),
+    ...(item.type === undefined ? {} : { type: item.type }),
+    ...(item.activityMode === undefined ? {} : { activity_mode: activityMode }),
+    ...(item.date === undefined ? {} : { event_date: item.date }),
+    ...(item.startTime === undefined ? {} : { start_time: flexible ? null : (item.startTime || null) }),
+    ...(item.endTime === undefined ? {} : { end_time: flexible ? null : (item.endTime || null) }),
+    ...(item.location === undefined ? {} : { location: item.location }),
+    ...(item.notes === undefined ? {} : { notes: item.notes }),
+    ...(item.reminderEnabled === undefined ? {} : { reminder_enabled: item.reminderEnabled }),
+    ...(item.reminderOffset === undefined ? {} : { reminder_offset: item.reminderOffset }),
+    ...(item.recurrence === undefined ? {} : { recurrence: item.recurrence }),
+    ...(item.targetCount === undefined ? {} : { target_count: item.targetCount ?? null }),
+    ...(item.targetPeriod === undefined ? {} : { target_period: item.targetPeriod ?? null }),
+    ...(item.durationMinutes === undefined ? {} : { duration_minutes: item.durationMinutes ?? null }),
+    ...(item.preferredStartTime === undefined ? {} : { preferred_start_time: item.preferredStartTime ?? null }),
+    ...(item.preferredEndTime === undefined ? {} : { preferred_end_time: item.preferredEndTime ?? null }),
+    ...(item.activityDeadline === undefined ? {} : { activity_deadline: item.activityDeadline ?? null }),
+    ...(item.googleCalendar === undefined ? {} : { google_calendar: item.googleCalendar }),
+  }
+}
+
 export async function listSchedule(userId: string) {
   const { data, error } = await db().from('schedule_items').select(columns).eq('user_id', userId).order('event_date', { ascending: true }).order('start_time', { ascending: true })
   if (error) throw new Error(`Schedule read failed: ${error.message}`)
@@ -74,50 +99,16 @@ export async function listSchedule(userId: string) {
 export async function createSchedule(userId: string, item: Omit<ScheduleRecord, 'id'>) {
   const { data, error } = await db().from('schedule_items').insert({
     user_id: userId,
-    title: item.title,
-    type: item.type,
-    activity_mode: item.activityMode,
-    event_date: item.date,
-    start_time: item.startTime || null,
-    end_time: item.endTime,
-    location: item.location,
-    notes: item.notes,
-    reminder_enabled: item.reminderEnabled,
-    reminder_offset: item.reminderOffset,
-    recurrence: item.recurrence,
-    target_count: item.targetCount ?? null,
-    target_period: item.targetPeriod ?? null,
-    duration_minutes: item.durationMinutes ?? null,
-    preferred_start_time: item.preferredStartTime ?? null,
-    preferred_end_time: item.preferredEndTime ?? null,
-    activity_deadline: item.activityDeadline ?? null,
-    google_calendar: item.googleCalendar,
+    ...normalizeScheduleWrite(item),
   }).select(columns).single()
   if (error) throw new Error(`Schedule create failed: ${error.message}`)
   return fromRow(data)
 }
 
 export async function updateSchedule(userId: string, id: number, item: Partial<Omit<ScheduleRecord, 'id'>>) {
-  const { data, error } = await db().from('schedule_items').update({
-    ...(item.title === undefined ? {} : { title: item.title }),
-    ...(item.type === undefined ? {} : { type: item.type }),
-    ...(item.date === undefined ? {} : { event_date: item.date }),
-    ...(item.startTime === undefined ? {} : { start_time: item.startTime || null }),
-    ...(item.endTime === undefined ? {} : { end_time: item.endTime }),
-    ...(item.location === undefined ? {} : { location: item.location }),
-    ...(item.notes === undefined ? {} : { notes: item.notes }),
-    ...(item.reminderEnabled === undefined ? {} : { reminder_enabled: item.reminderEnabled }),
-    ...(item.reminderOffset === undefined ? {} : { reminder_offset: item.reminderOffset }),
-    ...(item.recurrence === undefined ? {} : { recurrence: item.recurrence }),
-    ...(item.activityMode === undefined ? {} : { activity_mode: item.activityMode }),
-    ...(item.targetCount === undefined ? {} : { target_count: item.targetCount ?? null }),
-    ...(item.targetPeriod === undefined ? {} : { target_period: item.targetPeriod ?? null }),
-    ...(item.durationMinutes === undefined ? {} : { duration_minutes: item.durationMinutes ?? null }),
-    ...(item.preferredStartTime === undefined ? {} : { preferred_start_time: item.preferredStartTime ?? null }),
-    ...(item.preferredEndTime === undefined ? {} : { preferred_end_time: item.preferredEndTime ?? null }),
-    ...(item.activityDeadline === undefined ? {} : { activity_deadline: item.activityDeadline ?? null }),
-    ...(item.googleCalendar === undefined ? {} : { google_calendar: item.googleCalendar }),
-  }).eq('id', id).eq('user_id', userId).select(columns).maybeSingle()
+  const { data, error } = await db().from('schedule_items').update(
+    normalizeScheduleWrite(item),
+  ).eq('id', id).eq('user_id', userId).select(columns).maybeSingle()
   if (error) throw new Error(`Schedule update failed: ${error.message}`)
   if (!data) return null
   return fromRow(data)

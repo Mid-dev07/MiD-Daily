@@ -1,1 +1,1 @@
-export { buildAssistantTools, configureAssistantRuntime, isAssistantConfigured, runAssistant, type WorkersAiBinding } from './assistant.js'
+export { buildAssistantTools, configureAssistantRuntime, executeAssistantProposals, isAssistantConfigured, runAssistant, type AssistantMessage, type AssistantProposal, type WorkersAiBinding } from './assistant.js'
