@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getAIStatus, sendAIMessage, type AIMessage } from '../../integrations/aiApi'
+import { executeAIProposals, getAIStatus, sendAIMessage, type AIMessage, type AIProposal } from '../../integrations/aiApi'
 import {
   createTelegramLink,
   createWhatsAppLink,
@@ -20,6 +20,8 @@ export function AssistantView() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [lastActions, setLastActions] = useState<Array<{ tool: string; ok: boolean }>>([])
+  const [pendingProposals, setPendingProposals] = useState<AIProposal[]>([])
+  const [confirming, setConfirming] = useState(false)
   const [integrations, setIntegrations] = useState<IntegrationStatus | null>(null)
   const [integrationLoading, setIntegrationLoading] = useState(true)
   const [integrationBusy, setIntegrationBusy] = useState<'telegram' | 'whatsapp' | null>(null)
@@ -105,16 +107,35 @@ export function AssistantView() {
     setInput('')
     setError('')
     setLastActions([])
+    setPendingProposals([])
     setLoading(true)
 
     try {
-      const result = await sendAIMessage(nextMessages.slice(-10), allowWrites)
+      const result = await sendAIMessage(nextMessages.slice(-10), allowWrites, allowWrites ? 'preview' : 'execute')
       setMessages((current) => [...current, { role: 'assistant' as const, content: result.text }].slice(-10))
       setLastActions(result.actions)
+      setPendingProposals(result.proposals ?? [])
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Assistant request failed.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const confirmProposals = async () => {
+    if (!pendingProposals.length || confirming) return
+
+    setConfirming(true)
+    setError('')
+    try {
+      const result = await executeAIProposals(pendingProposals)
+      setPendingProposals([])
+      setLastActions(result.actions)
+      setMessages((current) => [...current, { role: 'assistant' as const, content: 'Confirmed. The proposed changes have been applied to your MiD workspace.' }].slice(-10))
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Unable to execute the proposed actions.')
+    } finally {
+      setConfirming(false)
     }
   }
 
@@ -275,6 +296,33 @@ export function AssistantView() {
         </div>
 
         {error && <div className="form-error" role="alert">{error}</div>}
+
+        {pendingProposals.length > 0 && (
+          <div className="ai-proposal-panel" aria-label="Proposed MiD actions">
+            <div className="ai-proposal-heading">
+              <div>
+                <span className="section-kicker">ACTION REVIEW</span>
+                <strong>Review before MiD changes your workspace</strong>
+              </div>
+              <span className="card-meta">{pendingProposals.length} proposed</span>
+            </div>
+            <div className="ai-proposal-list">
+              {pendingProposals.map((proposal, index) => (
+                <div className="ai-proposal-item" key={proposal.tool + index}>
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                  <div>
+                    <strong>{proposal.tool.replace(/_/g, ' ')}</strong>
+                    <small>{Object.entries(proposal.arguments).filter(([, value]) => value !== null && value !== '').slice(0, 3).map(([key, value]) => key + ': ' + String(value)).join(' · ')}</small>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="ai-proposal-actions">
+              <button className="secondary-button" type="button" disabled={confirming} onClick={() => setPendingProposals([])}>Keep draft</button>
+              <button className="primary-button" type="button" disabled={confirming} onClick={() => void confirmProposals()}>{confirming ? 'Applying…' : 'Confirm & apply'}</button>
+            </div>
+          </div>
+        )}
 
         {lastActions.length > 0 && (
           <div className="ai-action-summary" aria-label="Assistant action results">
