@@ -33,6 +33,13 @@ const environmentFiles = [
 const failures = []
 
 const rhythmSection = uiSystem.split('/* 4PT RHYTHM CONTRACT')[1] ?? ''
+const unrealTokens = ['#0a1119', '#0d151f', '#4fd1ff', '#4ade80', '#fbbf24', '#fb7185']
+if (!unrealTokens.every((token) => tokens.toLowerCase().includes(token.toLowerCase()))) {
+  failures.push('MiD Unreal material tokens are missing or have drifted.')
+}
+if (!/--light-angle:\s*145deg/.test(tokens)) failures.push('The canonical 145deg MiD key-light token must remain intact.')
+if (!/linear-gradient\\(145deg/.test(uiSystem)) failures.push('Unreal material surfaces must retain a 145deg directional gradient.')
+
 if (!/--rhythm-micro:\s*4px/.test(tokens) || !/--rhythm-tight:\s*8px/.test(tokens) || !/--rhythm-component:\s*16px/.test(tokens)) {
   failures.push('Canonical 4pt spacing tokens are missing from tokens.css.')
 }
