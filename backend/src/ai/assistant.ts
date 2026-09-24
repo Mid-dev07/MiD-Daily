@@ -833,7 +833,7 @@ export async function runAssistant(
   userId: string,
   messages: AssistantMessage[],
   allowWrites: boolean,
-  executionMode: 'preview' | 'execute' = 'preview',
+  executionMode: 'preview' | 'execute' = 'execute',
 ) {
   if (!assistantAi) throw new Error('AI integration is not configured.')
 
