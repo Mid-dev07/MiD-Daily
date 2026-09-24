@@ -15,7 +15,8 @@
     "FRONTEND_URL": "https://mid-daily.e41262272.workers.dev",
     "GOOGLE_REDIRECT_URI": "https://mid-daily-api.e41262272.workers.dev/auth/google/callback",
     "COOKIE_SECURE": "true",
-    "APP_TIMEZONE": "Asia/Jakarta"
+    "APP_TIMEZONE": "Asia/Jakarta",
+    "INSTAGRAM_REDIRECT_URI": "https://mid-daily-api.e41262272.workers.dev/auth/instagram/callback"
   },
   "triggers": {
     "crons": ["* * * * *"]
@@ -26,7 +27,9 @@
   "secrets": {
     "required": [
       "SUPABASE_SECRET_KEY",
-      "TOKEN_ENCRYPTION_KEY_B64"
+      "TOKEN_ENCRYPTION_KEY_B64",
+      "INSTAGRAM_CLIENT_ID",
+      "INSTAGRAM_CLIENT_SECRET"
     ]
   }
 }
