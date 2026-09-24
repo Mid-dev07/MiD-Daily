@@ -91,7 +91,8 @@ if (!/FeatureLandscape/.test(dashboard) || !/<FeatureLandscape/.test(dashboard))
   failures.push('Dashboard must expose the spatial workspace compass as a live navigation surface.')
 }
 
-if (!/MiDIcon/.test(sidebarSource) || /icon: '[⌂◷✓◎✦●↗◉]'/u.test(sidebarSource)) {
+const iconSidebarSource = readFileSync(join(srcDir, 'components/layout/Sidebar.tsx'), 'utf8')
+if (!/MiDIcon/.test(iconSidebarSource) || /icon: '[⌂◷✓◎✦●↗◉]'/u.test(iconSidebarSource)) {
   failures.push('Primary navigation must use the deterministic MiD SVG icon system, not platform glyphs.')
 }
 const featureIconSource = readFileSync(join(srcDir, 'features/dashboard/components/FeatureLandscape.tsx'), 'utf8')
