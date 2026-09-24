@@ -884,3 +884,318 @@ textarea:focus {
     opacity: .22;
   }
 }
+
+
+/* =========================================================================
+   UNREAL SPECTRUM CORRECTION
+   Cyan is an interaction accent — not the entire color identity.
+   Materials stay graphite/steel; modules receive restrained local accents.
+   ========================================================================= */
+
+:root {
+  --unreal-graphite-0: #07090d;
+  --unreal-graphite-1: #0b0f15;
+  --unreal-graphite-2: #111720;
+  --unreal-graphite-3: #18212b;
+  --unreal-steel: #9aa7b2;
+  --unreal-silver: #dfe6eb;
+  --unreal-cyan: #4fd1ff;
+  --unreal-amber: #f2b86b;
+  --unreal-violet: #9b8cff;
+  --unreal-green: #65d49a;
+  --unreal-rose: #f07f9b;
+  --unreal-blue: #718bff;
+  --color-bg: var(--unreal-graphite-0);
+  --color-surface: var(--unreal-graphite-2);
+  --color-surface-strong: var(--unreal-graphite-3);
+  --surface-card: rgba(11,15,21,.88);
+  --surface-raised: rgba(19,25,33,.94);
+  --surface-recessed: rgba(4,7,11,.68);
+  --color-text: #eef2f5;
+  --color-text-muted: #aeb9c2;
+  --color-text-faint: #74818d;
+  --color-border: rgba(204,216,226,.12);
+  --color-border-soft: rgba(204,216,226,.065);
+  --accent: var(--unreal-cyan);
+  --accent-soft: rgba(79,209,255,.12);
+  --accent-glow: rgba(79,209,255,.20);
+}
+
+/* Neutralize the environment first. Accent lights are spatial events, not the
+   dominant surface color. */
+body {
+  background: var(--unreal-graphite-0);
+}
+
+.app-frame::before {
+  background:
+    radial-gradient(760px 420px at 72% 8%, rgba(79,209,255,.045), transparent 68%),
+    radial-gradient(520px 380px at 22% 74%, rgba(242,184,107,.055), transparent 72%),
+    radial-gradient(460px 340px at 58% 42%, rgba(155,140,255,.045), transparent 74%);
+}
+
+.environment-scene {
+  background: #06080c;
+}
+
+.environment-sky {
+  background:
+    radial-gradient(circle at 73% 17%, rgba(242,184,107,.14), transparent 12%),
+    radial-gradient(circle at 30% 27%, rgba(155,140,255,.075), transparent 19%),
+    linear-gradient(180deg, #101923 0%, #0a0f15 50%, #05070b 100%);
+}
+
+.environment-scene::before {
+  background:
+    linear-gradient(180deg, rgba(5,7,11,.10), rgba(5,7,11,.34) 42%, rgba(1,3,6,.91) 100%),
+    linear-gradient(90deg, rgba(1,3,6,.78), transparent 20%, transparent 80%, rgba(1,3,6,.66));
+}
+
+.environment-scene::after {
+  background:
+    radial-gradient(ellipse at 72% 17%, rgba(242,184,107,.09), transparent 19%),
+    radial-gradient(ellipse at 32% 52%, rgba(155,140,255,.055), transparent 28%);
+}
+
+.environment-light-shafts {
+  background:
+    linear-gradient(116deg, transparent 38%, rgba(255,245,225,.045) 47%, transparent 56%),
+    linear-gradient(103deg, transparent 53%, rgba(171,155,255,.04) 59%, transparent 66%);
+}
+
+.environment-scene > .environment-vignette::before {
+  background:
+    linear-gradient(rgba(184,198,210,.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(184,198,210,.055) 1px, transparent 1px);
+}
+
+.environment-scene > .environment-vignette::after {
+  background: linear-gradient(90deg, transparent, rgba(242,184,107,.22) 22%, rgba(255,255,255,.13) 50%, rgba(113,139,255,.18) 78%, transparent);
+  box-shadow: 0 0 28px rgba(242,184,107,.06);
+}
+
+/* The shell is steel/graphite. Cyan belongs to the edge language only. */
+.sidebar {
+  border-color: rgba(204,216,226,.13);
+  background:
+    linear-gradient(145deg, rgba(19,25,33,.94), rgba(7,10,14,.96)),
+    rgba(8,11,15,.94);
+  box-shadow:
+    0 32px 96px rgba(0,0,0,.58),
+    inset 0 1px 0 rgba(255,255,255,.075),
+    inset 0 0 0 1px rgba(255,255,255,.018);
+}
+
+.sidebar::before {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.055), transparent 22%, transparent 73%, rgba(155,140,255,.028));
+}
+
+.brand-mark {
+  border-color: rgba(206,220,229,.22);
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255,255,255,.20), transparent 25%),
+    linear-gradient(145deg, rgba(108,127,143,.28), rgba(57,71,87,.10)),
+    rgba(9,13,18,.90);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.17),
+    0 0 0 1px rgba(255,255,255,.025),
+    0 0 22px rgba(79,209,255,.05);
+}
+
+.nav-item:hover {
+  background: linear-gradient(90deg, rgba(255,255,255,.055), rgba(255,255,255,.015) 72%, transparent);
+  border-color: rgba(208,220,228,.10);
+  transform: translateX(4px);
+}
+
+.nav-item:hover::before {
+  background: rgba(255,255,255,.40);
+  box-shadow: 0 0 12px rgba(255,255,255,.12);
+}
+
+.nav-item.is-active {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--module-accent, var(--unreal-cyan)) 15%, transparent), transparent 70%),
+    linear-gradient(145deg, rgba(27,34,43,.66), rgba(8,12,17,.84));
+  border-color: rgba(204,216,226,.15);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.018),
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 12px 24px rgba(0,0,0,.20);
+}
+
+.nav-item.is-active::before {
+  background: var(--module-accent, var(--unreal-cyan));
+  box-shadow: 0 0 16px color-mix(in srgb, var(--module-accent, var(--unreal-cyan)) 45%, transparent);
+}
+
+.nav-item.is-active .nav-index,
+.nav-item.is-active .nav-icon {
+  color: var(--module-accent, var(--unreal-cyan));
+}
+
+/* Topbar is neutral steel; cyan appears only on the interaction edge. */
+.topbar {
+  background: linear-gradient(180deg, rgba(6,9,13,.96), rgba(6,9,13,.70) 72%, transparent);
+}
+
+.sidebar-toggle,
+.notification-trigger,
+.search-trigger,
+.environment-control,
+.profile-trigger,
+.icon-button,
+.filter-button {
+  border-color: rgba(201,214,224,.13);
+  background:
+    linear-gradient(145deg, rgba(22,28,36,.78), rgba(7,11,16,.88));
+}
+
+.sidebar-toggle:hover,
+.notification-trigger:hover,
+.search-trigger:hover,
+.environment-control:hover,
+.profile-chip:hover {
+  border-color: color-mix(in srgb, var(--module-accent, var(--unreal-cyan)) 26%, rgba(201,214,224,.14));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.09),
+    0 14px 30px rgba(0,0,0,.20),
+    0 0 20px color-mix(in srgb, var(--module-accent, var(--unreal-cyan)) 7%, transparent);
+}
+
+.environment-readout b {
+  color: #e8edf1;
+}
+
+.search-trigger kbd {
+  background: rgba(255,255,255,.022);
+  border-color: rgba(202,213,222,.12);
+}
+
+/* Rebuilt material hierarchy: graphite shell, steel bevel, contextual signal. */
+.content-card,
+.glass-panel,
+.stat-card,
+.integration-panel,
+.ai-shell-card,
+.dashboard-signal-card,
+.assistant-channel-card {
+  border-color: rgba(194,208,220,.125);
+  background:
+    linear-gradient(145deg, rgba(25,32,40,.60), rgba(7,10,15,.90)),
+    rgba(9,12,17,.86);
+  box-shadow:
+    0 24px 62px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(255,255,255,.065),
+    inset 0 0 0 1px rgba(255,255,255,.012);
+}
+
+.content-card::after,
+.glass-panel::after,
+.stat-card::after,
+.integration-panel::after,
+.ai-shell-card::after,
+.dashboard-signal-card::after,
+.assistant-channel-card::after {
+  background:
+    linear-gradient(120deg, rgba(255,255,255,.035), transparent 18% 76%, color-mix(in srgb, var(--module-accent, var(--unreal-cyan)) 3%, transparent)),
+    linear-gradient(90deg, transparent 0 48%, rgba(255,255,255,.016) 50%, transparent 52% 100%);
+}
+
+.content-card:hover,
+.glass-panel:hover,
+.stat-card:hover,
+.dashboard-signal-card:hover,
+.assistant-channel-card:hover {
+  border-color: color-mix(in srgb, var(--module-accent, var(--unreal-cyan)) 22%, rgba(194,208,220,.14));
+  box-shadow:
+    0 28px 68px rgba(0,0,0,.38),
+    inset 0 1px 0 rgba(255,255,255,.075),
+    0 0 22px color-mix(in srgb, var(--module-accent, var(--unreal-cyan)) 4%, transparent);
+}
+
+.secondary-button {
+  background:
+    linear-gradient(145deg, rgba(24,31,39,.78), rgba(7,11,16,.90));
+  color: #e5ebef;
+}
+
+.primary-button {
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--module-accent, var(--unreal-cyan)) 88%, white 12%), color-mix(in srgb, var(--module-accent, var(--unreal-cyan)) 58%, #17202a 42%));
+  border-color: color-mix(in srgb, var(--module-accent, var(--unreal-cyan)) 42%, rgba(255,255,255,.16));
+  box-shadow:
+    0 12px 26px rgba(0,0,0,.22),
+    0 0 20px color-mix(in srgb, var(--module-accent, var(--unreal-cyan)) 10%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.52);
+}
+
+.primary-button:hover {
+  box-shadow:
+    0 16px 32px rgba(0,0,0,.26),
+    0 0 28px color-mix(in srgb, var(--module-accent, var(--unreal-cyan)) 17%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.56);
+}
+
+.text-button {
+  color: var(--module-accent, var(--unreal-cyan));
+}
+
+.dashboard-signal-progress span {
+  background: linear-gradient(90deg, var(--module-accent, var(--unreal-cyan)), color-mix(in srgb, var(--module-accent, var(--unreal-cyan)) 52%, white 48%));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--module-accent, var(--unreal-cyan)) 18%, transparent);
+}
+
+/* Local module identities: each feels like a different subsystem of one machine. */
+.view-key[data-module="dashboard"] { --module-accent: #4fd1ff; }
+.view-key[data-module="schedule"] { --module-accent: #9b8cff; }
+.view-key[data-module="tasks"] { --module-accent: #65d49a; }
+.view-key[data-module="finance"] { --module-accent: #f2b86b; }
+.view-key[data-module="social"] { --module-accent: #f07f9b; }
+.view-key[data-module="assistant"] { --module-accent: #67d9ff; }
+.view-key[data-module="profile"] { --module-accent: #c8d0d7; }
+.view-key[data-module="insights"] { --module-accent: #718bff; }
+.view-key[data-module="habits"] { --module-accent: #b6d86a; }
+
+.view-key[data-module] .section-kicker,
+.view-key[data-module] .topbar-index,
+.view-key[data-module] .card-meta {
+  color: color-mix(in srgb, var(--module-accent) 70%, #93a0aa 30%);
+}
+
+.view-key[data-module] .timeline-dot {
+  background: var(--module-accent);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--module-accent) 10%, transparent),
+    0 0 14px color-mix(in srgb, var(--module-accent) 22%, transparent);
+}
+
+.view-key[data-module] .priority-badge.high { color: #ff859b; }
+.view-key[data-module] .priority-badge.medium { color: #f4bf72; }
+.view-key[data-module] .priority-badge.low { color: #72dda4; }
+
+/* Hero surfaces use material neutral + one local energy source, not a blue wash. */
+.feature-landscape {
+  background:
+    radial-gradient(circle at 68% 36%, color-mix(in srgb, var(--module-accent, var(--unreal-cyan)) 11%, transparent), transparent 18%),
+    radial-gradient(circle at 32% 74%, rgba(155,140,255,.05), transparent 23%),
+    linear-gradient(180deg, rgba(17,22,29,.70), rgba(4,7,11,.93));
+  border-color: rgba(206,218,226,.16);
+}
+
+.feature-landscape::after {
+  background:
+    linear-gradient(rgba(188,202,213,.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(188,202,213,.055) 1px, transparent 1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content-card:hover,
+  .glass-panel:hover,
+  .stat-card:hover,
+  .dashboard-signal-card:hover,
+  .assistant-channel-card:hover {
+    transform: none;
+  }
+}
