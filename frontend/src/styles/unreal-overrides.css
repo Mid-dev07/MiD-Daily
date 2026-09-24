@@ -1,4 +1,52 @@
+/* Bridge existing MiD tokens into the Unreal palette so older components inherit the same material language. */
+:root {
+  --bg-void: #050913;
+  --bg-deep: #08111d;
+  --surface-0: rgba(8,16,28,.88);
+  --surface-1: rgba(12,24,40,.80);
+  --surface-2: rgba(18,32,50,.68);
+  --surface-3: rgba(24,42,62,.58);
+  --line: rgba(149,201,231,.16);
+  --line-strong: rgba(153,224,255,.34);
+  --accent: #4fd1ff;
+  --accent-soft: rgba(79,209,255,.16);
+  --accent-glow: rgba(79,209,255,.28);
+  --nature-moss: #4f92ad;
+  --nature-sage: #8bb8cc;
+  --nature-fern: #3e6680;
+  --nature-stone: #7e91a2;
+  --nature-sun: #f7c76a;
+  --nature-fog: #d7e8f2;
+  --state-success: #4ade80;
+  --state-warning: #f7c76a;
+  --state-danger: #fb7185;
+  --color-bg: #050913;
+  --color-surface: #0c1828;
+  --color-surface-strong: #122238;
+  --color-border: rgba(149,201,231,.16);
+  --color-border-soft: rgba(149,201,231,.07);
+  --color-text: #f2f7fb;
+  --color-text-muted: #a8baca;
+  --color-text-faint: #71879a;
+  --color-accent: #4fd1ff;
+  --color-accent-soft: rgba(79,209,255,.16);
+  --color-success: #4ade80;
+  --color-warning: #f7c76a;
+  --color-danger: #fb7185;
+  --surface-card: rgba(8,16,28,.82);
+  --surface-raised: rgba(14,27,44,.92);
+  --surface-recessed: rgba(3,8,16,.62);
+  --surface-border-visible: rgba(149,201,231,.20);
+  --surface-highlight: rgba(255,255,255,.11);
+  --surface-shadow: rgba(0,0,0,.46);
+  --contrast-min-ui: 4.5;
+}
+
 /* MiD-Daily — UNREAL VISIBLE TRANSFORMATION
+   Purpose: make the product identity visibly Unreal-grade without WebGL,
+   persistent backdrop-filter, image backgrounds, or heavy runtime effects.
+*/
+
    Purpose: make the product identity visibly Unreal-grade without WebGL,
    persistent backdrop-filter, image backgrounds, or heavy runtime effects.
 */
