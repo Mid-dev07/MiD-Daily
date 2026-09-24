@@ -27,7 +27,8 @@ import {
 import { claimTelegramUpdate, createTelegramLinkCode, deleteTelegramConnectionByUserId, getTelegramConnectionByChatId, getTelegramConnectionByUserId, redeemTelegramLinkCode, isTelegramPersistenceConfigured } from './integrations/telegramStore.js'
 import { isTelegramConfigured, parseCommand, sendTelegramMessage, setTelegramWebhook, verifyWebhookSecret } from './integrations/telegram.js'
 import { dispatchNaturalLanguageMessage } from './integrations/gateway.js'
-import { getAccountInsights, getAccountProfile, isInstagramAnalyticsConfigured, normalizeAccountInsights } from './integrations/instagramAnalytics.js'
+import { getAccountInsights, getAccountProfile, getEnvironmentCredentials, isInstagramAnalyticsConfigured, normalizeAccountInsights } from './integrations/instagramAnalytics.js'
+import { deleteInstagramConnectionByUserId, getInstagramConnectionByUserId, isInstagramConnectionPersistenceConfigured } from './integrations/instagramStore.js'
 import { getWhatsAppConfig, isWhatsAppConfigured, parseWhatsAppCommand, sendWhatsAppText, verifyWebhookChallenge, verifyWhatsAppSignature, buildWhatsAppUpdateHash } from './integrations/whatsapp.js'
 import { createWhatsAppLinkCode, deleteWhatsAppConnectionByUserId, getWhatsAppConnectionByUserId, getWhatsAppConnectionByWaId, redeemWhatsAppLinkCode, claimWhatsAppUpdate, isWhatsAppPersistenceConfigured } from './integrations/whatsappStore.js'
 import {
@@ -1469,30 +1470,56 @@ function formatTelegramExpenses(items: Array<{ title: string; amount: number; ca
 }
 
 async function handleInstagramInsights(req: IncomingMessage, res: ServerResponse) {
-  await requireAuthenticatedUserId(req)
-  if (!isInstagramAnalyticsConfigured()) {
-    throw httpError(503, 'Instagram Analytics is not configured.')
+  const userId = await requireAuthenticatedUserId(req)
+  const connection = isInstagramConnectionPersistenceConfigured()
+    ? await getInstagramConnectionByUserId(userId)
+    : null
+  const environment = getEnvironmentCredentials()
+  const credentials = connection && connection.status !== 'revoked'
+    ? (environment
+      ? { ...environment, accessToken: connection.accessToken, accountId: connection.providerAccountId }
+      : null)
+    : environment
+
+  if (!credentials) {
+    throw httpError(503, 'Instagram Analytics is not connected for this account.')
   }
 
   const [profile, insights] = await Promise.all([
-    getAccountProfile(),
-    getAccountInsights(),
+    getAccountProfile(credentials),
+    getAccountInsights(credentials),
   ])
 
-  sendJson(res, 200, normalizeAccountInsights(profile, insights.data ?? []))
+  const normalized = normalizeAccountInsights(profile, insights.data ?? [])
+  sendJson(res, 200, {
+    ...normalized,
+    scope: connection ? 'user' : 'deployment',
+  })
+}
+
+async function handleInstagramDisconnect(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  if (!isInstagramConnectionPersistenceConfigured()) {
+    throw httpError(503, 'Instagram connection storage is not configured.')
+  }
+  await deleteInstagramConnectionByUserId(userId)
+  sendJson(res, 200, { connected: false })
 }
 
 async function handleIntegrationStatus(req: IncomingMessage, res: ServerResponse) {
   const userId = await requireAuthenticatedUserId(req)
-  const [telegram, whatsapp] = await Promise.all([
+  const [telegram, whatsapp, instagramConnection] = await Promise.all([
     getTelegramConnectionByUserId(userId),
     getWhatsAppConnectionByUserId(userId),
+    isInstagramConnectionPersistenceConfigured() ? getInstagramConnectionByUserId(userId) : Promise.resolve(null),
   ])
 
   const aiConfigured = isAssistantConfigured()
   const telegramConfigured = isTelegramConfigured() && isTelegramPersistenceConfigured()
   const whatsappConfigured = isWhatsAppConfigured() && isWhatsAppPersistenceConfigured()
-  const instagramConfigured = isInstagramAnalyticsConfigured()
+  const instagramDeploymentConfigured = isInstagramAnalyticsConfigured()
+  const instagramConnected = Boolean(instagramConnection && instagramConnection.status !== 'revoked')
+  const instagramConfigured = instagramConnected || instagramDeploymentConfigured
 
   sendJson(res, 200, {
     ai: {
@@ -1518,9 +1545,9 @@ async function handleIntegrationStatus(req: IncomingMessage, res: ServerResponse
     },
     instagram: {
       configured: instagramConfigured,
-      state: instagramConfigured ? 'DEPLOYMENT_ACCOUNT' : 'NOT_CONFIGURED',
+      state: instagramConnected ? 'CONNECTED' : instagramDeploymentConfigured ? 'DEPLOYMENT_ACCOUNT' : 'NOT_CONFIGURED',
       mode: 'analytics-read-only',
-      scope: 'deployment',
+      scope: instagramConnected ? 'user' : 'deployment',
       connectable: false,
     },
   })
@@ -1900,6 +1927,11 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
 
     if (req.method === 'GET' && url.pathname === '/api/integrations/instagram/insights') {
       await handleInstagramInsights(req, res)
+      return
+    }
+
+    if (req.method === 'POST' && url.pathname === '/api/integrations/instagram/disconnect') {
+      await handleInstagramDisconnect(req, res)
       return
     }
 
