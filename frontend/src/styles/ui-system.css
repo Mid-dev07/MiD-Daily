@@ -513,3 +513,18 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     width: 100%;
   }
 }
+
+
+/* MiD STATE-DRIVEN ATMOSPHERE
+   Environment response is data-led and bounded: no continuous animation is introduced. */
+.app-frame[data-workload="low"] .environment-vignette { opacity: .84; }
+.app-frame[data-workload="medium"] .environment-vignette { opacity: .9; }
+.app-frame[data-workload="high"] .environment-vignette { opacity: .96; }
+.app-frame[data-workload="high"] .environment-light-shafts { opacity: .3; }
+.app-frame[data-workload="low"] .environment-light-shafts { opacity: .42; }
+
+@media (prefers-reduced-motion: reduce) {
+  .app-frame[data-workload] .environment-light-shafts {
+    opacity: .34;
+  }
+}
