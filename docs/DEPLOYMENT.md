@@ -66,6 +66,22 @@ Linking is authenticated and uses one-time link codes. Webhooks verify Telegram'
 
 Linking is authenticated and uses one-time link codes. Webhooks verify Meta HMAC signatures and deduplicate incoming update hashes.
 
+## Instagram
+
+Production supports two analytics modes:
+- **User-scoped Connect** uses Instagram Business Login OAuth. The browser receives only an authorization URL; token exchange and encrypted persistence remain server-side.
+- **Deployment fallback** can use the legacy server-side access token/account variables while per-user OAuth is not configured.
+
+OAuth configuration:
+```env
+INSTAGRAM_CLIENT_ID=<server-side app id>
+INSTAGRAM_CLIENT_SECRET=<server-side app secret>
+INSTAGRAM_REDIRECT_URI=https://mid-daily-api.e41262272.workers.dev/auth/instagram/callback
+INSTAGRAM_GRAPH_VERSION=<current supported Graph version>
+```
+
+Analytics uses the Business Login scopes `instagram_business_basic` and `instagram_business_manage_insights`. Long-lived tokens are refreshed by the Worker on a bounded six-hour maintenance window when they approach expiry.
+
 ## Assistant
 
 The assistant is backend-mediated. Read tools are always available when configured; write tools are exposed only when the user explicitly enables actions in the UI.
