@@ -20,3 +20,7 @@ export function getInstagramInsights() {
 export function disconnectInstagram() {
   return apiRequest<{ connected: boolean }>('/api/integrations/instagram/disconnect', { method: 'POST' })
 }
+
+export function startInstagramAuthentication() {
+  return apiRequest<{ authorizationUrl: string; expiresAt: string }>('/api/integrations/instagram/start', { method: 'POST' })
+}
