@@ -349,3 +349,106 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   .toast{right:16px;bottom:calc(88px + env(safe-area-inset-bottom));max-width:calc(100vw - 32px)}
 }
 @media (prefers-reduced-motion:reduce){.feature-landscape{transform:none!important;will-change:auto}.toast{animation:none}}
+
+
+/* MiD TERRAIN SIGNATURE
+   Module identity comes from restrained surface behavior, not theme changes. */
+.view-key[data-module] {
+  --module-accent: rgba(211, 231, 165, .22);
+  --module-light: rgba(240, 244, 222, .045);
+  --module-surface-angle: 145deg;
+}
+.view-key[data-module="dashboard"] {
+  --module-accent: rgba(215, 231, 183, .24);
+  --module-light: rgba(239, 246, 219, .055);
+}
+.view-key[data-module="schedule"] {
+  --module-accent: rgba(192, 215, 173, .22);
+  --module-light: rgba(211, 231, 213, .045);
+  --module-surface-angle: 180deg;
+}
+.view-key[data-module="tasks"] {
+  --module-accent: rgba(221, 208, 165, .22);
+  --module-light: rgba(244, 236, 203, .045);
+}
+.view-key[data-module="finance"] {
+  --module-accent: rgba(231, 193, 128, .22);
+  --module-light: rgba(247, 223, 179, .045);
+}
+.view-key[data-module="social"] {
+  --module-accent: rgba(191, 210, 196, .2);
+  --module-light: rgba(226, 237, 231, .04);
+}
+.view-key[data-module="assistant"] {
+  --module-accent: rgba(196, 212, 231, .22);
+  --module-light: rgba(224, 234, 247, .045);
+  --module-surface-angle: 160deg;
+}
+.view-key[data-module="profile"] {
+  --module-accent: rgba(225, 214, 191, .2);
+  --module-light: rgba(242, 233, 217, .04);
+}
+.view-key[data-module="insights"] {
+  --module-accent: rgba(193, 211, 187, .22);
+  --module-light: rgba(225, 238, 219, .045);
+  --module-surface-angle: 170deg;
+}
+.view-key[data-module="habits"] {
+  --module-accent: rgba(191, 214, 166, .22);
+  --module-light: rgba(227, 241, 203, .05);
+}
+.view-key[data-module] .content-card,
+.view-key[data-module] .integration-panel,
+.view-key[data-module] .ai-shell-card,
+.view-key[data-module] .stat-card {
+  background:
+    linear-gradient(var(--module-surface-angle), var(--module-light), transparent 46%),
+    linear-gradient(145deg, rgba(41, 61, 43, .28), rgba(8, 17, 11, .68)),
+    rgba(8, 17, 11, .72);
+  box-shadow: var(--shadow-soft), inset 0 1px 0 var(--module-accent), 0 1px 0 rgba(255,255,255,.025);
+}
+.view-key[data-module] .card-heading:after,
+.view-key[data-module] .page-intro:after {
+  content: "";
+  display: block;
+  width: 32px;
+  height: 4px;
+  margin-top: 16px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--module-accent), transparent);
+  opacity: .75;
+}
+.assistant-health-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 16px;
+}
+.assistant-health-strip span {
+  min-height: 56px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid rgba(232, 241, 221, .09);
+  border-radius: 12px;
+  background: rgba(7, 16, 10, .3);
+}
+.assistant-health-strip b { font-size: 11px; }
+.assistant-health-strip small {
+  color: rgba(223, 234, 214, .46);
+  font: 9px/1.2 var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.nav-icon,
+.feature-node-icon {
+  display: inline-grid;
+  place-items: center;
+  line-height: 0;
+}
+@media (max-width: 560px) {
+  .assistant-health-strip {
+    grid-template-columns: 1fr;
+  }
+}
