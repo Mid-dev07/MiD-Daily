@@ -3,7 +3,7 @@ import { createSchedule, listSchedule, type ScheduleRecord } from '../scheduleSt
 
 
 const WORKERS_AI_MODEL = '@cf/zai-org/glm-4.7-flash'
-import { todayInAppTimeZone } from '../time.js'
+import { appTimeZone, todayInAppTimeZone } from '../time.js'
 
 const MAX_TOOL_ROUNDS = 4
 const MAX_ITEMS = 20
@@ -736,7 +736,7 @@ async function runWorkersAi(
     'You are MiD-Daily Assistant.',
     'Use only the tools provided. Never claim data that was not returned by a tool.',
     'The authenticated user owns all tool data. Never ask for or invent a user id.',
-    'Current app timezone: ' + APP_TIMEZONE + '.',
+    'Current app timezone: ' + appTimeZone() + '.',
     'Current date in the app timezone: ' + todayInTimeZone() + '.',
     'When creating an activity, inspect the relevant schedule range first so you do not silently create a time conflict.',
     'Do not claim a time slot is free unless the schedule range tool was checked for that date.',
