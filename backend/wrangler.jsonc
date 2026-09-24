@@ -27,9 +27,7 @@
   "secrets": {
     "required": [
       "SUPABASE_SECRET_KEY",
-      "TOKEN_ENCRYPTION_KEY_B64",
-      "INSTAGRAM_CLIENT_ID",
-      "INSTAGRAM_CLIENT_SECRET"
+      "TOKEN_ENCRYPTION_KEY_B64"
     ]
   }
 }
