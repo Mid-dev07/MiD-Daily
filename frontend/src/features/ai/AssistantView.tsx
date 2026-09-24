@@ -136,6 +136,12 @@ export function AssistantView() {
     integrations?.whatsapp.displayName || '',
   )
 
+  const integrationSummary = integrations ? [
+    ['Telegram', integrations.telegram.state],
+    ['WhatsApp', integrations.whatsapp.state],
+    ['AI', integrations.ai.state],
+  ] as const : []
+
   return (
     <section className="workspace page-enter">
       <div className="page-intro">
@@ -148,6 +154,12 @@ export function AssistantView() {
           <button className="text-button" type="button" disabled={integrationLoading} onClick={() => void refreshIntegrations()}>{integrationLoading ? 'Checking…' : 'Refresh'}</button>
         </div>
         {integrationError && <div className="ai-availability-note" role="alert"><strong>Integration status could not be checked.</strong><span>{integrationError} Refresh the status before troubleshooting provider setup.</span></div>}
+
+        <div className="assistant-health-strip" aria-label="Integration health">
+          {integrationSummary.map(([label, state]) => (
+            <span key={label}><b>{label}</b><small>{state.replaceAll('_', ' ')}</small></span>
+          ))}
+        </div>
 
         <div className="assistant-channel-grid">
           <article className="assistant-channel-card">
@@ -237,6 +249,13 @@ export function AssistantView() {
                   : 'AI service not configured'}
           </span>
         </div>
+
+        {integrations?.instagram.state === 'DEPLOYMENT_ACCOUNT' && (
+          <div className="ai-availability-note" role="status">
+            <strong>Instagram analytics is deployment-scoped.</strong>
+            <span>This account can be read from the current deployment, but per-user Connect is not enabled yet. It will remain separate from your personal Tasks, Finance, and Schedule data.</span>
+          </div>
+        )}
 
         {aiConfigured === false && !aiStatusError && (
           <div className="ai-availability-note" role="status">
