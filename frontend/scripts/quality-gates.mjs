@@ -90,6 +90,20 @@ if (/\.feature-landscape\s*\{[^}]*display:\s*none\s*!important/.test(uiSystem) |
 if (!/FeatureLandscape/.test(dashboard) || !/<FeatureLandscape/.test(dashboard)) {
   failures.push('Dashboard must expose the spatial workspace compass as a live navigation surface.')
 }
+
+if (!/MiDIcon/.test(sidebarSource) || /icon: '[⌂◷✓◎✦●↗◉]'/u.test(sidebarSource)) {
+  failures.push('Primary navigation must use the deterministic MiD SVG icon system, not platform glyphs.')
+}
+const featureIconSource = readFileSync(join(srcDir, 'features/dashboard/components/FeatureLandscape.tsx'), 'utf8')
+if (!/MiDIcon/.test(featureIconSource) || /icon: '[⌂◷✓◎✦●↗◉]'/u.test(featureIconSource)) {
+  failures.push('Feature Landscape must use the deterministic MiD SVG icon system.')
+}
+if (!/\.view-key\[data-module/.test(uiSystem) || !/--module-surface-angle/.test(uiSystem)) {
+  failures.push('Module terrain signature layer is missing from the active UI system.')
+}
+if (!/assistant-health-strip/.test(uiSystem)) {
+  failures.push('Integration health strip styling is missing from the active UI system.')
+}
 if (!/SIDEBAR_HIDDEN_STORAGE_KEY/.test(appSourceForInteraction) || !/setSidebarHidden/.test(appSourceForInteraction) || !/sidebarHidden/.test(appSourceForInteraction)) {
   failures.push('Workspace navigation visibility must remain user-controllable and persisted.')
 }
