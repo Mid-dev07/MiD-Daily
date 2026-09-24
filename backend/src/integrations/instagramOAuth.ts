@@ -115,3 +115,24 @@ export async function refreshLongLivedInstagramToken(accessToken: string) {
     expiresIn: typeof data.expires_in === 'number' ? data.expires_in : 0,
   }
 }
+
+
+export async function refreshLongLivedInstagramToken(accessToken: string) {
+  const url = new URL(GRAPH_HOST + '/refresh_access_token')
+  url.searchParams.set('grant_type', 'ig_refresh_token')
+  url.searchParams.set('access_token', accessToken)
+
+  const response = await fetch(url, {
+    headers: { Accept: 'application/json' },
+  })
+  const data = await readJson(response)
+
+  if (typeof data.access_token !== 'string') {
+    throw new Error('Instagram token refresh returned an invalid response.')
+  }
+
+  return {
+    accessToken: data.access_token,
+    expiresIn: typeof data.expires_in === 'number' ? data.expires_in : 0,
+  }
+}
