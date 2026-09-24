@@ -185,7 +185,7 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
         </div>
       </div>
 
-      <ScheduleToolbar date={date} filter={filter} onShiftDate={(days) => setDate(shiftDate(date, days))} onResetDate={() => setDate(getToday())} onFilterChange={setFilter} />
+      <ScheduleToolbar date={date} filter={filter} onShiftDate={(days) => setDate(shiftDate(date, days))} onResetDate={() => setDate(getAppToday(APP_TIMEZONE))} onFilterChange={setFilter} />
 
       <div className="schedule-date-caption">
         <div><strong>{formatDateLong(date)}</strong><span>{visibleItems.length} {visibleItems.length === 1 ? 'activity' : 'activities'}</span></div>
