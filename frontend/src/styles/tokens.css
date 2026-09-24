@@ -1,48 +1,52 @@
 :root {
-  --bg-void: #07100b;
-  --bg-deep: #0b1710;
-  --surface-0: rgba(12, 24, 16, .88);
-  --surface-1: rgba(16, 31, 20, .78);
-  --surface-2: rgba(24, 43, 28, .66);
-  --surface-3: rgba(34, 57, 37, .58);
+  /* MiD base — dark, mineral, restrained. */
+  --bg-void: #0a1119;
+  --bg-deep: #0d151f;
+  --surface-0: rgba(13, 21, 31, .92);
+  --surface-1: rgba(15, 26, 38, .86);
+  --surface-2: rgba(20, 33, 48, .72);
+  --surface-3: rgba(27, 43, 61, .62);
 
-  --line: rgba(226, 235, 214, .12);
-  --line-strong: rgba(240, 247, 228, .24);
+  --line: rgba(190, 207, 222, .14);
+  --line-strong: rgba(210, 225, 237, .25);
 
-  --accent: #c3d88f;
-  --accent-soft: rgba(195, 216, 143, .15);
-  --accent-glow: rgba(195, 216, 143, .23);
+  /* Cyan is the MiD interaction signature — never the page fill. */
+  --accent: #4fd1ff;
+  --accent-soft: rgba(79, 209, 255, .13);
+  --accent-glow: rgba(79, 209, 255, .22);
 
-  --nature-moss: #778d58;
-  --nature-sage: #a8b98a;
-  --nature-fern: #557257;
-  --nature-stone: #9a9683;
-  --nature-sun: #e7b56b;
-  --nature-fog: #dce8d7;
+  /* Environment / material secondary tones. */
+  --nature-moss: #6f8f74;
+  --nature-sage: #9eb5a1;
+  --nature-fern: #4f6f5a;
+  --nature-stone: #7f8992;
+  --nature-sun: #d9ad6d;
+  --nature-fog: #c9d5dc;
 
-  --state-success: #9fca83;
-  --state-warning: #e0ae62;
-  --state-danger: #e88a7a;
+  /* Semantic state language. */
+  --state-success: #4ade80;
+  --state-warning: #fbbf24;
+  --state-danger: #fb7185;
 
   --light-angle: 145deg;
-  --spec-highlight: rgba(255, 255, 236, .16);
-  --ao-shadow: rgba(0, 0, 0, .38);
+  --spec-highlight: rgba(255, 255, 255, .14);
+  --ao-shadow: rgba(0, 0, 0, .42);
 
   --color-bg: var(--bg-void);
-  --color-surface: #132117;
-  --color-surface-strong: #1a2a1d;
+  --color-surface: #0d151f;
+  --color-surface-strong: #142130;
   --color-border: var(--line);
-  --color-border-soft: rgba(226, 235, 214, .07);
-  --color-text: #f1f3e8;
-  --color-text-muted: #c5ceb9;
-  --color-text-faint: #99a693;
+  --color-border-soft: rgba(190, 207, 222, .07);
+  --color-text: #edf4f8;
+  --color-text-muted: #aab9c5;
+  --color-text-faint: #788996;
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-success: var(--state-success);
   --color-warning: var(--state-warning);
   --color-danger: var(--state-danger);
 
-  /* 4pt foundation: micro rhythm uses 4px; component rhythm uses 8px. */
+  /* 4pt foundation. */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -69,8 +73,8 @@
   --radius-lg: 24px;
   --radius-xl: 32px;
 
-  --shadow-soft: 0 18px 42px rgba(0, 0, 0, .23);
-  --shadow-raised: 0 28px 72px rgba(0, 0, 0, .32);
+  --shadow-soft: 0 18px 42px rgba(0, 0, 0, .28);
+  --shadow-raised: 0 28px 72px rgba(0, 0, 0, .38);
   --shadow-inset: inset 0 1px 0 rgba(255,255,255,.08);
 
   --font-ui: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -81,7 +85,6 @@
   --duration-fast: 140ms;
   --duration-normal: 220ms;
   --ease-standard: cubic-bezier(.2, .8, .2, 1);
-
 
   --content-max: 1320px;
   --content-gutter: clamp(16px, 3.6vw, 56px);
@@ -96,12 +99,13 @@
   --control-h: 44px;
   --touch-target: 48px;
 
-  --surface-card: rgba(12, 23, 16, .82);
-  --surface-raised: rgba(22, 38, 25, .92);
-  --surface-recessed: rgba(3, 10, 6, .48);
+  /* Material vocabulary: glass panel / emissive / recessed. */
+  --surface-card: rgba(13, 21, 31, .78);
+  --surface-raised: rgba(19, 31, 45, .92);
+  --surface-recessed: rgba(4, 9, 15, .64);
 
-  --surface-border-visible: rgba(238, 245, 223, .18);
-  --surface-highlight: rgba(255, 255, 238, .13);
-  --surface-shadow: rgba(0, 0, 0, .34);
+  --surface-border-visible: rgba(204, 220, 232, .18);
+  --surface-highlight: rgba(255, 255, 255, .12);
+  --surface-shadow: rgba(0, 0, 0, .38);
   --contrast-min-ui: 4.5;
 }

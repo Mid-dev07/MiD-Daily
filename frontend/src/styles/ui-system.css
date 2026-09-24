@@ -528,3 +528,524 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     opacity: .34;
   }
 }
+
+
+/* ==========================================================================
+   UNREAL HABITAT MATERIAL SYSTEM
+   MiD identity remains visible: the environment, editorial layout, module
+   names, and content hierarchy stay intact. Unreal is the material/lighting
+   behavior layered onto that identity.
+   ========================================================================== */
+
+.app-frame {
+  background: #0a1119;
+}
+
+.app-frame::before {
+  background:
+    radial-gradient(720px 420px at 76% 12%, rgba(79, 209, 255, .065), transparent 68%),
+    radial-gradient(620px 460px at 8% 78%, rgba(116, 146, 126, .075), transparent 72%),
+    radial-gradient(460px 340px at 52% 44%, rgba(217, 173, 109, .028), transparent 74%);
+}
+
+.environment-scene {
+  background: #09111a;
+}
+
+.environment-sky {
+  background:
+    radial-gradient(circle at 68% 16%, rgba(217, 173, 109, .22), transparent 17%),
+    linear-gradient(180deg, rgba(58, 82, 73, .78), rgba(29, 44, 49, .72) 44%, #08111a 100%);
+}
+
+.environment-scene::before {
+  background:
+    linear-gradient(180deg, rgba(6, 14, 22, .18), transparent 28%, transparent 58%, rgba(2, 7, 12, .82)),
+    linear-gradient(90deg, rgba(3, 9, 15, .56), transparent 22%, transparent 80%, rgba(3, 9, 15, .34));
+}
+
+.environment-scene::after {
+  background:
+    radial-gradient(ellipse at 68% 18%, rgba(217, 173, 109, .11), transparent 24%),
+    radial-gradient(ellipse at 50% 62%, rgba(171, 193, 182, .045), transparent 38%);
+}
+
+.environment-light-shafts {
+  opacity: .32;
+  background:
+    linear-gradient(115deg, transparent 39%, rgba(244, 231, 201, .075) 47%, transparent 56%),
+    linear-gradient(108deg, transparent 53%, rgba(216, 234, 226, .05) 59%, transparent 67%);
+}
+
+.environment-vignette {
+  background: radial-gradient(ellipse at center, transparent 42%, rgba(0, 5, 10, .76) 100%);
+}
+
+/* App shell: grounded mineral body with a single 145deg key light. */
+.sidebar {
+  width: 256px;
+  border-color: rgba(203, 219, 231, .15);
+  background:
+    linear-gradient(145deg, rgba(24, 37, 50, .84), rgba(7, 14, 22, .88)),
+    rgba(8, 15, 23, .82);
+  box-shadow:
+    0 24px 72px rgba(0, 0, 0, .42),
+    inset 0 1px rgba(255, 255, 255, .08);
+}
+
+.sidebar::before {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, .05), transparent 24%, transparent 76%, rgba(79, 209, 255, .025));
+}
+
+.brand {
+  border-bottom-color: rgba(202, 218, 229, .1);
+}
+
+.brand-mark {
+  border-color: rgba(211, 227, 238, .22);
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255, 255, 255, .18), transparent 26%),
+    linear-gradient(145deg, rgba(79, 209, 255, .16), rgba(30, 49, 65, .3)),
+    rgba(8, 16, 25, .84);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, .14),
+    0 10px 28px rgba(0, 0, 0, .25),
+    0 0 18px rgba(79, 209, 255, .06);
+}
+
+.nav-item {
+  color: rgba(205, 218, 228, .66);
+}
+
+.nav-item:hover {
+  color: #f0f6fa;
+  background:
+    linear-gradient(145deg, rgba(79, 209, 255, .09), rgba(255, 255, 255, .018));
+  border-color: rgba(194, 213, 226, .1);
+  transform: translateX(2px);
+}
+
+.nav-item.is-active {
+  color: #f4f8fb;
+  background:
+    linear-gradient(145deg, rgba(79, 209, 255, .13), rgba(20, 33, 47, .38)),
+    rgba(10, 19, 29, .62);
+  border-color: rgba(79, 209, 255, .18);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, .06),
+    inset 3px 0 rgba(79, 209, 255, .72);
+}
+
+.nav-index {
+  color: rgba(153, 175, 191, .42);
+}
+
+.nav-icon {
+  color: rgba(169, 193, 207, .66);
+}
+
+.nav-item.is-active .nav-index,
+.nav-item.is-active .nav-icon {
+  color: var(--accent);
+  filter: drop-shadow(0 0 8px rgba(79, 209, 255, .18));
+}
+
+/* Top bar: quiet metal strip, not a second hero. */
+.topbar {
+  background: linear-gradient(180deg, rgba(7, 13, 20, .84), rgba(7, 13, 20, .18));
+}
+
+.topbar::after {
+  background: linear-gradient(90deg, transparent, rgba(79, 209, 255, .12), transparent);
+}
+
+.topbar-kicker,
+.section-kicker {
+  color: rgba(145, 183, 201, .66);
+}
+
+.topbar-index {
+  color: rgba(79, 209, 255, .78);
+}
+
+.topbar-title-row h1 {
+  color: #eef5f9;
+  text-shadow: 0 0 32px rgba(79, 209, 255, .055);
+}
+
+.sidebar-toggle,
+.notification-trigger,
+.search-trigger,
+.environment-control,
+.profile-trigger,
+.icon-button,
+.filter-button {
+  border-color: rgba(201, 218, 230, .13);
+  background:
+    linear-gradient(145deg, rgba(22, 35, 49, .72), rgba(7, 14, 22, .78));
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, .07),
+    0 8px 22px rgba(0, 0, 0, .14);
+}
+
+.sidebar-toggle:hover,
+.notification-trigger:hover,
+.search-trigger:hover,
+.environment-control:hover,
+.profile-chip:hover {
+  border-color: rgba(79, 209, 255, .24);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, .1),
+    0 12px 28px rgba(0, 0, 0, .18),
+    0 0 20px rgba(79, 209, 255, .05);
+}
+
+.environment-readout b {
+  color: #e9f1f5;
+}
+
+.environment-readout small,
+.environment-attribution-inline {
+  color: rgba(165, 184, 196, .52);
+}
+
+/* Core material classes: glass / emissive / recessed. */
+.content-card,
+.glass-panel,
+.stat-card,
+.integration-panel,
+.ai-shell-card,
+.dashboard-signal-card,
+.assistant-channel-card {
+  border-color: rgba(196, 214, 226, .13);
+  background:
+    linear-gradient(145deg, rgba(26, 41, 55, .46), rgba(7, 14, 23, .74)),
+    rgba(8, 16, 25, .76);
+  box-shadow:
+    var(--shadow-soft),
+    inset 0 1px rgba(255, 255, 255, .07),
+    0 1px rgba(79, 209, 255, .02);
+}
+
+.content-card::before,
+.glass-panel::before,
+.stat-card::before,
+.dashboard-signal-card::before,
+.assistant-channel-card::before {
+  background:
+    radial-gradient(240px 180px at var(--ux-x, 18%) var(--ux-y, 12%), rgba(227, 241, 248, .08), transparent 72%);
+}
+
+.card-heading h3,
+.page-intro h2 {
+  color: #eef4f8;
+}
+
+.card-meta,
+.page-intro p {
+  color: rgba(164, 184, 196, .58);
+}
+
+.primary-button {
+  border-color: rgba(79, 209, 255, .42);
+  background:
+    linear-gradient(145deg, #58d5ff, #2b88b4);
+  color: #06131b;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, .2),
+    0 0 22px rgba(79, 209, 255, .1),
+    inset 0 1px rgba(255, 255, 255, .48);
+}
+
+.primary-button:hover {
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, .24),
+    0 0 26px rgba(79, 209, 255, .16),
+    inset 0 1px rgba(255, 255, 255, .55);
+}
+
+.secondary-button {
+  border-color: rgba(198, 215, 226, .15);
+  background:
+    linear-gradient(145deg, rgba(21, 34, 48, .7), rgba(6, 13, 21, .82));
+  color: #e6eef3;
+}
+
+.secondary-button:hover {
+  border-color: rgba(79, 209, 255, .21);
+}
+
+.text-button {
+  color: var(--accent);
+}
+
+input:not([type=checkbox]):not([type=radio]),
+select,
+textarea {
+  border-color: rgba(165, 188, 202, .15);
+  background:
+    linear-gradient(180deg, rgba(4, 10, 17, .8), rgba(7, 14, 22, .62));
+  box-shadow:
+    inset 0 1px 6px rgba(0, 0, 0, .32),
+    inset 0 1px rgba(255, 255, 255, .025);
+}
+
+input:not([type=checkbox]):not([type=radio]):focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(79, 209, 255, .38);
+  box-shadow:
+    inset 0 1px 6px rgba(0, 0, 0, .28),
+    0 0 0 3px rgba(79, 209, 255, .08);
+}
+
+.form-field > label,
+.field > label,
+.form-label {
+  color: rgba(158, 184, 199, .62);
+}
+
+/* HUD information rail without turning every number neon. */
+.dashboard-signal-grid {
+  gap: 12px;
+}
+
+.dashboard-signal-card {
+  border-color: rgba(194, 214, 226, .13);
+  background:
+    linear-gradient(145deg, rgba(26, 41, 55, .44), rgba(7, 14, 22, .76)),
+    rgba(9, 17, 26, .76);
+}
+
+.dashboard-signal-card > span:first-child {
+  color: rgba(130, 169, 188, .62);
+}
+
+.dashboard-signal-card strong {
+  color: #f0f6fa;
+  text-shadow: 0 0 22px rgba(79, 209, 255, .055);
+}
+
+.dashboard-signal-card small {
+  color: rgba(156, 180, 193, .54);
+}
+
+.dashboard-signal-card.is-alert {
+  border-color: rgba(251, 113, 133, .24);
+}
+
+.dashboard-signal-progress {
+  background: rgba(158, 180, 193, .1);
+}
+
+.dashboard-signal-progress span {
+  background: linear-gradient(90deg, #4fd1ff, #8ce7ff);
+  box-shadow: 0 0 12px rgba(79, 209, 255, .14);
+}
+
+.amount-positive {
+  color: var(--state-success);
+}
+
+.amount-negative {
+  color: var(--state-danger);
+}
+
+.priority-badge.high {
+  color: #ff91a4;
+}
+
+.priority-badge.medium {
+  color: #f8c46c;
+}
+
+.priority-badge.low {
+  color: #63dc93;
+}
+
+.timeline-dot {
+  background: var(--accent);
+  box-shadow:
+    0 0 0 4px rgba(79, 209, 255, .07),
+    0 0 14px rgba(79, 209, 255, .18);
+}
+
+.schedule-item,
+.task-row,
+.upcoming-item,
+.dashboard-flexible-item,
+.attention-item {
+  border-top-color: rgba(181, 203, 216, .1);
+}
+
+.task-row:hover,
+.upcoming-item:hover,
+.dashboard-flexible-item:hover,
+.attention-item:hover {
+  background: linear-gradient(90deg, rgba(79, 209, 255, .045), transparent);
+}
+
+/* Feature Landscape stays MiD's navigation signature; Unreal enters through
+   depth, edge-light and material contrast instead of replacing the scene. */
+.feature-landscape {
+  border-color: rgba(196, 215, 227, .15);
+  background:
+    radial-gradient(circle at 68% 34%, rgba(79, 209, 255, .055), transparent 20%),
+    linear-gradient(180deg, rgba(9, 17, 26, .18), rgba(4, 10, 16, .6)),
+    rgba(5, 12, 18, .24);
+  box-shadow:
+    0 32px 84px rgba(0, 0, 0, .3),
+    inset 0 1px rgba(255, 255, 255, .075);
+}
+
+.feature-landscape::after {
+  background:
+    linear-gradient(rgba(185, 207, 220, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(185, 207, 220, .035) 1px, transparent 1px);
+}
+
+.feature-node {
+  border-color: rgba(202, 218, 229, .1);
+  background:
+    linear-gradient(145deg, rgba(22, 38, 51, .34), rgba(5, 12, 18, .56));
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, .05),
+    0 12px 24px rgba(0, 0, 0, .18);
+}
+
+.feature-node:hover {
+  border-color: rgba(79, 209, 255, .2);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, .08),
+    0 18px 32px rgba(0, 0, 0, .22),
+    0 0 20px rgba(79, 209, 255, .04);
+}
+
+.feature-node.is-active {
+  border-color: rgba(79, 209, 255, .26);
+  background:
+    linear-gradient(145deg, rgba(79, 209, 255, .11), rgba(6, 15, 24, .62));
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, .08),
+    0 18px 36px rgba(0, 0, 0, .24),
+    0 0 22px rgba(79, 209, 255, .07);
+}
+
+.feature-core {
+  border-color: rgba(79, 209, 255, .3);
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, .12), transparent 26%),
+    linear-gradient(145deg, rgba(79, 209, 255, .16), rgba(19, 38, 53, .42));
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, .12),
+    0 20px 48px rgba(0, 0, 0, .3),
+    0 0 30px rgba(79, 209, 255, .08);
+}
+
+.feature-scene-caption {
+  color: rgba(151, 180, 196, .5);
+}
+
+.feature-scene-caption strong {
+  color: rgba(214, 230, 239, .72);
+}
+
+/* Module terrain = one machine, different subsystem signatures. */
+.view-key[data-module] {
+  --module-accent: #4fd1ff;
+  --module-surface: rgba(13, 21, 31, .76);
+  --module-light: rgba(79, 209, 255, .035);
+  --module-surface-angle: 145deg;
+}
+
+.view-key[data-module="schedule"] {
+  --module-accent: #9b8cff;
+  --module-light: rgba(155, 140, 255, .035);
+}
+
+.view-key[data-module="tasks"] {
+  --module-accent: #4ade80;
+  --module-light: rgba(74, 222, 128, .03);
+}
+
+.view-key[data-module="finance"] {
+  --module-accent: #fbbf24;
+  --module-light: rgba(251, 191, 36, .03);
+}
+
+.view-key[data-module="social"] {
+  --module-accent: #fb7185;
+  --module-light: rgba(251, 113, 133, .028);
+}
+
+.view-key[data-module="assistant"] {
+  --module-accent: #67d9ff;
+  --module-light: rgba(103, 217, 255, .035);
+}
+
+.view-key[data-module="profile"] {
+  --module-accent: #c6d0d8;
+  --module-light: rgba(198, 208, 216, .025);
+}
+
+.view-key[data-module="insights"] {
+  --module-accent: #718bff;
+  --module-light: rgba(113, 139, 255, .03);
+}
+
+.view-key[data-module="habits"] {
+  --module-accent: #a8d86e;
+  --module-light: rgba(168, 216, 110, .03);
+}
+
+.view-key[data-module] .content-card,
+.view-key[data-module] .integration-panel,
+.view-key[data-module] .ai-shell-card,
+.view-key[data-module] .stat-card {
+  background:
+    linear-gradient(var(--module-surface-angle), var(--module-light), transparent 42%),
+    linear-gradient(145deg, rgba(25, 39, 52, .34), rgba(7, 14, 22, .72)),
+    var(--module-surface);
+  box-shadow:
+    var(--shadow-soft),
+    inset 0 1px rgba(255, 255, 255, .055),
+    0 1px rgba(255, 255, 255, .018);
+}
+
+.view-key[data-module] .section-kicker,
+.view-key[data-module] .card-meta {
+  color: color-mix(in srgb, var(--module-accent) 62%, #8194a1 38%);
+}
+
+.view-key[data-module] .timeline-dot {
+  background: var(--module-accent);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--module-accent) 10%, transparent),
+    0 0 14px color-mix(in srgb, var(--module-accent) 16%, transparent);
+}
+
+/* Living material interaction: one local catch-light, no global neon wash. */
+.content-card[data-ux-lit="true"],
+.glass-panel[data-ux-lit="true"],
+.stat-card[data-ux-lit="true"],
+.dashboard-signal-card[data-ux-lit="true"],
+.planner-shortcut[data-ux-lit="true"],
+.feature-node[data-ux-lit="true"] {
+  border-color: color-mix(in srgb, var(--module-accent, #4fd1ff) 26%, rgba(220, 231, 239, .12));
+  box-shadow:
+    0 22px 56px rgba(0, 0, 0, .3),
+    inset 0 1px rgba(255, 255, 255, .085),
+    0 0 0 1px color-mix(in srgb, var(--module-accent, #4fd1ff) 5%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content-card[data-ux-lit="true"],
+  .glass-panel[data-ux-lit="true"],
+  .stat-card[data-ux-lit="true"],
+  .dashboard-signal-card[data-ux-lit="true"],
+  .planner-shortcut[data-ux-lit="true"],
+  .feature-node[data-ux-lit="true"] {
+    box-shadow: inset 0 1px rgba(255, 255, 255, .06);
+  }
+}
