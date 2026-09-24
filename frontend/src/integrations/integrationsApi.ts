@@ -3,15 +3,20 @@ import { apiRequest } from '../lib/api'
 export interface IntegrationStatus {
   ai: {
     configured: boolean
+    state: 'READY' | 'NOT_CONFIGURED'
+    mode: 'workers-ai'
+    writeActions: 'explicit-confirmation-required'
   }
   telegram: {
     configured: boolean
+    state: 'NOT_CONFIGURED' | 'CONNECTABLE' | 'CONNECTED'
     connected: boolean
     connectedAt: string | null
     username: string | null
   }
   whatsapp: {
     configured: boolean
+    state: 'NOT_CONFIGURED' | 'CONNECTABLE' | 'CONNECTED'
     connected: boolean
     connectedAt: string | null
     displayName: string | null
@@ -19,7 +24,10 @@ export interface IntegrationStatus {
   }
   instagram: {
     configured: boolean
+    state: 'NOT_CONFIGURED' | 'DEPLOYMENT_ACCOUNT'
     mode: 'analytics-read-only'
+    scope: 'deployment'
+    connectable: false
   }
 }
 
