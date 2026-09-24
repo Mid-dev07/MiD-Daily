@@ -337,7 +337,6 @@ body {
   gap: 16px;
   background:
     linear-gradient(180deg, rgba(5,11,20,.94), rgba(5,11,20,.62) 72%, transparent);
-  backdrop-filter: none;
 }
 
 .topbar::before {
