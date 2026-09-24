@@ -44,7 +44,7 @@
 
 /* MiD-Daily — UNREAL VISIBLE TRANSFORMATION
    Purpose: make the product identity visibly Unreal-grade without WebGL,
-   persistent backdrop-filter, image backgrounds, or heavy runtime effects.
+   persistent blur layers, image backgrounds, or heavy runtime effects.
 */
 :root {
   --unreal-void: #050913;
