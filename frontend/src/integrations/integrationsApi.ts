@@ -24,10 +24,10 @@ export interface IntegrationStatus {
   }
   instagram: {
     configured: boolean
-    state: 'NOT_CONFIGURED' | 'DEPLOYMENT_ACCOUNT' | 'CONNECTED'
+    state: 'NOT_CONFIGURED' | 'DEPLOYMENT_ACCOUNT' | 'CONNECTABLE' | 'CONNECTED'
     mode: 'analytics-read-only'
     scope: 'deployment' | 'user'
-    connectable: false
+    connectable: boolean
   }
 }
 
@@ -55,4 +55,8 @@ export function disconnectTelegram() {
 
 export function disconnectWhatsApp() {
   return apiRequest<{ connected: boolean }>('/api/integrations/whatsapp/disconnect', { method: 'POST' })
+}
+
+export function startInstagramAuthentication() {
+  return apiRequest<{ authorizationUrl: string; expiresAt: string }>('/api/integrations/instagram/start', { method: 'POST' })
 }
