@@ -24,9 +24,9 @@ export interface IntegrationStatus {
   }
   instagram: {
     configured: boolean
-    state: 'NOT_CONFIGURED' | 'DEPLOYMENT_ACCOUNT'
+    state: 'NOT_CONFIGURED' | 'DEPLOYMENT_ACCOUNT' | 'CONNECTED'
     mode: 'analytics-read-only'
-    scope: 'deployment'
+    scope: 'deployment' | 'user'
     connectable: false
   }
 }
