@@ -105,6 +105,22 @@ if (!/\.view-key\[data-module/.test(uiSystem) || !/--module-surface-angle/.test(
 if (!/assistant-health-strip/.test(uiSystem)) {
   failures.push('Integration health strip styling is missing from the active UI system.')
 }
+const instagramViewSource = readFileSync(join(srcDir, 'features/social/SocialAnalyticsView.tsx'), 'utf8')
+const instagramApiSource = readFileSync(join(srcDir, 'integrations/instagramApi.ts'), 'utf8')
+const instagramServerSource = readFileSync(join(root, '../backend/src/server.ts'), 'utf8')
+const instagramOAuthSource = readFileSync(join(root, '../backend/src/integrations/instagramOAuth.ts'), 'utf8')
+if (!/startInstagramAuthentication/.test(instagramViewSource) || !/Connect Instagram/.test(instagramViewSource)) {
+  failures.push('Instagram must expose a user-facing Connect action when OAuth is available.')
+}
+if (!/\/api\/integrations\/instagram\/start/.test(instagramApiSource)) {
+  failures.push('Instagram Connect API contract is missing.')
+}
+if (!/\/auth\/instagram\/callback/.test(instagramServerSource) || !/handleInstagramStart/.test(instagramServerSource) || !/handleInstagramCallback/.test(instagramServerSource)) {
+  failures.push('Instagram OAuth server start/callback flow is missing.')
+}
+if (!/instagram_business_basic/.test(instagramOAuthSource) || !/instagram_business_manage_insights/.test(instagramOAuthSource)) {
+  failures.push('Instagram OAuth analytics scopes are missing.')
+}
 if (!/SIDEBAR_HIDDEN_STORAGE_KEY/.test(appSourceForInteraction) || !/setSidebarHidden/.test(appSourceForInteraction) || !/sidebarHidden/.test(appSourceForInteraction)) {
   failures.push('Workspace navigation visibility must remain user-controllable and persisted.')
 }
