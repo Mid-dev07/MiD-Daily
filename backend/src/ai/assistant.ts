@@ -3,7 +3,8 @@ import { createSchedule, listSchedule, type ScheduleRecord } from '../scheduleSt
 
 
 const WORKERS_AI_MODEL = '@cf/zai-org/glm-4.7-flash'
-const APP_TIMEZONE = process.env.APP_TIMEZONE ?? 'Asia/Jakarta'
+import { todayInAppTimeZone } from '../time.js'
+
 const MAX_TOOL_ROUNDS = 4
 const MAX_ITEMS = 20
 
@@ -229,14 +230,7 @@ export function buildAssistantTools(allowWrites: boolean) {
 }
 
 function todayInTimeZone() {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: APP_TIMEZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(new Date())
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
-  return values.year + '-' + values.month + '-' + values.day
+  return todayInAppTimeZone()
 }
 
 function assertString(value: unknown, field: string, max = 500) {
