@@ -19,7 +19,8 @@ import { toGoogleCalendarEventPayload } from '../../integrations/calendar/google
 import { getNotificationSupport, requestNotificationPermission, showNotification } from '../../integrations/notifications/browserNotification'
 import type { ScheduleDraft, ScheduleItem, ScheduleType } from './schedule.types'
 
-const getToday = () => new Intl.DateTimeFormat('sv-SE').format(new Date())
+import { APP_TIMEZONE, getToday as getAppToday } from '../../lib/dateTime'
+
 
 interface ScheduleViewProps {
   schedule: ScheduleItem[]
@@ -28,7 +29,7 @@ interface ScheduleViewProps {
 }
 
 export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: ScheduleViewProps) {
-  const [date, setDate] = useState(getToday)
+  const [date, setDate] = useState(() => getAppToday(APP_TIMEZONE))
   const [filter, setFilter] = useState<ScheduleType | 'ALL'>('ALL')
   const [now, setNow] = useState(() => new Date())
   const [formOpen, setFormOpen] = useState(false)
@@ -36,7 +37,7 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
   const [detailItem, setDetailItem] = useState<ScheduleItem>()
   const [notificationSupport, setNotificationSupport] = useState(getNotificationSupport)
 
-  const today = getToday()
+  const today = getAppToday(APP_TIMEZONE)
   const isToday = date === today
   const currentTimeLabel = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(now)
 
