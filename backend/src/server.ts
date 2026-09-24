@@ -1,7 +1,7 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto'
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
 import { createClient } from '@supabase/supabase-js'
-import { isAssistantConfigured, runAssistant } from './ai/index.js'
+import { executeAssistantProposals, isAssistantConfigured, runAssistant, type AssistantProposal } from './ai/index.js'
 import {
   deleteGoogleConnection,
   getGoogleConnection,
@@ -1749,6 +1749,39 @@ function handleAiStatus(req: IncomingMessage, res: ServerResponse) {
   sendJson(res, 200, { configured: isAssistantConfigured() })
 }
 
+async function handleAiProposalExecution(req: IncomingMessage, res: ServerResponse) {
+  const userId = await requireAuthenticatedUserId(req)
+  const body = await readRequestJson(req)
+  const proposalsValue = body.proposals
+
+  if (!Array.isArray(proposalsValue) || proposalsValue.length === 0 || proposalsValue.length > 10) {
+    throw httpError(400, 'AI proposals are invalid.')
+  }
+
+  const proposals = proposalsValue.map((value) => {
+    if (!value || typeof value !== 'object') throw httpError(400, 'AI proposal is invalid.')
+    const item = value as Record<string, unknown>
+    if (typeof item.tool !== 'string' || !item.tool.trim()) throw httpError(400, 'AI proposal tool is invalid.')
+    if (!item.arguments || typeof item.arguments !== 'object' || Array.isArray(item.arguments)) {
+      throw httpError(400, 'AI proposal arguments are invalid.')
+    }
+    return {
+      tool: item.tool.trim(),
+      arguments: item.arguments as Record<string, unknown>,
+    } satisfies AssistantProposal
+  })
+
+  try {
+    const result = await executeAssistantProposals(userId, proposals)
+    sendJson(res, 200, result)
+  } catch (error) {
+    const status = error instanceof Error && 'status' in error && typeof (error as { status?: unknown }).status === 'number'
+      ? Number((error as { status?: unknown }).status)
+      : 500
+    sendJson(res, status, { error: error instanceof Error ? error.message : 'AI action execution failed.' })
+  }
+}
+
 async function handleAiChat(req: IncomingMessage, res: ServerResponse) {
   const userId = await requireAuthenticatedUserId(req)
   const body = await readRequestJson(req)
@@ -1832,6 +1865,11 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
 
     if (req.method === 'POST' && url.pathname === '/api/ai/chat') {
       await handleAiChat(req, res)
+      return
+    }
+
+    if (req.method === 'POST' && url.pathname === '/api/ai/proposals/execute') {
+      await handleAiProposalExecution(req, res)
       return
     }
 
