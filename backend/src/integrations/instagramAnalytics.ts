@@ -3,6 +3,13 @@ const API_VERSION = process.env.INSTAGRAM_GRAPH_VERSION ?? ''
 const ACCOUNT_ID = process.env.INSTAGRAM_ACCOUNT_ID ?? ''
 const HOST = process.env.INSTAGRAM_GRAPH_HOST ?? 'https://graph.instagram.com'
 
+export interface InstagramCredentials {
+  accessToken: string
+  apiVersion: string
+  accountId: string
+  host: string
+}
+
 export interface InstagramInsightPoint {
   name: string
   values?: Array<{ value: number; end_time?: string }>
@@ -31,18 +38,24 @@ async function getJson<T>(path: string, query: Record<string, string>) {
   return data
 }
 
-export async function getAccountProfile() {
-  return getJson<InstagramAccountProfile>(ACCOUNT_ID, {
+export async function getAccountProfile(credentials = environmentCredentials()) {
+  if (!credentials) throw new Error('Instagram Analytics is not configured.')
+  return getJson<InstagramAccountProfile>(credentials, credentials.accountId, {
     fields: 'id,username,name,followers_count,media_count',
   })
 }
 
-export async function getAccountInsights() {
-  return getJson<{ data?: InstagramInsightPoint[] }>(ACCOUNT_ID + '/insights', {
+export async function getAccountInsights(credentials = environmentCredentials()) {
+  if (!credentials) throw new Error('Instagram Analytics is not configured.')
+  return getJson<{ data?: InstagramInsightPoint[] }>(credentials, credentials.accountId + '/insights', {
     metric: 'views,reach,accounts_engaged,total_interactions',
     metric_type: 'total_value',
     period: 'day',
   })
+}
+
+export function getEnvironmentCredentials() {
+  return environmentCredentials()
 }
 
 export function normalizeAccountInsights(profile: InstagramAccountProfile, insights: InstagramInsightPoint[]) {
