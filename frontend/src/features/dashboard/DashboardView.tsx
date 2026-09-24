@@ -2,8 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import type { FinanceEntry, Task, View } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
 import { scheduleOccursOnDate, shiftDate } from '../schedule/schedule.date'
-import { currency } from '../../lib/format'
-import { formatDate } from '../../lib/dateTime'
+import { currency, formatDate } from '../../lib/format'
 import { FeatureLandscape } from './components/FeatureLandscape'
 
 interface DashboardViewProps {
