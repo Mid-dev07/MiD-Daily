@@ -59,6 +59,11 @@ export type AssistantMessage = {
   content: string
 }
 
+export type AssistantProposal = {
+  tool: string
+  arguments: Record<string, unknown>
+}
+
 const baseTools = [
   {
     type: 'function' as const,
@@ -716,13 +721,17 @@ function workersAiTools(allowWrites: boolean) {
   }))
 }
 
+const writeToolNames = new Set(writeTools.map((tool) => tool.name))
+
 async function runWorkersAi(
   ai: WorkersAiBinding,
   userId: string,
   messages: AssistantMessage[],
   allowWrites: boolean,
+  executionMode: 'preview' | 'execute',
 ) {
-  const actions: Array<{ tool: string; ok: boolean }> = []
+  const actions: Array<{ tool: string; ok: boolean; preview?: boolean }> = []
+  const proposals: AssistantProposal[] = []
   const systemMessage = [
     'You are MiD-Daily Assistant.',
     'Use only the tools provided. Never claim data that was not returned by a tool.',
@@ -732,7 +741,9 @@ async function runWorkersAi(
     'When creating an activity, inspect the relevant schedule range first so you do not silently create a time conflict.',
     'Do not claim a time slot is free unless the schedule range tool was checked for that date.',
     allowWrites
-      ? 'Write actions are enabled because the user explicitly allowed actions. Only create data when the user explicitly requests it.'
+      ? executionMode === 'preview'
+        ? 'Write actions are available only as proposals in this response. Never execute a write action during preview. Clearly describe proposed changes and wait for explicit confirmation.'
+        : 'Write actions are enabled because the user explicitly confirmed them. Only create data when the user explicitly requests it.'
       : 'Write actions are disabled. Do not create or modify anything.',
     'Answer in the same language as the user when practical.',
   ].join(' ')
@@ -758,6 +769,7 @@ async function runWorkersAi(
       return {
         text: assistantResponseText(rawResponse) || 'I could not produce a response.',
         actions,
+        proposals,
         model: WORKERS_AI_MODEL,
       }
     }
@@ -776,6 +788,18 @@ async function runWorkersAi(
     })
 
     for (const call of calls) {
+      if (executionMode === 'preview' && writeToolNames.has(call.name)) {
+        proposals.push({ tool: call.name, arguments: call.arguments })
+        actions.push({ tool: call.name, ok: true, preview: true })
+        modelMessages.push({
+          role: 'tool',
+          tool_call_id: call.id,
+          name: call.name,
+          content: JSON.stringify({ preview: true, executed: false, proposal: { tool: call.name, arguments: call.arguments } }),
+        })
+        continue
+      }
+
       try {
         const result = await executeTool(userId, call.name, JSON.stringify(call.arguments))
         actions.push({ tool: call.name, ok: true })
@@ -809,6 +833,7 @@ export async function runAssistant(
   userId: string,
   messages: AssistantMessage[],
   allowWrites: boolean,
+  executionMode: 'preview' | 'execute' = 'preview',
 ) {
   if (!assistantAi) throw new Error('AI integration is not configured.')
 
@@ -819,5 +844,24 @@ export async function runAssistant(
       content: assertString(message.content, 'Message', 4000),
     }))
 
-  return runWorkersAi(assistantAi, userId, sanitized, allowWrites)
+  return runWorkersAi(assistantAi, userId, sanitized, allowWrites, executionMode)
+}
+
+
+export async function executeAssistantProposals(
+  userId: string,
+  proposals: AssistantProposal[],
+) {
+  if (!proposals.length) return { actions: [] as Array<{ tool: string; ok: boolean }> }
+  if (proposals.length > 10) throw new Error('Too many AI actions were proposed.')
+
+  const actions: Array<{ tool: string; ok: boolean }> = []
+  for (const proposal of proposals) {
+    if (!writeToolNames.has(proposal.tool)) throw new Error('AI proposal contains a read-only tool.')
+    const result = await executeTool(userId, proposal.tool, JSON.stringify(proposal.arguments))
+    actions.push({ tool: proposal.tool, ok: true })
+    void result
+  }
+
+  return { actions }
 }
