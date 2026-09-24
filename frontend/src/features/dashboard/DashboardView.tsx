@@ -2,7 +2,8 @@ import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import type { FinanceEntry, Task, View } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
 import { scheduleOccursOnDate, shiftDate } from '../schedule/schedule.date'
-import { currency, formatDate } from '../../lib/format'
+import { currency } from '../../lib/format'
+import { formatDate } from '../../lib/dateTime'
 import { FeatureLandscape } from './components/FeatureLandscape'
 
 interface DashboardViewProps {
@@ -15,14 +16,13 @@ interface DashboardViewProps {
 }
 
 const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
-const getToday = (timezone: string) => new Intl.DateTimeFormat('sv-SE', { timeZone: timezone }).format(new Date())
 
 const QuickCapture = lazy(() => import('./components/QuickCapture').then((module) => ({ default: module.QuickCapture })))
 const FocusMode = lazy(() => import('./components/FocusMode').then((module) => ({ default: module.FocusMode })))
 
 export function DashboardView({ tasks, schedule, finance, onToggleTask, onNavigate, timezone = LOCAL_TIMEZONE }: DashboardViewProps) {
   const [now, setNow] = useState(() => new Date())
-  const today = getToday(timezone)
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: timezone }).format(new Date())
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 60_000)
