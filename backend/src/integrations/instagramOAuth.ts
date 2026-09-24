@@ -50,19 +50,24 @@ export async function exchangeInstagramCode(code: string) {
   })
   const data = await readJson(response)
 
-  if (typeof data.access_token !== 'string' || typeof data.user_id !== 'string') {
+  const accountId = typeof data.user_id === 'string'
+    ? data.user_id
+    : typeof data.user_id === 'number'
+      ? String(data.user_id)
+      : ''
+  if (typeof data.access_token !== 'string' || !accountId) {
     throw new Error('Instagram OAuth returned an invalid access token response.')
   }
 
   return {
     accessToken: data.access_token,
-    accountId: data.user_id,
+    accountId,
     expiresIn: typeof data.expires_in === 'number' ? data.expires_in : 3600,
   }
 }
 
 export async function exchangeForLongLivedInstagramToken(shortLivedToken: string) {
-  const url = new URL(GRAPH_HOST + '/' + API_VERSION.replace(/^\/+/, '') + '/access_token')
+  const url = new URL(GRAPH_HOST + '/access_token')
   url.searchParams.set('grant_type', 'ig_exchange_token')
   url.searchParams.set('client_secret', CLIENT_SECRET)
   url.searchParams.set('access_token', shortLivedToken)
@@ -88,4 +93,25 @@ export function instagramGraphBase() {
 
 export function instagramGraphApiVersion() {
   return API_VERSION
+}
+
+
+export async function refreshLongLivedInstagramToken(accessToken: string) {
+  const url = new URL(GRAPH_HOST + '/refresh_access_token')
+  url.searchParams.set('grant_type', 'ig_refresh_token')
+  url.searchParams.set('access_token', accessToken)
+
+  const response = await fetch(url, {
+    headers: { Accept: 'application/json' },
+  })
+  const data = await readJson(response)
+
+  if (typeof data.access_token !== 'string') {
+    throw new Error('Instagram token refresh returned an invalid response.')
+  }
+
+  return {
+    accessToken: data.access_token,
+    expiresIn: typeof data.expires_in === 'number' ? data.expires_in : 0,
+  }
 }
