@@ -24,11 +24,22 @@ export interface InstagramAccountProfile {
   media_count?: number
 }
 
-async function getJson<T>(path: string, query: Record<string, string>) {
-  if (!ACCESS_TOKEN || !API_VERSION || !ACCOUNT_ID) throw new Error('Instagram Analytics is not configured.')
+function environmentCredentials(): InstagramCredentials | null {
+  if (!ACCESS_TOKEN || !API_VERSION || !ACCOUNT_ID) return null
+  return {
+    accessToken: ACCESS_TOKEN,
+    apiVersion: API_VERSION,
+    accountId: ACCOUNT_ID,
+    host: HOST,
+  }
+}
 
-  const url = new URL(HOST + '/' + API_VERSION.replace(/^\/+/, '') + '/' + path.replace(/^\/+/, ''))
-  Object.entries({ ...query, access_token: ACCESS_TOKEN }).forEach(([key, value]) => url.searchParams.set(key, value))
+async function getJson<T>(credentials: InstagramCredentials, path: string, query: Record<string, string>) {
+  const url = new URL(
+    credentials.host + '/' + credentials.apiVersion.replace(/^\/+/, '') + '/' + path.replace(/^\/+/, ''),
+  )
+  Object.entries({ ...query, access_token: credentials.accessToken })
+    .forEach(([key, value]) => url.searchParams.set(key, value))
 
   const response = await fetch(url, {
     headers: { Accept: 'application/json' },
@@ -79,5 +90,5 @@ export function normalizeAccountInsights(profile: InstagramAccountProfile, insig
 }
 
 export function isInstagramAnalyticsConfigured() {
-  return Boolean(ACCESS_TOKEN && API_VERSION && ACCOUNT_ID)
+  return Boolean(environmentCredentials())
 }
