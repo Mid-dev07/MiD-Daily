@@ -407,17 +407,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     rgba(8, 17, 11, .72);
   box-shadow: var(--shadow-soft), inset 0 1px 0 var(--module-accent), 0 1px 0 rgba(255,255,255,.025);
 }
-.view-key[data-module] .card-heading:after,
-.view-key[data-module] .page-intro:after {
-  content: "";
-  display: block;
-  width: 32px;
-  height: 4px;
-  margin-top: 16px;
-  border-radius: 4px;
-  background: linear-gradient(90deg, var(--module-accent), transparent);
-  opacity: .75;
-}
 .assistant-health-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
