@@ -452,3 +452,75 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     grid-template-columns: 1fr;
   }
 }
+
+
+.ai-proposal-panel {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid rgba(231, 223, 183, .18);
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, rgba(224, 209, 164, .055), rgba(6, 14, 9, .44)),
+    rgba(7, 15, 9, .44);
+  box-shadow: inset 0 1px rgba(255, 248, 220, .07), 0 16px 36px rgba(0,0,0,.18);
+}
+.ai-proposal-heading,
+.ai-proposal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.ai-proposal-heading > div {
+  display: grid;
+  gap: 4px;
+}
+.ai-proposal-heading strong {
+  font-size: 12px;
+}
+.ai-proposal-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+.ai-proposal-item {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  min-height: 56px;
+  padding: 12px;
+  border: 1px solid rgba(233, 241, 221, .08);
+  border-radius: 12px;
+  background: rgba(2, 8, 5, .28);
+}
+.ai-proposal-item > span {
+  color: rgba(210, 225, 180, .48);
+  font: 9px/1 var(--font-mono);
+}
+.ai-proposal-item > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.ai-proposal-item small {
+  color: rgba(220, 231, 210, .46);
+  font-size: 9px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ai-proposal-actions {
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+@media (max-width: 560px) {
+  .ai-proposal-heading,
+  .ai-proposal-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .ai-proposal-actions > * {
+    width: 100%;
+  }
+}
