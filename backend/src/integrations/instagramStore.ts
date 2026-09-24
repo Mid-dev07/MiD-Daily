@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto'
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto'
 
 const SUPABASE_URL = process.env.SUPABASE_URL ?? ''
 const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY ?? ''
@@ -108,4 +108,38 @@ export async function deleteInstagramConnectionByUserId(userId: string) {
 
 export function isInstagramConnectionPersistenceConfigured() {
   return Boolean(SUPABASE_URL && SUPABASE_SECRET_KEY)
+}
+
+
+function hashState(value: string) {
+  return createHash('sha256').update(value, 'utf8').digest('hex')
+}
+
+export async function createInstagramOAuthState(userId: string) {
+  const state = randomBytes(24).toString('base64url')
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
+
+  await db().from('instagram_oauth_states').delete().eq('user_id', userId)
+
+  const { error } = await db().from('instagram_oauth_states').insert({
+    state_hash: hashState(state),
+    user_id: userId,
+    expires_at: expiresAt,
+  })
+  if (error) throw new Error('Instagram OAuth state creation failed: ' + error.message)
+
+  return { state, expiresAt }
+}
+
+export async function consumeInstagramOAuthState(state: string) {
+  const { data, error } = await db()
+    .from('instagram_oauth_states')
+    .delete()
+    .eq('state_hash', hashState(state))
+    .gt('expires_at', new Date().toISOString())
+    .select('user_id')
+    .maybeSingle()
+
+  if (error) throw new Error('Instagram OAuth state validation failed: ' + error.message)
+  return data?.user_id ? String(data.user_id) : null
 }
