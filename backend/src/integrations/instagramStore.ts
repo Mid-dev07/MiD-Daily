@@ -143,3 +143,57 @@ export async function consumeInstagramOAuthState(state: string) {
   if (error) throw new Error('Instagram OAuth state validation failed: ' + error.message)
   return data?.user_id ? String(data.user_id) : null
 }
+
+
+export interface InstagramRefreshCandidate {
+  userId: string
+  providerAccountId: string
+  encryptedAccessToken: string
+  tokenExpiresAt: string | null
+}
+
+export async function listInstagramConnectionsForRefresh(threshold: Date) {
+  const { data, error } = await db()
+    .from('instagram_connections')
+    .select('user_id,provider_account_id,encrypted_access_token,token_expires_at,status')
+    .eq('status', 'connected')
+    .not('token_expires_at', 'is', null)
+    .lte('token_expires_at', threshold.toISOString())
+
+  if (error) throw new Error('Instagram refresh candidates lookup failed: ' + error.message)
+  return (data ?? []).map((row) => ({
+    userId: String(row.user_id),
+    providerAccountId: String(row.provider_account_id),
+    encryptedAccessToken: String(row.encrypted_access_token),
+    tokenExpiresAt: typeof row.token_expires_at === 'string' ? row.token_expires_at : null,
+  })) as InstagramRefreshCandidate[]
+}
+
+export async function updateInstagramRefreshedToken(
+  userId: string,
+  accessToken: string,
+  tokenExpiresAt: string | null,
+) {
+  const { error } = await db()
+    .from('instagram_connections')
+    .update({
+      encrypted_access_token: encryptToken(userId, accessToken),
+      token_expires_at: tokenExpiresAt,
+      status: 'connected',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId)
+
+  if (error) throw new Error('Instagram refreshed token save failed: ' + error.message)
+}
+
+export async function markInstagramConnectionDegraded(userId: string) {
+  await db()
+    .from('instagram_connections')
+    .update({ status: 'degraded', updated_at: new Date().toISOString() })
+    .eq('user_id', userId)
+}
+
+export function decryptInstagramTokenForRefresh(userId: string, encryptedToken: string) {
+  return decryptToken(userId, encryptedToken)
+}
