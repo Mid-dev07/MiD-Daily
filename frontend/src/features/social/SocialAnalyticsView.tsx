@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getInstagramInsights, type InstagramInsightsResponse } from '../../integrations/instagramApi'
+import { disconnectInstagram, getInstagramInsights, type InstagramInsightsResponse } from '../../integrations/instagramApi'
 
 function formatNumber(value: number | undefined) {
   return typeof value === 'number' ? new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(value) : '—'
@@ -9,6 +9,7 @@ export function SocialAnalyticsView() {
   const [data, setData] = useState<InstagramInsightsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [disconnecting, setDisconnecting] = useState(false)
 
   const refresh = async () => {
     setLoading(true)
@@ -27,6 +28,20 @@ export function SocialAnalyticsView() {
     void refresh()
   }, [])
 
+  const handleDisconnect = async () => {
+    if (!window.confirm('Disconnect Instagram from MiD-Daily?')) return
+    setDisconnecting(true)
+    setError('')
+    try {
+      await disconnectInstagram()
+      await refresh()
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Unable to disconnect Instagram.')
+    } finally {
+      setDisconnecting(false)
+    }
+  }
+
   return (
     <section className="workspace page-enter">
       <div className="page-intro">
@@ -44,8 +59,13 @@ export function SocialAnalyticsView() {
             <h3>{data?.username ? '@' + data.username : 'Professional account analytics'}</h3>
           </div>
           <div className="integration-actions">
-            <span className="integration-badge">{loading ? 'CHECKING' : data ? 'LIVE READ' : 'SETUP NEEDED'}</span>
-            <button className="text-button" type="button" disabled={loading} onClick={() => void refresh()}>
+            <span className="integration-badge">{loading ? 'CHECKING' : data ? (data.scope === 'user' ? 'CONNECTED' : 'DEPLOYMENT READ') : 'SETUP NEEDED'}</span>
+            {data?.scope === 'user' && (
+              <button className="text-button danger" type="button" disabled={loading || disconnecting} onClick={() => void handleDisconnect()}>
+                {disconnecting ? 'Disconnecting…' : 'Disconnect'}
+              </button>
+            )}
+            <button className="text-button" type="button" disabled={loading || disconnecting} onClick={() => void refresh()}>
               {loading ? 'Checking…' : 'Refresh'}
             </button>
           </div>
