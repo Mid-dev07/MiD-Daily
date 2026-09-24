@@ -333,7 +333,40 @@ create policy "reminder_dispatches_deny_client"
   on public.reminder_dispatches for all to anon, authenticated
   using (false) with check (false);
 
--- 9) Planner modes + Finance budgets
+-- 9) Per-user Instagram connections
+create table if not exists public.instagram_connections (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  provider_account_id text not null,
+  username text,
+  encrypted_access_token text not null,
+  token_expires_at timestamptz,
+  connected_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  status text not null default 'connected'
+    check (status in ('connected','degraded','revoked'))
+);
+
+create unique index if not exists instagram_connections_provider_account_idx
+  on public.instagram_connections (provider_account_id);
+
+create index if not exists instagram_connections_updated_at_idx
+  on public.instagram_connections (updated_at desc);
+
+alter table public.instagram_connections enable row level security;
+revoke all on table public.instagram_connections from anon, authenticated;
+grant all on table public.instagram_connections to service_role;
+
+drop policy if exists "instagram_connections_deny_client" on public.instagram_connections;
+create policy "instagram_connections_deny_client"
+  on public.instagram_connections for all to anon, authenticated
+  using (false) with check (false);
+
+drop trigger if exists instagram_connections_set_updated_at on public.instagram_connections;
+create trigger instagram_connections_set_updated_at
+  before update on public.instagram_connections
+  for each row execute function public.set_updated_at();
+
+-- 10) Planner modes + Finance budgets
 alter table public.schedule_items
   add column if not exists activity_mode text not null default 'ONE_TIME',
   add column if not exists target_count integer,
@@ -444,7 +477,7 @@ create trigger finance_budgets_set_updated_at
   before update on public.finance_budgets
   for each row execute function public.set_updated_at();
 
--- 10) Realtime publication for authenticated workspace sync.
+-- 11) Realtime publication for authenticated workspace sync.
 do $$
 begin
   if not exists (
