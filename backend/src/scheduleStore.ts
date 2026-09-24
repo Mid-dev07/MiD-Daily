@@ -65,7 +65,7 @@ function fromRow(row: Record<string, unknown>): ScheduleRecord {
 
 const columns = 'id,title,type,activity_mode,event_date,start_time,end_time,location,notes,reminder_enabled,reminder_offset,recurrence,target_count,target_period,duration_minutes,preferred_start_time,preferred_end_time,activity_deadline,google_calendar'
 
-function normalizeScheduleWrite(item: Omit<ScheduleRecord, 'id'> | Partial<Omit<ScheduleRecord, 'id'>>) {
+export function normalizeScheduleWrite(item: Omit<ScheduleRecord, 'id'> | Partial<Omit<ScheduleRecord, 'id'>>) {
   const activityMode = item.activityMode ?? 'ONE_TIME'
   const flexible = activityMode === 'FLEXIBLE'
   return {
