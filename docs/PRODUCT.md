@@ -37,9 +37,9 @@ The roadmap is complete for the current product scope. Provider-specific setup a
 
 ## Deferred / operational boundaries
 - WhatsApp remains a separately configured provider; the adapter/foundation exists, but production certification depends on external Meta credentials, permissions, webhook configuration, and review state.
-- Instagram analytics remains an optional read-only foundation; live metrics depend on a Professional account and current provider permissions.
+- Instagram analytics is a read-only workspace. User-scoped Connect uses Business Login OAuth when configured; a deployment-scoped fallback remains supported for legacy deployments.
 - Google Calendar two-way sync and calendar selection remain future work because they require external-change detection, conflict resolution, and additional account UX.
-- Credentialed end-user acceptance flows (email recovery, Google OAuth, Telegram/Calendar consent) require a real interactive test session and are not represented as completed solely from automated CI evidence.
+- Credentialed end-user acceptance flows (email recovery, Google OAuth, Telegram/Calendar consent, Instagram OAuth consent) require a real interactive provider session and are not represented as completed solely from automated CI evidence.
 
 ## Product principles
 1. Core data remains user-scoped.
