@@ -127,7 +127,6 @@
 /* Unreal render-core tokens — visual behavior, not product semantics. */
 :root {
   --engine-key-angle: 145deg;
-  --engine-tilt-max: 1.25deg;
   --engine-specular-radius: 260px;
   --engine-specular-strength: .16;
   --engine-depth-near: 2px;
