@@ -395,6 +395,32 @@ if (!/uniforms\.wetness/.test(materialWorldSource) || !/gl\.uniform1f\(uniforms\
   failures.push('Environmental wetness must reach the WebGL material shader.')
 }
 
+
+const lightingWorldSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
+for (const contract of [
+  'uniform float uLightWarmth;',
+  'uniform float uSkyCoolness;',
+  'uniform float uAirDensity;',
+  'vec3 skyFill',
+  'vec3 groundFill',
+  'vec3 sunColor',
+  'float atmosphericFade',
+  'const lightWarmth =',
+  'const skyCoolness =',
+  'const airDensity =',
+  'uniforms.lightWarmth',
+  'uniforms.skyCoolness',
+  'uniforms.airDensity',
+]) {
+  if (!lightingWorldSource.includes(contract)) failures.push('Lighting/atmosphere v1 contract missing: ' + contract)
+}
+if (!/environmentLightDirection/.test(lightingWorldSource) || !/uniforms\.light, lightDirection/.test(lightingWorldSource)) {
+  failures.push('Lighting/atmosphere v1 must retain solar direction as the primary directional light input.')
+}
+if (/uTime|timestamp * 0\.001|Math\.sin\(t/.test(lightingWorldSource)) {
+  failures.push('Lighting/atmosphere v1 must remain event/state driven with no perpetual time animation.')
+}
+
 const spatialStyles = join(srcDir, 'styles/spatial-composition.css')
 if (!existsSync(spatialStyles)) {
   failures.push('Spatial workspace composition stylesheet is missing.')

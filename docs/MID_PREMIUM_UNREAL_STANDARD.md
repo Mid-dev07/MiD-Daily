@@ -639,3 +639,19 @@ Grounding:
 - this is an approximation, not a substitute for a full shadow map.
 
 Material realism is successful when terrain, stone, rock, moss, and wet surfaces can be distinguished from their light response—not merely from their base color.
+
+
+## 21 — Lighting & Atmospheric Depth Standard v1
+
+Environmental lighting must communicate the actual state of the MiD place without requiring a post-processing stack.
+
+The spatial renderer uses the existing astronomical light direction plus a bounded material-light model:
+- warm/cool key-light color follows the environment light warmth state;
+- sky fill stays cooler and vertically oriented, while ground fill remains subdued and warmer near warm daylight;
+- directional light remains dominant over ambient fill so forms keep readable shape;
+- atmospheric density lightly reduces contrast with distance rather than applying a visible fog effect over the whole scene;
+- material, wetness, and lighting are separate concerns but compose in the same shader pass to avoid extra render passes.
+
+The lighting model is an approximation appropriate to native WebGL2 and the existing performance target. It is not intended to simulate a full physically based renderer.
+
+Quality target: dawn/golden-hour should produce restrained warm directional light, cloudy/rain conditions should remain cooler and flatter, and night should rely on cool ambient structure with minimal emissive support.
