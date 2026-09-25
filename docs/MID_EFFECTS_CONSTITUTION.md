@@ -51,6 +51,9 @@ After a user action, the UI should show the resulting state change through data,
 ### Ambient Response
 The living environment may change slowly based on actual time, weather, workload, or module state. The spatial world may also adjust light intensity and camera response, but never continuously perform for the user.
 
+### Biophilic Spatial Language
+Nature is a mood anchor, not decoration. Natural cues may appear through terrain, stone, moss, foliage silhouettes, fog, sky, and warm directional light. These cues should establish calm and spatial belonging while remaining subordinate to product information.
+
 ### Spatial Connection
 Related workspace areas may expose temporary visual relationships through proximity, light, line, or shared emphasis.
 
