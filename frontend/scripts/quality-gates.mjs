@@ -24,6 +24,18 @@ const experienceSystem = readFileSync(join(srcDir, 'styles/experience.css'), 'ut
 const tokens = readFileSync(join(srcDir, 'styles/tokens.css'), 'utf8')
 const dashboard = readFileSync(join(srcDir, 'features/dashboard/DashboardView.tsx'), 'utf8')
 const featureLandscape = readFileSync(join(srcDir, 'features/dashboard/components/FeatureLandscape.tsx'), 'utf8')
+const workspaceHeaderPath = join(srcDir, 'components/ui/WorkspaceHeader.tsx')
+const workspaceHeaderSource = existsSync(workspaceHeaderPath) ? readFileSync(workspaceHeaderPath, 'utf8') : ''
+const convergedWorkspaceFiles = [
+  'features/schedule/ScheduleView.tsx',
+  'features/tasks/TasksView.tsx',
+  'features/finance/FinanceView.tsx',
+  'features/social/SocialAnalyticsView.tsx',
+  'features/ai/AssistantView.tsx',
+  'features/profile/ProfileView.tsx',
+  'features/insights/InsightsView.tsx',
+  'features/habits/HabitsView.tsx',
+]
 const modalCandidates = tsxFiles.filter((file) => /role="dialog"[\s\S]{0,240}aria-modal="true"/.test(readFileSync(file, 'utf8')))
 const mainSource = readFileSync(join(srcDir, 'main.tsx'), 'utf8')
 const environmentScene = readFileSync(join(srcDir, 'environment/EnvironmentScene.tsx'), 'utf8')
@@ -119,6 +131,15 @@ if (/environment-photograph/.test(uiSystem)) {
 }
 if (!/feature-landscape/.test(featureLandscape) || !/onNavigate/.test(featureLandscape)) {
   failures.push('Feature Landscape field guide must remain available as a real navigation surface.')
+}
+if (!existsSync(workspaceHeaderPath) || !/WorkspaceHeader/.test(workspaceHeaderSource) || !/workspace-header/.test(experienceSystem)) {
+  failures.push('Shared WorkspaceHeader identity layer is missing from the active UI system.')
+}
+for (const relative of convergedWorkspaceFiles) {
+  const source = readFileSync(join(srcDir, relative), 'utf8')
+  if (!/WorkspaceHeader/.test(source) || !/index="/.test(source)) {
+    failures.push('Workspace module header convergence missing from: ' + relative)
+  }
 }
 if (!/WORKSPACE COMPASS/.test(featureLandscape) || !/feature-compass-status/.test(featureLandscape)) {
   failures.push('Workspace Compass must expose current-location context, not only visual navigation.')
