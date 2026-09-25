@@ -1,6 +1,8 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
+const operatingStandardPath = join(root, '../docs/MID_PREMIUM_UNREAL_STANDARD.md')
+if (!existsSync(operatingStandardPath)) failures.push('Premium Unreal operating standard document is missing.')
 const root = new URL('..', import.meta.url).pathname
 const srcDir = join(root, 'src')
 
