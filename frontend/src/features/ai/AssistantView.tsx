@@ -209,7 +209,7 @@ export function AssistantView() {
             ) : integrations && <button className="secondary-button" type="button" onClick={() => window.open('https://t.me/BotFather', '_blank', 'noopener,noreferrer')}>Open setup</button>}
           </article>
 
-          <article className="assistant-channel-card">
+          <article className="assistant-channel-card" data-spatial-role="instrument">
             <div className="assistant-channel-copy">
               <span className="integration-label">WhatsApp</span>
               <strong>{whatsapp.title}</strong>
@@ -229,7 +229,7 @@ export function AssistantView() {
         </div>
       </section>
 
-      <section className="content-card planner-shortcuts-card">
+      <section className="content-card planner-shortcuts-card" data-spatial-role="supporting">
         <div className="card-heading">
           <div>
             <span className="section-kicker">PLANNER</span>
@@ -253,7 +253,7 @@ export function AssistantView() {
         </div>
       </section>
 
-      <section className="content-card ai-shell-card">
+      <section className="content-card ai-shell-card" data-spatial-role="focus">
         <div className="ai-toolbar">
           <label className="ai-action-toggle">
             <input
