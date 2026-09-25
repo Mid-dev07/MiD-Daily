@@ -453,7 +453,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         gl.uniformMatrix4fv(uniforms.projection, false, projection)
         gl.uniformMatrix4fv(uniforms.view, false, view)
         gl.uniform3f(uniforms.camera, camera[0], camera[1], camera[2])
-        gl.uniform3f(uniforms.light, DEFAULT_LIGHT_DIRECTION[0], DEFAULT_LIGHT_DIRECTION[1], DEFAULT_LIGHT_DIRECTION[2])
+        gl.uniform3f(uniforms.light, lightDirection[0], lightDirection[1], lightDirection[2])
         gl.uniform1f(uniforms.intensity, intensity)
         gl.uniform1f(uniforms.time, reduceMotion.matches ? 0 : t)
 
