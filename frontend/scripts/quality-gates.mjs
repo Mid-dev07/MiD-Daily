@@ -123,6 +123,12 @@ if (!/feature-landscape/.test(featureLandscape) || !/onNavigate/.test(featureLan
 if (!/WORKSPACE COMPASS/.test(featureLandscape) || !/feature-compass-status/.test(featureLandscape)) {
   failures.push('Workspace Compass must expose current-location context, not only visual navigation.')
 }
+if (!/buildCompassState/.test(featureLandscape) || !/data-compass-target/.test(featureLandscape) || !/feature-core-needle/.test(featureLandscape)) {
+  failures.push('Daily Compass must remain a state-driven directional surface with a live target and navigation action.')
+}
+if (!/tasks=\{tasks\}/.test(dashboard) || !/schedule=\{schedule\}/.test(dashboard) || !/finance=\{finance\}/.test(dashboard) || !/now=\{now\}/.test(dashboard)) {
+  failures.push('Dashboard must provide live daily context to the Daily Compass.')
+}
 for (const position of ['feature-node--n', 'feature-node--ne', 'feature-node--e', 'feature-node--se', 'feature-node--s', 'feature-node--sw', 'feature-node--w', 'feature-node--nw']) {
   if (!uiSystem.includes(position)) failures.push('Workspace Compass is missing positional CSS: ' + position)
 }

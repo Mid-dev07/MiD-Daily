@@ -303,7 +303,15 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
         <QuickCapture />
       </Suspense>
 
-      <FeatureLandscape activeView="dashboard" onNavigate={onNavigate} />
+      <FeatureLandscape
+        activeView="dashboard"
+        onNavigate={onNavigate}
+        tasks={tasks}
+        schedule={schedule}
+        finance={finance}
+        now={now}
+        timezone={timezone}
+      />
 
       <details className="dashboard-secondary-details">
         <summary><span>More context</span><small>Upcoming, flexible plans, and attention details</small><b>+</b></summary>
