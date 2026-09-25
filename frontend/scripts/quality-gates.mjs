@@ -138,6 +138,9 @@ if (/\.feature-landscape\s*\{[^}]*display:\s*none\s*!important/.test(uiSystem) |
 if (!/FeatureLandscape/.test(dashboard) || !/<FeatureLandscape/.test(dashboard)) {
   failures.push('Dashboard must expose the spatial workspace compass as a live navigation surface.')
 }
+if (!/WorkspaceContextRail/.test(appSourceForInteraction) || !/activeView !== 'dashboard'/.test(appSourceForInteraction) || !/workspace-context-rail/.test(experienceSystem)) {
+  failures.push('Non-Today workspaces must retain a shared live context bridge back to schedule, tasks, and finance.')
+}
 if (!/dashboard-command-deck/.test(dashboard) || !/dashboard-hero-aside/.test(dashboard) || !/dashboard-live/.test(dashboard)) {
   failures.push('Dashboard visual redesign contract is missing the command deck, live status rail, or hero shell.')
 }
