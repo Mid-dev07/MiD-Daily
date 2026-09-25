@@ -1,0 +1,360 @@
+/* MiD Daily — Glassmorphism Material Layer
+   This file owns glass appearance only.
+   Layout, component structure, 4pt rhythm, and interaction plumbing stay elsewhere.
+
+   GLASSMORPHISM CONTRACT
+   G0 = living environment
+   G1 = shell glass (sidebar / topbar)
+   G2 = clear glass surfaces (cards / rows)
+   G3 = recessed controls
+   G4 = dense glass (modal / command surfaces)
+
+   Performance rules:
+   - backdrop-filter is reserved for persistent shell surfaces and transient command/modal surfaces.
+   - content cards use simulated glass: translucent layers + rim + local pointer light.
+   - blur values are tokenized and never animated.
+   - no canvas/WebGL or per-component pointer listeners.
+*/
+
+@supports not (backdrop-filter: blur(1px)) {
+  .sidebar,
+  .topbar,
+  .glass-panel,
+  .global-search-dialog,
+  .modal > *,
+  .dialog-overlay > * {
+    background-color: rgba(8, 18, 11, .9);
+  }
+}
+
+/* G1 — shell glass */
+.sidebar,
+.topbar {
+  background:
+    radial-gradient(280px 180px at var(--ux-x, 18%) var(--ux-y, 8%), rgba(220, 238, 187, .07), transparent 74%),
+    linear-gradient(145deg, rgba(15, 29, 19, .68), rgba(5, 13, 8, .54));
+  border-color: var(--glass-rim);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  -webkit-backdrop-filter: blur(var(--glass-blur-shell)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur-shell)) saturate(var(--glass-saturate));
+  background-clip: padding-box;
+}
+
+.sidebar {
+  overflow: hidden;
+}
+
+.sidebar::before,
+.topbar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 246, .05), transparent 28%),
+    radial-gradient(220px 120px at var(--ux-x, 18%) var(--ux-y, 8%), rgba(210, 232, 171, .08), transparent 72%);
+}
+
+.sidebar > *,
+.topbar > * {
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar[data-ux-lit="true"],
+.topbar[data-ux-lit="true"] {
+  border-color: var(--glass-rim-strong);
+  box-shadow: var(--glass-shadow-raised), inset 0 1px 0 rgba(255, 255, 248, .15);
+}
+
+.topbar {
+  background:
+    linear-gradient(180deg, rgba(5, 13, 8, .6), rgba(5, 13, 8, .2)),
+    radial-gradient(420px 180px at var(--ux-x, 16%) var(--ux-y, 8%), rgba(216, 236, 180, .07), transparent 72%);
+}
+
+/* G2 — clear glass surfaces */
+.content-card,
+.glass-panel,
+.stat-card,
+.integration-panel,
+.ai-shell-card,
+.dashboard-signal-card,
+.assistant-channel-card,
+.feature-directory-item,
+.feature-node,
+.finance-budget-row,
+.notification-card,
+.insights-metric,
+.habit-day,
+.habit-check,
+.task-item-card,
+.global-search-result {
+  position: relative;
+  border-color: var(--glass-rim);
+  background:
+    radial-gradient(240px 180px at var(--ux-x, 18%) var(--ux-y, 10%), rgba(227, 241, 202, .08), transparent 72%),
+    linear-gradient(145deg, rgba(39, 60, 40, .2), rgba(4, 12, 7, .5)),
+    var(--glass-clear);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .2), inset 0 1px 0 var(--glass-highlight);
+  background-clip: padding-box;
+}
+
+.glass-panel {
+  -webkit-backdrop-filter: blur(var(--glass-blur-surface)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur-surface)) saturate(var(--glass-saturate));
+}
+
+.content-card::after,
+.glass-panel::after,
+.stat-card::after,
+.dashboard-signal-card::after,
+.assistant-channel-card::after,
+.feature-node::after,
+.feature-directory-item::after,
+.finance-budget-row::after,
+.notification-card::after,
+.insights-metric::after,
+.habit-day::after,
+.habit-check::after,
+.task-item-card::after,
+.global-search-result::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(145deg, rgba(255, 255, 248, .05), transparent 32%);
+  opacity: .8;
+}
+
+.content-card > *,
+.glass-panel > *,
+.stat-card > *,
+.dashboard-signal-card > *,
+.assistant-channel-card > *,
+.feature-node > *,
+.feature-directory-item > *,
+.finance-budget-row > *,
+.notification-card > *,
+.insights-metric > *,
+.habit-day > *,
+.habit-check > *,
+.task-item-card > *,
+.global-search-result > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .content-card:hover,
+  .glass-panel:hover,
+  .stat-card:hover,
+  .dashboard-signal-card:hover,
+  .feature-directory-item:hover,
+  .feature-node:hover,
+  .finance-budget-row:hover,
+  .notification-card:hover,
+  .insights-metric:hover,
+  .habit-day:hover,
+  .habit-check:hover,
+  .task-item-card:hover,
+  .global-search-result:hover {
+    transform: translateY(-2px);
+    border-color: var(--glass-rim-strong);
+    box-shadow: 0 22px 56px rgba(0, 0, 0, .26), inset 0 1px 0 rgba(255, 255, 248, .14);
+  }
+}
+
+.content-card[data-ux-lit="true"],
+.glass-panel[data-ux-lit="true"],
+.stat-card[data-ux-lit="true"],
+.dashboard-signal-card[data-ux-lit="true"],
+.feature-directory-item[data-ux-lit="true"],
+.feature-node[data-ux-lit="true"],
+.finance-budget-row[data-ux-lit="true"],
+.notification-card[data-ux-lit="true"],
+.insights-metric[data-ux-lit="true"],
+.habit-day[data-ux-lit="true"],
+.habit-check[data-ux-lit="true"],
+.task-item-card[data-ux-lit="true"],
+.global-search-result[data-ux-lit="true"] {
+  border-color: var(--glass-rim-strong);
+  background:
+    radial-gradient(260px 190px at var(--ux-x, 18%) var(--ux-y, 10%), rgba(238, 247, 214, .13), transparent 70%),
+    linear-gradient(145deg, rgba(45, 68, 45, .24), rgba(5, 13, 8, .52)),
+    var(--glass-clear);
+}
+
+/* G3 — recessed controls */
+.secondary-button,
+.filter-button,
+.icon-button,
+.sidebar-toggle,
+.notification-trigger,
+.search-trigger,
+.environment-control,
+.profile-chip,
+.connections-toggle {
+  border-color: rgba(232, 242, 222, .14);
+  background:
+    linear-gradient(145deg, rgba(27, 45, 28, .34), rgba(3, 10, 6, .46)),
+    var(--glass-recessed);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 248, .08), inset 0 -10px 18px rgba(0, 0, 0, .1), 0 10px 28px rgba(0, 0, 0, .14);
+}
+
+.secondary-button:hover,
+.filter-button:hover,
+.icon-button:hover,
+.sidebar-toggle:hover,
+.notification-trigger:hover,
+.search-trigger:hover,
+.environment-control:hover,
+.profile-chip:hover,
+.connections-toggle:hover {
+  border-color: rgba(232, 243, 210, .24);
+  background:
+    radial-gradient(120px 80px at var(--ux-x, 18%) var(--ux-y, 10%), rgba(232, 244, 205, .1), transparent 72%),
+    linear-gradient(145deg, rgba(32, 52, 33, .42), rgba(5, 12, 7, .48)),
+    var(--glass-recessed);
+}
+
+.sidebar-toggle[data-ux-lit="true"],
+.notification-trigger[data-ux-lit="true"],
+.search-trigger[data-ux-lit="true"],
+.environment-control[data-ux-lit="true"],
+.profile-chip[data-ux-lit="true"],
+.icon-button[data-ux-lit="true"],
+.filter-button[data-ux-lit="true"],
+.secondary-button[data-ux-lit="true"],
+.connections-toggle[data-ux-lit="true"] {
+  border-color: var(--glass-rim-strong);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 248, .12), 0 14px 32px rgba(0, 0, 0, .18);
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea,
+.global-search-input-wrap {
+  border-color: rgba(233, 242, 222, .12);
+  background:
+    linear-gradient(145deg, rgba(7, 16, 10, .42), rgba(2, 8, 5, .6)),
+    var(--glass-recessed);
+  box-shadow: inset 0 1px 6px rgba(0, 0, 0, .3), inset 0 1px 0 rgba(255, 255, 248, .04);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus,
+.global-search-input-wrap:focus-within {
+  border-color: rgba(214, 235, 173, .38);
+  box-shadow: inset 0 1px 5px rgba(0, 0, 0, .24), 0 0 0 3px rgba(195, 216, 143, .08), inset 0 1px 0 rgba(255, 255, 248, .08);
+}
+
+/* G4 — dense glass command surfaces */
+.global-search-dialog,
+.modal > *,
+.dialog-overlay > * {
+  position: relative;
+  border-color: rgba(233, 242, 222, .2);
+  background:
+    radial-gradient(500px 220px at var(--ux-x, 18%) var(--ux-y, 8%), rgba(224, 241, 192, .1), transparent 72%),
+    linear-gradient(145deg, rgba(31, 52, 34, .78), rgba(4, 12, 7, .76)),
+    var(--glass-dense);
+  box-shadow: 0 34px 100px rgba(0, 0, 0, .48), inset 0 1px 0 rgba(255, 255, 248, .11);
+  -webkit-backdrop-filter: blur(var(--glass-blur-modal)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur-modal)) saturate(var(--glass-saturate));
+  background-clip: padding-box;
+}
+
+.global-search-dialog::before,
+.modal > *::before,
+.dialog-overlay > *::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(145deg, rgba(255, 255, 250, .07), transparent 30%);
+}
+
+.global-search-dialog > *,
+.modal > * > *,
+.dialog-overlay > * > * {
+  position: relative;
+  z-index: 1;
+}
+
+.notification-popover,
+.task-actions-menu > div {
+  border-color: var(--glass-rim);
+  background:
+    radial-gradient(180px 120px at var(--ux-x, 18%) var(--ux-y, 8%), rgba(225, 241, 194, .07), transparent 72%),
+    linear-gradient(145deg, rgba(18, 33, 21, .9), rgba(4, 11, 7, .92));
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .36), inset 0 1px 0 rgba(255, 255, 248, .08);
+}
+
+.secondary-panel,
+.dashboard-secondary-details,
+.dashboard-focus-disclosure {
+  border-color: rgba(233, 242, 222, .12);
+  background:
+    linear-gradient(145deg, rgba(24, 42, 26, .24), rgba(3, 10, 6, .4)),
+    rgba(4, 11, 7, .32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 248, .05);
+}
+
+/* Local reflection on the interactive surface. */
+.sidebar[data-ux-lit="true"]::before,
+.topbar[data-ux-lit="true"]::before,
+.content-card[data-ux-lit="true"]::before,
+.glass-panel[data-ux-lit="true"]::before,
+.stat-card[data-ux-lit="true"]::before,
+.feature-node[data-ux-lit="true"]::before,
+.feature-directory-item[data-ux-lit="true"]::before,
+.finance-budget-row[data-ux-lit="true"]::before,
+.notification-card[data-ux-lit="true"]::before,
+.insights-metric[data-ux-lit="true"]::before,
+.habit-day[data-ux-lit="true"]::before,
+.habit-check[data-ux-lit="true"]::before,
+.global-search-result[data-ux-lit="true"]::before {
+  background:
+    radial-gradient(200px 140px at var(--ux-x, 18%) var(--ux-y, 10%), rgba(247, 250, 224, .16), transparent 68%),
+    linear-gradient(145deg, rgba(255, 255, 248, .05), transparent 30%);
+}
+
+/* Keep the environment underneath the glass. */
+.environment-scene,
+.environment-scene *,
+.app-frame::before,
+.app-frame::after {
+  pointer-events: none;
+}
+
+@media (max-width: 820px) {
+  .sidebar {
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    background:
+      linear-gradient(145deg, rgba(12, 25, 16, .72), rgba(4, 11, 7, .68)),
+      var(--glass-clear);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content-card,
+  .glass-panel,
+  .stat-card,
+  .dashboard-signal-card,
+  .feature-directory-item,
+  .feature-node,
+  .finance-budget-row,
+  .notification-card,
+  .insights-metric,
+  .habit-day,
+  .habit-check,
+  .task-item-card,
+  .global-search-result {
+    transition: none !important;
+    transform: none !important;
+  }
+}

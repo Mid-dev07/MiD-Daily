@@ -14,10 +14,12 @@ function walk(dir) {
 const tsxFiles = walk(srcDir).filter((file) => file.endsWith('.tsx'))
 const cssFiles = walk(join(srcDir, 'styles')).filter((file) => file.endsWith('.css'))
 const uiSystem = readFileSync(join(srcDir, 'styles/ui-system.css'), 'utf8')
+const glassSystem = readFileSync(join(srcDir, 'styles/glass.css'), 'utf8')
 const tokens = readFileSync(join(srcDir, 'styles/tokens.css'), 'utf8')
 const dashboard = readFileSync(join(srcDir, 'features/dashboard/DashboardView.tsx'), 'utf8')
 const featureLandscape = readFileSync(join(srcDir, 'features/dashboard/components/FeatureLandscape.tsx'), 'utf8')
 const modalCandidates = tsxFiles.filter((file) => /role="dialog"[\s\S]{0,240}aria-modal="true"/.test(readFileSync(file, 'utf8')))
+const mainSource = readFileSync(join(srcDir, 'main.tsx'), 'utf8')
 const environmentScene = readFileSync(join(srcDir, 'environment/EnvironmentScene.tsx'), 'utf8')
 const appSourceForInteraction = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
 const environmentFiles = [
@@ -38,6 +40,7 @@ if (!unrealTokens.every((token) => tokens.toLowerCase().includes(token.toLowerCa
   failures.push('MiD Unreal material tokens are missing or have drifted.')
 }
 if (!/--light-angle:\s*145deg/.test(tokens)) failures.push('The canonical 145deg MiD key-light token must remain intact.')
+if (!existsSync(join(srcDir, 'styles/glass.css')) || !/styles\/glass\.css/.test(mainSource)) failures.push('Glass material layer must be loaded explicitly after the structural UI system.')
 if (!/linear-gradient\(145deg/.test(uiSystem)) failures.push('Unreal material surfaces must retain a 145deg directional gradient.')
 
 if (!/--rhythm-micro:\s*4px/.test(tokens) || !/--rhythm-tight:\s*8px/.test(tokens) || !/--rhythm-component:\s*16px/.test(tokens)) {
@@ -74,7 +77,20 @@ if (existsSync(join(srcDir, 'styles/app.css'))) {
   failures.push('Legacy styles/app.css must remain removed from the active stylesheet tree.')
 }
 if (uiSystem.includes('backdrop-filter')) {
-  failures.push('Active ui-system.css must not use persistent backdrop-filter.')
+  failures.push('ui-system.css must remain material-blur free; keep backdrop-filter isolated in glass.css.')
+}
+const glassBlurDeclarations = [...glassSystem.matchAll(/(?:^|\n)\s*(?:-webkit-)?backdrop-filter:\s*([^;]+)/g)].map((match) => match[1])
+if (glassBlurDeclarations.length > 8) {
+  failures.push('Glass blur budget exceeded: expected no more than 8 backdrop-filter declarations, found ' + glassBlurDeclarations.length + '.')
+}
+if (glassBlurDeclarations.some((value) => !/blur\(var\(--glass-(blur-shell|blur-surface|blur-modal)\)/.test(value))) {
+  failures.push('Glass blur must use tokenized blur values from tokens.css.')
+}
+if (!/@supports\s+not\s*\(\s*backdrop-filter:\s*blur\(1px\)\s*\)/.test(glassSystem)) {
+  failures.push('glass.css must provide a backdrop-filter feature-detection fallback contract.')
+}
+if (!/GLASSMORPHISM CONTRACT/.test(glassSystem) || !/G0 = living environment/.test(glassSystem) || !/G4 = dense glass/.test(glassSystem)) {
+  failures.push('Glassmorphism material hierarchy contract is missing or incomplete.')
 }
 if (!/data-ux-lit/.test(uiSystem) || !/feature-directory:has/.test(uiSystem) || !/prefers-reduced-motion:\s*reduce/.test(uiSystem)) {
   failures.push('Living material interaction contract is missing from the active UI stylesheet.')
@@ -200,13 +216,6 @@ for (const file of modalCandidates) {
   }
   if (!/ref=\{dialogRef\}/.test(source)) {
     failures.push('Dialog without focus-trap root ref: ' + file.replace(root, ''))
-  }
-}
-
-for (const file of cssFiles) {
-  const source = readFileSync(file, 'utf8')
-  if (source.includes('backdrop-filter')) {
-    failures.push('Persistent backdrop-filter found in active stylesheet: ' + file.replace(root, ''))
   }
 }
 

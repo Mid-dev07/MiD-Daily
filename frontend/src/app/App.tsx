@@ -63,10 +63,10 @@ export function App() {
     if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
 
     const surfaceSelector = [
-      '.content-card','.glass-panel','.stat-card','.dashboard-signal-card','.feature-directory-item',
+      '.sidebar','.topbar','.content-card','.glass-panel','.stat-card','.dashboard-signal-card','.feature-directory-item',
       '.feature-node','.secondary-button','.filter-button','.icon-button','.profile-chip','.environment-control',
       '.search-trigger','.connections-toggle','.briefing-item','.planner-shortcut','.global-search-result',
-      '.toast','.finance-budget-row','.task-item-card','.notification-card','.flexible-plan','.schedule-now-strip',
+      '.toast','.finance-budget-row','.task-item-card','.notification-card','.notification-popover','.secondary-panel','.global-search-dialog','.flexible-plan','.schedule-now-strip',
       '.insights-metric','.habit-check','.habit-day','.dashboard-section-link'
     ].join(',')
 
