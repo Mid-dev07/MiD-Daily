@@ -414,6 +414,12 @@ if (!/environmentLightDirection/.test(worldRenderer)) failures.push('Spatial wor
 if (!/uniforms\.light, lightDirection\[0\], lightDirection\[1\], lightDirection\[2\]/.test(worldRenderer)) {
   failures.push('Spatial world must upload the calculated solar direction to WebGL lighting.')
 }
+if (/uTime|const t = timestamp \* 0\.001|Math\.sin\(t/.test(worldRenderer)) {
+  failures.push('Spatial world must not use perpetual time-based animation loops.')
+}
+if (!/cameraState|desiredCamera|cameraBlend/.test(worldRenderer)) {
+  failures.push('Spatial world must use the event-driven semantic camera rail.')
+}
 if (!/DEFAULT_LIGHT_DIRECTION/.test(worldRenderer)) failures.push('Spatial world must retain the canonical 145deg fallback light.')
 
 const responsiveMainSource = readFileSync(join(srcDir, 'main.tsx'), 'utf8')
