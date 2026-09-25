@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type PropsWith
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase, supabaseConfigured } from '../../lib/supabase'
 import { checkPasswordExposure } from '../../lib/api'
+import { syncGoogleCalendarProviderToken } from '../../integrations/calendar/googleCalendarProvider'
 
 interface AuthContextValue {
   configured: boolean
@@ -32,12 +33,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
     }
 
     void supabase.auth.getSession()
-      .then(({ data }) => setSession(data.session))
+      .then(({ data }) => {
+        setSession(data.session)
+        void syncGoogleCalendarProviderToken(data.session).catch(() => undefined)
+      })
       .finally(() => setLoading(false))
 
     const { data } = supabase.auth.onAuthStateChange((event, nextSession) => {
       setSession(nextSession)
       if (event === 'PASSWORD_RECOVERY') setRecovery(true)
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+        void syncGoogleCalendarProviderToken(nextSession).catch(() => undefined)
+      }
     })
 
     return () => data.subscription.unsubscribe()
@@ -83,7 +90,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
       if (!supabase) return 'Authentication is not configured.'
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin },
+        options: {
+          redirectTo: window.location.origin,
+          scopes: 'openid email profile https://www.googleapis.com/auth/calendar.events',
+          queryParams: {
+            access_type: 'offline',
+          },
+        },
       })
       return error?.message ?? null
     },
