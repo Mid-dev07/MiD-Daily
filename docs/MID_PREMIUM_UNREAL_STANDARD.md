@@ -583,3 +583,29 @@ Final standard:
 Experience first → clarity second → performance third → aesthetics fourth → technology last.
 
 UNREAL succeeds only when MiD feels premium, alive, memorable, and effortless at the same time.
+
+
+## 19 — Environmental Geometry Standard v1
+
+The spatial world must be treated as a believable place, not as a decorative backdrop behind the DOM.
+
+Required production language:
+- terrain is a shaped surface with restrained height variation; a perfectly flat floor is not sufficient;
+- natural forms use more than one deterministic low-poly rock profile so repeated silhouettes do not feel stamped;
+- organic ground language uses static foliage-adjacent geometry with low draw cost and no perpetual animation;
+- foreground, midground, and background forms should create depth without competing with application content;
+- spatial anchors remain connected to the environment rather than floating as isolated UI markers;
+- geometry remains deterministic and cached through WebGL vertex arrays;
+- the world remains native WebGL2 with the existing 2.2M pixel cap, 45 FPS desktop target, 30 FPS mobile target, reduced-motion handling, and CSS fallback;
+- no texture pack, third-party 3D library, particle system, or continuous decorative animation is required for this stage.
+
+Environmental geometry is successful when the user can perceive ground, landform, and organic context before consciously noticing the rendering technique.
+
+The next quality layers remain separate:
+1. geometry establishes believable form;
+2. materials establish surface identity;
+3. lighting establishes physical readability;
+4. atmosphere establishes time/weather continuity;
+5. composition establishes cinematic spatial framing.
+
+Do not collapse these layers into generic post-processing or decorative blur.
