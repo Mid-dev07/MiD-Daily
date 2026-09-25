@@ -1,7 +1,7 @@
 # MiD-Daily — Product Baseline
 
 ## Vision
-MiD-Daily is a lightweight personal daily-management workspace that brings schedule, tasks, finance, and connected assistants into one calm, nature-led interface.
+MiD-Daily is a lightweight personal daily-management workspace that brings schedule, tasks, finance, habits, insights, and connected tools into one living personal operating workspace.
 
 ## Target
 Personal use first, with a clear ownership model suitable for small-scale multi-user expansion.
@@ -41,9 +41,12 @@ The roadmap is complete for the current product scope. Provider-specific setup a
 - Google Calendar two-way sync and calendar selection remain future work because they require external-change detection, conflict resolution, and additional account UX.
 - Credentialed end-user acceptance flows (email recovery, Google OAuth, Telegram/Calendar consent, Instagram OAuth consent) require a real interactive provider session and are not represented as completed solely from automated CI evidence.
 
+## Identity reference
+The canonical product identity is defined in `docs/MID_IDENTITY_SYSTEM.md`. UNREAL is an execution layer on top of that identity.
+
 ## Product principles
 1. Core data remains user-scoped.
 2. Integrations are adapters; they must not leak provider credentials into the browser.
-3. Nature is part of the visual environment, not a decorative background pasted behind a dashboard.
+3. The environment is part of MiD's living context, not a decorative background pasted behind a dashboard.
 4. Interaction should communicate state through depth, light, motion, and clear copy without excessive effects.
 5. The application must remain useful when optional providers are unavailable.
