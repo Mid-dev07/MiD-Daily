@@ -371,7 +371,7 @@ if (rockDrawCount < 8) {
 const materialWorldSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
 for (const contract of [
   'uniform float uWetness;',
-  'function surfaceHash',
+  'float surfaceHash(vec2 position)',
   'float roughness = 0.9;',
   'float wetResponse = 0.5;',
   'float wet = clamp(uWetness * wetResponse',
@@ -386,7 +386,7 @@ for (const materialKind of [
   '], stone, 3',
   '], fern, 4',
   '], moss, 4',
-  'color, 5,',
+  '5,\n      0.008,',
   'contactShadow, 6',
 ]) {
   if (!materialWorldSource.includes(materialKind)) failures.push('Environmental material kind missing: ' + materialKind)
