@@ -1,4 +1,4 @@
-/* MiD Daily — Spatial Workspace Composition v2
+/* MiD Daily — Spatial Workspace Composition v3
    DOM declares semantic spatial roles; this layer defines how those roles occupy depth.
    WebGL remains environmental context. DOM remains authoritative for product UI.
 */
@@ -68,14 +68,7 @@
   z-index: 1;
 }
 
-/* Orientation layer: where the user is in the workspace. */
-.view-key[data-module] .workspace-header[data-spatial-role="orientation"],
-.view-key[data-module] .workspace-header:not([data-spatial-role]) {
-  transform: translateZ(14px);
-  transform-style: preserve-3d;
-}
-
-/* The first-party header component does not need markup changes to inherit this role. */
+/* Orientation layer: the header owns semantic intent; depth is role-controlled below. */
 .view-key[data-module] .workspace-header-main {
   position: relative;
 }
