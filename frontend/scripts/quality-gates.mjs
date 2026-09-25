@@ -452,6 +452,35 @@ if (!/WorldLandmarkKind = 'ridge' \| 'grove' \| 'shelter'/.test(compositionSourc
   failures.push('Cinematic composition landmark taxonomy must remain bounded to natural/stone forms.')
 }
 
+
+const environmentResponseSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
+for (const contract of [
+  'uniform float uOpacity;',
+  'function groundShadowGeometry()',
+  'function drawProjectedGroundShadow(',
+  'const shadow = createMesh',
+  'uniforms.opacity',
+  'const targetVisual = {',
+  'const environmentBlend =',
+  'visualState.wetness',
+  'weatherSpecular',
+  'materialWetness',
+]) {
+  if (!environmentResponseSource.includes(contract)) failures.push('Environmental response v1 contract missing: ' + contract)
+}
+if (!/drawProjectedGroundShadow\([\s\S]*lightDirection[\s\S]*shadow/.test(environmentResponseSource)) {
+  failures.push('Projected ground shadows must derive direction from the active solar light vector.')
+}
+if (!/draw\(shadowMesh[\s\S]*kind\s*,?\s*6[\s\S]*opacity/.test(environmentResponseSource)) {
+  failures.push('Projected ground shadows must use the dedicated low-opacity contact material path.')
+}
+if (!/groundWet = smoothstep/.test(environmentResponseSource) || !/weatherSpecular/.test(environmentResponseSource)) {
+  failures.push('Weather response must remain material-aware instead of applying one global glossy treatment.')
+}
+if (/uTime|timestamp * 0\\.001|Math\\.sin\(t/.test(environmentResponseSource)) {
+  failures.push('Environmental response v1 must remain event/state driven with no perpetual decorative animation.')
+}
+
 const spatialStyles = join(srcDir, 'styles/spatial-composition.css')
 if (!existsSync(spatialStyles)) {
   failures.push('Spatial workspace composition stylesheet is missing.')
