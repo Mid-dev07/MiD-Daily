@@ -292,7 +292,7 @@ if (!existsSync(worldRendererPath)) {
   if (!/prefers-reduced-motion/.test(worldRenderer)) failures.push('Spatial world renderer must honor reduced-motion.')
   if (!/MAX_WORLD_PIXELS/.test(worldRenderer) || !/Math\.sqrt\(MAX_WORLD_PIXELS/.test(worldRenderer)) failures.push('Spatial world renderer must cap its pixel workload.')
   if (!/createVertexArray/.test(worldRenderer)) failures.push('Spatial world renderer must cache geometry through WebGL vertex arrays.')
-  if (/getBoundingClientRect\(\)[\\s\\S]*?const render/.test(worldRenderer)) failures.push('Spatial world renderer must keep layout reads outside its frame loop.')
+  if (/getBoundingClientRect\(\)[\s\S]*?const render/.test(worldRenderer)) failures.push('Spatial world renderer must keep layout reads outside its frame loop.')
   if (!/removeEventListener\(['"]visibilitychange/.test(worldRenderer)) failures.push('Spatial world renderer must clean up visibility listeners.')
   if (/addEventListener\(['"]pointermove/.test(worldRenderer)) failures.push('Spatial world renderer must not own a second pointermove stream.')
 }
