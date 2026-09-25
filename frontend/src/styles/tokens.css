@@ -139,4 +139,16 @@
   --engine-specular-strength: .16;
   --engine-depth-near: 2px;
   --engine-atmosphere-slow: 28s;
+
+  /* UNREAL final material tokens — restrained and reusable. */
+  --unreal-rim: rgba(232, 243, 248, .11);
+  --unreal-rim-soft: rgba(232, 243, 248, .055);
+  --unreal-shadow-contact: 0 12px 28px rgba(0, 0, 0, .18);
+  --unreal-shadow-deep: 0 24px 64px rgba(0, 0, 0, .28);
+  --unreal-inset: inset 0 1px rgba(255, 255, 255, .06);
+  --unreal-inset-strong: inset 0 1px rgba(255, 255, 255, .10);
+  --unreal-focus: rgba(236, 247, 252, .92);
+  --unreal-motion-micro: 140ms;
+  --unreal-motion-normal: 210ms;
+  --unreal-motion-scene: 320ms;
 }
