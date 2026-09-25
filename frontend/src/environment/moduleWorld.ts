@@ -39,7 +39,6 @@ const anchors: WorldModuleAnchor[] = [
       foregroundRight: [7.6, 0.08, 5.8],
       horizon: [0, 0.08, -9.6],
     },
-  }
   },
   {
     view: 'schedule',
@@ -54,7 +53,6 @@ const anchors: WorldModuleAnchor[] = [
       foregroundRight: [4.9, 0.06, 5.8],
       horizon: [-6.8, 0.1, -9.4],
     },
-  }
   },
   {
     view: 'tasks',
@@ -69,7 +67,6 @@ const anchors: WorldModuleAnchor[] = [
       foregroundRight: [3.8, 0.06, 5.8],
       horizon: [-8.6, 0.08, -8.8],
     },
-  }
   },
   {
     view: 'finance',
@@ -84,7 +81,6 @@ const anchors: WorldModuleAnchor[] = [
       foregroundRight: [8.3, 0.08, 5.1],
       horizon: [8.6, 0.08, -8.6],
     },
-  }
   },
   {
     view: 'social',
@@ -99,7 +95,6 @@ const anchors: WorldModuleAnchor[] = [
       foregroundRight: [8.5, 0.08, 4.8],
       horizon: [8.7, 0.08, -8.2],
     },
-  }
   },
   {
     view: 'assistant',
@@ -114,7 +109,6 @@ const anchors: WorldModuleAnchor[] = [
       foregroundRight: [7.8, 0.08, 5.3],
       horizon: [7.2, 0.08, -9],
     },
-  }
   },
   {
     view: 'profile',
@@ -129,7 +123,6 @@ const anchors: WorldModuleAnchor[] = [
       foregroundRight: [7.7, 0.08, 4.8],
       horizon: [0, 0.08, -9.8],
     },
-  }
   },
   {
     view: 'insights',
@@ -144,7 +137,6 @@ const anchors: WorldModuleAnchor[] = [
       foregroundRight: [5.7, 0.07, 5.4],
       horizon: [-8.5, 0.08, -9],
     },
-  }
   },
   {
     view: 'habits',
@@ -159,7 +151,6 @@ const anchors: WorldModuleAnchor[] = [
       foregroundRight: [5.2, 0.07, 5.6],
       horizon: [-8.8, 0.08, -8.7],
     },
-  }
   },
 ]
 
