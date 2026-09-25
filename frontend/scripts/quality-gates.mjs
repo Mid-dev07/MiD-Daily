@@ -144,6 +144,9 @@ if (!/WorkspaceContextRail/.test(appSourceForInteraction) || !/activeView !== 'd
 if (!/dashboard-command-deck/.test(dashboard) || !/dashboard-hero-aside/.test(dashboard) || !/dashboard-live/.test(dashboard)) {
   failures.push('Dashboard visual redesign contract is missing the command deck, live status rail, or hero shell.')
 }
+if (!/listHabits/.test(dashboard) || !/Today’s habits/.test(dashboard) || !/dashboard-habits/.test(experienceSystem)) {
+  failures.push('Today must surface a live habit rhythm signal as part of Module Convergence.')
+}
 if (!/opacity:0;visibility:hidden;pointer-events:none/.test(uiSystem)) {
   failures.push('Sidebar hide state must remove the hidden rail from interaction and visual compositing.')
 }

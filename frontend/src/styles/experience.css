@@ -571,6 +571,139 @@ textarea:focus,
 }
 
 /* =========================================================
+   MODULE CONVERGENCE V1B — TODAY RHYTHM SIGNAL
+   Habits are surfaced as a quiet daily signal, not another task board.
+========================================================= */
+
+.dashboard-habits {
+  display: grid;
+  gap: 12px;
+  margin: 16px auto 0;
+  width: min(100%, var(--content-max));
+}
+
+.dashboard-habits .card-heading {
+  align-items: center;
+}
+
+.dashboard-habits .dashboard-section-link {
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.dashboard-habits-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-height: 48px;
+}
+
+.dashboard-habits-summary strong {
+  color: #edf5f8;
+  font-size: 24px;
+  letter-spacing: -.04em;
+}
+
+.dashboard-habits-summary span {
+  color: var(--mi-text-dim);
+  font-size: 10px;
+}
+
+.dashboard-habit-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dashboard-habit-row {
+  min-width: 0;
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  row-gap: 4px;
+  align-content: center;
+  padding: 12px;
+  border: 1px solid rgba(225, 238, 230, .08);
+  border-radius: 12px;
+  color: inherit;
+  background: rgba(8, 16, 22, .30);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    transform 160ms var(--ease-spring),
+    border-color 160ms var(--ease-standard),
+    background-color 160ms var(--ease-standard);
+}
+
+.dashboard-habit-row:hover {
+  transform: translateY(-1px);
+  border-color: rgba(79, 209, 255, .16);
+  background: rgba(79, 209, 255, .035);
+}
+
+.dashboard-habit-row.is-done {
+  border-color: rgba(74, 222, 128, .16);
+}
+
+.dashboard-habit-state {
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid rgba(225, 238, 230, .12);
+  border-radius: 50%;
+  color: var(--mi-text-dim);
+  font: 700 11px/1 var(--font-mono);
+}
+
+.dashboard-habit-row.is-done .dashboard-habit-state {
+  border-color: rgba(74, 222, 128, .30);
+  color: var(--mi-green);
+  background: rgba(74, 222, 128, .06);
+}
+
+.dashboard-habit-row strong {
+  overflow: hidden;
+  color: #eaf3f6;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-habit-row small {
+  color: rgba(160, 180, 191, .54);
+  font-size: 9px;
+}
+
+@media (max-width: 900px) {
+  .dashboard-habit-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .dashboard-habits {
+    margin-top: 12px;
+  }
+
+  .dashboard-habit-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-habit-row:hover {
+    transform: none;
+  }
+}
+
+/* =========================================================
    MODULE CONVERGENCE V1 — SHARED WORKSPACE CONTEXT
    Non-Today workspaces retain a compact live bridge back to the
    same schedule/task/finance reality shown on Today.
