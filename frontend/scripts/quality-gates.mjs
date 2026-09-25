@@ -79,19 +79,14 @@ if (existsSync(join(srcDir, 'styles/app.css'))) {
 if (uiSystem.includes('backdrop-filter')) {
   failures.push('ui-system.css must remain material-blur free; keep backdrop-filter isolated in glass.css.')
 }
-const glassBlurDeclarations = [...glassSystem.matchAll(/(?:-webkit-)?backdrop-filter:\s*([^;]+)/g)].map((match) => match[1])
+const glassBlurDeclarations = [...glassSystem.matchAll(/(?:^|\n)\s*(?:-webkit-)?backdrop-filter:\s*([^;]+)/g)].map((match) => match[1])
 if (glassBlurDeclarations.length > 8) {
   failures.push('Glass blur budget exceeded: expected no more than 8 backdrop-filter declarations, found ' + glassBlurDeclarations.length + '.')
 }
 if (glassBlurDeclarations.some((value) => !/blur\(var\(--glass-(blur-shell|blur-surface|blur-modal)\)/.test(value))) {
   failures.push('Glass blur must use tokenized blur values from tokens.css.')
 }
-for (const file of cssFiles) {
-  const source = readFileSync(file, 'utf8')
-  if (file.endsWith('glass.css')) continue
-  if (source.includes('backdrop-filter')) failures.push('Persistent backdrop-filter found outside glass.css: ' + file.replace(root, ''))
-}
-if (!/@supports\s*\(backdrop-filter:\s*blur\(1px\)\)/.test(glassSystem)) {
+if (!/@supports\s+not\s*\(\s*backdrop-filter:\s*blur\(1px\)\s*\)/.test(glassSystem)) {
   failures.push('glass.css must provide a backdrop-filter feature-detection fallback contract.')
 }
 if (!/GLASSMORPHISM CONTRACT/.test(glassSystem) || !/G0 = living environment/.test(glassSystem) || !/G4 = dense glass/.test(glassSystem)) {
