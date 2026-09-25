@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useAuth } from '../../auth/AuthProvider'
 import {
   disconnectGoogleCalendar,
   getGoogleCalendarConnectionStatus,
@@ -13,6 +14,8 @@ const initialStatus: GoogleCalendarConnectionStatus = {
 }
 
 export function GoogleCalendarIntegrationCard() {
+  const { user, signInWithGoogle } = useAuth()
+  const isGoogleUser = Boolean(user?.app_metadata?.provider === 'google' || user?.identities?.some((identity) => identity.provider === 'google'))
   const [status, setStatus] = useState<GoogleCalendarConnectionStatus>(initialStatus)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -41,6 +44,16 @@ export function GoogleCalendarIntegrationCard() {
       await startGoogleCalendarOAuth()
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Unable to start Google Calendar authorization.')
+      setLoading(false)
+    }
+  }
+
+  const completeGoogleAuthorization = async () => {
+    setError('')
+    setLoading(true)
+    const reason = await signInWithGoogle()
+    if (reason) {
+      setError(reason)
       setLoading(false)
     }
   }
@@ -88,8 +101,8 @@ export function GoogleCalendarIntegrationCard() {
             <button className="secondary-button" type="button" disabled={loading} onClick={() => void disconnect()}>Disconnect</button>
           </>
         ) : status.configured ? (
-          <button className="secondary-button" type="button" disabled={loading} onClick={() => void connect()}>
-            Connect Google
+          <button className="secondary-button" type="button" disabled={loading} onClick={() => void (isGoogleUser ? completeGoogleAuthorization() : connect())}>
+            {isGoogleUser ? 'Enable Calendar access' : 'Connect Google'}
           </button>
         ) : (
           <button
