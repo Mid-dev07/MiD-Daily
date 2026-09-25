@@ -411,6 +411,9 @@ for (const visualField of ['lightWarmth', 'skyCoolness', 'natureSaturation', 'su
 }
 const worldRenderer = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
 if (!/environmentLightDirection/.test(worldRenderer)) failures.push('Spatial world must consume real solar direction when available.')
+if (!/uniforms\.light, lightDirection\[0\], lightDirection\[1\], lightDirection\[2\]/.test(worldRenderer)) {
+  failures.push('Spatial world must upload the calculated solar direction to WebGL lighting.')
+}
 if (!/DEFAULT_LIGHT_DIRECTION/.test(worldRenderer)) failures.push('Spatial world must retain the canonical 145deg fallback light.')
 
 const responsiveMainSource = readFileSync(join(srcDir, 'main.tsx'), 'utf8')
