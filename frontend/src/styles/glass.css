@@ -16,6 +16,17 @@
    - no canvas/WebGL or per-component pointer listeners.
 */
 
+@supports not (backdrop-filter: blur(1px)) {
+  .sidebar,
+  .topbar,
+  .glass-panel,
+  .global-search-dialog,
+  .modal > *,
+  .dialog-overlay > * {
+    background-color: rgba(8, 18, 11, .9);
+  }
+}
+
 /* G1 — shell glass */
 .sidebar,
 .topbar {
