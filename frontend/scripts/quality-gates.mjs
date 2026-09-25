@@ -118,6 +118,21 @@ if (!/data-ux-lit/.test(uiSystem) || !/action-focus/.test(uiSystem) || !/prefers
 if (!/surfaceSelector/.test(appSourceForInteraction) || !/requestAnimationFrame/.test(appSourceForInteraction) || !/pointermove/.test(appSourceForInteraction)) {
   failures.push('Foreground material interaction must use one delegated pointer stream with requestAnimationFrame.')
 }
+if (!/UNREAL FINAL RENDER CORE — PHASE 1 COMPLETE/.test(experienceSystem) || !/--ux-rx/.test(experienceSystem) || !/--ux-ry/.test(experienceSystem) || !/--ux-elevation/.test(experienceSystem)) {
+  failures.push('Final Unreal render core must visibly consume delegated light/elevation variables.')
+}
+if (/\.content-card[\\s\\S]{0,220}backdrop-filter:\\s*blur/.test(experienceSystem)) {
+  failures.push('G2 content cards must remain clear painted glass; persistent blur belongs only to shell/transient surfaces.')
+}
+if (!/UNREAL FINALIZATION — PHASE 2/.test(experienceSystem) || !/UNREAL FINALIZATION — PHASE 4/.test(experienceSystem)) {
+  failures.push('Final Unreal spatial/material pass is incomplete.')
+}
+if (!/:focus-visible/.test(uiSystem) || !/outline:\\s*2px/.test(uiSystem)) {
+  failures.push('Global focus visibility contract must remain explicit and measurable.')
+}
+if (!/@media\\s*\\(prefers-reduced-motion:\\s*reduce\\)[\\s\\S]*?\.environment-clouds[\\s\\S]*?animation:\\s*none/.test(experienceSystem)) {
+  failures.push('Reduced-motion must disable non-essential environmental movement.')
+}
 if (/pointermove/.test(environmentScene)) {
   failures.push('EnvironmentScene must not own pointermove handlers; keep pointer interaction bounded to foreground surfaces.')
 }
