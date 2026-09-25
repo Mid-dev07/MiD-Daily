@@ -297,6 +297,66 @@ function assertPersistenceConfigured() {
   }
 }
 
+async function handleProviderToken(req: IncomingMessage, res: ServerResponse) {
+  const ownerId = await requireAuthenticatedUserId(req)
+  assertGoogleConfigured()
+  assertPersistenceConfigured()
+
+  const body = await readRequestJson(req)
+  const accessToken = typeof body.accessToken === 'string' ? body.accessToken.trim() : ''
+  const refreshToken = typeof body.refreshToken === 'string' ? body.refreshToken.trim() : ''
+
+  if (!accessToken || accessToken.length > 4096) {
+    throw httpError(400, 'Google provider access token is invalid.')
+  }
+  if (refreshToken.length > 4096) {
+    throw httpError(400, 'Google provider refresh token is invalid.')
+  }
+
+  const tokenInfoResponse = await fetch(
+    `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(accessToken)}`,
+    {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+    },
+  )
+  const tokenInfo = await tokenInfoResponse.json().catch(() => ({})) as Record<string, unknown>
+
+  if (!tokenInfoResponse.ok) {
+    throw httpError(401, 'Google provider access token is invalid or expired.')
+  }
+
+  const scope = typeof tokenInfo.scope === 'string' ? tokenInfo.scope : ''
+  const scopes = new Set(scope.split(/\\s+/).filter(Boolean))
+  if (!scopes.has(CALENDAR_SCOPE)) {
+    throw httpError(403, 'Google Calendar permission was not granted during Google sign-in.')
+  }
+
+  const existing = await getGoogleConnection(ownerId)
+  const effectiveRefreshToken = refreshToken || existing?.token.refreshToken
+  if (!effectiveRefreshToken) {
+    throw httpError(409, 'Google did not return an offline Calendar refresh token. Sign in with Google again to finish Calendar authorization.')
+  }
+
+  const expiresInSeconds = Number(tokenInfo.expires_in)
+  const expiresAt = Number.isFinite(expiresInSeconds) && expiresInSeconds > 0
+    ? Date.now() + expiresInSeconds * 1000
+    : Date.now() + 60 * 60 * 1000
+
+  await saveGoogleConnection(ownerId, {
+    connectedAt: existing?.connectedAt ?? new Date().toISOString(),
+    token: {
+      accessToken,
+      refreshToken: effectiveRefreshToken,
+      expiresAt,
+      scope,
+      tokenType: 'Bearer',
+    },
+  })
+
+  sendJson(res, 200, { connected: true })
+}
+
 async function exchangeCode(code: string, verifier: string): Promise<GoogleConnection['token']> {
   const body = new URLSearchParams({
     code,
@@ -2076,6 +2136,11 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
 
     if (req.method === 'GET' && url.pathname === '/api/integrations/google-calendar/status') {
       await handleStatus(req, res)
+      return
+    }
+
+    if (req.method === 'POST' && url.pathname === '/api/integrations/google-calendar/provider-token') {
+      await handleProviderToken(req, res)
       return
     }
 
