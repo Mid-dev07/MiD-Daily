@@ -416,18 +416,11 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
       const model = new Float32Array(16)
 
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+      const spatialPathQuery = window.matchMedia('(min-width: 821px) and (pointer: fine)')
       const frameInterval = 1000 / (window.innerWidth < 700 ? MOBILE_FPS : DESKTOP_FPS)
       const initialAnchor = worldModuleAnchor(activeViewRef.current)
-      let cameraState: Vec3 = [
-        initialAnchor.position[0] * 0.18,
-        4.25,
-        10.8 + initialAnchor.position[2] * 0.08,
-      ]
-      let targetState: Vec3 = [
-        initialAnchor.position[0] * 0.22,
-        1.4,
-        initialAnchor.position[2] * 0.12,
-      ]
+      let cameraState: Vec3 = [...initialAnchor.camera.eye]
+      let targetState: Vec3 = [...initialAnchor.camera.target]
       let frame = 0
       let running = true
       let width = 1
@@ -484,15 +477,16 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         const pointerStrength = reduceMotion.matches ? 0 : 1
         const yaw = pointer.x * 0.055 * pointerStrength
         const pitch = pointer.y * 0.035 * pointerStrength
+        const pointerOrbit = 0.6
         const desiredCamera: Vec3 = [
-          activeAnchor.position[0] * 0.18 + Math.sin(yaw) * 10.8,
-          4.25 + pitch * 4,
-          10.8 + activeAnchor.position[2] * 0.08 + Math.cos(yaw) * 10.8,
+          activeAnchor.camera.eye[0] + Math.sin(yaw) * pointerOrbit,
+          activeAnchor.camera.eye[1] + pitch * 0.8,
+          activeAnchor.camera.eye[2] + (Math.cos(yaw) - 1) * pointerOrbit,
         ]
         const desiredTarget: Vec3 = [
-          activeAnchor.position[0] * 0.22,
-          1.4 + pitch * 1.1,
-          activeAnchor.position[2] * 0.12,
+          activeAnchor.camera.target[0],
+          activeAnchor.camera.target[1] + pitch * 0.5,
+          activeAnchor.camera.target[2],
         ]
         const cameraBlend = reduceMotion.matches ? 1 : Math.min(1, delta * 7)
         cameraState = [
@@ -571,13 +565,15 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         draw(box, [7.0, 0.34, 3.8], [1.8, 0.34, 0.38], [0.08, 0.13, 0.16], 1)
         draw(box, [0, 0.52, 1.15], [2.5, 0.52, 1.35], [0.08, 0.14, 0.17], 1, 0.01)
 
-        drawSpatialPath(
-          draw,
-          box,
-          [0, 0.02, 1.15],
-          activeAnchor.position,
-          moss,
-        )
+        if (spatialPathQuery.matches) {
+          drawSpatialPath(
+            draw,
+            box,
+            [0, 0.02, 1.15],
+            activeAnchor.position,
+            moss,
+          )
+        }
 
         draw(box, [-7.0, 0.18, -0.3], [2.1, 0.07, 0.28], fern, 1, 0.015, -0.18)
         draw(box, [-4.8, 0.11, 2.1], [1.4, 0.045, 0.26], moss, 1, 0.01, 0.18)
