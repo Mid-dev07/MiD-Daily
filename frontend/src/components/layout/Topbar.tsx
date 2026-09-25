@@ -82,7 +82,7 @@ export function Topbar({ view, profile, onProfile, onSearch, onNavigate, userId,
       </button>
       <div className="topbar-title">
         <div className="topbar-heading">
-          <span className="topbar-kicker">PERSONAL OPERATING LANDSCAPE</span>
+          <span className="topbar-kicker">MiD · PERSONAL SPACE</span>
           <div className="topbar-title-row">
             <span className="topbar-index" aria-hidden="true">{viewIndices[view]}</span>
             <h1>{titles[view]}</h1>
@@ -95,7 +95,7 @@ export function Topbar({ view, profile, onProfile, onSearch, onNavigate, userId,
           <span className="environment-glyph" aria-hidden="true">{weatherGlyph(environment)}</span>
           <span className="environment-readout">
             <b>{environmentText}</b>
-            <small>{environment.location ? 'local environment' : 'personalize sky'}</small>
+            <small>{environment.location ? 'around you' : 'set your local sky'}</small>
           </span>
         </button>
         <span className="environment-attribution-inline" aria-label="Weather data source">{environment.weather ? 'Open-Meteo' : 'MiD local'}</span>
