@@ -51,20 +51,77 @@ uniform vec3 uBaseColor;
 uniform float uLightIntensity;
 uniform float uEmissive;
 uniform float uKind;
+uniform float uWetness;
 
 varying vec3 vWorldPosition;
 varying vec3 vWorldNormal;
+
+float surfaceHash(vec2 position) {
+  return fract(sin(dot(position, vec2(127.1, 311.7))) * 43758.5453123);
+}
 
 void main() {
   vec3 normal = normalize(vWorldNormal);
   vec3 lightDir = normalize(uLightDirection);
   vec3 viewDir = normalize(uCameraPosition - vWorldPosition);
 
+  if (uKind > 5.5) {
+    float contactFalloff = 0.72 + 0.18 * max(normal.y, 0.0);
+    gl_FragColor = vec4(uBaseColor * contactFalloff, 1.0);
+    return;
+  }
+
   float diffuse = max(dot(normal, lightDir), 0.0);
-  float halfLambert = diffuse * 0.72 + 0.28;
+  float wrap = mix(0.16, 0.3, 1.0 - max(normal.y, 0.0));
+  float halfLambert = clamp((diffuse + wrap) / (1.0 + wrap), 0.0, 1.0);
   vec3 halfVector = normalize(lightDir + viewDir);
-  float specular = pow(max(dot(normal, halfVector), 0.0), 36.0);
-  float rim = pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0);
+
+  float roughness = 0.9;
+  float wetResponse = 0.5;
+  if (uKind > 0.5 && uKind < 1.5) {
+    roughness = 0.78;
+    wetResponse = 0.82;
+  } else if (uKind > 1.5 && uKind < 2.5) {
+    roughness = 0.94;
+    wetResponse = 1.0;
+  } else if (uKind > 2.5 && uKind < 3.5) {
+    roughness = 0.58;
+    wetResponse = 0.92;
+  } else if (uKind > 3.5 && uKind < 4.5) {
+    roughness = 0.96;
+    wetResponse = 0.38;
+  } else if (uKind > 4.5 && uKind < 5.5) {
+    roughness = 0.9;
+    wetResponse = 0.56;
+  }
+
+  float wet = clamp(uWetness * wetResponse, 0.0, 1.0);
+  float specularPower = mix(10.0, 72.0, 1.0 - roughness);
+  float specularStrength = mix(0.025, 0.16, 1.0 - roughness) + wet * 0.2;
+  float specular = pow(max(dot(normal, halfVector), 0.0), specularPower) * specularStrength;
+  float rim = pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0) * 0.05;
+
+  float macroNoise = surfaceHash(floor(vWorldPosition.xz * 1.35));
+  float microNoise = surfaceHash(floor(vWorldPosition.xz * 4.5));
+  float surfaceVariation = mix(0.91, 1.08, macroNoise * 0.78 + microNoise * 0.22);
+
+  vec3 materialBase = uBaseColor * surfaceVariation;
+  if (uKind > 1.5 && uKind < 2.5) {
+    float naturalBreak = mix(0.88, 1.1, macroNoise);
+    materialBase *= naturalBreak;
+  } else if (uKind > 3.5 && uKind < 4.5) {
+    float leafBacklight = pow(max(dot(-normal, lightDir), 0.0), 1.6) * 0.09;
+    materialBase += vec3(0.012, 0.028, 0.016) * leafBacklight;
+  }
+
+  float wetDarken = mix(1.0, 0.76, wet);
+  materialBase *= wetDarken;
+
+  float contact = 1.0;
+  if (uKind > 0.5 && uKind < 4.5) {
+    float groundBand = 1.0 - smoothstep(0.02, 0.34, max(vWorldPosition.y, 0.0));
+    contact = mix(1.0, 0.72, groundBand * 0.24);
+  }
 
   float grid = 0.0;
   if (uKind < 0.5) {
@@ -75,13 +132,13 @@ void main() {
     grid = max(line * 0.16, fine * 0.045);
   }
 
-  vec3 base = uBaseColor * (0.34 + halfLambert * 0.66 * uLightIntensity);
-  vec3 reflected = vec3(specular * 0.17 + rim * 0.08);
+  vec3 base = materialBase * (0.31 + halfLambert * 0.69 * uLightIntensity) * contact;
+  vec3 reflected = vec3(specular + rim);
   vec3 emissive = uBaseColor * uEmissive;
   vec3 color = base + reflected + emissive + uBaseColor * grid;
 
   float distanceFade = smoothstep(24.0, 6.0, length(vWorldPosition.xz));
-  color *= mix(0.52, 1.0, distanceFade);
+  color *= mix(0.9, 1.0, distanceFade);
 
   gl_FragColor = vec4(color, 1.0);
 }
@@ -438,7 +495,7 @@ function drawSpatialPath(
       [midX, 0.015, midZ],
       [segmentLength * 0.44, 0.018, 0.075],
       color,
-      1,
+      5,
       0.008,
       angle,
     )
@@ -497,9 +554,10 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         intensity: gl.getUniformLocation(program, 'uLightIntensity'),
         emissive: gl.getUniformLocation(program, 'uEmissive'),
         kind: gl.getUniformLocation(program, 'uKind'),
+        wetness: gl.getUniformLocation(program, 'uWetness'),
       }
 
-      if ([uniforms.projection, uniforms.view, uniforms.model, uniforms.camera, uniforms.light, uniforms.base, uniforms.intensity, uniforms.emissive, uniforms.kind].some((uniform) => !uniform)) {
+      if ([uniforms.projection, uniforms.view, uniforms.model, uniforms.camera, uniforms.light, uniforms.base, uniforms.intensity, uniforms.emissive, uniforms.kind, uniforms.wetness].some((uniform) => !uniform)) {
         throw new Error('WebGL uniform contract is incomplete.')
       }
 
@@ -618,6 +676,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         gl.uniform3f(uniforms.camera, camera[0], camera[1], camera[2])
         gl.uniform3f(uniforms.light, lightDirection[0], lightDirection[1], lightDirection[2])
         gl.uniform1f(uniforms.intensity, intensity)
+        gl.uniform1f(uniforms.wetness, wetness)
 
         const draw = (mesh: Mesh, position: Vec3, scale: Vec3, color: Vec3, kind: number, emissive = 0, rotation = 0) => {
           gl.bindVertexArray(mesh.vao)
@@ -674,22 +733,33 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
           )
         }
 
-        draw(rockA, [-5.2, 0.06, 3.0], [0.72, 0.42, 0.54], stone, 1, 0.0, -0.12)
-        draw(rockB, [5.1, 0.04, 2.8], [0.62, 0.34, 0.48], warm, 1, 0.0, 0.22)
-        draw(rockC, [-3.3, 0.03, -3.9], [0.52, 0.28, 0.44], fern, 1, 0.0, -0.32)
-        draw(rockA, [3.8, 0.04, -4.5], [0.7, 0.36, 0.52], moss, 1, 0.0, 0.16)
-        draw(rockB, [-8.4, 0.02, 5.6], [1.55, 0.72, 1.2], stone, 1, 0.0, 0.12)
-        draw(rockC, [8.1, 0.02, 4.8], [1.38, 0.68, 1.1], mineral, 1, 0.0, -0.22)
-        draw(rockA, [-8.8, 0.02, -6.8], [1.7, 0.82, 1.25], warm, 1, 0.0, 0.28)
-        draw(rockB, [7.6, 0.02, -7.2], [1.5, 0.74, 1.18], moss, 1, 0.0, -0.18)
-        draw(rockC, [-1.0, 0.02, -7.8], [1.05, 0.5, 0.86], stone, 1, 0.0, 0.05)
+        const contactShadow: Vec3 = [
+          mineral[0] * 0.24,
+          mineral[1] * 0.3,
+          mineral[2] * 0.28,
+        ]
+        draw(box, [0, -0.02, 0.0], [4.9, 0.008, 2.8], contactShadow, 6)
+        draw(box, [-5.2, 0.004, 3.0], [0.9, 0.008, 0.68], contactShadow, 6, 0, -0.12)
+        draw(box, [5.1, 0.004, 2.8], [0.78, 0.008, 0.6], contactShadow, 6, 0, 0.22)
+        draw(box, [-8.4, 0.004, 5.6], [1.72, 0.008, 1.3], contactShadow, 6, 0, 0.12)
+        draw(box, [7.6, 0.004, -7.2], [1.66, 0.008, 1.26], contactShadow, 6, 0, -0.18)
 
-        draw(foliage, [-7.2, -0.02, -0.8], [1.15, 0.95, 1.15], fern, 1, 0, 0.2)
-        draw(foliage, [-5.9, -0.02, 1.5], [0.82, 0.72, 0.82], moss, 1, 0, -0.25)
-        draw(foliage, [6.5, -0.02, 0.6], [1.0, 0.84, 1.0], fern, 1, 0, -0.12)
-        draw(foliage, [4.7, -0.02, -2.3], [0.86, 0.78, 0.86], moss, 1, 0, 0.24)
-        draw(foliage, [-2.9, -0.02, -5.2], [1.05, 0.9, 1.05], fern, 1, 0, -0.18)
-        draw(foliage, [3.9, -0.02, -6.4], [0.92, 0.8, 0.92], moss, 1, 0, 0.16)
+        draw(rockA, [-5.2, 0.06, 3.0], [0.72, 0.42, 0.54], stone, 3, 0.0, -0.12)
+        draw(rockB, [5.1, 0.04, 2.8], [0.62, 0.34, 0.48], warm, 3, 0.0, 0.22)
+        draw(rockC, [-3.3, 0.03, -3.9], [0.52, 0.28, 0.44], fern, 3, 0.0, -0.32)
+        draw(rockA, [3.8, 0.04, -4.5], [0.7, 0.36, 0.52], moss, 3, 0.0, 0.16)
+        draw(rockB, [-8.4, 0.02, 5.6], [1.55, 0.72, 1.2], stone, 3, 0.0, 0.12)
+        draw(rockC, [8.1, 0.02, 4.8], [1.38, 0.68, 1.1], mineral, 3, 0.0, -0.22)
+        draw(rockA, [-8.8, 0.02, -6.8], [1.7, 0.82, 1.25], warm, 3, 0.0, 0.28)
+        draw(rockB, [7.6, 0.02, -7.2], [1.5, 0.74, 1.18], moss, 3, 0.0, -0.18)
+        draw(rockC, [-1.0, 0.02, -7.8], [1.05, 0.5, 0.86], stone, 3, 0.0, 0.05)
+
+        draw(foliage, [-7.2, -0.02, -0.8], [1.15, 0.95, 1.15], fern, 4, 0, 0.2)
+        draw(foliage, [-5.9, -0.02, 1.5], [0.82, 0.72, 0.82], moss, 4, 0, -0.25)
+        draw(foliage, [6.5, -0.02, 0.6], [1.0, 0.84, 1.0], fern, 4, 0, -0.12)
+        draw(foliage, [4.7, -0.02, -2.3], [0.86, 0.78, 0.86], moss, 4, 0, 0.24)
+        draw(foliage, [-2.9, -0.02, -5.2], [1.05, 0.9, 1.05], fern, 4, 0, -0.18)
+        draw(foliage, [3.9, -0.02, -6.4], [0.92, 0.8, 0.92], moss, 4, 0, 0.16)
 
         draw(box, [-2.2, 0.63, 0.0], [0.04, 0.63, 0.96], cyan, 1, 0.42)
         draw(box, [2.2, 0.63, 0.0], [0.04, 0.63, 0.96], cyan, 1, 0.42)
