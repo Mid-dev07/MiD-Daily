@@ -2,7 +2,7 @@ import test, { after } from 'node:test'
 import assert from 'node:assert/strict'
 
 process.env.PORT = '0'
-process.env.FRONTEND_URL = 'https://mid-daily.e41262272.workers.dev'
+process.env.FRONTEND_URL = 'https://mid-manager.xyz'
 process.env.COOKIE_SECURE = 'false'
 process.env.SUPABASE_URL = ''
 process.env.SUPABASE_SECRET_KEY = ''
@@ -46,9 +46,37 @@ test('Telegram integration status rejects unauthenticated requests', async () =>
   assert.equal(response.status, 401)
 })
 
+test('CORS allows the canonical custom domain', async () => {
+  const response = await fetch(baseUrl + '/api/ai/status', {
+    headers: { Origin: 'https://mid-manager.xyz' },
+  })
+  assert.equal(response.headers.get('access-control-allow-origin'), 'https://mid-manager.xyz')
+})
+
+test('CORS keeps the legacy frontend Worker origin working during migration', async () => {
+  const response = await fetch(baseUrl + '/api/ai/status', {
+    headers: { Origin: 'https://mid-daily.e41262272.workers.dev' },
+  })
+  assert.equal(response.headers.get('access-control-allow-origin'), 'https://mid-daily.e41262272.workers.dev')
+})
+
 test('CORS does not echo an untrusted origin', async () => {
   const response = await fetch(baseUrl + '/api/ai/status', {
     headers: { Origin: 'https://evil.example.com' },
   })
   assert.equal(response.headers.get('access-control-allow-origin'), process.env.FRONTEND_URL)
+})
+
+test('CORS preflight is handled', async () => {
+  const response = await fetch(baseUrl + '/api/integrations/google-calendar/status', {
+    method: 'OPTIONS',
+    headers: {
+      Origin: 'https://mid-manager.xyz',
+      'Access-Control-Request-Method': 'GET',
+      'Access-Control-Request-Headers': 'Authorization',
+    },
+  })
+  assert.equal(response.status, 204)
+  assert.equal(response.headers.get('access-control-allow-origin'), 'https://mid-manager.xyz')
+  assert.equal(response.headers.get('access-control-allow-credentials'), 'true')
 })
