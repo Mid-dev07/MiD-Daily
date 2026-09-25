@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { TaskDetail } from './components/TaskDetail'
+import { WorkspaceHeader } from '../../components/ui/WorkspaceHeader'
 import { TaskForm } from './components/TaskForm'
 import type { Task, TaskDraft, TaskPriority, TaskStatus } from '../../types'
 
@@ -44,10 +45,13 @@ export function TasksView({ tasks, onSaveTask, onToggleTask, onDeleteTask }: Tas
 
   return (
     <section className="workspace page-enter">
-      <div className="page-intro">
-        <div><span className="section-kicker">FOCUS</span><h2>Tasks</h2><p>Track work, deadlines, priority, and progress without adding unnecessary complexity.</p></div>
-        <button className="primary-button" type="button" onClick={openCreate}>+ Add task</button>
-      </div>
+      <WorkspaceHeader
+        index="003"
+        kicker="FOCUS"
+        title="Tasks"
+        description="Track work, deadlines, priority, and progress without adding unnecessary complexity."
+        action={<button className="primary-button" type="button" onClick={openCreate}>+ Add task</button>}
+      />
 
       <div className="task-toolbar content-card">
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search title or category" aria-label="Search tasks" />
