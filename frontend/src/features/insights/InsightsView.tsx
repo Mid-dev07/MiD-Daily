@@ -74,7 +74,7 @@ export function InsightsView({ tasks, schedule, finance, onNavigate }: InsightsV
         action={<button className="primary-button" type="button" onClick={() => onNavigate('assistant')}>Review with Assistant</button>}
       />
 
-      <section className="insights-metric-grid" aria-label="Weekly overview">
+      <section className="insights-metric-grid workspace-metrics workspace-metrics--four" aria-label="Weekly overview">
         <article className="content-card insights-metric"><span>Task completion</span><strong>{tasks.length ? Math.round((completedTasks.length / tasks.length) * 100) : 0}%</strong><small>{completedTasks.length} done · {openTasks.length} open</small></article>
         <article className="content-card insights-metric"><span>Focus load</span><strong>{Math.round(fixedMinutes / 60 * 10) / 10}h</strong><small>fixed schedule in next 7 days</small></article>
         <article className="content-card insights-metric"><span>Near deadlines</span><strong>{dueSoon.length}</strong><small>{overdueTasks.length} overdue right now</small></article>
