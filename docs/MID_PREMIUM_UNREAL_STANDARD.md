@@ -389,20 +389,34 @@ Avoid accidental empty space, random offsets, equal visual weight everywhere, an
 
 The environment is part of MiD identity.
 
+It is now a real spatial layer, not only a CSS background.
+
+It may use one bounded WebGL2 canvas with procedural geometry to establish:
+- depth;
+- architecture;
+- material presence;
+- camera perspective;
+- contextual light;
+- spatial continuity between workspaces.
+
 It should:
 - create atmosphere;
 - establish time and mood;
 - support context;
 - remain subdued behind content;
-- respond subtly to real state.
+- respond subtly to real state;
+- degrade to the existing CSS environment when WebGL2 is unavailable.
 
 It must never:
 - become wallpaper competing with text;
 - become a cyberpunk environment;
+- become a tech demo whose complexity is visible to the user;
 - continuously animate;
 - dominate every page.
 
 Foreground always wins.
+
+The renderer is an environmental instrument, not the product UI.
 
 ## 14 — Responsive Standard
 
