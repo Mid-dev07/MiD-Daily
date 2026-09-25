@@ -702,3 +702,17 @@ Performance and motion:
 - touch/reduced-motion layouts retain the same environmental semantics while reducing spatial intensity.
 
 Quality target: after a weather or day-phase change, the user should perceive a coherent shift in wetness, reflectivity, atmosphere, and grounding rather than a palette swap.
+
+
+## 24 — Cinematic Landmark Grounding Standard v1
+
+Authored workspace landmarks are part of the same physical environment as the shared workspace core.
+
+Required:
+- the active landmark receives a restrained projected ground-shadow approximation derived from the same solar light vector as the rest of the world;
+- landmark shadow scale and softness are bounded by landmark taxonomy and authored scale rather than renderer-wide multipliers;
+- grove, ridge, and shelter retain distinct grounding footprints while sharing one shadow/material grammar;
+- landmark grounding is limited to the desktop/fine-pointer spatial composition boundary and disappears naturally when the world is reduced;
+- atmospheric distance fade must use both sky coolness and light warmth so distant forms inherit the current environmental condition rather than fading into a fixed color.
+
+Quality target: a workspace landmark should feel planted into the terrain and atmosphere, not like an isolated low-poly object placed on top of the scene.
