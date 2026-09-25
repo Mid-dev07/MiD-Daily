@@ -609,3 +609,33 @@ The next quality layers remain separate:
 5. composition establishes cinematic spatial framing.
 
 Do not collapse these layers into generic post-processing or decorative blur.
+
+## 20 — Environmental Material Standard v1
+
+Geometry is not considered realistic until surface response changes with material identity and weather.
+
+Material families inside the spatial world:
+- Terrain: high roughness, restrained broad variation, low specular response;
+- Stone/structure: moderate roughness with controlled directional reflection;
+- Rock: lower roughness and stronger form catch so landforms read as solid mineral objects;
+- Moss/foliage: high roughness, softer contrast, restrained backlight/scatter response;
+- Path/moss accents: quiet matte response so navigation remains subordinate;
+- Contact: dark recessed grounding surfaces used only where they materially improve object-to-ground separation.
+
+Weather response:
+- wetness must modify both surface darkening and specular response;
+- wet rock/stone may become darker and more reflective;
+- foliage should remain mostly diffuse;
+- wetness must not turn the whole world glossy.
+
+Natural variation:
+- deterministic macro/micro surface variation is allowed;
+- variation must remain bounded and spatially coherent;
+- no texture pack is required for this stage.
+
+Grounding:
+- major forms may receive low-profile contact surfaces to approximate soft contact shadowing;
+- contact geometry must remain subtle, reusable, and below the content attention level;
+- this is an approximation, not a substitute for a full shadow map.
+
+Material realism is successful when terrain, stone, rock, moss, and wet surfaces can be distinguished from their light response—not merely from their base color.
