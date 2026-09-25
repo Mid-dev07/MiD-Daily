@@ -127,10 +127,10 @@ if (/\.content-card[\\s\\S]{0,220}backdrop-filter:\\s*blur/.test(experienceSyste
 if (!/UNREAL FINALIZATION — PHASE 2/.test(experienceSystem) || !/UNREAL FINALIZATION — PHASE 4/.test(experienceSystem)) {
   failures.push('Final Unreal spatial/material pass is incomplete.')
 }
-if (!/:focus-visible/.test(uiSystem) || !/outline:\\s*2px/.test(uiSystem)) {
+if (!/:focus-visible/.test(uiSystem) || !/outline:\s*2px/.test(uiSystem)) {
   failures.push('Global focus visibility contract must remain explicit and measurable.')
 }
-if (!/@media\\s*\\(prefers-reduced-motion:\\s*reduce\\)[\\s\\S]*?\.environment-clouds[\\s\\S]*?animation:\\s*none/.test(experienceSystem)) {
+if (!/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.environment-clouds[\s\S]*?animation:\s*none/.test(experienceSystem)) {
   failures.push('Reduced-motion must disable non-essential environmental movement.')
 }
 if (/pointermove/.test(environmentScene)) {
