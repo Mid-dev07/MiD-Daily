@@ -109,7 +109,16 @@
   --surface-shadow: rgba(0, 0, 0, .38);
   --contrast-min-ui: 4.5;
 
-  /* Glassmorphism material tokens — appearance lives in glass.css. */
+  /* Glassmorphism material tokens — shared, centralized, and tokenized. */
+  --glass-clear: rgba(11, 24, 15, .38);
+  --glass-soft: rgba(12, 28, 17, .52);
+  --glass-dense: rgba(9, 20, 12, .68);
+  --glass-recessed: rgba(2, 8, 5, .44);
+  --glass-rim: rgba(233, 242, 222, .15);
+  --glass-rim-strong: rgba(233, 242, 222, .24);
+  --glass-highlight: rgba(255, 255, 248, .11);
+  --glass-shadow: 0 24px 64px rgba(0, 0, 0, .28);
+  --glass-shadow-raised: 0 28px 72px rgba(0, 0, 0, .36);
   --glass-blur-shell: 14px;
   --glass-blur-surface: 8px;
   --glass-blur-modal: 20px;
