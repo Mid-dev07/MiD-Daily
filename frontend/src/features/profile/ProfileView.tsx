@@ -76,7 +76,7 @@ export function ProfileView({ user, profile, onProfileChange, onToast }: Profile
       />
 
       <div className="profile-layout">
-        <section className="content-card profile-hero-card">
+        <section className="content-card profile-hero-card" data-spatial-role="identity">
           <div className="profile-avatar-large-wrap">
             {profile.avatarUrl ? (
               <img className="profile-avatar-large" src={profile.avatarUrl} alt={displayName + ' profile'} />
@@ -109,7 +109,7 @@ export function ProfileView({ user, profile, onProfileChange, onToast }: Profile
           </div>
         </section>
 
-        <section className="content-card profile-form-card">
+        <section className="content-card profile-form-card" data-spatial-role="primary">
           <div className="card-heading">
             <div>
               <span className="section-kicker">PERSONAL INFO</span>
