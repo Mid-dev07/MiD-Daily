@@ -3,7 +3,7 @@ import type { FinanceEntry, Habit, HabitLog, Task, View } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
 import { scheduleOccursOnDate, shiftDate } from '../schedule/schedule.date'
 import { currency, formatDate } from '../../lib/format'
-import { FeatureLandscape } from './components/FeatureLandscape'
+import { ActionFocus } from './components/ActionFocus'
 import { listHabitLogs, listHabits } from '../habits/habitApi'
 import { weekday } from '../habits/habitRules'
 
@@ -303,8 +303,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
         <QuickCapture />
       </Suspense>
 
-      <FeatureLandscape
-        activeView="dashboard"
+      <ActionFocus
         onNavigate={onNavigate}
         tasks={tasks}
         schedule={schedule}
