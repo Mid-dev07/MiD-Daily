@@ -49,7 +49,8 @@ if (!/4PT RHYTHM CONTRACT/.test(uiSystem) || !/FINAL UI SYSTEM CLEANUP/.test(uiS
   failures.push('Active UI stylesheet must include the canonical 4pt rhythm and final cleanup layers.')
 }
 
-const spatialSource = uiSystem + '\\n' + experienceSystem\nconst spatialDeclarations = [...spatialSource.matchAll(/(?:^|[;{}])\s*(gap|row-gap|column-gap|padding(?:-[a-z]+)?|margin(?:-[a-z]+)?|min-height|max-height|min-width|max-width|height|width|top|right|bottom|left|inset|border-radius|grid-template-columns|grid-template-rows):\s*([^;{}]+)/gm)]
+const spatialSource = uiSystem + '\n' + experienceSystem
+const spatialDeclarations = [...spatialSource.matchAll(/(?:^|[;{}])\s*(gap|row-gap|column-gap|padding(?:-[a-z]+)?|margin(?:-[a-z]+)?|min-height|max-height|min-width|max-width|height|width|top|right|bottom|left|inset|border-radius|grid-template-columns|grid-template-rows):\s*([^;{}]+)/gm)]
 const offGridValues = []
 for (const match of spatialDeclarations) {
   const prop = match[1]
