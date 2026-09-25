@@ -189,7 +189,7 @@ if (!/dashboard-command-deck/.test(dashboard) || !/dashboard-hero-aside/.test(da
 if (!/listHabits/.test(dashboard) || !/Today’s habits/.test(dashboard) || !/dashboard-habits/.test(experienceSystem)) {
   failures.push('Today must surface a live habit rhythm signal as part of Module Convergence.')
 }
-if (!/opacity:0;visibility:hidden;pointer-events:none/.test(uiSystem + experienceSystem)) {
+if (!/opacity\s*:\s*0[\s;]+visibility\s*:\s*hidden[\s;]+pointer-events\s*:\s*none/.test(uiSystem + experienceSystem)) {
   failures.push('Sidebar hide state must remove the hidden rail from interaction and visual compositing.')
 }
 
