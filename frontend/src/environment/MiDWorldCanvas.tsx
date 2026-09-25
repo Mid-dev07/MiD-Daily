@@ -767,6 +767,8 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
       let targetState: Vec3 = [...initialAnchor.camera.target]
       let frame = 0
       let running = true
+      let renderRequested = true
+      let keepAnimating = true
       let width = 1
       let height = 1
       let lastRender = -Infinity
@@ -780,10 +782,21 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         precipitation: 0,
       }
 
+      const requestRender = () => {
+        renderRequested = true
+        if (!running || frame) return
+        frame = window.requestAnimationFrame(render)
+      }
+
       const pointerListener = (event: Event) => {
         const detail = event instanceof CustomEvent ? event.detail as { x?: number; y?: number } : null
         pointerRef.current.x = Number(detail?.x ?? 0)
         pointerRef.current.y = Number(detail?.y ?? 0)
+        requestRender()
+      }
+
+      const invalidateListener = () => {
+        requestRender()
       }
 
       const resize = () => {
@@ -814,13 +827,18 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
       gl.uniform3f(uniforms.light, DEFAULT_LIGHT_DIRECTION[0], DEFAULT_LIGHT_DIRECTION[1], DEFAULT_LIGHT_DIRECTION[2])
       gl.uniform1f(uniforms.opacity, 1)
 
-      const render = (timestamp: number) => {
+      function render(timestamp: number) {
         if (!running) return
+        frame = 0
 
         if (timestamp - lastRender < frameInterval) {
-          frame = window.requestAnimationFrame(render)
+          if (renderRequested || keepAnimating) {
+            frame = window.requestAnimationFrame(render)
+          }
           return
         }
+
+        renderRequested = false
 
         lastRender = timestamp
         const delta = lastTimestamp > 0 ? Math.min(0.08, (timestamp - lastTimestamp) / 1000) : 1
@@ -873,6 +891,24 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
           airDensity: visualState.airDensity + (targetVisual.airDensity - visualState.airDensity) * environmentBlend,
           precipitation: visualState.precipitation + (targetVisual.precipitation - visualState.precipitation) * environmentBlend,
         }
+
+        const cameraSettled =
+          Math.abs(desiredCamera[0] - cameraState[0]) < 0.002 &&
+          Math.abs(desiredCamera[1] - cameraState[1]) < 0.002 &&
+          Math.abs(desiredCamera[2] - cameraState[2]) < 0.002 &&
+          Math.abs(desiredTarget[0] - targetState[0]) < 0.002 &&
+          Math.abs(desiredTarget[1] - targetState[1]) < 0.002 &&
+          Math.abs(desiredTarget[2] - targetState[2]) < 0.002
+        const visualSettled = Math.max(
+          Math.abs(targetVisual.intensity - visualState.intensity),
+          Math.abs(targetVisual.wetness - visualState.wetness),
+          Math.abs(targetVisual.lightWarmth - visualState.lightWarmth),
+          Math.abs(targetVisual.skyCoolness - visualState.skyCoolness),
+          Math.abs(targetVisual.airDensity - visualState.airDensity),
+          Math.abs(targetVisual.precipitation - visualState.precipitation),
+        ) < 0.002
+        keepAnimating = !cameraSettled || !visualSettled
+
         const intensity = visualState.intensity
         const lightDirection = env.sun.altitude > -6
           ? environmentLightDirection(env.sun.azimuth, env.sun.altitude)
@@ -1163,7 +1199,10 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         draw(box, [0, 0.95, -0.05], [1.15, 0.035, 1.15], cyan, 1, 0.16, 0)
 
         gl.bindVertexArray(null)
-        frame = window.requestAnimationFrame(render)
+
+        if (renderRequested || keepAnimating) {
+          frame = window.requestAnimationFrame(render)
+        }
       }
 
       resize()
@@ -1178,20 +1217,22 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
 
         if (!running) {
           running = true
-          frame = window.requestAnimationFrame(render)
+          requestRender()
         }
       }
 
       window.addEventListener('mid:world-pointer', pointerListener)
+      window.addEventListener('mid:world-invalidate', invalidateListener)
       document.addEventListener('visibilitychange', handleVisibility)
       onReady?.(true)
-      frame = window.requestAnimationFrame(render)
+      requestRender()
 
       return () => {
         running = false
         window.cancelAnimationFrame(frame)
         resizeObserver.disconnect()
         window.removeEventListener('mid:world-pointer', pointerListener)
+        window.removeEventListener('mid:world-invalidate', invalidateListener)
         document.removeEventListener('visibilitychange', handleVisibility)
         gl.deleteVertexArray(box.vao)
         gl.deleteVertexArray(rockA.vao)
