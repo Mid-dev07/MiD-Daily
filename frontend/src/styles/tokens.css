@@ -108,4 +108,10 @@
   --surface-highlight: rgba(255, 255, 255, .12);
   --surface-shadow: rgba(0, 0, 0, .38);
   --contrast-min-ui: 4.5;
+
+  /* Glassmorphism material tokens — appearance lives in glass.css. */
+  --glass-blur-shell: 14px;
+  --glass-blur-surface: 8px;
+  --glass-blur-modal: 20px;
+  --glass-saturate: 118%;
 }
