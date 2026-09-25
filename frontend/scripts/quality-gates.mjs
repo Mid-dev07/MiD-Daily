@@ -162,6 +162,9 @@ for (const [label, file] of nativeControlFiles) {
   if (!/form-status form-status--error/.test(source)) {
     failures.push('Shared error status surface is missing from ' + label + '.')
   }
+  if (!/form-status form-status--saving/.test(source)) {
+    failures.push('Shared saving status surface is missing from ' + label + '.')
+  }
 }
 if (!/appearance:\s*none;/.test(uiSystem) || !/url\("data:image\/svg\+xml/.test(uiSystem) || !/calendar-picker-indicator/.test(uiSystem)) {
   failures.push('Select/date/time controls must replace default browser chrome with MiD-styled control affordances.')
