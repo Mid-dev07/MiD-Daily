@@ -241,6 +241,12 @@ export function App() {
     const onPointerMove = (event: PointerEvent) => {
       pointerX = event.clientX
       pointerY = event.clientY
+      window.dispatchEvent(new CustomEvent('mid:world-pointer', {
+        detail: {
+          x: (event.clientX / Math.max(1, window.innerWidth) - 0.5) * 2,
+          y: (event.clientY / Math.max(1, window.innerHeight) - 0.5) * 2,
+        },
+      }))
       if (activeSurface || landscape) schedule()
     }
 
