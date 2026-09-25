@@ -1796,6 +1796,56 @@ textarea:focus {
 
 .toast-icon { color: var(--mi-cyan); }
 
+.confirm-dialog {
+  width: min(520px, 100%);
+  max-height: min(76vh, 720px);
+}
+
+.confirm-dialog-copy {
+  padding: 4px 0 8px;
+}
+
+.confirm-dialog-copy p {
+  margin: 0;
+  color: var(--mi-text-soft);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.confirm-dialog-actions {
+  justify-content: flex-end;
+  padding-top: 8px;
+}
+
+.confirm-dialog-confirm.is-danger {
+  border-color: rgba(251,113,133,.28);
+  color: #fff3f5;
+  background:
+    linear-gradient(145deg, rgba(251,113,133,.78), rgba(127,45,62,.88));
+  box-shadow:
+    0 12px 28px rgba(251,113,133,.10),
+    inset 0 1px rgba(255,255,255,.30);
+}
+
+.confirm-dialog-confirm.is-danger:hover {
+  border-color: rgba(251,113,133,.40);
+}
+
+@media (max-width: 560px) {
+  .confirm-dialog {
+    width: 100%;
+  }
+
+  .confirm-dialog-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .confirm-dialog-actions > * {
+    width: 100%;
+  }
+}
+
 /* ==========================================================================
    15. LIVING STATE
    ========================================================================== */
