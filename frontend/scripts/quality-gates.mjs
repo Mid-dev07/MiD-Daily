@@ -126,7 +126,7 @@ if (!/WORKSPACE COMPASS/.test(featureLandscape) || !/feature-compass-status/.tes
 for (const position of ['feature-node--n', 'feature-node--ne', 'feature-node--e', 'feature-node--se', 'feature-node--s', 'feature-node--sw', 'feature-node--w', 'feature-node--nw']) {
   if (!featureLandscape.includes(position)) failures.push('Workspace Compass is missing positional node: ' + position)
 }
-if (!/feature-core.*Today/.test(featureLandscape)) {
+if (!/feature-core/.test(featureLandscape) || !/Return to Today/.test(featureLandscape)) {
   failures.push('Workspace Compass center must remain a functional return-to-Today control.')
 }
 if (!/aria-current=\{active \? 'page' : undefined\}/.test(featureLandscape)) {
