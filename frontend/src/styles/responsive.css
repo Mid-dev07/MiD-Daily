@@ -1,0 +1,511 @@
+/* MiD Daily — Responsive Experience Contract
+   Final responsive authority. Earlier component CSS establishes defaults;
+   this layer establishes device-class behavior without changing semantics.
+   Device classes:
+   desktop >= 1280
+   laptop 1024–1279
+   tablet  768–1023
+   phone   <= 767
+   compact phone <= 390
+*/
+
+/* ---------- Global fluid baseline ---------- */
+html,
+body,
+#root {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.app-frame,
+.main-content,
+.workspace,
+.view-key,
+.topbar,
+.workspace > * {
+  min-width: 0;
+}
+
+.workspace {
+  width: 100%;
+  padding-inline: clamp(16px, 3vw, 56px);
+}
+
+.topbar {
+  padding-inline: clamp(12px, 3vw, 56px);
+}
+
+img,
+svg,
+canvas,
+video {
+  max-width: 100%;
+}
+
+/* ---------- Wide desktop ---------- */
+@media (min-width: 1280px) {
+  .workspace {
+    padding-inline: clamp(32px, 4vw, 64px);
+  }
+
+  .topbar {
+    padding-inline: clamp(24px, 4vw, 64px);
+  }
+
+  .environment-world-canvas {
+    opacity: .94;
+  }
+}
+
+/* ---------- Laptop ---------- */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .sidebar {
+    width: 236px;
+  }
+
+  .main-content {
+    margin-left: 268px;
+    width: calc(100% - 268px);
+  }
+
+  .workspace {
+    padding-block: 24px 104px;
+    padding-inline: clamp(20px, 2.4vw, 32px);
+  }
+
+  .topbar {
+    min-height: 72px;
+  }
+
+  .dashboard-hero-grid {
+    grid-template-columns: minmax(0, 1.45fr) minmax(260px, .75fr);
+  }
+
+  .dashboard-overview,
+  .dashboard-context-grid {
+    grid-template-columns: minmax(0, 1.35fr) minmax(260px, .8fr);
+  }
+}
+
+/* ---------- Tablet / touch workspace ---------- */
+@media (max-width: 1023px) {
+  .app-frame {
+    --content-gutter: 16px;
+  }
+
+  .topbar {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .topbar-actions {
+    justify-content: flex-end;
+  }
+
+  .topbar-actions > * {
+    flex: 0 0 auto;
+  }
+
+  .search-trigger {
+    width: 48px;
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .search-trigger > span:nth-of-type(2),
+  .search-trigger kbd {
+    display: none;
+  }
+
+  .profile-email,
+  .environment-control .environment-readout,
+  .environment-attribution-inline {
+    display: none;
+  }
+
+  .environment-control {
+    width: 48px;
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .workspace {
+    padding-top: 20px;
+    padding-bottom: 124px;
+  }
+
+  .page-intro {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .page-intro p {
+    max-width: 64ch;
+  }
+
+  .dashboard-hero-actions {
+    width: 100%;
+  }
+
+  .dashboard-hero-actions > * {
+    flex: 1 1 180px;
+  }
+
+  .form-grid,
+  .form-fields,
+  .schedule-form-grid,
+  .finance-form-grid,
+  .profile-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-field.full,
+  .field.full {
+    grid-column: auto;
+  }
+
+  .environment-world-canvas {
+    opacity: .82;
+  }
+}
+
+/* ---------- Tablet portrait + phone ---------- */
+@media (max-width: 767px) {
+  .topbar {
+    position: sticky;
+    margin: max(8px, env(safe-area-inset-top)) 12px 0;
+    min-height: 62px;
+    padding: 8px 10px;
+    border-radius: 16px;
+    gap: 8px;
+  }
+
+  .topbar-kicker {
+    display: none;
+  }
+
+  .topbar-title-row {
+    gap: 6px;
+  }
+
+  .topbar-title-row h1 {
+    font-size: clamp(20px, 6vw, 25px);
+  }
+
+  .topbar-index {
+    font-size: 9px;
+  }
+
+  .topbar-sidebar-toggle,
+  .notification-trigger,
+  .search-trigger,
+  .environment-control {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    padding: 0;
+  }
+
+  .topbar-sidebar-toggle .sidebar-toggle-copy {
+    display: none;
+  }
+
+  .profile-chip {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .profile-chip .text-button {
+    display: none;
+  }
+
+  .workspace {
+    padding: 20px 12px calc(132px + env(safe-area-inset-bottom));
+  }
+
+  .workspace::before {
+    inset: 8px 4px 48px;
+  }
+
+  .page-intro {
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .page-intro h2 {
+    font-size: clamp(34px, 10vw, 52px);
+    line-height: .96;
+  }
+
+  .page-intro p {
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .content-card,
+  .glass-panel,
+  .stat-card,
+  .integration-panel,
+  .ai-shell-card,
+  .secondary-panel {
+    border-radius: 16px;
+  }
+
+  .dashboard-command-deck {
+    min-height: 0;
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .dashboard-signal-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+  }
+
+  .dashboard-signal-card {
+    min-height: 96px;
+    padding: 12px;
+  }
+
+  .dashboard-signal-card strong {
+    font-size: clamp(18px, 6vw, 24px);
+  }
+
+  .dashboard-hero-actions > *,
+  .form-actions > *,
+  .module-toolbar > *,
+  .finance-toolbar-controls > *,
+  .filter-row > * {
+    min-width: min(100%, 180px);
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea,
+  .primary-button,
+  .secondary-button,
+  .danger-button,
+  .icon-button,
+  .filter-button {
+    min-height: 48px;
+  }
+
+  textarea {
+    min-height: 104px;
+  }
+
+  .app-frame.sidebar-hidden .sidebar {
+    transform: translateY(calc(100% + 36px));
+  }
+
+  .sidebar {
+    inset: auto 8px calc(8px + env(safe-area-inset-bottom));
+    width: auto;
+    height: 68px;
+    padding: 8px;
+    border-radius: 20px;
+  }
+
+  .sidebar .brand {
+    display: none;
+  }
+
+  .nav-list {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(68px, 1fr);
+    grid-template-rows: 1fr;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .nav-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-item {
+    min-height: 52px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 3px;
+    padding: 5px 4px;
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .nav-item::before {
+    left: 10px;
+    right: 10px;
+    top: auto;
+    bottom: 2px;
+    width: auto;
+    height: 2px;
+  }
+
+  .nav-index {
+    display: none;
+  }
+
+  .nav-icon {
+    height: 20px;
+  }
+
+  .nav-item > span:last-child {
+    max-width: 64px;
+    overflow: hidden;
+    font-size: 8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .environment-world-canvas {
+    opacity: .68;
+  }
+
+  .environment-light-shafts,
+  .environment-canopy {
+    opacity: .24;
+  }
+
+  .environment-clouds,
+  .environment-stars {
+    opacity: .48;
+  }
+
+  .workspace-context-rail {
+    gap: 8px;
+  }
+
+  .workspace-context-item {
+    min-height: 48px;
+  }
+
+  .quick-capture-row,
+  .ai-composer {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Compact phone ---------- */
+@media (max-width: 390px) {
+  .topbar {
+    margin-inline: 8px;
+    padding-inline: 8px;
+  }
+
+  .topbar-title-row h1 {
+    font-size: 20px;
+  }
+
+  .topbar-index {
+    display: none;
+  }
+
+  .topbar-actions {
+    gap: 4px;
+  }
+
+  .workspace {
+    padding-inline: 8px;
+  }
+
+  .page-intro h2 {
+    font-size: 34px;
+  }
+
+  .dashboard-command-deck {
+    padding: 12px;
+  }
+
+  .dashboard-signal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-signal-card {
+    min-height: 84px;
+    border-left: 0;
+    border-top: 1px solid rgba(206,224,227,.07);
+  }
+
+  .dashboard-signal-card:first-child {
+    border-top: 0;
+  }
+
+  .sidebar {
+    inset-inline: 6px;
+    height: 64px;
+  }
+
+  .nav-list {
+    grid-auto-columns: 66px;
+  }
+
+  .environment-world-canvas {
+    opacity: .54;
+  }
+}
+
+/* ---------- Short landscape phones / small tablets ---------- */
+@media (max-width: 920px) and (orientation: landscape) and (max-height: 560px) {
+  .topbar {
+    min-height: 54px;
+    margin-top: max(4px, env(safe-area-inset-top));
+  }
+
+  .workspace {
+    padding-top: 12px;
+    padding-bottom: 92px;
+  }
+
+  .sidebar {
+    height: 56px;
+    bottom: calc(6px + env(safe-area-inset-bottom));
+  }
+
+  .nav-item {
+    min-height: 44px;
+  }
+
+  .page-intro h2 {
+    font-size: clamp(28px, 7vw, 42px);
+  }
+
+  .environment-world-canvas {
+    opacity: .60;
+  }
+}
+
+/* ---------- Touch devices: no hover dependency ---------- */
+@media (hover: none), (pointer: coarse) {
+  .nav-item:hover,
+  .workspace-context-item:hover,
+  .primary-button:hover,
+  .secondary-button:hover,
+  .text-button:hover,
+  .filter-button:hover,
+  .icon-button:hover,
+  .search-trigger:hover,
+  .environment-control:hover,
+  .profile-chip:hover {
+    transform: none;
+  }
+
+  .dashboard-command-deck[data-ux-lit="true"],
+  .dashboard-hero-aside[data-ux-lit="true"] {
+    transform: none;
+  }
+}
+
+/* ---------- Reduced motion remains authoritative ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .environment-world-canvas {
+    opacity: .44;
+  }
+
+  .page-enter {
+    animation: none;
+  }
+}
