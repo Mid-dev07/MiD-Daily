@@ -23,18 +23,28 @@ export function GoogleCalendarIntegrationCard() {
   useEffect(() => {
     let active = true
 
-    void getGoogleCalendarConnectionStatus()
-      .then((next) => {
-        if (active) setStatus(next)
-      })
-      .catch(() => {
-        if (active) setError('Calendar backend is not reachable.')
-      })
-      .finally(() => {
-        if (active) setLoading(false)
-      })
+    const refreshStatus = () => {
+      setLoading(true)
+      void getGoogleCalendarConnectionStatus()
+        .then((next) => {
+          if (active) setStatus(next)
+        })
+        .catch(() => {
+          if (active) setError('Calendar backend is not reachable.')
+        })
+        .finally(() => {
+          if (active) setLoading(false)
+        })
+    }
 
-    return () => { active = false }
+    refreshStatus()
+    const onConnected = () => refreshStatus()
+    window.addEventListener('mid-daily:google-calendar-connected', onConnected)
+
+    return () => {
+      active = false
+      window.removeEventListener('mid-daily:google-calendar-connected', onConnected)
+    }
   }, [])
 
   const connect = async () => {
