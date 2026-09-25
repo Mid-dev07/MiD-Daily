@@ -119,8 +119,6 @@
 
 .sidebar > * { position: relative; z-index: 1; }
 
-.sidebar-hidden .sidebar{opacity:0;visibility:hidden;pointer-events:none;transform:translateX(calc(-100% - 24px));}
-
 .brand {
   display: flex;
   align-items: center;
@@ -259,12 +257,6 @@
   margin-left: 292px;
   width: calc(100% - 292px);
   transition: margin-left 220ms var(--ease-spring), width 220ms var(--ease-spring);
-}
-
-.sidebar-hidden .main-content,
-.app-frame.sidebar-hidden .main-content {
-  margin-left: 0;
-  width: 100%;
 }
 
 /* ==========================================================================
@@ -2163,13 +2155,6 @@ textarea:focus {
   gap: 8px;
 }
 
-
-.sidebar-hidden .sidebar {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transform: translateX(calc(-100% - 24px));
-}
 
 .view-key[data-module="dashboard"] {
   --module-accent: var(--mi-cyan);
