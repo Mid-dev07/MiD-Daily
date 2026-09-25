@@ -168,11 +168,17 @@ void main() {
   float viewDistance = length(uCameraPosition - vWorldPosition);
   float atmosphericDensity = clamp(uAirDensity * 0.45, 0.0, 0.64);
   float atmosphericFade = smoothstep(10.0, 30.0, viewDistance) * atmosphericDensity;
-  vec3 atmosphereColor = mix(
-    vec3(0.055, 0.08, 0.095),
-    vec3(0.12, 0.11, 0.095),
+  vec3 coolAtmosphere = mix(
+    vec3(0.045, 0.07, 0.09),
+    vec3(0.075, 0.11, 0.13),
+    uSkyCoolness,
+  );
+  vec3 warmAtmosphere = mix(
+    vec3(0.11, 0.10, 0.085),
+    vec3(0.16, 0.125, 0.095),
     uLightWarmth,
   );
+  vec3 atmosphereColor = mix(coolAtmosphere, warmAtmosphere, uLightWarmth * 0.72);
   color = mix(color, atmosphereColor, atmosphericFade);
 
   gl_FragColor = vec4(color, uOpacity);
@@ -1002,6 +1008,54 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
             fern,
             activeAnchor.composition.landmarkScale,
           )
+
+          const composition = activeAnchor.composition
+          const [lx, ly, lz] = composition.landmark
+          const landmarkScale = Math.max(0.72, Math.min(1.08, composition.landmarkScale))
+          const landmarkShadowSoftness = Math.min(
+            1,
+            Math.max(0.18, 0.16 + env.visual.airDensity * 0.62 + env.visual.cloudOpacity * 0.18),
+          )
+          const landmarkShadowTint: Vec3 = [
+            mineral[0] * 0.21,
+            mineral[1] * 0.23,
+            mineral[2] * 0.25,
+          ]
+
+          if (composition.landmarkKind === 'grove') {
+            drawProjectedGroundShadow(
+              draw,
+              shadow,
+              lightDirection,
+              [lx - 0.45 * landmarkScale, ly + 0.38 * landmarkScale, lz],
+              0.82 * landmarkScale,
+              [1.0 * landmarkScale, 0.82 * landmarkScale],
+              landmarkShadowTint,
+              landmarkShadowSoftness,
+            )
+          } else if (composition.landmarkKind === 'ridge') {
+            drawProjectedGroundShadow(
+              draw,
+              shadow,
+              lightDirection,
+              [lx + 0.08 * landmarkScale, ly + 0.56 * landmarkScale, lz],
+              0.72 * landmarkScale,
+              [1.55 * landmarkScale, 0.92 * landmarkScale],
+              landmarkShadowTint,
+              landmarkShadowSoftness,
+            )
+          } else {
+            drawProjectedGroundShadow(
+              draw,
+              shadow,
+              lightDirection,
+              [lx, ly + 0.55 * landmarkScale, lz],
+              0.95 * landmarkScale,
+              [1.2 * landmarkScale, 0.82 * landmarkScale],
+              landmarkShadowTint,
+              landmarkShadowSoftness,
+            )
+          }
         }
 
         const contactShadow: Vec3 = [
