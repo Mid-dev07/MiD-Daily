@@ -95,7 +95,7 @@ export function SocialAnalyticsView() {
       {notice && <div className="ai-availability-note" role="status"><strong>{notice}</strong><span>You can disconnect the account at any time from this workspace.</span></div>}
       {error && <div className="form-error" role="alert">{error}</div>}
 
-      <div className="content-card integration-panel social-foundation-card">
+      <div className="content-card integration-panel social-foundation-card" data-spatial-role="primary">
         <div className="card-heading">
           <div>
             <span className="section-kicker">INSTAGRAM</span>
