@@ -421,6 +421,37 @@ if (/uTime|timestamp * 0\.001|Math\.sin\(t/.test(lightingWorldSource)) {
   failures.push('Lighting/atmosphere v1 must remain event/state driven with no perpetual time animation.')
 }
 
+
+const compositionSource = readFileSync(join(srcDir, 'environment/moduleWorld.ts'), 'utf8')
+const compositionRendererSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
+for (const contract of [
+  'WorldLandmarkKind',
+  'WorldModuleComposition',
+  'foregroundLeft',
+  'foregroundRight',
+  'horizon',
+  'landmarkKind',
+  'landmarkScale',
+]) {
+  if (!compositionSource.includes(contract)) failures.push('Cinematic composition intent missing: ' + contract)
+}
+for (const contract of [
+  'function drawWorldComposition',
+  'composition.landmarkKind',
+  'composition.foregroundLeft',
+  'composition.foregroundRight',
+  'composition.horizon',
+  'drawWorldComposition(',
+]) {
+  if (!compositionRendererSource.includes(contract)) failures.push('Cinematic composition renderer contract missing: ' + contract)
+}
+if (!/spatialPathQuery\.matches[\s\S]{0,900}drawWorldComposition/.test(compositionRendererSource)) {
+  failures.push('Cinematic composition must share the desktop/fine-pointer spatial reduction boundary.')
+}
+if (!/WorldLandmarkKind = 'ridge' \| 'grove' \| 'shelter'/.test(compositionSource)) {
+  failures.push('Cinematic composition landmark taxonomy must remain bounded to natural/stone forms.')
+}
+
 const spatialStyles = join(srcDir, 'styles/spatial-composition.css')
 if (!existsSync(spatialStyles)) {
   failures.push('Spatial workspace composition stylesheet is missing.')
