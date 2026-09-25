@@ -62,12 +62,7 @@ export function App() {
     if (!(frame instanceof HTMLElement)) return
     if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
 
-    const microTiltSelector = [
-      '.content-card','.glass-panel','.stat-card','.dashboard-signal-card','.feature-directory-item',
-      '.feature-node','.planner-shortcut','.global-search-result','.toast','.finance-budget-row',
-      '.task-item-card','.notification-card','.notification-popover','.secondary-panel','.flexible-plan',
-      '.schedule-now-strip','.insights-metric','.habit-check','.habit-day','.dashboard-section-link'
-    ].join(',')
+    const microTiltSelector = '.feature-landscape'
 
     const surfaceSelector = [
       '.sidebar','.topbar','.content-card','.glass-panel','.stat-card','.dashboard-signal-card','.feature-directory-item',
@@ -117,8 +112,8 @@ export function App() {
           const distance = Math.min(1, Math.hypot(nx, ny) * 1.414)
           activeSurface.style.setProperty('--ux-elevation', (1 - distance).toFixed(3))
           if (activeSurface.matches(microTiltSelector)) {
-            activeSurface.style.setProperty('--ux-rx', (-ny * 1.25).toFixed(2) + 'deg')
-            activeSurface.style.setProperty('--ux-ry', (nx * 1.25).toFixed(2) + 'deg')
+            activeSurface.style.setProperty('--ux-rx', (-ny * 0.45).toFixed(2) + 'deg')
+            activeSurface.style.setProperty('--ux-ry', (nx * 0.45).toFixed(2) + 'deg')
           } else {
             activeSurface.style.removeProperty('--ux-rx')
             activeSurface.style.removeProperty('--ux-ry')
