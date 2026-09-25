@@ -464,6 +464,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         const stone: Vec3 = [0.17 + tint[0] * 0.2, 0.23 + tint[1] * 0.16, 0.25 + tint[2] * 0.14]
         const moss: Vec3 = [0.17 + tint[0] * 0.12, 0.27 + tint[1] * 0.16, 0.20 + tint[2] * 0.08]
         const fern: Vec3 = [0.10 + tint[0] * 0.08, 0.20 + tint[1] * 0.12, 0.14 + tint[2] * 0.06]
+        const cyan: Vec3 = [0.11, 0.42, 0.52]
         const warm: Vec3 = [0.42 + tint[0] * 0.05, 0.3 + tint[1] * 0.03, 0.18]
 
         draw(floor, [0, -0.12, 0], [18, 1, 18], mineral, 0)
