@@ -50,6 +50,7 @@ const environmentFiles = [
   'environment/visual.ts',
   'environment/useEnvironment.ts',
   'environment/EnvironmentScene.tsx',
+  'environment/MiDWorldCanvas.tsx',
 ]
 
 const failures = []
@@ -281,8 +282,21 @@ if (!/environment-stars/.test(environmentScene) || !/environment-sun/.test(envir
 if (/environment-photograph/.test(environmentScene) || /images\\.unsplash\\.com/.test(environmentScene)) {
   failures.push('Living Environment must not fall back to a photographic wallpaper layer.')
 }
+const worldRendererPath = join(srcDir, 'environment/MiDWorldCanvas.tsx')
+if (!existsSync(worldRendererPath)) {
+  failures.push('Spatial world renderer is missing from the environment layer.')
+} else {
+  const worldRenderer = readFileSync(worldRendererPath, 'utf8')
+  if (!/getContext\(['"]webgl2/.test(worldRenderer)) failures.push('Spatial world renderer must use a real WebGL2 context.')
+  if (!/requestAnimationFrame/.test(worldRenderer)) failures.push('Spatial world renderer must use a bounded animation frame loop.')
+  if (!/prefers-reduced-motion/.test(worldRenderer)) failures.push('Spatial world renderer must honor reduced-motion.')
+  if (/addEventListener\(['"]pointermove/.test(worldRenderer)) failures.push('Spatial world renderer must not own a second pointermove stream.')
+}
 if (/pointermove/.test(environmentScene) || existsSync(join(srcDir, 'hooks/useLivingInteractions.ts'))) {
-  failures.push('Environment shell must not reintroduce pointermove JavaScript interaction handlers.')
+  failures.push('Environment shell must not reintroduce a local pointermove interaction handler.')
+}
+if (!/mid:world-pointer/.test(appSourceForInteraction) || !/CustomEvent/.test(appSourceForInteraction)) {
+  failures.push('The shared App interaction stream must route pointer state into the spatial world.')
 }
 const missingEnvironmentFiles = environmentFiles.filter((relative) => !existsSync(join(srcDir, relative)))
 if (missingEnvironmentFiles.length) {
