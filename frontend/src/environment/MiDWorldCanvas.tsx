@@ -51,7 +51,6 @@ uniform vec3 uBaseColor;
 uniform float uLightIntensity;
 uniform float uEmissive;
 uniform float uKind;
-uniform float uTime;
 
 varying vec3 vWorldPosition;
 varying vec3 vWorldNormal;
@@ -78,7 +77,7 @@ void main() {
 
   vec3 base = uBaseColor * (0.34 + halfLambert * 0.66 * uLightIntensity);
   vec3 reflected = vec3(specular * 0.17 + rim * 0.08);
-  vec3 emissive = uBaseColor * (uEmissive * (0.74 + 0.26 * sin(uTime * 0.8)));
+  vec3 emissive = uBaseColor * uEmissive;
   vec3 color = base + reflected + emissive + uBaseColor * grid;
 
   float distanceFade = smoothstep(24.0, 6.0, length(vWorldPosition.xz));
@@ -360,10 +359,9 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         intensity: gl.getUniformLocation(program, 'uLightIntensity'),
         emissive: gl.getUniformLocation(program, 'uEmissive'),
         kind: gl.getUniformLocation(program, 'uKind'),
-        time: gl.getUniformLocation(program, 'uTime'),
       }
 
-      if ([uniforms.projection, uniforms.view, uniforms.model, uniforms.camera, uniforms.light, uniforms.base, uniforms.intensity, uniforms.emissive, uniforms.kind, uniforms.time].some((uniform) => !uniform)) {
+      if ([uniforms.projection, uniforms.view, uniforms.model, uniforms.camera, uniforms.light, uniforms.base, uniforms.intensity, uniforms.emissive, uniforms.kind].some((uniform) => !uniform)) {
         throw new Error('WebGL uniform contract is incomplete.')
       }
 
@@ -377,11 +375,23 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
 
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
       const frameInterval = 1000 / (window.innerWidth < 700 ? MOBILE_FPS : DESKTOP_FPS)
+      const initialAnchor = worldModuleAnchor(activeViewRef.current)
+      let cameraState: Vec3 = [
+        initialAnchor.position[0] * 0.18,
+        4.25,
+        10.8 + initialAnchor.position[2] * 0.08,
+      ]
+      let targetState: Vec3 = [
+        initialAnchor.position[0] * 0.22,
+        1.4,
+        initialAnchor.position[2] * 0.12,
+      ]
       let frame = 0
       let running = true
       let width = 1
       let height = 1
       let lastRender = -Infinity
+      let lastTimestamp = 0
 
       const pointerListener = (event: Event) => {
         const detail = event instanceof CustomEvent ? event.detail as { x?: number; y?: number } : null
@@ -425,18 +435,36 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         }
 
         lastRender = timestamp
-        const t = timestamp * 0.001
+        const delta = lastTimestamp > 0 ? Math.min(0.08, (timestamp - lastTimestamp) / 1000) : 1
+        lastTimestamp = timestamp
         const pointer = pointerRef.current
         const activeAnchor = worldModuleAnchor(activeViewRef.current)
         const pointerStrength = reduceMotion.matches ? 0 : 1
-        const yaw = pointer.x * 0.055 * pointerStrength + Math.sin(t * 0.07) * 0.008
+        const yaw = pointer.x * 0.055 * pointerStrength
         const pitch = pointer.y * 0.035 * pointerStrength
-        const camera: Vec3 = [Math.sin(yaw) * 10.8, 4.25 + pitch * 4, Math.cos(yaw) * 10.8]
-        const target: Vec3 = [
-          activeAnchor.position[0] * 0.06,
-          1.4 + pitch * 1.1,
-          activeAnchor.position[2] * 0.035,
+        const desiredCamera: Vec3 = [
+          activeAnchor.position[0] * 0.18 + Math.sin(yaw) * 10.8,
+          4.25 + pitch * 4,
+          10.8 + activeAnchor.position[2] * 0.08 + Math.cos(yaw) * 10.8,
         ]
+        const desiredTarget: Vec3 = [
+          activeAnchor.position[0] * 0.22,
+          1.4 + pitch * 1.1,
+          activeAnchor.position[2] * 0.12,
+        ]
+        const cameraBlend = reduceMotion.matches ? 1 : Math.min(1, delta * 7)
+        cameraState = [
+          cameraState[0] + (desiredCamera[0] - cameraState[0]) * cameraBlend,
+          cameraState[1] + (desiredCamera[1] - cameraState[1]) * cameraBlend,
+          cameraState[2] + (desiredCamera[2] - cameraState[2]) * cameraBlend,
+        ]
+        targetState = [
+          targetState[0] + (desiredTarget[0] - targetState[0]) * cameraBlend,
+          targetState[1] + (desiredTarget[1] - targetState[1]) * cameraBlend,
+          targetState[2] + (desiredTarget[2] - targetState[2]) * cameraBlend,
+        ]
+        const camera = cameraState
+        const target = targetState
         const env = environmentRef.current
         const tint = dayTint(env)
         const intensity = Math.max(0.28, Math.min(1, env.visual.lightIntensity + 0.24))
@@ -455,7 +483,6 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         gl.uniform3f(uniforms.camera, camera[0], camera[1], camera[2])
         gl.uniform3f(uniforms.light, lightDirection[0], lightDirection[1], lightDirection[2])
         gl.uniform1f(uniforms.intensity, intensity)
-        gl.uniform1f(uniforms.time, reduceMotion.matches ? 0 : t)
 
         const draw = (mesh: Mesh, position: Vec3, scale: Vec3, color: Vec3, kind: number, emissive = 0, rotation = 0) => {
           gl.bindVertexArray(mesh.vao)
@@ -513,19 +540,17 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         draw(box, [-2.2, 0.63, 0.0], [0.04, 0.63, 0.96], cyan, 1, 0.42)
         draw(box, [2.2, 0.63, 0.0], [0.04, 0.63, 0.96], cyan, 1, 0.42)
         draw(box, [0, 1.08, -0.01], [1.0, 0.025, 0.025], cyan, 1, 0.52)
-        draw(box, [-4.9, 1.9, -2.7], [0.035, 0.52, 1.55], warm, 1, 0.18, t * 0.04)
+        draw(box, [-4.9, 1.9, -2.7], [0.035, 0.52, 1.55], warm, 1, 0.18, 0.04)
 
         for (const anchor of MODULE_ANCHORS) {
           const active = anchor.view === activeViewRef.current
           const distance = Math.hypot(anchor.position[0] - activeAnchor.position[0], anchor.position[2] - activeAnchor.position[2])
           const emphasis = active ? 0.24 : distance < 6 ? 0.055 : 0.025
           const scale: Vec3 = active ? [0.9, 0.035, 0.52] : [0.64, 0.022, 0.38]
-          draw(box, anchor.position, scale, anchor.color, 1, emphasis, active && !reduceMotion.matches ? t * 0.08 : 0)
+          draw(box, anchor.position, scale, anchor.color, 1, emphasis, active ? 0.08 : 0)
         }
 
-        if (!reduceMotion.matches) {
-          draw(box, [0, 0.95, -0.05], [1.15, 0.035, 1.15], cyan, 1, 0.16, t * 0.11)
-        }
+        draw(box, [0, 0.95, -0.05], [1.15, 0.035, 1.15], cyan, 1, 0.16, 0)
 
         gl.bindVertexArray(null)
         frame = window.requestAnimationFrame(render)
