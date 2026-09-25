@@ -1,4 +1,4 @@
-/* MiD-Daily vNext — structural UI system. Material glass styling is isolated in glass.css. */
+/* MiD-Daily vNext — structural UI system. Visual material authority lives in experience.css. */
 .app-frame{position:relative;min-height:100vh;isolation:isolate;color:var(--color-text)}
 .app-frame:before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(800px 500px at 76% 10%,rgba(233,199,125,.09),transparent 62%),radial-gradient(680px 480px at 10% 90%,rgba(92,145,92,.11),transparent 65%)}
 .app-frame:after{content:"";position:fixed;inset:0;z-index:5;pointer-events:none;background:linear-gradient(180deg,transparent 55%,rgba(1,6,3,.3)),linear-gradient(90deg,rgba(1,6,3,.32),transparent 20%,transparent 82%,rgba(1,6,3,.18))}
@@ -351,62 +351,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 @media (prefers-reduced-motion:reduce){.feature-landscape{transform:none!important;will-change:auto}.toast{animation:none}}
 
 
-/* MiD TERRAIN SIGNATURE
-   Module identity comes from restrained surface behavior, not theme changes. */
-.view-key[data-module] {
-  --module-accent: rgba(211, 231, 165, .22);
-  --module-light: rgba(240, 244, 222, .045);
-  --module-surface-angle: 145deg;
-}
-.view-key[data-module="dashboard"] {
-  --module-accent: rgba(215, 231, 183, .24);
-  --module-light: rgba(239, 246, 219, .055);
-}
-.view-key[data-module="schedule"] {
-  --module-accent: rgba(192, 215, 173, .22);
-  --module-light: rgba(211, 231, 213, .045);
-  --module-surface-angle: 180deg;
-}
-.view-key[data-module="tasks"] {
-  --module-accent: rgba(221, 208, 165, .22);
-  --module-light: rgba(244, 236, 203, .045);
-}
-.view-key[data-module="finance"] {
-  --module-accent: rgba(231, 193, 128, .22);
-  --module-light: rgba(247, 223, 179, .045);
-}
-.view-key[data-module="social"] {
-  --module-accent: rgba(191, 210, 196, .2);
-  --module-light: rgba(226, 237, 231, .04);
-}
-.view-key[data-module="assistant"] {
-  --module-accent: rgba(196, 212, 231, .22);
-  --module-light: rgba(224, 234, 247, .045);
-  --module-surface-angle: 160deg;
-}
-.view-key[data-module="profile"] {
-  --module-accent: rgba(225, 214, 191, .2);
-  --module-light: rgba(242, 233, 217, .04);
-}
-.view-key[data-module="insights"] {
-  --module-accent: rgba(193, 211, 187, .22);
-  --module-light: rgba(225, 238, 219, .045);
-  --module-surface-angle: 170deg;
-}
-.view-key[data-module="habits"] {
-  --module-accent: rgba(191, 214, 166, .22);
-  --module-light: rgba(227, 241, 203, .05);
-}
-.view-key[data-module] .content-card,
-.view-key[data-module] .integration-panel,
-.view-key[data-module] .ai-shell-card,
-.view-key[data-module] .stat-card {
-  background:
-    linear-gradient(var(--module-surface-angle), var(--module-light), transparent 46%),
-    linear-gradient(145deg, rgba(41, 61, 43, .28), rgba(8, 17, 11, .68)),
-    rgba(8, 17, 11, .72);
-  box-shadow: var(--shadow-soft), inset 0 1px 0 var(--module-accent), 0 1px 0 rgba(255,255,255,.025);
-}
 .assistant-health-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -949,80 +893,6 @@ textarea:focus {
 
 .feature-scene-caption strong {
   color: rgba(214, 230, 239, .72);
-}
-
-/* Module terrain = one machine, different subsystem signatures. */
-.view-key[data-module] {
-  --module-accent: #4fd1ff;
-  --module-surface: rgba(13, 21, 31, .76);
-  --module-light: rgba(79, 209, 255, .035);
-  --module-surface-angle: 145deg;
-}
-
-.view-key[data-module="schedule"] {
-  --module-accent: #9b8cff;
-  --module-light: rgba(155, 140, 255, .035);
-}
-
-.view-key[data-module="tasks"] {
-  --module-accent: #4ade80;
-  --module-light: rgba(74, 222, 128, .03);
-}
-
-.view-key[data-module="finance"] {
-  --module-accent: #fbbf24;
-  --module-light: rgba(251, 191, 36, .03);
-}
-
-.view-key[data-module="social"] {
-  --module-accent: #fb7185;
-  --module-light: rgba(251, 113, 133, .028);
-}
-
-.view-key[data-module="assistant"] {
-  --module-accent: #67d9ff;
-  --module-light: rgba(103, 217, 255, .035);
-}
-
-.view-key[data-module="profile"] {
-  --module-accent: #c6d0d8;
-  --module-light: rgba(198, 208, 216, .025);
-}
-
-.view-key[data-module="insights"] {
-  --module-accent: #718bff;
-  --module-light: rgba(113, 139, 255, .03);
-}
-
-.view-key[data-module="habits"] {
-  --module-accent: #a8d86e;
-  --module-light: rgba(168, 216, 110, .03);
-}
-
-.view-key[data-module] .content-card,
-.view-key[data-module] .integration-panel,
-.view-key[data-module] .ai-shell-card,
-.view-key[data-module] .stat-card {
-  background:
-    linear-gradient(var(--module-surface-angle), var(--module-light), transparent 42%),
-    linear-gradient(145deg, rgba(25, 39, 52, .34), rgba(7, 14, 22, .72)),
-    var(--module-surface);
-  box-shadow:
-    var(--shadow-soft),
-    inset 0 1px rgba(255, 255, 255, .055),
-    0 1px rgba(255, 255, 255, .018);
-}
-
-.view-key[data-module] .section-kicker,
-.view-key[data-module] .card-meta {
-  color: color-mix(in srgb, var(--module-accent) 62%, #8194a1 38%);
-}
-
-.view-key[data-module] .timeline-dot {
-  background: var(--module-accent);
-  box-shadow:
-    0 0 0 4px color-mix(in srgb, var(--module-accent) 10%, transparent),
-    0 0 14px color-mix(in srgb, var(--module-accent) 16%, transparent);
 }
 
 /* Living material interaction: one local catch-light, no global neon wash. */
