@@ -1028,7 +1028,7 @@ textarea:focus,
 .feature-core::after {
   content: "";
   position: absolute;
-  inset: 10px;
+  inset: 8px;
   border: 1px solid color-mix(in srgb, var(--module-accent, var(--accent)) 34%, transparent);
   border-radius: 50%;
   opacity: .35;
