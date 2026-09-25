@@ -364,6 +364,12 @@ if (!existsSync(spatialStyles)) {
     'prefers-reduced-motion: reduce',
     'data-spatial-role="primary"',
     'data-spatial-role="supporting"',
+    'data-spatial-role="controls"',
+    'data-spatial-role="instrument"',
+    'data-spatial-role="rhythm"',
+    'data-spatial-role="identity"',
+    'backdrop-filter: blur(10px)',
+    'inset 0 1px 6px',
 
   ]) {
     if (!spatialSource.includes(contract)) failures.push('Spatial composition contract missing: ' + contract)

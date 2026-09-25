@@ -492,7 +492,16 @@ Canonical roles:
 - `identity`: personal identity surface.
 - `instrument`: small working object inside a larger spatial surface.
 
-Depth must follow semantic role. Module-specific rules may change accent, emphasis, or local composition, but must not create unrelated depth systems.
+Depth and material must follow semantic role. Canonical material grammar is:
+- primary / focus: controlled glass depth with restrained atmospheric highlight;
+- supporting / secondary-group: matte/receded working surfaces;
+- controls / instrument: recessed instrument surfaces with inner depth;
+- metrics: compact HUD-like signal surfaces;
+- rhythm: natural-soft material language;
+- identity: mineral/personal material language;
+- utility / archive: quiet low-priority surfaces.
+
+Only primary and focus may use the bounded panel backdrop blur, and that blur is removed on small/touch layouts. Module-specific rules may change accent, emphasis, or local composition, but must not create unrelated depth or material systems.
 
 ## 15 — Accessibility Standard
 
