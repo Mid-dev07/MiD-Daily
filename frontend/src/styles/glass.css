@@ -106,6 +106,7 @@
 .habit-check,
 .task-item-card,
 .global-search-result {
+  position: relative;
   border-color: var(--glass-rim);
   background:
     radial-gradient(240px 180px at var(--ux-x, 18%) var(--ux-y, 10%), rgba(227, 241, 202, .08), transparent 72%),
