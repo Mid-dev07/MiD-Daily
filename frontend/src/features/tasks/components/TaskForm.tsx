@@ -99,6 +99,7 @@ export function TaskForm({ open, initialTask, onClose, onSubmit }: TaskFormProps
           <label>Notes<textarea disabled={saving} value={draft.notes ?? ''} onChange={(event) => setField('notes', event.target.value)} rows={4} placeholder="Optional context, acceptance criteria, or next step" maxLength={5000} /></label>
 
           {error && <div className="form-status form-status--error" role="alert">{error}</div>}
+          {saving && <div className="form-status form-status--saving" role="status" aria-live="polite">Saving task…</div>}
           <div className="modal-actions"><button className="secondary-button" type="button" disabled={saving} onClick={onClose}>Cancel</button><button className="primary-button" disabled={saving} type="submit">{saving ? 'Saving…' : initialTask ? 'Save changes' : 'Add task'}</button></div>
         </form>
       </section>
