@@ -23,7 +23,7 @@ const uiSystem = readFileSync(join(srcDir, 'styles/ui-system.css'), 'utf8')
 const experienceSystem = readFileSync(join(srcDir, 'styles/experience.css'), 'utf8')
 const tokens = readFileSync(join(srcDir, 'styles/tokens.css'), 'utf8')
 const dashboard = readFileSync(join(srcDir, 'features/dashboard/DashboardView.tsx'), 'utf8')
-const featureLandscape = readFileSync(join(srcDir, 'features/dashboard/components/FeatureLandscape.tsx'), 'utf8')
+const actionFocus = readFileSync(join(srcDir, 'features/dashboard/components/ActionFocus.tsx'), 'utf8')
 const workspaceHeaderPath = join(srcDir, 'components/ui/WorkspaceHeader.tsx')
 const workspaceHeaderSource = existsSync(workspaceHeaderPath) ? readFileSync(workspaceHeaderPath, 'utf8') : ''
 const convergedWorkspaceFiles = [
@@ -110,7 +110,7 @@ if (!/@supports\s+not\s*\(\s*backdrop-filter:\s*blur\(1px\)\s*\)/.test(experienc
 if (!/G0/.test(experienceSystem) || !/G1/.test(experienceSystem) || !/G2/.test(experienceSystem) || !/G3/.test(experienceSystem) || !/G4/.test(experienceSystem)) {
   failures.push('Experience material hierarchy contract is missing or incomplete.')
 }
-if (!/data-ux-lit/.test(uiSystem) || !/feature-directory:has/.test(uiSystem) || !/prefers-reduced-motion:\s*reduce/.test(uiSystem)) {
+if (!/data-ux-lit/.test(uiSystem) || !/action-focus/.test(uiSystem) || !/prefers-reduced-motion:\s*reduce/.test(uiSystem)) {
   failures.push('Living material interaction contract is missing from the active UI stylesheet.')
 }
 if (!/surfaceSelector/.test(appSourceForInteraction) || !/requestAnimationFrame/.test(appSourceForInteraction) || !/pointermove/.test(appSourceForInteraction)) {
@@ -129,41 +129,16 @@ if (canonicalTokenPattern.test(uiSystem)) {
 if (/environment-photograph/.test(uiSystem)) {
   failures.push('Obsolete photographic environment selectors must not remain in ui-system.css.')
 }
-if (!/feature-landscape/.test(featureLandscape) || !/onNavigate/.test(featureLandscape)) {
-  failures.push('Feature Landscape field guide must remain available as a real navigation surface.')
+if (!/ActionFocus/.test(actionFocus) || !/buildActionFocus/.test(actionFocus) || !/action-focus/.test(actionFocus)) {
+  failures.push('Action Focus must remain a live, state-driven daily priority surface.')
 }
-if (!existsSync(workspaceHeaderPath) || !/WorkspaceHeader/.test(workspaceHeaderSource) || !/workspace-header/.test(experienceSystem)) {
-  failures.push('Shared WorkspaceHeader identity layer is missing from the active UI system.')
+if (!/ActionFocus/.test(dashboard) || !/<ActionFocus/.test(dashboard) || /FeatureLandscape/.test(dashboard)) {
+  failures.push('Dashboard must expose Action Focus and must not retain the Compass component.')
 }
-for (const relative of convergedWorkspaceFiles) {
-  const source = readFileSync(join(srcDir, relative), 'utf8')
-  if (!/WorkspaceHeader/.test(source) || !/index="/.test(source)) {
-    failures.push('Workspace module header convergence missing from: ' + relative)
-  }
-}
-if (!/WORKSPACE COMPASS/.test(featureLandscape) || !/feature-compass-status/.test(featureLandscape)) {
-  failures.push('Workspace Compass must expose current-location context, not only visual navigation.')
-}
-if (!/buildCompassState/.test(featureLandscape) || !/data-compass-target/.test(featureLandscape) || !/feature-core-needle/.test(featureLandscape)) {
-  failures.push('Daily Compass must remain a state-driven directional surface with a live target and navigation action.')
-}
-if (!/tasks=\{tasks\}/.test(dashboard) || !/schedule=\{schedule\}/.test(dashboard) || !/finance=\{finance\}/.test(dashboard) || !/now=\{now\}/.test(dashboard)) {
-  failures.push('Dashboard must provide live daily context to the Daily Compass.')
-}
-for (const position of ['feature-node--n', 'feature-node--ne', 'feature-node--e', 'feature-node--se', 'feature-node--s', 'feature-node--sw', 'feature-node--w', 'feature-node--nw']) {
-  if (!uiSystem.includes(position)) failures.push('Workspace Compass is missing positional CSS: ' + position)
-}
-if (!/feature-core/.test(featureLandscape) || !/Return to Today/.test(featureLandscape)) {
-  failures.push('Workspace Compass center must remain a functional return-to-Today control.')
-}
-if (!/aria-current=\{active \? 'page' : undefined\}/.test(featureLandscape)) {
-  failures.push('Workspace Compass must expose the current workspace state to assistive technology.')
-}
-if (/\.feature-landscape\s*\{[^}]*display:\s*none\s*!important/.test(uiSystem) || /\.dashboard-page \.feature-landscape\s*\{[^}]*display:\s*none\s*!important/.test(uiSystem)) {
-  failures.push('Live Feature Landscape must not be hidden by active UI CSS.')
-}
-if (!/FeatureLandscape/.test(dashboard) || !/<FeatureLandscape/.test(dashboard)) {
-  failures.push('Dashboard must expose the spatial workspace compass as a live navigation surface.')
+if (/feature-(landscape|compass|node|core|directory)|Workspace Compass|Daily Compass|buildCompassState|data-compass-target/i.test(
+  [dashboard, actionFocus, uiSystem, experienceSystem].join('\n'),
+)) {
+  failures.push('Compass implementation or dead Compass styling remains in the active frontend surface.')
 }
 if (!/WorkspaceContextRail/.test(appSourceForInteraction) || !/activeView !== 'dashboard'/.test(appSourceForInteraction) || !/workspace-context-rail/.test(experienceSystem)) {
   failures.push('Non-Today workspaces must retain a shared live context bridge back to schedule, tasks, and finance.')
@@ -182,9 +157,8 @@ const iconSidebarSource = readFileSync(join(srcDir, 'components/layout/Sidebar.t
 if (!/MiDIcon/.test(iconSidebarSource) || /icon: '[⌂◷✓◎✦●↗◉]'/u.test(iconSidebarSource)) {
   failures.push('Primary navigation must use the deterministic MiD SVG icon system, not platform glyphs.')
 }
-const featureIconSource = readFileSync(join(srcDir, 'features/dashboard/components/FeatureLandscape.tsx'), 'utf8')
-if (!/MiDIcon/.test(featureIconSource) || /icon: '[⌂◷✓◎✦●↗◉]'/u.test(featureIconSource)) {
-  failures.push('Feature Landscape must use the deterministic MiD SVG icon system.')
+if (!/MiDIcon/.test(actionFocus) || /icon: '[⌂◷✓◎✦●↗◉]'/u.test(actionFocus)) {
+  failures.push('Action Focus must use the deterministic MiD SVG icon system.')
 }
 if (!/\.view-key\[data-module/.test(uiSystem) && !/\.view-key\[data-module/.test(experienceSystem)) {
   failures.push('Module terrain signature layer is missing from the active visual system.')
