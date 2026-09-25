@@ -606,16 +606,70 @@ textarea {
   border-radius: 12px;
   outline: none;
   color: var(--mi-text);
+  font: 500 12px/1.2 var(--font-ui);
+  letter-spacing: .005em;
+  color-scheme: dark;
   background:
     linear-gradient(180deg, rgba(4,9,15,.86), rgba(7,13,21,.72));
   box-shadow:
     inset 0 1px 5px rgba(0,0,0,.34),
     inset 0 1px rgba(255,255,255,.02);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):hover,
+select:hover,
+textarea:hover {
+  border-color: rgba(177, 201, 214, .24);
+}
+
+select {
+  appearance: none;
+  padding-right: 40px;
+  cursor: pointer;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m5 7.5 5 5 5-5' stroke='%2399adba' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right 12px center / 20px 20px no-repeat,
+    linear-gradient(180deg, rgba(4,9,15,.86), rgba(7,13,21,.72));
+}
+
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"] {
+  padding-right: 12px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+input[type="number"] {
+  appearance: textfield;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator {
+  width: 20px;
+  height: 20px;
+  padding: 4px;
+  margin: 0;
+  border-radius: 8px;
+  opacity: .72;
+  cursor: pointer;
 }
 
 textarea {
   min-height: 96px;
   resize: vertical;
+  line-height: 1.55;
 }
 
 input::placeholder,
@@ -628,6 +682,129 @@ textarea:focus {
   box-shadow:
     inset 0 1px 5px rgba(0,0,0,.30),
     0 0 0 3px rgba(79,209,255,.075);
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+  opacity: .54;
+}
+
+.form-grid > label,
+.schedule-form > label,
+.schedule-form .form-grid > label,
+.finance-form-grid > label {
+  display: grid;
+  gap: 8px;
+  color: var(--mi-text-soft);
+  font: 700 10px/1.2 var(--font-ui);
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.schedule-form > label > input,
+.schedule-form > label > select,
+.schedule-form > label > textarea,
+.form-grid > label > input,
+.form-grid > label > select,
+.form-grid > label > textarea {
+  margin-top: 0;
+}
+
+.field-control--money {
+  min-width: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.money-input {
+  position: relative;
+  min-width: 0;
+}
+
+.money-input .field-control--money {
+  padding-left: 40px;
+}
+
+.money-prefix {
+  position: absolute;
+  z-index: 2;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(168, 204, 218, .74);
+  font: 700 10px/1 var(--font-mono);
+  letter-spacing: .04em;
+  pointer-events: none;
+}
+
+.switch-field {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.switch-field > input[type="checkbox"] {
+  appearance: none;
+  width: 40px;
+  min-width: 40px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+  border: 1px solid rgba(188, 207, 218, .18);
+  border-radius: 999px;
+  background: rgba(7,13,20,.84);
+  box-shadow: inset 0 1px 4px rgba(0,0,0,.26);
+  cursor: pointer;
+  position: relative;
+}
+
+.switch-field > input[type="checkbox"]::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 4px;
+  top: 4px;
+  border-radius: 50%;
+  background: #8da5b3;
+  box-shadow: 0 2px 8px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.26);
+  transition: transform 160ms var(--ease-spring), background 160ms ease, box-shadow 160ms ease;
+}
+
+.switch-field > input[type="checkbox"]:checked {
+  border-color: rgba(79,209,255,.38);
+  background: rgba(79,209,255,.12);
+}
+
+.switch-field > input[type="checkbox"]:checked::after {
+  transform: translateX(16px);
+  background: var(--mi-cyan);
+  box-shadow: 0 0 14px rgba(79,209,255,.22), inset 0 1px rgba(255,255,255,.40);
+}
+
+.switch-field > input[type="checkbox"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79,209,255,.075), inset 0 1px 4px rgba(0,0,0,.26);
+}
+
+input[type="file"] {
+  min-height: 44px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+  min-height: 28px;
+  margin-right: 8px;
+  padding: 0 8px;
+  border: 1px solid rgba(202,219,229,.14);
+  border-radius: 8px;
+  color: #e7eff4;
+  background: linear-gradient(145deg, rgba(23,37,51,.74), rgba(7,13,21,.86));
+  cursor: pointer;
 }
 
 .form-grid,
@@ -659,6 +836,7 @@ textarea:focus {
 .field.full { grid-column: 1 / -1; }
 
 .form-error,
+.form-status,
 .quick-capture-message,
 .integration-description,
 .ai-availability-note,
@@ -668,7 +846,72 @@ textarea:focus {
   border: 1px solid rgba(210,224,233,.10);
   border-radius: 12px;
   color: var(--mi-text-soft);
-  background: rgba(8,15,23,.46);
+  background:
+    linear-gradient(145deg, rgba(21,35,47,.55), rgba(7,13,20,.68)),
+    rgba(8,15,23,.46);
+  box-shadow: inset 0 1px rgba(255,255,255,.035);
+}
+
+.form-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 11px;
+}
+
+.form-status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--mi-text-dim);
+  box-shadow: 0 0 10px rgba(159,180,191,.12);
+}
+
+.form-status--error,
+.form-error {
+  border-color: rgba(251,113,133,.24);
+  color: #ffd8df;
+  background:
+    linear-gradient(145deg, rgba(76,25,36,.34), rgba(12,15,22,.72)),
+    rgba(19,10,15,.54);
+}
+
+.form-status--error::before,
+.form-error::before {
+  background: var(--mi-rose);
+  box-shadow: 0 0 12px rgba(251,113,133,.28);
+}
+
+.form-status--success {
+  border-color: rgba(74,222,128,.20);
+  color: #d9f9e4;
+  background:
+    linear-gradient(145deg, rgba(20,66,39,.30), rgba(8,16,18,.72)),
+    rgba(9,21,15,.50);
+}
+
+.form-status--success::before {
+  background: var(--mi-green);
+  box-shadow: 0 0 12px rgba(74,222,128,.24);
+}
+
+.form-status--saving {
+  border-color: rgba(79,209,255,.20);
+  color: #d7f3fc;
+}
+
+.form-status--saving::before {
+  background: var(--mi-cyan);
+  box-shadow: 0 0 12px rgba(79,209,255,.24);
+}
+
+.schedule-form[data-form-state="saving"] input,
+.schedule-form[data-form-state="saving"] select,
+.schedule-form[data-form-state="saving"] textarea {
+  cursor: progress;
 }
 
 /* ==========================================================================

@@ -148,6 +148,39 @@ for (const [label, file, pattern] of terrainFiles) {
 if (!/workspace-toolbar-surface/.test(uiSystem) || !/workspace-metrics/.test(uiSystem) || !/empty-state/.test(uiSystem)) {
   failures.push('Shared content terrain CSS contract is missing.')
 }
+
+const nativeControlFiles = [
+  ['finance form', join(srcDir, 'features/finance/components/FinanceForm.tsx')],
+  ['schedule form', join(srcDir, 'features/schedule/components/ScheduleForm.tsx')],
+  ['task form', join(srcDir, 'features/tasks/components/TaskForm.tsx')],
+]
+for (const [label, file] of nativeControlFiles) {
+  const source = readFileSync(file, 'utf8')
+  if (!/data-form-state=/.test(source) || !/aria-busy=\{saving\}/.test(source)) {
+    failures.push('Shared form state contract is missing from ' + label + '.')
+  }
+  if (!/form-status form-status--error/.test(source)) {
+    failures.push('Shared error status surface is missing from ' + label + '.')
+  }
+  if (!/form-status form-status--saving/.test(source)) {
+    failures.push('Shared saving status surface is missing from ' + label + '.')
+  }
+}
+if (!/appearance:\s*none;/.test(uiSystem) || !/url\("data:image\/svg\+xml/.test(uiSystem) || !/calendar-picker-indicator/.test(uiSystem)) {
+  failures.push('Select/date/time controls must replace default browser chrome with MiD-styled control affordances.')
+}
+if (!/input\[type="number"\][\s\S]{0,180}appearance:\s*textfield/.test(uiSystem)) {
+  failures.push('Numeric inputs must not expose the default browser spinner UI.')
+}
+if (!/money-input/.test(uiSystem) || !/money-prefix/.test(uiSystem) || !/field-control--money/.test(uiSystem)) {
+  failures.push('Finance amount controls must use the intentional money-field surface.')
+}
+if (!/switch-field > input\[type="checkbox"\]/.test(uiSystem) || !/switch-field > input\[type="checkbox"\]:checked/.test(uiSystem)) {
+  failures.push('Toggle controls must use the MiD switch surface instead of native checkbox chrome.')
+}
+if (!/form-status--saving/.test(uiSystem) || !/schedule-form\[data-form-state="saving"\]/.test(uiSystem)) {
+  failures.push('Saving-state feedback must have a shared visual contract.')
+}
 if (!/ActionFocus/.test(dashboard) || !/<ActionFocus/.test(dashboard) || /FeatureLandscape/.test(dashboard)) {
   failures.push('Dashboard must expose Action Focus and must not retain the Compass component.')
 }
