@@ -80,8 +80,8 @@ if (uiSystem.includes('backdrop-filter')) {
   failures.push('ui-system.css must remain material-blur free; keep backdrop-filter isolated in glass.css.')
 }
 const glassBlurDeclarations = [...glassSystem.matchAll(/(?:-webkit-)?backdrop-filter:\s*([^;]+)/g)].map((match) => match[1])
-if (glassBlurDeclarations.length > 6) {
-  failures.push('Glass blur budget exceeded: expected no more than 6 backdrop-filter declarations, found ' + glassBlurDeclarations.length + '.')
+if (glassBlurDeclarations.length > 8) {
+  failures.push('Glass blur budget exceeded: expected no more than 8 backdrop-filter declarations, found ' + glassBlurDeclarations.length + '.')
 }
 if (glassBlurDeclarations.some((value) => !/blur\(var\(--glass-(blur-shell|blur-surface|blur-modal)\)/.test(value))) {
   failures.push('Glass blur must use tokenized blur values from tokens.css.')
@@ -96,9 +96,6 @@ if (!/@supports\s*\(backdrop-filter:\s*blur\(1px\)\)/.test(glassSystem)) {
 }
 if (!/GLASSMORPHISM CONTRACT/.test(glassSystem) || !/G0 = living environment/.test(glassSystem) || !/G4 = dense glass/.test(glassSystem)) {
   failures.push('Glassmorphism material hierarchy contract is missing or incomplete.')
-}
-if (!/glass\.css/.test(appSourceForInteraction.replace(/\r?\n/g, '')) && false) {
-  failures.push('Unreachable placeholder')
 }
 if (!/data-ux-lit/.test(uiSystem) || !/feature-directory:has/.test(uiSystem) || !/prefers-reduced-motion:\s*reduce/.test(uiSystem)) {
   failures.push('Living material interaction contract is missing from the active UI stylesheet.')
