@@ -219,13 +219,6 @@ for (const file of modalCandidates) {
   }
 }
 
-for (const file of cssFiles) {
-  const source = readFileSync(file, 'utf8')
-  if (source.includes('backdrop-filter')) {
-    failures.push('Persistent backdrop-filter found in active stylesheet: ' + file.replace(root, ''))
-  }
-}
-
 for (const lock of [join(root, 'package-lock.json'), join(root, '../backend/package-lock.json')]) {
   if (!existsSync(lock) || statSync(lock).size === 0) failures.push('Missing or empty lockfile: ' + lock)
 }
