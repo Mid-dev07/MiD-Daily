@@ -121,7 +121,7 @@ if (!/surfaceSelector/.test(appSourceForInteraction) || !/requestAnimationFrame/
 if (!/UNREAL FINAL RENDER CORE — PHASE 1 COMPLETE/.test(experienceSystem) || !/--ux-rx/.test(experienceSystem) || !/--ux-ry/.test(experienceSystem) || !/--ux-elevation/.test(experienceSystem)) {
   failures.push('Final Unreal render core must visibly consume delegated light/elevation variables.')
 }
-if (/\.content-card[\\s\\S]{0,220}backdrop-filter:\\s*blur/.test(experienceSystem)) {
+if (/\.content-card[\s\S]{0,220}backdrop-filter:\s*blur/.test(experienceSystem)) {
   failures.push('G2 content cards must remain clear painted glass; persistent blur belongs only to shell/transient surfaces.')
 }
 if (!/UNREAL FINALIZATION — PHASE 2/.test(experienceSystem) || !/UNREAL FINALIZATION — PHASE 4/.test(experienceSystem)) {
