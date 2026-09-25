@@ -133,7 +133,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
 
   return (
     <section className="workspace dashboard-page page-enter">
-      <section className="dashboard-command-deck" aria-label="Today command deck">
+      <section className="dashboard-command-deck" data-spatial-role="primary" aria-label="Today command deck">
         <div className="dashboard-hero-grid">
           <div className="page-intro">
             <div>
@@ -184,7 +184,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
       </section>
       </section>
 
-      <section className="content-card dashboard-habits" aria-label="Today's habits">
+      <section className="content-card dashboard-habits" data-spatial-role="rhythm" aria-label="Today's habits">
         <div className="card-heading">
           <div>
             <span className="section-kicker">RHYTHM</span>
@@ -232,8 +232,8 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
         )}
       </section>
 
-      <div className="dashboard-overview">
-        <section className="content-card dashboard-agenda">
+      <div className="dashboard-overview" data-spatial-role="secondary-group">
+        <section className="content-card dashboard-agenda" data-spatial-role="supporting">
           <div className="card-heading">
             <div>
               <span className="section-kicker">Today</span>
@@ -264,7 +264,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
           )}
         </section>
 
-        <section className="content-card dashboard-focus">
+        <section className="content-card dashboard-focus" data-spatial-role="focus">
           <div className="card-heading">
             <div>
               <span className="section-kicker">Focus</span>

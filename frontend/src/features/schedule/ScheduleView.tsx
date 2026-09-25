@@ -224,7 +224,7 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
       </div>
 
       {isToday && (
-        <div className="schedule-now-strip" aria-label={'Current time ' + currentTimeLabel}>
+        <div className="schedule-now-strip" data-spatial-role="orientation" aria-label={'Current time ' + currentTimeLabel}>
           <span className="schedule-now-label">NOW</span>
           <strong>{currentTimeLabel}</strong>
           <i aria-hidden="true" />
@@ -232,7 +232,7 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
         </div>
       )}
 
-      <div className="content-card schedule-events-card">
+      <div className="content-card schedule-events-card" data-spatial-role="primary">
         {visibleItems.length === 0
           ? <EmptyState title="Nothing scheduled" description="Try another date, clear the filter, or add a fixed activity." />
           : <div className="schedule-events">{visibleItems.map(({ item, source }, index) => (
@@ -249,7 +249,7 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
       </div>
 
       {flexiblePlans.length > 0 && (
-        <section className="content-card flexible-plans-card">
+        <section className="content-card flexible-plans-card" data-spatial-role="supporting">
           <div className="card-heading">
             <div>
               <span className="section-kicker">Flexible</span>
@@ -275,7 +275,7 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
         </section>
       )}
 
-      <details className="secondary-panel">
+      <details className="secondary-panel" data-spatial-role="utility">
         <summary>Connections &amp; notifications</summary>
         <div className="schedule-integrations">
           <GoogleCalendarIntegrationCard />

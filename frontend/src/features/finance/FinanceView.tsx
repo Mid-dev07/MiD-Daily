@@ -133,13 +133,13 @@ export function FinanceView({ finance, budgets, onSaveFinance, onDeleteFinance, 
         </div>
       </div>
 
-      <div className="stat-row workspace-metrics workspace-metrics--three">
+      <div className="stat-row workspace-metrics workspace-metrics--three" data-spatial-role="metrics">
         <article className="stat-card workspace-metric"><span>Income</span><strong className="amount-positive">{currency.format(income)}</strong><small>selected period</small></article>
         <article className="stat-card workspace-metric"><span>Expense</span><strong className="amount-negative">{currency.format(expense)}</strong><small>selected period</small></article>
         <article className="stat-card workspace-metric"><span>Balance</span><strong>{currency.format(income - expense)}</strong><small>period net</small></article>
       </div>
 
-      <section className="content-card finance-budget-card">
+      <section className="content-card finance-budget-card" data-spatial-role="primary">
         <div className="card-heading">
           <div><span className="section-kicker">Planning</span><h3>Budgets</h3></div>
           <button className="text-button" type="button" onClick={openBudgetCreate}>Add budget</button>
@@ -179,7 +179,7 @@ export function FinanceView({ finance, budgets, onSaveFinance, onDeleteFinance, 
         )}
       </section>
 
-      <section className="content-card finance-insights">
+      <section className="content-card finance-insights" data-spatial-role="supporting">
         <div className="card-heading">
           <div><span className="section-kicker">Breakdown</span><h3>Top expenses</h3></div>
           <span className="card-meta">{expenseByCategory.length} categories</span>
@@ -195,7 +195,7 @@ export function FinanceView({ finance, budgets, onSaveFinance, onDeleteFinance, 
         ))}
       </section>
 
-      <div className="content-card module-list">
+      <div className="content-card module-list" data-spatial-role="archive">
         {filtered.length === 0 ? (
           <div className="empty-state"><strong>No matching transactions.</strong><span>Adjust the filters or add a transaction.</span></div>
         ) : filtered.map((entry) => (

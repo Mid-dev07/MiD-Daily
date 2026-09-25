@@ -178,7 +178,7 @@ export function AssistantView() {
         description="One assistant layer for the web app, Telegram, and WhatsApp. Read-only Instagram analytics live in Social."
       />
 
-      <section className="content-card integration-panel assistant-channels-card">
+      <section className="content-card integration-panel assistant-channels-card" data-spatial-role="primary">
         <div className="card-heading">
           <div><span className="section-kicker">CHANNELS</span><h3>Connect your assistant</h3></div>
           <button className="text-button" type="button" disabled={integrationLoading} onClick={() => void refreshIntegrations()}>{integrationLoading ? 'Checking…' : 'Refresh'}</button>
@@ -192,7 +192,7 @@ export function AssistantView() {
         </div>
 
         <div className="assistant-channel-grid">
-          <article className="assistant-channel-card">
+          <article className="assistant-channel-card" data-spatial-role="instrument">
             <div className="assistant-channel-copy">
               <span className="integration-label">Telegram</span>
               <strong>{telegram.title}</strong>

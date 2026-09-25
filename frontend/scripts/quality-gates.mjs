@@ -344,8 +344,31 @@ if (!existsSync(spatialStyles)) {
     'data-module="insights"',
     'data-module="habits"',
     'prefers-reduced-motion: reduce',
+    'data-spatial-role="primary"',
+    'data-spatial-role="supporting"',
+
   ]) {
     if (!spatialSource.includes(contract)) failures.push('Spatial composition contract missing: ' + contract)
+  }
+}
+const spatialRoleContracts = {
+  'features/dashboard/DashboardView.tsx': ['primary', 'rhythm', 'secondary-group', 'supporting', 'focus'],
+  'features/schedule/ScheduleView.tsx': ['orientation', 'primary', 'supporting', 'utility'],
+  'features/tasks/TasksView.tsx': ['controls', 'primary', 'instrument'],
+  'features/finance/FinanceView.tsx': ['metrics', 'primary', 'supporting', 'archive'],
+  'features/social/SocialAnalyticsView.tsx': ['primary'],
+  'features/ai/AssistantView.tsx': ['primary', 'instrument'],
+  'features/profile/ProfileView.tsx': ['identity', 'primary'],
+  'features/insights/InsightsView.tsx': ['metrics', 'primary', 'supporting'],
+  'features/habits/HabitsView.tsx': ['primary', 'focus', 'instrument'],
+  'components/ui/WorkspaceHeader.tsx': ['orientation'],
+}
+for (const [relative, roles] of Object.entries(spatialRoleContracts)) {
+  const source = readFileSync(join(srcDir, relative), 'utf8')
+  for (const role of roles) {
+    if (!source.includes('data-spatial-role="' + role + '"')) {
+      failures.push('Spatial role missing in ' + relative + ': ' + role)
+    }
   }
 }
 if (!mainSource.includes("styles/spatial-composition.css")) failures.push('Spatial composition stylesheet must be loaded by main.tsx.')

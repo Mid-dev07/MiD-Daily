@@ -74,15 +74,15 @@ export function InsightsView({ tasks, schedule, finance, onNavigate }: InsightsV
         action={<button className="primary-button" type="button" onClick={() => onNavigate('assistant')}>Review with Assistant</button>}
       />
 
-      <section className="insights-metric-grid workspace-metrics workspace-metrics--four" aria-label="Weekly overview">
+      <section className="insights-metric-grid workspace-metrics workspace-metrics--four" data-spatial-role="metrics" aria-label="Weekly overview">
         <article className="content-card insights-metric workspace-metric"><span>Task completion</span><strong>{tasks.length ? Math.round((completedTasks.length / tasks.length) * 100) : 0}%</strong><small>{completedTasks.length} done · {openTasks.length} open</small></article>
         <article className="content-card insights-metric workspace-metric"><span>Focus load</span><strong>{Math.round(fixedMinutes / 60 * 10) / 10}h</strong><small>fixed schedule in next 7 days</small></article>
         <article className="content-card insights-metric workspace-metric"><span>Near deadlines</span><strong>{dueSoon.length}</strong><small>{overdueTasks.length} overdue right now</small></article>
         <article className="content-card insights-metric workspace-metric"><span>7-day net</span><strong className={windowExpense > windowIncome ? 'amount-negative' : 'amount-positive'}>{currency.format(windowIncome - windowExpense)}</strong><small>recorded income minus expenses</small></article>
       </section>
 
-      <div className="insights-grid">
-        <section className="content-card">
+      <div className="insights-grid" data-spatial-role="primary">
+        <section className="content-card" data-spatial-role="supporting">
           <div className="card-heading">
             <div><span className="section-kicker">SIGNALS</span><h3>What deserves attention</h3></div>
             <button className="text-button" type="button" onClick={() => onNavigate('tasks')}>Open tasks</button>

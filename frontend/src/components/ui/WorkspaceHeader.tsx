@@ -10,7 +10,7 @@ interface WorkspaceHeaderProps {
 
 export function WorkspaceHeader({ index, kicker, title, description, action }: WorkspaceHeaderProps) {
   return (
-    <header className="workspace-header">
+    <header className="workspace-header" data-spatial-role="orientation">
       <div className="workspace-header-main">
         <div className="workspace-header-code" aria-hidden="true">
           <span>{index}</span>

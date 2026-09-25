@@ -130,7 +130,7 @@ export function HabitsView() {
         description="Track repeatable habits without turning them into a pile of recurring tasks."
       />
 
-      <section className="content-card habit-composer">
+      <section className="content-card habit-composer" data-spatial-role="primary">
         <div className="card-heading">
           <div><span className="section-kicker">{editingId ? 'EDIT HABIT' : 'NEW HABIT'}</span><h3>{editingId ? 'Refine your routine' : 'Add a habit'}</h3></div>
           {editingId && <button className="text-button" type="button" onClick={resetForm}>Cancel edit</button>}
@@ -161,7 +161,7 @@ export function HabitsView() {
           <span>Create one above and your weekly rhythm will appear here.</span>
         </section>
       ) : (
-        <section className="content-card habit-board">
+        <section className="content-card habit-board" data-spatial-role="focus">
           <div className="habit-week-header">
             <div>
               <span className="section-kicker">THIS WEEK</span>
@@ -182,7 +182,7 @@ export function HabitsView() {
               const progress = habitWeekProgress(habit, logSet, dates, today)
               const streak = habitStreak(habit, logSet, today)
               return (
-                <article className="habit-row" key={habit.id}>
+                <article className="habit-row" data-spatial-role="instrument" key={habit.id}>
                   <div className="habit-main">
                     <div>
                       <strong>{habit.name}</strong>
