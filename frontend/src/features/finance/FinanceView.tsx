@@ -103,7 +103,7 @@ export function FinanceView({ finance, budgets, onSaveFinance, onDeleteFinance, 
         action={<button className="primary-button" type="button" onClick={openCreate}>Add transaction</button>}
       />
 
-      <div className="finance-toolbar content-card">
+      <div className="finance-toolbar workspace-toolbar-surface content-card">
         <div className="finance-toolbar-periods filter-row">
           {periodOptions.map((option) => (
             <button key={option.value} className={period === option.value ? 'filter-button is-active' : 'filter-button'} type="button" onClick={() => setPeriod(option.value)}>
