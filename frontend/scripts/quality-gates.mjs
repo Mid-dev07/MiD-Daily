@@ -51,6 +51,7 @@ const environmentFiles = [
   'environment/useEnvironment.ts',
   'environment/EnvironmentScene.tsx',
   'environment/MiDWorldCanvas.tsx',
+  'environment/moduleWorld.ts',
 ]
 
 const failures = []
@@ -305,6 +306,22 @@ if (/pointermove/.test(environmentScene) || existsSync(join(srcDir, 'hooks/useLi
 if (!/mid:world-pointer/.test(appSourceForInteraction) || !/CustomEvent/.test(appSourceForInteraction)) {
   failures.push('The shared App interaction stream must route pointer state into the spatial world.')
 }
+if (!/activeView={activeView}/.test(appSourceForInteraction)) {
+  failures.push('The active workspace must be wired into the spatial environment.')
+}
+const moduleWorldPath = join(srcDir, 'environment/moduleWorld.ts')
+if (existsSync(moduleWorldPath)) {
+  const moduleWorld = readFileSync(moduleWorldPath, 'utf8')
+  const requiredViews = ['dashboard', 'schedule', 'tasks', 'finance', 'social', 'assistant', 'profile', 'insights', 'habits']
+  for (const view of requiredViews) {
+    if (!moduleWorld.includes("view: '" + view + "'")) {
+      failures.push('Spatial module world anchor is missing: ' + view)
+    }
+  }
+  if (!/worldModuleAnchor/.test(readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8'))) {
+    failures.push('Spatial renderer must resolve the active module through the shared module-world map.')
+  }
+} 
 const missingEnvironmentFiles = environmentFiles.filter((relative) => !existsSync(join(srcDir, relative)))
 if (missingEnvironmentFiles.length) {
   for (const relative of missingEnvironmentFiles) failures.push('Missing environment foundation file: ' + relative)

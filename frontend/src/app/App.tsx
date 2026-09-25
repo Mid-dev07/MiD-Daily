@@ -616,7 +616,7 @@ export function App() {
       data-workload={workload}
       style={environmentCssVariables(environment)}
     >
-      <EnvironmentScene environment={environment} />
+      <EnvironmentScene environment={environment} activeView={activeView} />
       <Sidebar activeView={activeView} onNavigate={navigate} />
       <main className="main-content">
         <Topbar view={activeView} profile={profile} onProfile={() => navigate('profile')} onSearch={() => setSearchOpen(true)} sidebarHidden={sidebarHidden} onToggleSidebar={toggleSidebar} onNavigate={navigate} userId={userId} tasks={tasks} finance={finance} schedule={schedule} environment={environment} onEnvironmentAction={() => void (environment.location ? refreshEnvironment() : requestLocation())} />
