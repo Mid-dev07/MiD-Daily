@@ -532,6 +532,29 @@ if (/uTime|timestamp *0\.001|Math\.sin\(t/.test(weatherIntelligenceSource)) {
   failures.push('Weather intelligence v2 must remain event/state driven with no perpetual decorative animation.')
 }
 
+
+const interactionMotionSource = readFileSync(join(srcDir, 'styles/experience.css'), 'utf8')
+const pointerBridgeSource = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
+if (/animation:\s*mid-(atmosphere|light|fog)-breathe|@keyframes\s+mid-(atmosphere|light|fog)-breathe/.test(interactionMotionSource)) {
+  failures.push('Environment motion must not use perpetual atmospheric animation loops.')
+}
+for (const contract of [
+  'workspace-context-item',
+  'primary-button',
+  '--ux-x',
+  '--ux-y',
+  'data-ux-lit',
+]) {
+  if (!pointerBridgeSource.includes(contract)) failures.push('Delegated interaction surface contract missing: ' + contract)
+}
+for (const contract of [
+  '.workspace-context-item[data-ux-lit="true"]',
+  '.primary-button[data-ux-lit="true"]',
+  'No perpetual decorative loops remain',
+]) {
+  if (!interactionMotionSource.includes(contract)) failures.push('Interaction/motion cleanup contract missing: ' + contract)
+}
+
 const spatialStyles = join(srcDir, 'styles/spatial-composition.css')
 if (!existsSync(spatialStyles)) {
   failures.push('Spatial workspace composition stylesheet is missing.')

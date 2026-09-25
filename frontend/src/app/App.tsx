@@ -158,7 +158,8 @@ export function App() {
       '.feature-node','.secondary-button','.filter-button','.icon-button','.profile-chip','.environment-control',
       '.search-trigger','.connections-toggle','.briefing-item','.planner-shortcut','.global-search-result',
       '.toast','.finance-budget-row','.task-item-card','.notification-card','.notification-popover','.secondary-panel','.global-search-dialog','.flexible-plan','.schedule-now-strip',
-      '.insights-metric','.habit-check','.habit-day','.dashboard-section-link','.dashboard-command-deck','.dashboard-hero-aside'
+      '.insights-metric','.habit-check','.habit-day','.dashboard-section-link','.dashboard-command-deck','.dashboard-hero-aside',
+      '.workspace-context-item','.primary-button'
     ].join(',')
 
     let activeSurface: HTMLElement | null = null
