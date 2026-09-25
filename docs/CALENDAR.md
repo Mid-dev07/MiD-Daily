@@ -79,7 +79,7 @@ Use a dedicated **Web application** OAuth client for Calendar in the same Google
 
 Production OAuth redirect URI:
 
-https://mid-daily-api.e41262272.workers.dev/auth/google/callback
+https://api.mid-manager.xyz/auth/google/callback
 
 Cloudflare Worker configuration:
 
@@ -95,6 +95,10 @@ The storage design is persistent across process restarts because token records l
 ### Deployment note
 
 The storage design is persistent across process restarts because token records live in Supabase. Calendar connections are now user-scoped through authenticated `user_id`; service-role access remains backend-only.
+
+### Domain cutover
+
+After `mid-manager.xyz` is Active in Cloudflare, register `https://api.mid-manager.xyz/auth/google/callback` as the exact Authorized redirect URI in the Google OAuth Web application client. Keep the `workers.dev` URI only while it is intentionally used by an older deployment.
 
 ### Next step
 
