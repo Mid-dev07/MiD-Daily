@@ -467,6 +467,26 @@ Rules:
 
 The composition system is reusable across all nine modules and should be extended through semantic roles before adding one-off visual hacks.
 
+## 14.2 — Spatial Semantic Roles
+
+Workspace markup should describe spatial intent with `data-spatial-role` rather than encoding depth through one-off page selectors.
+
+Canonical roles:
+- `orientation`: establishes where the user is in the workspace.
+- `controls`: filters, navigation, or command surface.
+- `metrics`: compact high-priority signals.
+- `primary`: main working surface.
+- `focus`: active work or rhythm surface.
+- `rhythm`: ambient daily/behavioral signal.
+- `secondary-group`: grouped supporting instruments.
+- `supporting`: secondary information surface.
+- `utility`: low-priority integration/settings surface.
+- `archive`: historical or lower-priority records.
+- `identity`: personal identity surface.
+- `instrument`: small working object inside a larger spatial surface.
+
+Depth must follow semantic role. Module-specific rules may change accent, emphasis, or local composition, but must not create unrelated depth systems.
+
 ## 15 — Accessibility Standard
 
 Required:
