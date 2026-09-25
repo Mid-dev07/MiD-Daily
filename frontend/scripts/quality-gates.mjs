@@ -120,6 +120,18 @@ if (/environment-photograph/.test(uiSystem)) {
 if (!/feature-landscape/.test(featureLandscape) || !/onNavigate/.test(featureLandscape)) {
   failures.push('Feature Landscape field guide must remain available as a real navigation surface.')
 }
+if (!/WORKSPACE COMPASS/.test(featureLandscape) || !/feature-compass-status/.test(featureLandscape)) {
+  failures.push('Workspace Compass must expose current-location context, not only visual navigation.')
+}
+for (const position of ['feature-node--n', 'feature-node--ne', 'feature-node--e', 'feature-node--se', 'feature-node--s', 'feature-node--sw', 'feature-node--w', 'feature-node--nw']) {
+  if (!featureLandscape.includes(position)) failures.push('Workspace Compass is missing positional node: ' + position)
+}
+if (!/feature-core.*Today/.test(featureLandscape)) {
+  failures.push('Workspace Compass center must remain a functional return-to-Today control.')
+}
+if (!/aria-current=\{active \? 'page' : undefined\}/.test(featureLandscape)) {
+  failures.push('Workspace Compass must expose the current workspace state to assistive technology.')
+}
 if (/\.feature-landscape\s*\{[^}]*display:\s*none\s*!important/.test(uiSystem) || /\.dashboard-page \.feature-landscape\s*\{[^}]*display:\s*none\s*!important/.test(uiSystem)) {
   failures.push('Live Feature Landscape must not be hidden by active UI CSS.')
 }
