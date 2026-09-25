@@ -738,8 +738,11 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         window.removeEventListener('mid:world-pointer', pointerListener)
         document.removeEventListener('visibilitychange', handleVisibility)
         gl.deleteVertexArray(box.vao)
-        gl.deleteVertexArray(rock.vao)
-        gl.deleteVertexArray(floor.vao)
+        gl.deleteVertexArray(rockA.vao)
+        gl.deleteVertexArray(rockB.vao)
+        gl.deleteVertexArray(rockC.vao)
+        gl.deleteVertexArray(terrain.vao)
+        gl.deleteVertexArray(foliage.vao)
         gl.deleteProgram(program)
       }
     } catch {
