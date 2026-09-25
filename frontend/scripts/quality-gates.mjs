@@ -347,7 +347,6 @@ if (!existsSync(spatialStyles)) {
     if (!spatialSource.includes(contract)) failures.push('Spatial composition contract missing: ' + contract)
   }
 }
-const mainSource = readFileSync(join(srcDir, 'main.tsx'), 'utf8')
 if (!mainSource.includes("styles/spatial-composition.css")) failures.push('Spatial composition stylesheet must be loaded by main.tsx.')
 
 const responsiveStyles = join(srcDir, 'styles/responsive.css')
