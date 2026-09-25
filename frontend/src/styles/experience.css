@@ -879,3 +879,254 @@ textarea:focus,
     transform: none;
   }
 }
+
+
+/* =========================================================
+   EFFECTS CONSTITUTION V1
+   Responsive, not theatrical.
+========================================================= */
+
+/* 01 · Local light: the active material catches the pointer without
+   recoloring the page. */
+[data-ux-lit="true"] {
+  border-color: color-mix(in srgb, var(--module-accent, var(--accent)) 32%, rgba(230, 240, 232, .14));
+  box-shadow:
+    0 24px 62px rgb(0 0 0 / .30),
+    inset 0 1px rgb(255 255 255 / calc(.075 + var(--ux-elevation, 0) * .05)),
+    0 0 0 1px color-mix(in srgb, var(--module-accent, var(--accent)) 6%, transparent);
+}
+
+/* 02 · Physical depth: hover lifts; activation presses back into the
+   material instead of producing a decorative glow. */
+.primary-button,
+.secondary-button,
+.sidebar-toggle,
+.notification-trigger,
+.search-trigger,
+.environment-control,
+.profile-trigger,
+.icon-button,
+.filter-button,
+.connections-toggle,
+.dashboard-section-link,
+.planner-shortcut,
+.feature-directory-item,
+.feature-node,
+.feature-core {
+  transition:
+    transform var(--duration-fast) var(--ease-spring),
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-normal) var(--ease-standard),
+    background-color var(--duration-normal) var(--ease-standard);
+  transform-origin: center;
+}
+
+.primary-button:hover,
+.secondary-button:hover,
+.sidebar-toggle:hover,
+.notification-trigger:hover,
+.search-trigger:hover,
+.environment-control:hover,
+.profile-trigger:hover,
+.icon-button:hover,
+.filter-button:hover,
+.connections-toggle:hover,
+.dashboard-section-link:hover,
+.planner-shortcut:hover,
+.feature-directory-item:hover,
+.feature-node:hover,
+.feature-core:hover {
+  transform: translateY(var(--effect-hover-lift));
+}
+
+.primary-button:active,
+.secondary-button:active,
+.sidebar-toggle:active,
+.notification-trigger:active,
+.search-trigger:active,
+.environment-control:active,
+.profile-trigger:active,
+.icon-button:active,
+.filter-button:active,
+.connections-toggle:active,
+.dashboard-section-link:active,
+.planner-shortcut:active,
+.feature-directory-item:active,
+.feature-node:active,
+.feature-core:active {
+  transform: translateY(1px) scale(var(--effect-press-scale));
+  box-shadow:
+    inset 0 2px 8px rgb(0 0 0 / .18),
+    0 8px 18px rgb(0 0 0 / .14);
+}
+
+/* 03 · Focus is a material edge, not a color-only change. */
+.primary-button:focus-visible,
+.secondary-button:focus-visible,
+.sidebar-toggle:focus-visible,
+.notification-trigger:focus-visible,
+.search-trigger:focus-visible,
+.environment-control:focus-visible,
+.profile-trigger:focus-visible,
+.icon-button:focus-visible,
+.filter-button:focus-visible,
+.connections-toggle:focus-visible,
+.dashboard-section-link:focus-visible,
+.planner-shortcut:focus-visible,
+.feature-directory-item:focus-visible,
+.feature-node:focus-visible,
+.feature-core:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--module-accent, var(--accent)) 58%, #edf4f8 22%);
+  box-shadow:
+    0 0 0 var(--effect-focus-ring) color-mix(in srgb, var(--module-accent, var(--accent)) 13%, transparent),
+    inset 0 1px rgb(255 255 255 / .10),
+    0 16px 34px rgb(0 0 0 / .18);
+}
+
+/* 04 · State morph: existing information transforms instead of being
+   replaced by unrelated animated objects. */
+.dashboard-signal-progress span,
+.task-progress-track span,
+.progress-bar {
+  transition:
+    width 320ms var(--ease-spring),
+    opacity 180ms var(--ease-standard),
+    filter 180ms var(--ease-standard);
+}
+
+.task-item-card,
+.dashboard-signal-card,
+.content-card,
+.stat-card {
+  transition:
+    transform 220ms var(--ease-spring),
+    opacity 220ms var(--ease-standard),
+    border-color 180ms var(--ease-standard),
+    box-shadow 220ms var(--ease-standard);
+}
+
+/* 05 · Spatial focus pull: Feature Landscape keeps the active object clear
+   while surrounding objects recede just enough to reveal hierarchy. */
+.feature-scene:has(.feature-node:hover) .feature-node:not(:hover),
+.feature-scene:has(.feature-node:focus-visible) .feature-node:not(:focus-visible) {
+  opacity: .62;
+  filter: saturate(.78) brightness(.88);
+}
+
+.feature-scene:has(.feature-node:hover) .feature-core,
+.feature-scene:has(.feature-node:focus-visible) .feature-core {
+  opacity: .82;
+  transform: translate(-50%, -50%) scale(.97);
+}
+
+.feature-scene:has(.feature-node:hover) .feature-core::after,
+.feature-scene:has(.feature-node:focus-visible) .feature-core::after {
+  opacity: 1;
+}
+
+.feature-core::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid color-mix(in srgb, var(--module-accent, var(--accent)) 34%, transparent);
+  border-radius: 50%;
+  opacity: .35;
+  box-shadow: 0 0 24px color-mix(in srgb, var(--module-accent, var(--accent)) 12%, transparent);
+  transition: opacity 220ms var(--ease-standard), transform 260ms var(--ease-spring);
+}
+
+.feature-directory:has(.feature-directory-item:hover) .feature-directory-item:not(:hover),
+.feature-directory:has(.feature-directory-item:focus-visible) .feature-directory-item:not(:focus-visible) {
+  opacity: .70;
+}
+
+.feature-directory-item.is-active,
+.feature-node.is-active {
+  --ux-elevation: .9;
+}
+
+/* 06 · Ambient response stays slow, bounded, and behind content. */
+.environment-scene {
+  transition: filter 360ms var(--ease-standard);
+}
+
+.app-frame[data-workload="high"] .environment-scene {
+  filter: saturate(.94) brightness(.96);
+}
+
+.app-frame[data-workload="low"] .environment-scene {
+  filter: saturate(1.02) brightness(1.01);
+}
+
+/* Touch devices retain press feedback but never depend on hover. */
+@media (hover: none), (pointer: coarse) {
+  .primary-button:hover,
+  .secondary-button:hover,
+  .sidebar-toggle:hover,
+  .notification-trigger:hover,
+  .search-trigger:hover,
+  .environment-control:hover,
+  .profile-trigger:hover,
+  .icon-button:hover,
+  .filter-button:hover,
+  .connections-toggle:hover,
+  .dashboard-section-link:hover,
+  .planner-shortcut:hover,
+  .feature-directory-item:hover,
+  .feature-node:hover,
+  .feature-core:hover {
+    transform: none;
+  }
+
+  .feature-scene .feature-node,
+  .feature-directory .feature-directory-item {
+    opacity: 1;
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary-button,
+  .secondary-button,
+  .sidebar-toggle,
+  .notification-trigger,
+  .search-trigger,
+  .environment-control,
+  .profile-trigger,
+  .icon-button,
+  .filter-button,
+  .connections-toggle,
+  .dashboard-section-link,
+  .planner-shortcut,
+  .feature-directory-item,
+  .feature-node,
+  .feature-core,
+  .dashboard-signal-progress span,
+  .task-progress-track span,
+  .progress-bar,
+  .task-item-card,
+  .dashboard-signal-card,
+  .content-card,
+  .stat-card,
+  .feature-core::after {
+    transition:
+      border-color 160ms var(--ease-standard),
+      box-shadow 160ms var(--ease-standard),
+      opacity 160ms var(--ease-standard);
+    transform: none;
+  }
+
+  .feature-scene:has(.feature-node:hover) .feature-node:not(:hover),
+  .feature-scene:has(.feature-node:focus-visible) .feature-node:not(:focus-visible),
+  .feature-directory:has(.feature-directory-item:hover) .feature-directory-item:not(:hover),
+  .feature-directory:has(.feature-directory-item:focus-visible) .feature-directory-item:not(:focus-visible) {
+    opacity: 1;
+    filter: none;
+  }
+
+  .app-frame[data-workload="high"] .environment-scene,
+  .app-frame[data-workload="calm"] .environment-scene {
+    filter: none;
+  }
+}

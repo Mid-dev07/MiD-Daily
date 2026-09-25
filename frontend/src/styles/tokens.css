@@ -122,6 +122,14 @@
   --glass-blur-surface: 7px;
   --glass-blur-modal: 18px;
   --glass-saturate: 116%;
+
+  /* Interaction constitution — response should feel physical, not theatrical. */
+  --effect-hover-lift: -2px;
+  --effect-press-scale: .986;
+  --effect-focus-ring: 3px;
+  --effect-specular-radius: 260px;
+  --effect-specular-strength: .16;
+  --effect-scene-shift: 6px;
 }
 
 /* Unreal render-core tokens — visual behavior, not product semantics. */
