@@ -655,3 +655,24 @@ The spatial renderer uses the existing astronomical light direction plus a bound
 The lighting model is an approximation appropriate to native WebGL2 and the existing performance target. It is not intended to simulate a full physically based renderer.
 
 Quality target: dawn/golden-hour should produce restrained warm directional light, cloudy/rain conditions should remain cooler and flatter, and night should rely on cool ambient structure with minimal emissive support.
+
+
+## 22 — Cinematic Spatial Composition Standard v1
+
+The world must not read as a collection of generic objects distributed around the canvas. Each workspace receives authored spatial composition intent.
+
+Composition layers:
+- foreground framing: restrained landforms near the camera edges to establish scale and depth;
+- midground landmark: one authored natural/architectural focal form associated with the active workspace;
+- horizon layer: low, distant forms that give the scene a sense of place without becoming scenery wallpaper.
+
+Module composition is authored alongside camera intent. Camera coordinates remain explicit; composition positions must not be derived from hidden multipliers at render time.
+
+Allowed landmark languages:
+- ridge: clustered mineral landforms;
+- grove: restrained foliage grouping;
+- shelter: simple stone/structural form integrated with natural ground.
+
+Composition must remain subordinate to DOM content, disable/reduce on touch layouts, and remain event/state driven with no continuous animation.
+
+A cinematic composition pass is successful when navigation changes not only the camera framing but also the environmental context in which the workspace is situated.
