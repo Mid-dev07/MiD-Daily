@@ -1924,28 +1924,15 @@ textarea:focus {
   .habit-board,
   .habit-composer,
   .social-foundation-card {
-    transition: transform 200ms var(--ease-spring), border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    transition: border-color var(--unreal-motion-normal) var(--ease-standard), box-shadow var(--unreal-motion-normal) var(--ease-standard), background var(--unreal-motion-normal) var(--ease-standard);
   }
 
-  .content-card:hover,
-  .glass-panel:hover,
-  .stat-card:hover,
-  .integration-panel:hover,
-  .ai-shell-card:hover,
-  .dashboard-signal-card:hover,
-  .assistant-channel-card:hover,
   .planner-shortcut:hover,
-  .notification-card:hover,
-  .finance-budget-row:hover,
-  .task-item-card:hover,
-  .schedule-events-card:hover,
-  .flexible-plan:hover,
-  .profile-hero-card:hover,
-  .profile-form-card:hover,
-  .insights-metric:hover,
-  .habit-board:hover,
-  .habit-composer:hover,
-  .social-foundation-card:hover {
+  .dashboard-habit-row:hover,
+  .task-row:hover,
+  .upcoming-item:hover,
+  .dashboard-flexible-item:hover,
+  .attention-item:hover {
     transform: translateY(-2px);
     border-color: color-mix(in srgb, var(--module-accent, var(--mi-cyan)) 20%, rgba(210,225,234,.13));
   }
@@ -2196,5 +2183,25 @@ textarea:focus {
     grid-template-rows: 1fr;
     overflow-x: auto;
     overflow-y: hidden;
+  }
+}
+
+
+/* =========================================================
+   UNREAL FINAL INTERACTION CONTRACT
+========================================================= */
+
+:where(button, a, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--unreal-focus);
+  outline-offset: 4px;
+}
+
+:where(button, a, summary, [role="button"]):active:not(:disabled) {
+  transform: translateY(1px) scale(.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(button, a, summary, [role="button"]) {
+    transition-duration: 0.01ms;
   }
 }
