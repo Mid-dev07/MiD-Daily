@@ -2,7 +2,11 @@
 
 ## North star
 
-MiD Daily is a daily-management workspace first. **UNREAL is the material and interaction quality bar, not a reskin.**
+MiD Daily is a **living personal operating workspace** first: calm structure + living context + engineered material quality + personal relevance.
+
+**UNREAL is the material and interaction quality bar, not the identity and not a reskin.**
+
+Canonical identity contract: `docs/MID_IDENTITY_SYSTEM.md`.
 
 The interface must remain recognisably MiD:
 - same core workspace structure and navigation;
