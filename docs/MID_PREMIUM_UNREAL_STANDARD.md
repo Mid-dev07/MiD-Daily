@@ -465,6 +465,8 @@ Rules:
 - reduced motion retains hierarchy and state while removing spatial movement;
 - spatial composition must remain usable when the environment renderer falls back to CSS.
 - workspace navigation may move the camera along a bounded semantic rail tied to module anchors.
+- each module anchor owns an explicit camera eye/target intent so the rail is authored as composition, not derived from renderer magic multipliers.
+- pointer response is a restrained micro-orbit around that authored camera intent, never a second navigation system.
 - spatial motion is event-driven: navigation and pointer response may move the scene, but the world must not rely on perpetual decorative animation loops.
 - a calm workspace should feel alive through light, weather, state, and composition rather than constant movement.
 - the active module may have a restrained ground-level spatial path connecting its world anchor to the shared workspace core.
