@@ -1,4 +1,4 @@
-/* MiD-Daily vNext — cinematic nature system. CSS-only, no persistent blur/canvas/WebGL. */
+/* MiD-Daily vNext — structural UI system. Material glass styling is isolated in glass.css. */
 .app-frame{position:relative;min-height:100vh;isolation:isolate;color:var(--color-text)}
 .app-frame:before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(800px 500px at 76% 10%,rgba(233,199,125,.09),transparent 62%),radial-gradient(680px 480px at 10% 90%,rgba(92,145,92,.11),transparent 65%)}
 .app-frame:after{content:"";position:fixed;inset:0;z-index:5;pointer-events:none;background:linear-gradient(180deg,transparent 55%,rgba(1,6,3,.3)),linear-gradient(90deg,rgba(1,6,3,.32),transparent 20%,transparent 82%,rgba(1,6,3,.18))}
