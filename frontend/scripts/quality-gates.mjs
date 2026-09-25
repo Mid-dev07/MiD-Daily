@@ -120,6 +120,12 @@ if (/environment-photograph/.test(uiSystem)) {
 if (!/feature-landscape/.test(featureLandscape) || !/onNavigate/.test(featureLandscape)) {
   failures.push('Feature Landscape field guide must remain available as a real navigation surface.')
 }
+if (!/buildCompassState/.test(featureLandscape) || !/feature-compass-orbit/.test(featureLandscape) || !/data-compass-target/.test(featureLandscape) || !/feature-core-needle/.test(featureLandscape)) {
+  failures.push('Daily Compass must remain a state-driven directional surface with a live target and navigation action.')
+}
+if (!/tasks=\{tasks\}/.test(dashboard) || !/schedule=\{schedule\}/.test(dashboard) || !/finance=\{finance\}/.test(dashboard) || !/now=\{now\}/.test(dashboard)) {
+  failures.push('Dashboard must provide live daily context to the Daily Compass.')
+}
 if (/\.feature-landscape\s*\{[^}]*display:\s*none\s*!important/.test(uiSystem) || /\.dashboard-page \.feature-landscape\s*\{[^}]*display:\s*none\s*!important/.test(uiSystem)) {
   failures.push('Live Feature Landscape must not be hidden by active UI CSS.')
 }
