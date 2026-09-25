@@ -112,9 +112,13 @@ Semantic states: success #4ade80, warning #fbbf24, danger #fb7185.
 
 Key light: 145deg. The same directional logic governs highlights, raised edges, bevel-like gradients, local reflections, and selected surfaces.
 
-Natural atmosphere remains part of MiD's identity, but it belongs primarily to the environmental/contextual layer, not the whole UI palette.
+Natural atmosphere is a primary emotional anchor of MiD. It is not wallpaper and it is not a separate theme mode.
 
-Use moss, sage, stone, fog, and muted warm sunlight to support mood and depth rather than recolor the product.
+The nature language should be felt across the environment and, selectively, at the spatial composition layer through grounded stone, moss, soft sunlight, organic silhouettes, terrain transitions, foliage-adjacent forms, and breathable depth.
+
+Use moss, sage, stone, fog, muted warm sunlight, and mineral neutrals to create a calm biophilic atmosphere. Keep cyan as the interaction signature; nature should establish mood and place, not compete with information.
+
+The product should feel like a calm personal workspace situated inside a quiet living environment—not a dashboard placed on top of a forest illustration.
 
 ## 08 — Material Identity
 
@@ -170,7 +174,7 @@ It must not become a game map, visual gimmick, or main navigation replacement.
 
 ## 12 — Environment Identity
 
-The living environment is MiD's ambient world.
+The living environment is MiD's ambient world and emotional anchor.
 
 It communicates time, mood, natural context, and progression through the day.
 
@@ -179,6 +183,30 @@ It should stay behind the information layer.
 Foreground rule: content wins over atmosphere.
 
 Environment changes must be state-driven, slow, subdued, lightweight, and reduced-motion safe.
+
+## 12.1 — Time × Weather Environment Logic
+
+MiD environment mood is computed as a composition, not a list of unrelated themes.
+
+The system combines:
+1. astronomical state — sun altitude and azimuth;
+2. day phase — night, dawn, morning, day, golden-hour, dusk;
+3. weather — clear, cloud, fog, precipitation, storm, snow;
+4. spatial response — light direction, atmospheric density, material contrast, moisture, and nature saturation.
+
+The sun position determines where directional light comes from. The canonical 145° MiD light direction remains the fallback/material reference, while available solar data drives the actual spatial light direction.
+
+Weather modifies the current time state rather than replacing it.
+
+Examples:
+- morning + clear → fresh natural contrast, soft directional sunlight, brighter moss/terrain;
+- morning + rain → cool diffuse light, damp darker ground, denser air, restrained highlights;
+- day + cloudy → flatter daylight, softer shadows, muted landscape;
+- golden-hour + clear → warm low-angle light and longer atmospheric gradients;
+- dusk + rain → cooler muted sky, wet ground, low visibility, subdued highlights;
+- night + storm → deep cool environment, high atmospheric density, minimal emissive light, no cheerful daylight cues.
+
+The purpose is continuity: the user should always feel that the same MiD place is changing naturally through time and weather.
 
 ## 13 — Module Personalities
 

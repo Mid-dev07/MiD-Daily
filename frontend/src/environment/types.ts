@@ -49,6 +49,13 @@ export interface EnvironmentVisualState {
   starOpacity: number
   sunOpacity: number
   moonOpacity: number
+  lightWarmth: number
+  skyCoolness: number
+  natureSaturation: number
+  sunBeamOpacity: number
+  airDensity: number
+  wetness: number
+  worldContrast: number
 }
 
 export interface EnvironmentState {

@@ -236,6 +236,94 @@
     linear-gradient(180deg, #0a1320 0%, #2b3343 46%, #3a2f2c 70%, #081017 100%);
 }
 
+
+
+
+/* =========================================================
+   G0.5 · TIME × WEATHER ATMOSPHERE
+   Solar position establishes direction; weather modulates mood.
+========================================================= */
+.environment-sky::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(112, 158, 176, calc(.12 * var(--env-sky-coolness))),
+      transparent 44%,
+      rgba(205, 221, 203, calc(.035 * var(--env-nature-saturation))),
+      rgba(224, 184, 116, calc(.13 * var(--env-warmth)))
+    );
+  mix-blend-mode: soft-light;
+  opacity: .9;
+  pointer-events: none;
+}
+
+.environment-scene[data-weather="cloudy"] .environment-sky::after,
+.environment-scene[data-weather="fog"] .environment-sky::after,
+.environment-scene[data-weather="rain"] .environment-sky::after,
+.environment-scene[data-weather="heavy-rain"] .environment-sky::after,
+.environment-scene[data-weather="storm"] .environment-sky::after,
+.environment-scene[data-weather="showers"] .environment-sky::after {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(101, 134, 147, calc(.16 * var(--env-sky-coolness))),
+      rgba(123, 146, 148, calc(.05 * var(--env-air-density))) 42%,
+      rgba(44, 64, 59, calc(.08 * var(--env-nature-saturation))) 76%,
+      transparent
+    );
+  mix-blend-mode: normal;
+  opacity: .92;
+}
+
+.environment-scene[data-weather="drizzle"] .environment-sky::after,
+.environment-scene[data-weather="rain"] .environment-sky::after,
+.environment-scene[data-weather="showers"] .environment-sky::after {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(92, 122, 136, .11),
+      rgba(54, 78, 77, calc(.09 * var(--env-wetness))) 68%,
+      rgba(174, 185, 168, .04)
+    );
+}
+
+.environment-scene[data-weather="heavy-rain"] .environment-sky::after,
+.environment-scene[data-weather="storm"] .environment-sky::after {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(58, 77, 91, .20),
+      rgba(38, 52, 59, .12) 54%,
+      rgba(35, 51, 46, .10) 100%
+    );
+  opacity: 1;
+}
+
+.environment-light-shafts {
+  opacity: var(--env-sun-beam);
+}
+
+.environment-terrain {
+  filter: saturate(calc(.88 + var(--env-nature-saturation) * .18))
+    contrast(var(--env-world-contrast));
+}
+
+.environment-fog {
+  opacity: calc(var(--env-fog-opacity) + var(--env-air-density) * .08);
+}
+
+.environment-rain {
+  opacity: calc(var(--env-rain-opacity) * (.68 + var(--env-wetness) * .32));
+}
+
+.environment-sun {
+  filter: saturate(calc(.84 + var(--env-warmth) * .22))
+    brightness(calc(.92 + var(--env-warmth) * .12));
+}
+
 /* =========================================================
    G1 · WORLD SHELL
 ========================================================= */

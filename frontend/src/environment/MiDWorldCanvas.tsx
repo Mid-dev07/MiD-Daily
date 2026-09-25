@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { View } from '../types'
 import { worldModuleAnchor, worldModuleAnchors } from './moduleWorld'
+import { environmentLightDirection } from './mood'
 import type { EnvironmentState } from './types'
 
 interface MiDWorldCanvasProps {
@@ -11,7 +12,7 @@ interface MiDWorldCanvasProps {
 
 type Vec3 = [number, number, number]
 
-const LIGHT_DIRECTION: Vec3 = [
+const DEFAULT_LIGHT_DIRECTION: Vec3 = [
   Math.cos((145 * Math.PI) / 180),
   0.82,
   Math.sin((145 * Math.PI) / 180),
@@ -227,6 +228,41 @@ function boxGeometry() {
   return new Float32Array(vertices)
 }
 
+function rockGeometry() {
+  const vertices: number[] = []
+  const sides = 7
+  const radii = [1, .88, 1.08, .92, 1.03, .9, 1.06]
+  const heights = [.82, .95, .76, .9, .72, .88, .78]
+
+  for (let i = 0; i < sides; i += 1) {
+    const next = (i + 1) % sides
+    const a0 = (i / sides) * Math.PI * 2
+    const a1 = (next / sides) * Math.PI * 2
+    const r0 = radii[i]
+    const r1 = radii[next]
+    const p0: Vec3 = [Math.cos(a0) * r0, 0, Math.sin(a0) * r0]
+    const p1: Vec3 = [Math.cos(a1) * r1, 0, Math.sin(a1) * r1]
+    const q1: Vec3 = [Math.cos(a1) * r1 * .82, heights[next], Math.sin(a1) * r1 * .82]
+    const q0: Vec3 = [Math.cos(a0) * r0 * .82, heights[i], Math.sin(a0) * r0 * .82]
+    const normal: Vec3 = [
+      Math.cos((a0 + a1) * .5),
+      .22,
+      Math.sin((a0 + a1) * .5),
+    ]
+
+    for (const corner of [p0, p1, q1, p0, q1, q0]) {
+      vertices.push(corner[0], corner[1], corner[2], normal[0], normal[1], normal[2])
+    }
+
+    const centerTop: Vec3 = [0, .86, 0]
+    for (const corner of [q0, q1, centerTop]) {
+      vertices.push(corner[0], corner[1], corner[2], 0, 1, 0)
+    }
+  }
+
+  return new Float32Array(vertices)
+}
+
 function planeGeometry() {
   return new Float32Array([
     -1, 0, -1, 0, 1, 0,
@@ -332,6 +368,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
       }
 
       const box = createMesh(gl, boxGeometry(), positionLocation, normalLocation)
+      const rock = createMesh(gl, rockGeometry(), positionLocation, normalLocation)
       const floor = createMesh(gl, planeGeometry(), positionLocation, normalLocation)
 
       const projection = new Float32Array(16)
@@ -377,7 +414,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
       gl.enable(gl.BLEND)
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
       gl.useProgram(program)
-      gl.uniform3f(uniforms.light, LIGHT_DIRECTION[0], LIGHT_DIRECTION[1], LIGHT_DIRECTION[2])
+      gl.uniform3f(uniforms.light, DEFAULT_LIGHT_DIRECTION[0], DEFAULT_LIGHT_DIRECTION[1], DEFAULT_LIGHT_DIRECTION[2])
 
       const render = (timestamp: number) => {
         if (!running) return
@@ -400,8 +437,14 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
           1.4 + pitch * 1.1,
           activeAnchor.position[2] * 0.035,
         ]
-        const tint = dayTint(environmentRef.current)
-        const intensity = Math.max(0.35, Math.min(1, environmentRef.current.visual.lightIntensity + 0.24))
+        const env = environmentRef.current
+        const tint = dayTint(env)
+        const intensity = Math.max(0.28, Math.min(1, env.visual.lightIntensity + 0.24))
+        const lightDirection = env.sun.altitude > -6
+          ? environmentLightDirection(env.sun.azimuth, env.sun.altitude)
+          : DEFAULT_LIGHT_DIRECTION
+        const naturalDepth = env.visual.worldContrast
+        const wetness = env.visual.wetness
 
         lookAt(view, camera, target, [0, 1, 0])
 
@@ -410,7 +453,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         gl.uniformMatrix4fv(uniforms.projection, false, projection)
         gl.uniformMatrix4fv(uniforms.view, false, view)
         gl.uniform3f(uniforms.camera, camera[0], camera[1], camera[2])
-        gl.uniform3f(uniforms.light, LIGHT_DIRECTION[0], LIGHT_DIRECTION[1], LIGHT_DIRECTION[2])
+        gl.uniform3f(uniforms.light, DEFAULT_LIGHT_DIRECTION[0], DEFAULT_LIGHT_DIRECTION[1], DEFAULT_LIGHT_DIRECTION[2])
         gl.uniform1f(uniforms.intensity, intensity)
         gl.uniform1f(uniforms.time, reduceMotion.matches ? 0 : t)
 
@@ -424,10 +467,30 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
           gl.drawArrays(gl.TRIANGLES, 0, mesh.vertexCount)
         }
 
-        const mineral: Vec3 = [0.11 + tint[0] * 0.25, 0.17 + tint[1] * 0.18, 0.2 + tint[2] * 0.16]
-        const stone: Vec3 = [0.17 + tint[0] * 0.2, 0.23 + tint[1] * 0.16, 0.25 + tint[2] * 0.14]
+        const naturalSaturation = env.visual.natureSaturation
+        const damp = wetness * 0.14
+        const mineral: Vec3 = [
+          (0.11 + tint[0] * 0.25) * naturalDepth,
+          (0.17 + tint[1] * 0.18) * naturalDepth,
+          (0.2 + tint[2] * 0.16) * naturalDepth,
+        ]
+        const stone: Vec3 = [
+          (0.17 + tint[0] * 0.2) * (1 - damp * 0.5),
+          (0.23 + tint[1] * 0.16) * (1 - damp * 0.28),
+          (0.25 + tint[2] * 0.14) * (1 - damp * 0.18),
+        ]
+        const moss: Vec3 = [
+          Math.min(1, (0.17 + tint[0] * 0.12) * naturalSaturation),
+          Math.min(1, (0.27 + tint[1] * 0.16) * naturalSaturation),
+          Math.min(1, (0.20 + tint[2] * 0.08) * naturalSaturation),
+        ]
+        const fern: Vec3 = [
+          Math.min(1, (0.10 + tint[0] * 0.08) * naturalSaturation),
+          Math.min(1, (0.20 + tint[1] * 0.12) * naturalSaturation),
+          Math.min(1, (0.14 + tint[2] * 0.06) * naturalSaturation),
+        ]
         const cyan: Vec3 = [0.11, 0.42, 0.52]
-        const warm: Vec3 = [0.42, 0.3, 0.18]
+        const warm: Vec3 = [0.42 + tint[0] * 0.05, 0.3 + tint[1] * 0.03, 0.18]
 
         draw(floor, [0, -0.12, 0], [18, 1, 18], mineral, 0)
         draw(box, [0, 0.08, 0], [4.8, 0.14, 2.7], stone, 1)
@@ -438,6 +501,14 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         draw(box, [-7.4, 0.42, 3.2], [2.4, 0.42, 0.38], [0.08, 0.13, 0.16], 1)
         draw(box, [7.0, 0.34, 3.8], [1.8, 0.34, 0.38], [0.08, 0.13, 0.16], 1)
         draw(box, [0, 0.52, 1.15], [2.5, 0.52, 1.35], [0.08, 0.14, 0.17], 1, 0.01)
+
+        draw(box, [-7.0, 0.18, -0.3], [2.1, 0.07, 0.28], fern, 1, 0.015, -0.18)
+        draw(box, [-4.8, 0.11, 2.1], [1.4, 0.045, 0.26], moss, 1, 0.01, 0.18)
+        draw(box, [4.4, 0.09, 1.8], [1.65, 0.04, 0.22], moss, 1, 0.01, -0.12)
+        draw(rock, [-5.2, 0.06, 3.0], [0.72, 0.42, 0.54], stone, 1, 0.0, -0.12)
+        draw(rock, [5.1, 0.04, 2.8], [0.62, 0.34, 0.48], warm, 1, 0.0, 0.22)
+        draw(rock, [-3.3, 0.03, -3.9], [0.52, 0.28, 0.44], fern, 1, 0.0, -0.32)
+        draw(rock, [3.8, 0.04, -4.5], [0.7, 0.36, 0.52], moss, 1, 0.0, 0.16)
 
         draw(box, [-2.2, 0.63, 0.0], [0.04, 0.63, 0.96], cyan, 1, 0.42)
         draw(box, [2.2, 0.63, 0.0], [0.04, 0.63, 0.96], cyan, 1, 0.42)
@@ -488,6 +559,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         window.removeEventListener('mid:world-pointer', pointerListener)
         document.removeEventListener('visibilitychange', handleVisibility)
         gl.deleteVertexArray(box.vao)
+        gl.deleteVertexArray(rock.vao)
         gl.deleteVertexArray(floor.vao)
         gl.deleteProgram(program)
       }

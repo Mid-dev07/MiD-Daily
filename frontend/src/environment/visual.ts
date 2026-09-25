@@ -34,6 +34,13 @@ export function environmentCssVariables(environment: EnvironmentState): CSSPrope
     '--env-moon-opacity': String(environment.visual.moonOpacity),
     '--env-horizon-opacity': String(0.24 + environment.visual.lightIntensity * 0.16),
     '--env-vignette-opacity': String(0.16 + (1 - environment.visual.lightIntensity) * 0.18),
+    '--env-warmth': String(environment.visual.lightWarmth),
+    '--env-sky-coolness': String(environment.visual.skyCoolness),
+    '--env-nature-saturation': String(environment.visual.natureSaturation),
+    '--env-sun-beam': String(environment.visual.sunBeamOpacity),
+    '--env-air-density': String(environment.visual.airDensity),
+    '--env-wetness': String(environment.visual.wetness),
+    '--env-world-contrast': String(environment.visual.worldContrast),
   } as CSSProperties
 }
 
