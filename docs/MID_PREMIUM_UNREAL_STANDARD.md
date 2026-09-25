@@ -464,6 +464,9 @@ Rules:
 - mobile and touch layouts remove depth transforms while retaining hierarchy;
 - reduced motion retains hierarchy and state while removing spatial movement;
 - spatial composition must remain usable when the environment renderer falls back to CSS.
+- workspace navigation may move the camera along a bounded semantic rail tied to module anchors.
+- spatial motion is event-driven: navigation and pointer response may move the scene, but the world must not rely on perpetual decorative animation loops.
+- a calm workspace should feel alive through light, weather, state, and composition rather than constant movement.
 
 The composition system is reusable across all nine modules and should be extended through semantic roles before adding one-off visual hacks.
 
