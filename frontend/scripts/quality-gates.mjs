@@ -332,6 +332,11 @@ if (!existsSync(spatialStyles)) {
   failures.push('Spatial workspace composition stylesheet is missing.')
 } else {
   const spatialSource = readFileSync(spatialStyles, 'utf8')
+  const moduleScopedDepthPattern = /\.view-key\[data-module="[^"]+"\][^{]*\[data-spatial-role="[^"]+"\]\s*\{[^}]*\btransform:\s*[^;]*translateZ\(/s
+  if (moduleScopedDepthPattern.test(spatialSource)) {
+    failures.push('Spatial depth must remain owned by semantic roles, not module-specific selectors.')
+  }
+
   for (const contract of [
     'perspective:',
     'data-module="dashboard"',
