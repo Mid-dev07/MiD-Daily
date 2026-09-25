@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { WorkspaceHeader } from '../../components/ui/WorkspaceHeader'
 import type { FinanceEntry, Task } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
 import { scheduleOccursOnDate, shiftDate } from '../schedule/schedule.date'
@@ -65,14 +66,13 @@ export function InsightsView({ tasks, schedule, finance, onNavigate }: InsightsV
 
   return (
     <section className="workspace page-enter">
-      <div className="page-intro">
-        <div>
-          <span className="section-kicker">INSIGHTS</span>
-          <h2>Weekly snapshot</h2>
-          <p>See your current workload, upcoming schedule, and finance context without pretending we have history we do not store.</p>
-        </div>
-        <button className="primary-button" type="button" onClick={() => onNavigate('assistant')}>Review with Assistant</button>
-      </div>
+      <WorkspaceHeader
+        index="008"
+        kicker="PATTERNS"
+        title="Weekly snapshot"
+        description="See your current workload, upcoming schedule, and finance context without pretending we have history we do not store."
+        action={<button className="primary-button" type="button" onClick={() => onNavigate('assistant')}>Review with Assistant</button>}
+      />
 
       <section className="insights-metric-grid" aria-label="Weekly overview">
         <article className="content-card insights-metric"><span>Task completion</span><strong>{tasks.length ? Math.round((completedTasks.length / tasks.length) * 100) : 0}%</strong><small>{completedTasks.length} done · {openTasks.length} open</small></article>
