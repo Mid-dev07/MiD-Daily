@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { WorkspaceHeader } from '../../components/ui/WorkspaceHeader'
 import type { User } from '@supabase/supabase-js'
 import type { Profile } from '../../types'
 import { removeProfileAvatar, saveProfile, uploadProfileAvatar } from './profileApi'
@@ -67,13 +68,12 @@ export function ProfileView({ user, profile, onProfileChange, onToast }: Profile
 
   return (
     <section className="workspace page-enter">
-      <div className="page-intro profile-page-intro">
-        <div>
-          <span className="section-kicker">ACCOUNT</span>
-          <h2>Your profile</h2>
-          <p>Make your account feel like yours with a photo, display name, username, and bio.</p>
-        </div>
-      </div>
+      <WorkspaceHeader
+        index="007"
+        kicker="ACCOUNT"
+        title="Your profile"
+        description="Make your account feel like yours with a photo, display name, username, and bio."
+      />
 
       <div className="profile-layout">
         <section className="content-card profile-hero-card">
