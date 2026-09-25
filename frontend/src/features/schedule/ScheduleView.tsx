@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { EmptyState } from '../../components/ui/EmptyState'
+import { WorkspaceHeader } from '../../components/ui/WorkspaceHeader'
 import { formatDateLong, scheduleOccursOnDate, shiftDate } from './schedule.date'
 import { normalizeScheduleList } from './schedule.migration'
 import { ScheduleDetail } from './components/ScheduleDetail'
@@ -174,16 +175,18 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
 
   return (
     <section className="workspace page-enter">
-      <div className="page-intro schedule-intro">
-        <div>
-          <h2>Schedule</h2>
-          <p>Plan classes, work, study, and personal time in one place.</p>
-        </div>
-        <div className="schedule-header-actions">
-          {demoMode && <button className="secondary-button" type="button" onClick={() => void resetToSeed()}>Reset demo</button>}
-          <button className="primary-button" type="button" onClick={openCreate}>Add activity</button>
-        </div>
-      </div>
+      <WorkspaceHeader
+        index="002"
+        kicker="RHYTHM"
+        title="Schedule"
+        description="Plan classes, work, study, and personal time in one place."
+        action={(
+          <div className="schedule-header-actions">
+            {demoMode && <button className="secondary-button" type="button" onClick={() => void resetToSeed()}>Reset demo</button>}
+            <button className="primary-button" type="button" onClick={openCreate}>Add activity</button>
+          </div>
+        )}
+      />
 
       <ScheduleToolbar date={date} filter={filter} onShiftDate={(days) => setDate(shiftDate(date, days))} onResetDate={() => setDate(getAppToday(APP_TIMEZONE))} onFilterChange={setFilter} />
 
