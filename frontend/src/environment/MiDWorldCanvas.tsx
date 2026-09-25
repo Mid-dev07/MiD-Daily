@@ -8,6 +8,16 @@ interface MiDWorldCanvasProps {
 
 type Vec3 = [number, number, number]
 
+const LIGHT_DIRECTION: Vec3 = [
+  Math.cos((145 * Math.PI) / 180),
+  0.82,
+  Math.sin((145 * Math.PI) / 180),
+]
+
+const DESKTOP_FPS = 45
+const MOBILE_FPS = 30
+const MAX_WORLD_PIXELS = 2_200_000
+
 const VERTEX_SHADER = `
 attribute vec3 aPosition;
 attribute vec3 aNormal;
@@ -48,17 +58,16 @@ void main() {
 
   float diffuse = max(dot(normal, lightDir), 0.0);
   float halfLambert = diffuse * 0.72 + 0.28;
-
   vec3 halfVector = normalize(lightDir + viewDir);
   float specular = pow(max(dot(normal, halfVector), 0.0), 36.0);
-
   float rim = pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0);
 
   float grid = 0.0;
   if (uKind < 0.5) {
     vec2 cell = abs(fract(vWorldPosition.xz * 0.5 - 0.5) - 0.5);
     float line = 1.0 - min(min(cell.x, cell.y) / 0.045, 1.0);
-    float fine = 1.0 - min(min(abs(fract(vWorldPosition.xz * 0.1 - 0.5) - 0.5).x, abs(fract(vWorldPosition.xz * 0.1 - 0.5) - 0.5).y) / 0.06, 1.0);
+    vec2 fineCell = abs(fract(vWorldPosition.xz * 0.1 - 0.5) - 0.5);
+    float fine = 1.0 - min(min(fineCell.x, fineCell.y) / 0.06, 1.0);
     grid = max(line * 0.16, fine * 0.045);
   }
 
@@ -73,6 +82,11 @@ void main() {
   gl_FragColor = vec4(color, 1.0);
 }
 `
+
+interface Mesh {
+  vao: WebGLVertexArrayObject
+  vertexCount: number
+}
 
 function createShader(gl: WebGL2RenderingContext, type: number, source: string) {
   const shader = gl.createShader(type)
@@ -220,7 +234,27 @@ function planeGeometry() {
   ])
 }
 
-function dayTint(environment: EnvironmentState) {
+function createMesh(gl: WebGL2RenderingContext, data: Float32Array, positionLocation: number, normalLocation: number): Mesh {
+  const vao = gl.createVertexArray()
+  const buffer = gl.createBuffer()
+  if (!vao || !buffer) throw new Error('WebGL geometry resources could not be created.')
+
+  gl.bindVertexArray(vao)
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
+  gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
+
+  gl.enableVertexAttribArray(positionLocation)
+  gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 24, 0)
+  gl.enableVertexAttribArray(normalLocation)
+  gl.vertexAttribPointer(normalLocation, 3, gl.FLOAT, false, 24, 12)
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, null)
+  gl.bindVertexArray(null)
+
+  return { vao, vertexCount: data.length / 6 }
+}
+
+function dayTint(environment: EnvironmentState): Vec3 {
   switch (environment.dayPhase) {
     case 'dawn':
     case 'golden-hour':
@@ -248,10 +282,11 @@ export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
     if (!canvas) return
 
     let gl: WebGL2RenderingContext | null = null
+
     try {
       gl = canvas.getContext('webgl2', {
         alpha: true,
-        antialias: true,
+        antialias: window.innerWidth >= 900,
         powerPreference: 'low-power',
         preserveDrawingBuffer: false,
       })
@@ -269,6 +304,7 @@ export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
       const program = createProgram(gl)
       const positionLocation = gl.getAttribLocation(program, 'aPosition')
       const normalLocation = gl.getAttribLocation(program, 'aNormal')
+
       const uniforms = {
         projection: gl.getUniformLocation(program, 'uProjection'),
         view: gl.getUniformLocation(program, 'uView'),
@@ -282,65 +318,67 @@ export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
         time: gl.getUniformLocation(program, 'uTime'),
       }
 
-      const boxBuffer = gl.createBuffer()
-      const floorBuffer = gl.createBuffer()
-      if (!boxBuffer || !floorBuffer) throw new Error('WebGL geometry buffers could not be created.')
+      if ([uniforms.projection, uniforms.view, uniforms.model, uniforms.camera, uniforms.light, uniforms.base, uniforms.intensity, uniforms.emissive, uniforms.kind, uniforms.time].some((uniform) => !uniform)) {
+        throw new Error('WebGL uniform contract is incomplete.')
+      }
 
-      gl.bindBuffer(gl.ARRAY_BUFFER, boxBuffer)
-      gl.bufferData(gl.ARRAY_BUFFER, boxGeometry(), gl.STATIC_DRAW)
-
-      gl.bindBuffer(gl.ARRAY_BUFFER, floorBuffer)
-      gl.bufferData(gl.ARRAY_BUFFER, planeGeometry(), gl.STATIC_DRAW)
+      const box = createMesh(gl, boxGeometry(), positionLocation, normalLocation)
+      const floor = createMesh(gl, planeGeometry(), positionLocation, normalLocation)
 
       const projection = new Float32Array(16)
       const view = new Float32Array(16)
       const model = new Float32Array(16)
 
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+      const frameInterval = 1000 / (window.innerWidth < 700 ? MOBILE_FPS : DESKTOP_FPS)
       let frame = 0
       let running = true
       let width = 1
       let height = 1
-      let lastRender = 0
+      let lastRender = -Infinity
 
       const pointerListener = (event: Event) => {
-        const detail = event instanceof CustomEvent
-          ? event.detail as { x?: number; y?: number }
-          : null
+        const detail = event instanceof CustomEvent ? event.detail as { x?: number; y?: number } : null
         pointerRef.current.x = Number(detail?.x ?? 0)
         pointerRef.current.y = Number(detail?.y ?? 0)
       }
 
-      window.addEventListener('mid:world-pointer', pointerListener)
-
       const resize = () => {
         const rect = canvas.getBoundingClientRect()
-        const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 1.15 : 1.5)
-        width = Math.max(1, Math.round(rect.width * dpr))
-        height = Math.max(1, Math.round(rect.height * dpr))
-        if (canvas.width !== width || canvas.height !== height) {
-          canvas.width = width
-          canvas.height = height
-          gl?.viewport(0, 0, width, height)
-        }
+        const cssWidth = Math.max(1, rect.width)
+        const cssHeight = Math.max(1, rect.height)
+        const pixelRatio = Math.min(
+          window.devicePixelRatio || 1,
+          Math.sqrt(MAX_WORLD_PIXELS / (cssWidth * cssHeight)),
+        )
+        width = Math.max(1, Math.round(cssWidth * pixelRatio))
+        height = Math.max(1, Math.round(cssHeight * pixelRatio))
+
+        if (canvas.width === width && canvas.height === height) return
+
+        canvas.width = width
+        canvas.height = height
+        gl.viewport(0, 0, width, height)
+        perspective(projection, Math.PI / 4.8, width / Math.max(1, height), 0.1, 80)
       }
 
-      const resizeObserver = new ResizeObserver(resize)
-      resizeObserver.observe(canvas)
-      resize()
-      
+      gl.clearColor(0, 0, 0, 0)
+      gl.enable(gl.DEPTH_TEST)
+      gl.enable(gl.CULL_FACE)
+      gl.enable(gl.BLEND)
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+      gl.useProgram(program)
+      gl.uniform3f(uniforms.light, LIGHT_DIRECTION[0], LIGHT_DIRECTION[1], LIGHT_DIRECTION[2])
+
       const render = (timestamp: number) => {
         if (!running) return
 
-        const interval = reduceMotion.matches ? 1000 : (window.innerWidth < 700 ? 1000 / 30 : 1000 / 45)
-        if (timestamp - lastRender < interval) {
+        if (timestamp - lastRender < frameInterval) {
           frame = window.requestAnimationFrame(render)
           return
         }
+
         lastRender = timestamp
-
-        resize()
-
         const t = timestamp * 0.001
         const pointer = pointerRef.current
         const pointerStrength = reduceMotion.matches ? 0 : 1
@@ -351,38 +389,25 @@ export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
         const tint = dayTint(environmentRef.current)
         const intensity = Math.max(0.35, Math.min(1, environmentRef.current.visual.lightIntensity + 0.24))
 
-        perspective(projection, Math.PI / 4.8, width / Math.max(1, height), 0.1, 80)
         lookAt(view, camera, target, [0, 1, 0])
 
-        gl.viewport(0, 0, width, height)
-        gl.clearColor(0, 0, 0, 0)
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-        gl.enable(gl.DEPTH_TEST)
-        gl.enable(gl.CULL_FACE)
-        gl.enable(gl.BLEND)
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-        gl.useProgram(program)
 
         gl.uniformMatrix4fv(uniforms.projection, false, projection)
         gl.uniformMatrix4fv(uniforms.view, false, view)
         gl.uniform3f(uniforms.camera, camera[0], camera[1], camera[2])
-        gl.uniform3f(uniforms.light, Math.cos((145 * Math.PI) / 180), 0.82, Math.sin((145 * Math.PI) / 180))
+        gl.uniform3f(uniforms.light, LIGHT_DIRECTION[0], LIGHT_DIRECTION[1], LIGHT_DIRECTION[2])
         gl.uniform1f(uniforms.intensity, intensity)
         gl.uniform1f(uniforms.time, reduceMotion.matches ? 0 : t)
 
-        const drawGeometry = (buffer: WebGLBuffer, vertexCount: number, position: Vec3, scale: Vec3, color: Vec3, kind: number, emissive = 0, rotation = 0) => {
-          gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
-          gl.enableVertexAttribArray(positionLocation)
-          gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 24, 0)
-          gl.enableVertexAttribArray(normalLocation)
-          gl.vertexAttribPointer(normalLocation, 3, gl.FLOAT, false, 24, 12)
-
+        const draw = (mesh: Mesh, position: Vec3, scale: Vec3, color: Vec3, kind: number, emissive = 0, rotation = 0) => {
+          gl.bindVertexArray(mesh.vao)
           modelMatrix(model, position, scale, rotation)
           gl.uniformMatrix4fv(uniforms.model, false, model)
           gl.uniform3f(uniforms.base, color[0], color[1], color[2])
           gl.uniform1f(uniforms.kind, kind)
           gl.uniform1f(uniforms.emissive, emissive)
-          gl.drawArrays(gl.TRIANGLES, 0, vertexCount)
+          gl.drawArrays(gl.TRIANGLES, 0, mesh.vertexCount)
         }
 
         const mineral: Vec3 = [0.11 + tint[0] * 0.25, 0.17 + tint[1] * 0.18, 0.2 + tint[2] * 0.16]
@@ -390,52 +415,59 @@ export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
         const cyan: Vec3 = [0.11, 0.42, 0.52]
         const warm: Vec3 = [0.42, 0.3, 0.18]
 
-        drawGeometry(floorBuffer, 6, [0, -0.12, 0], [18, 1, 18], mineral, 0)
-        drawGeometry(boxBuffer, 36, [0, 0.08, 0], [4.8, 0.14, 2.7], stone, 1)
-        drawGeometry(boxBuffer, 36, [-5.8, 1.15, -2.0], [0.55, 1.15, 2.7], [0.09, 0.15, 0.18], 1)
-        drawGeometry(boxBuffer, 36, [5.8, 1.05, -1.4], [0.7, 1.05, 2.4], [0.09, 0.15, 0.18], 1)
-        drawGeometry(boxBuffer, 36, [-3.7, 2.0, -5.8], [2.2, 2.0, 0.28], [0.12, 0.18, 0.2], 1, 0.02)
-        drawGeometry(boxBuffer, 36, [3.2, 1.65, -6.5], [1.6, 1.65, 0.22], [0.11, 0.17, 0.19], 1, 0.02)
-        drawGeometry(boxBuffer, 36, [-7.4, 0.42, 3.2], [2.4, 0.42, 0.38], [0.08, 0.13, 0.16], 1)
-        drawGeometry(boxBuffer, 36, [7.0, 0.34, 3.8], [1.8, 0.34, 0.38], [0.08, 0.13, 0.16], 1)
-        drawGeometry(boxBuffer, 36, [0, 0.52, 1.15], [2.5, 0.52, 1.35], [0.08, 0.14, 0.17], 1, 0.01)
+        draw(floor, [0, -0.12, 0], [18, 1, 18], mineral, 0)
+        draw(box, [0, 0.08, 0], [4.8, 0.14, 2.7], stone, 1)
+        draw(box, [-5.8, 1.15, -2.0], [0.55, 1.15, 2.7], [0.09, 0.15, 0.18], 1)
+        draw(box, [5.8, 1.05, -1.4], [0.7, 1.05, 2.4], [0.09, 0.15, 0.18], 1)
+        draw(box, [-3.7, 2.0, -5.8], [2.2, 2.0, 0.28], [0.12, 0.18, 0.2], 1, 0.02)
+        draw(box, [3.2, 1.65, -6.5], [1.6, 1.65, 0.22], [0.11, 0.17, 0.19], 1, 0.02)
+        draw(box, [-7.4, 0.42, 3.2], [2.4, 0.42, 0.38], [0.08, 0.13, 0.16], 1)
+        draw(box, [7.0, 0.34, 3.8], [1.8, 0.34, 0.38], [0.08, 0.13, 0.16], 1)
+        draw(box, [0, 0.52, 1.15], [2.5, 0.52, 1.35], [0.08, 0.14, 0.17], 1, 0.01)
 
-        drawGeometry(boxBuffer, 36, [-2.2, 0.63, 0.0], [0.04, 0.63, 0.96], cyan, 1, 0.42)
-        drawGeometry(boxBuffer, 36, [2.2, 0.63, 0.0], [0.04, 0.63, 0.96], cyan, 1, 0.42)
-        drawGeometry(boxBuffer, 36, [0, 1.08, -0.01], [1.0, 0.025, 0.025], cyan, 1, 0.52)
-        drawGeometry(boxBuffer, 36, [-4.9, 1.9, -2.7], [0.035, 0.52, 1.55], warm, 1, 0.18, t * 0.04)
+        draw(box, [-2.2, 0.63, 0.0], [0.04, 0.63, 0.96], cyan, 1, 0.42)
+        draw(box, [2.2, 0.63, 0.0], [0.04, 0.63, 0.96], cyan, 1, 0.42)
+        draw(box, [0, 1.08, -0.01], [1.0, 0.025, 0.025], cyan, 1, 0.52)
+        draw(box, [-4.9, 1.9, -2.7], [0.035, 0.52, 1.55], warm, 1, 0.18, t * 0.04)
 
         if (!reduceMotion.matches) {
-          drawGeometry(boxBuffer, 36, [0, 0.95, -0.05], [1.15, 0.035, 1.15], cyan, 1, 0.16, t * 0.11)
+          draw(box, [0, 0.95, -0.05], [1.15, 0.035, 1.15], cyan, 1, 0.16, t * 0.11)
         }
 
+        gl.bindVertexArray(null)
         frame = window.requestAnimationFrame(render)
       }
 
-      onReady?.(true)
-      frame = window.requestAnimationFrame(render)
-
+      resize()
+      const resizeObserver = new ResizeObserver(resize)
+      resizeObserver.observe(canvas)
       const handleVisibility = () => {
         if (document.visibilityState === 'hidden') {
           running = false
           window.cancelAnimationFrame(frame)
-        } else if (!running) {
+          return
+        }
+
+        if (!running) {
           running = true
           frame = window.requestAnimationFrame(render)
         }
       }
 
+      window.addEventListener('mid:world-pointer', pointerListener)
       document.addEventListener('visibilitychange', handleVisibility)
+      onReady?.(true)
+      frame = window.requestAnimationFrame(render)
 
       return () => {
         running = false
         window.cancelAnimationFrame(frame)
         resizeObserver.disconnect()
-        document.removeEventListener('visibilitychange', handleVisibility)
         window.removeEventListener('mid:world-pointer', pointerListener)
-        gl?.deleteBuffer(boxBuffer)
-        gl?.deleteBuffer(floorBuffer)
-        gl?.deleteProgram(program)
+        document.removeEventListener('visibilitychange', handleVisibility)
+        gl.deleteVertexArray(box.vao)
+        gl.deleteVertexArray(floor.vao)
+        gl.deleteProgram(program)
       }
     } catch {
       onReady?.(false)

@@ -1751,7 +1751,6 @@ textarea:focus,
 .dashboard-command-deck,
 .dashboard-hero-aside {
   transform-style: preserve-3d;
-  will-change: transform;
 }
 
 .dashboard-command-deck {
@@ -1924,12 +1923,6 @@ textarea:focus,
 /* =========================================================
    SPATIAL UNREAL — DOM MATERIAL RESPONSE
 ========================================================= */
-.content-card,
-.glass-panel,
-.dashboard-signal-card,
-.dashboard-habits {
-  transform: translateZ(0);
-}
 
 .workspace::before {
   inset: 8px 20px 40px;
@@ -1950,8 +1943,3 @@ textarea:focus,
     0 24px 56px rgba(0,0,0,.14);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .environment-world-canvas {
-    filter: none;
-  }
-}
