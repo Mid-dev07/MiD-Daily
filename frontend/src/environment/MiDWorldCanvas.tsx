@@ -1,8 +1,11 @@
 import { useEffect, useRef } from 'react'
+import type { View } from '../types'
+import { worldModuleAnchor, worldModuleAnchors } from './moduleWorld'
 import type { EnvironmentState } from './types'
 
 interface MiDWorldCanvasProps {
   environment: EnvironmentState
+  activeView: View
   onReady?: (ready: boolean) => void
 }
 
@@ -272,10 +275,15 @@ export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const pointerRef = useRef({ x: 0, y: 0 })
   const environmentRef = useRef(environment)
+  const activeViewRef = useRef(activeView)
 
   useEffect(() => {
     environmentRef.current = environment
   }, [environment])
+
+  useEffect(() => {
+    activeViewRef.current = activeView
+  }, [activeView])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -381,11 +389,16 @@ export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
         lastRender = timestamp
         const t = timestamp * 0.001
         const pointer = pointerRef.current
+        const activeAnchor = worldModuleAnchor(activeViewRef.current)
         const pointerStrength = reduceMotion.matches ? 0 : 1
         const yaw = pointer.x * 0.055 * pointerStrength + Math.sin(t * 0.07) * 0.008
         const pitch = pointer.y * 0.035 * pointerStrength
         const camera: Vec3 = [Math.sin(yaw) * 10.8, 4.25 + pitch * 4, Math.cos(yaw) * 10.8]
-        const target: Vec3 = [0, 1.4 + pitch * 1.1, 0]
+        const target: Vec3 = [
+          activeAnchor.position[0] * 0.06,
+          1.4 + pitch * 1.1,
+          activeAnchor.position[2] * 0.035,
+        ]
         const tint = dayTint(environmentRef.current)
         const intensity = Math.max(0.35, Math.min(1, environmentRef.current.visual.lightIntensity + 0.24))
 
@@ -429,6 +442,15 @@ export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
         draw(box, [2.2, 0.63, 0.0], [0.04, 0.63, 0.96], cyan, 1, 0.42)
         draw(box, [0, 1.08, -0.01], [1.0, 0.025, 0.025], cyan, 1, 0.52)
         draw(box, [-4.9, 1.9, -2.7], [0.035, 0.52, 1.55], warm, 1, 0.18, t * 0.04)
+
+        const moduleAnchors = worldModuleAnchors()
+        for (const anchor of moduleAnchors) {
+          const active = anchor.view === activeViewRef.current
+          const distance = Math.hypot(anchor.position[0] - activeAnchor.position[0], anchor.position[2] - activeAnchor.position[2])
+          const emphasis = active ? 0.24 : distance < 6 ? 0.055 : 0.025
+          const scale: Vec3 = active ? [0.9, 0.035, 0.52] : [0.64, 0.022, 0.38]
+          draw(box, anchor.position, scale, anchor.color, 1, emphasis, active && !reduceMotion.matches ? t * 0.08 : 0)
+        }
 
         if (!reduceMotion.matches) {
           draw(box, [0, 0.95, -0.05], [1.15, 0.035, 1.15], cyan, 1, 0.16, t * 0.11)
