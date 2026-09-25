@@ -420,26 +420,35 @@ The renderer is an environmental instrument, not the product UI.
 
 ## 14 — Responsive Standard
 
-Desktop:
-- spatial composition;
-- persistent sidebar;
-- environmental context;
-- wider working surfaces.
+Responsive behavior is a product constraint, not a finishing step.
 
-Tablet:
-- tighter composition;
-- fewer simultaneous columns;
-- preserve hierarchy.
+MiD must adapt as a system across:
+- desktop monitors;
+- laptops;
+- tablets in portrait or landscape;
+- phones of different widths and heights.
 
-Mobile:
-- one-handed usage first;
-- 48px touch targets;
-- compact navigation where appropriate;
-- no desktop controls squeezed into mobile;
-- no mandatory hover interactions;
-- no critical information hidden behind visual effects.
+The layout may change composition, navigation placement, density, typography, and environmental intensity, but product semantics remain stable.
 
-Mobile must feel designed, not compressed.
+Canonical device classes:
+- Wide desktop: 1280px and above.
+- Laptop: 1024–1279px.
+- Tablet/small touch: 768–1023px, with the final touch navigation transition at 820px.
+- Phone: 560px and below.
+- Compact phone: 390px and below.
+
+Rules:
+- never squeeze desktop columns into a phone;
+- preserve 48px touch targets;
+- support safe-area insets;
+- never depend on hover for meaning or critical actions;
+- spatial world intensity must reduce on small screens;
+- bottom navigation is preferred over a compressed desktop sidebar on touch layouts;
+- content width must remain fluid and never cause accidental horizontal overflow;
+- controls and toolbars may stack or become scrollable when space is insufficient;
+- hierarchy and task order must remain recognizable across all device classes.
+
+Responsive changes must be intentional composition changes, not simply smaller typography.
 
 ## 15 — Accessibility Standard
 

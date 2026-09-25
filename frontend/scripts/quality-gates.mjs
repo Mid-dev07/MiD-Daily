@@ -322,6 +322,28 @@ if (existsSync(moduleWorldPath)) {
     failures.push('Spatial renderer must resolve the active module through the shared module-world map.')
   }
 } 
+const responsiveStyles = join(srcDir, 'styles/responsive.css')
+if (!existsSync(responsiveStyles)) {
+  failures.push('Responsive experience authority stylesheet is missing.')
+} else {
+  const responsiveSource = readFileSync(responsiveStyles, 'utf8')
+  for (const contract of [
+    '@media (min-width: 1280px)',
+    '@media (min-width: 1024px) and (max-width: 1279px)',
+    '@media (max-width: 1023px)',
+    '@media (max-width: 820px)',
+    '@media (max-width: 390px)',
+    'env(safe-area-inset-bottom)',
+    '(hover: none), (pointer: coarse)',
+  ]) {
+    if (!responsiveSource.includes(contract)) failures.push('Responsive contract missing: ' + contract)
+  }
+  if (!/environment-world-canvas/.test(responsiveSource)) failures.push('Responsive spatial world rules are missing.')
+  if (!/min-height:\s*48px/.test(responsiveSource)) failures.push('Responsive touch controls must preserve 48px targets.')
+}
+const responsiveMainSource = readFileSync(join(srcDir, 'main.tsx'), 'utf8')
+if (!/styles\/responsive\.css/.test(responsiveMainSource)) failures.push('Responsive authority stylesheet must be loaded after experience.css.')
+
 const missingEnvironmentFiles = environmentFiles.filter((relative) => !existsSync(join(srcDir, relative)))
 if (missingEnvironmentFiles.length) {
   for (const relative of missingEnvironmentFiles) failures.push('Missing environment foundation file: ' + relative)
