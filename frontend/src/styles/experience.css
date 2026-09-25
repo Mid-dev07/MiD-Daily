@@ -1594,3 +1594,94 @@ textarea:focus,
     animation: none;
   }
 }
+
+
+/* =========================================================
+   UNREAL FINALIZATION — PHASE 4
+   Signature spatial grammar: indexed workspace, connected
+   context rail, and localized module energy.
+========================================================= */
+
+.workspace-header {
+  position: relative;
+  padding-left: 16px;
+}
+
+.workspace-header::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 4px;
+  width: 4px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--module-accent), transparent 78%);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--module-accent) 18%, transparent);
+  opacity: .72;
+}
+
+.workspace-header-code {
+  min-height: 24px;
+  padding: 4px 8px;
+  width: max-content;
+  max-width: 100%;
+  border: 1px solid color-mix(in srgb, var(--module-accent) 10%, var(--unreal-rim-soft));
+  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(229,240,230,.035), rgba(4,11,17,.18));
+  box-shadow: var(--unreal-inset);
+}
+
+.workspace-context-rail {
+  position: relative;
+}
+
+.workspace-context-rail::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--module-accent) 11%, transparent), transparent);
+  pointer-events: none;
+}
+
+.workspace-context-lead,
+.workspace-context-item {
+  position: relative;
+  z-index: 1;
+  border-color: color-mix(in srgb, var(--module-accent) 8%, var(--unreal-rim-soft));
+  box-shadow: var(--unreal-shadow-contact), var(--unreal-inset);
+}
+
+.workspace-context-item:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--module-accent) 20%, var(--unreal-rim-soft));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--module-accent) 5%, transparent), rgba(5,12,18,.44));
+}
+
+.workspace-context-item:focus-visible {
+  outline: 2px solid var(--unreal-focus);
+  outline-offset: 4px;
+  border-color: color-mix(in srgb, var(--module-accent) 38%, var(--unreal-rim));
+}
+
+@media (max-width: 820px) {
+  .workspace-header {
+    padding-left: 12px;
+  }
+
+  .workspace-header::before {
+    top: 8px;
+  }
+
+  .workspace-context-rail::before {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-context-item:hover {
+    transform: none;
+  }
+}
