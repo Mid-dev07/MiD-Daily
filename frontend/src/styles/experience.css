@@ -90,7 +90,7 @@
   z-index: 3;
   left: var(--env-moon-x);
   top: var(--env-moon-y);
-  width: 58px;
+  width: 56px;
   background:
     radial-gradient(circle at 34% 32%, #f5f8e6 0 26%, #d8e0ca 58%, rgba(216, 224, 202, 0) 72%);
   opacity: var(--env-moon-opacity);
@@ -269,13 +269,13 @@
 }
 
 .nav-list {
-  gap: 6px;
+  gap: 8px;
 }
 
 .nav-item {
   position: relative;
   min-height: 48px;
-  border-radius: 14px;
+  border-radius: 16px;
   color: rgba(224, 235, 230, .6);
 }
 
@@ -283,9 +283,9 @@
   content: "";
   position: absolute;
   left: 0;
-  top: 11px;
-  bottom: 11px;
-  width: 2px;
+  top: 12px;
+  bottom: 12px;
+  width: 4px;
   border-radius: 99px;
   background: transparent;
   transition: background var(--duration-fast), box-shadow var(--duration-fast);
@@ -322,9 +322,9 @@
 .topbar {
   min-height: 68px;
   margin: 12px 24px 0;
-  padding: 10px 12px;
+  padding: 12px 12px;
   border: 1px solid rgba(231, 240, 234, .13);
-  border-radius: 18px;
+  border-radius: 20px;
   background:
     radial-gradient(360px 160px at var(--ux-x, 12%) var(--ux-y, 4%), rgba(222, 237, 225, .08), transparent 72%),
     linear-gradient(145deg, rgba(14, 27, 35, .66), rgba(5, 12, 18, .48)),
@@ -337,8 +337,8 @@
 }
 
 .topbar::after {
-  left: 18px;
-  right: 18px;
+  left: 20px;
+  right: 20px;
   bottom: 0;
   background: linear-gradient(90deg, transparent, rgba(232, 243, 231, .14), transparent);
 }
@@ -424,7 +424,7 @@
 }
 
 .page-intro h2 {
-  margin-top: 10px;
+  margin-top: 8px;
   font-size: clamp(44px, 6vw, 84px);
   letter-spacing: -.075em;
   text-shadow: 0 10px 42px rgba(0, 0, 0, .2);
@@ -483,7 +483,7 @@
 .glass-panel,
 .integration-panel,
 .ai-shell-card {
-  border-radius: 26px;
+  border-radius: 24px;
 }
 
 .content-card:hover,
@@ -613,7 +613,7 @@ textarea:focus,
     margin: 8px 12px 0;
     min-height: 64px;
     padding: 8px 10px;
-    border-radius: 17px;
+    border-radius: 16px;
   }
 
   .workspace {
@@ -634,7 +634,7 @@ textarea:focus,
   }
 
   .dashboard-command-deck {
-    border-radius: 26px;
+    border-radius: 24px;
   }
 
   .app-frame.sidebar-hidden .sidebar {
