@@ -5,6 +5,7 @@ import type { EnvironmentState } from './types'
 
 interface EnvironmentSceneProps {
   environment: EnvironmentState
+  activeView: View
 }
 
 const stars = [
@@ -14,19 +15,20 @@ const stars = [
   ['37%', '31%', '1px'], ['55%', '34%', '1px'], ['72%', '31%', '1px'], ['89%', '36%', '2px'],
 ]
 
-export function EnvironmentScene({ environment }: EnvironmentSceneProps) {
+export function EnvironmentScene({ environment, activeView }: EnvironmentSceneProps) {
   const [worldReady, setWorldReady] = useState(false)
 
   return (
     <div
       className="environment-scene"
       data-renderer={worldReady ? 'webgl' : 'css'}
+      data-module={activeView}
       data-day-phase={environment.dayPhase}
       data-weather={environment.weather?.condition ?? 'clear'}
       style={environmentCssVariables(environment)}
       aria-hidden="true"
     >
-      <MiDWorldCanvas environment={environment} onReady={setWorldReady} />
+      <MiDWorldCanvas environment={environment} activeView={activeView} onReady={setWorldReady} />
       <div className="environment-sky" />
       <div className="environment-stars">
         {stars.map(([x, y, size], index) => (
