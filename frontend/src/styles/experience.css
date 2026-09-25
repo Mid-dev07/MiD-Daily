@@ -697,7 +697,7 @@ textarea:focus,
     rotateY(var(--ux-ry));
   transform-style: preserve-3d;
   backface-visibility: hidden;
-  will-change: transform;
+  will-change: auto;
   isolation: isolate;
   transition:
     transform 240ms var(--ease-spring),
@@ -705,69 +705,40 @@ textarea:focus,
     box-shadow 240ms var(--ease-standard);
 }
 
-.content-card::after,
-.glass-panel::after,
-.stat-card::after,
-.dashboard-signal-card::after,
-.feature-directory-item::after,
-.feature-node::after,
-.planner-shortcut::after,
-.global-search-result::after,
-.finance-budget-row::after,
-.task-item-card::after,
-.notification-card::after,
-.notification-popover::after,
-.secondary-panel::after,
-.flexible-plan::after,
-.schedule-now-strip::after,
-.insights-metric::after,
-.habit-check::after,
-.habit-day::after,
-.dashboard-section-link::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
+.content-card::before,
+.glass-panel::before,
+.stat-card::before,
+.dashboard-signal-card::before,
+.feature-directory-item::before,
+.feature-node::before,
+.planner-shortcut::before,
+.global-search-result::before,
+.finance-budget-row::before,
+.task-item-card::before,
+.notification-card::before,
+.notification-popover::before,
+.secondary-panel::before,
+.flexible-plan::before,
+.schedule-now-strip::before,
+.insights-metric::before,
+.habit-check::before,
+.habit-day::before,
+.dashboard-section-link::before {
   background:
     radial-gradient(
       var(--engine-specular-radius) 170px at var(--ux-x, 18%) var(--ux-y, 10%),
-      rgba(255 255 255 / calc(var(--engine-specular-strength) * (.45 + var(--ux-elevation)))),
+      rgba(255 255 255 / calc(var(--engine-specular-strength) * (.35 + var(--ux-elevation)))),
       transparent 62%
     ),
     linear-gradient(
       var(--engine-key-angle),
-      rgba(255 255 255 / .055),
+      rgba(255 255 255 / .045),
       transparent 24% 72%,
-      color-mix(in srgb, var(--module-accent, var(--accent)) 9%, transparent)
+      color-mix(in srgb, var(--module-accent, var(--accent)) 7%, transparent)
     );
   mix-blend-mode: screen;
+  opacity: .34;
   transition: opacity 180ms var(--ease-standard);
-}
-
-.content-card > *,
-.glass-panel > *,
-.stat-card > *,
-.dashboard-signal-card > *,
-.feature-directory-item > *,
-.feature-node > *,
-.planner-shortcut > *,
-.global-search-result > *,
-.finance-budget-row > *,
-.task-item-card > *,
-.notification-card > *,
-.notification-popover > *,
-.secondary-panel > *,
-.flexible-plan > *,
-.schedule-now-strip > *,
-.insights-metric > *,
-.habit-check > *,
-.habit-day > *,
-.dashboard-section-link > * {
-  position: relative;
-  z-index: 1;
 }
 
 .content-card[data-ux-lit="true"],
@@ -794,30 +765,31 @@ textarea:focus,
     rotateX(var(--ux-rx))
     rotateY(var(--ux-ry))
     scale(1.004);
+  will-change: transform;
   box-shadow:
     0 24px 62px rgb(0 0 0 / .3),
     inset 0 1px rgb(255 255 255 / calc(.075 + var(--ux-elevation) * .05));
 }
 
-.content-card[data-ux-lit="true"]::after,
-.glass-panel[data-ux-lit="true"]::after,
-.stat-card[data-ux-lit="true"]::after,
-.dashboard-signal-card[data-ux-lit="true"]::after,
-.feature-directory-item[data-ux-lit="true"]::after,
-.feature-node[data-ux-lit="true"]::after,
-.planner-shortcut[data-ux-lit="true"]::after,
-.global-search-result[data-ux-lit="true"]::after,
-.finance-budget-row[data-ux-lit="true"]::after,
-.task-item-card[data-ux-lit="true"]::after,
-.notification-card[data-ux-lit="true"]::after,
-.notification-popover[data-ux-lit="true"]::after,
-.secondary-panel[data-ux-lit="true"]::after,
-.flexible-plan[data-ux-lit="true"]::after,
-.schedule-now-strip[data-ux-lit="true"]::after,
-.insights-metric[data-ux-lit="true"]::after,
-.habit-check[data-ux-lit="true"]::after,
-.habit-day[data-ux-lit="true"]::after,
-.dashboard-section-link[data-ux-lit="true"]::after {
+.content-card[data-ux-lit="true"]::before,
+.glass-panel[data-ux-lit="true"]::before,
+.stat-card[data-ux-lit="true"]::before,
+.dashboard-signal-card[data-ux-lit="true"]::before,
+.feature-directory-item[data-ux-lit="true"]::before,
+.feature-node[data-ux-lit="true"]::before,
+.planner-shortcut[data-ux-lit="true"]::before,
+.global-search-result[data-ux-lit="true"]::before,
+.finance-budget-row[data-ux-lit="true"]::before,
+.task-item-card[data-ux-lit="true"]::before,
+.notification-card[data-ux-lit="true"]::before,
+.notification-popover[data-ux-lit="true"]::before,
+.secondary-panel[data-ux-lit="true"]::before,
+.flexible-plan[data-ux-lit="true"]::before,
+.schedule-now-strip[data-ux-lit="true"]::before,
+.insights-metric[data-ux-lit="true"]::before,
+.habit-check[data-ux-lit="true"]::before,
+.habit-day[data-ux-lit="true"]::before,
+.dashboard-section-link[data-ux-lit="true"]::before {
   opacity: 1;
 }
 
@@ -905,27 +877,5 @@ textarea:focus,
       border-color 180ms var(--ease-standard),
       box-shadow 180ms var(--ease-standard);
     transform: none;
-  }
-
-  .content-card::after,
-  .glass-panel::after,
-  .stat-card::after,
-  .dashboard-signal-card::after,
-  .feature-directory-item::after,
-  .feature-node::after,
-  .planner-shortcut::after,
-  .global-search-result::after,
-  .finance-budget-row::after,
-  .task-item-card::after,
-  .notification-card::after,
-  .notification-popover::after,
-  .secondary-panel::after,
-  .flexible-plan::after,
-  .schedule-now-strip::after,
-  .insights-metric::after,
-  .habit-check::after,
-  .habit-day::after,
-  .dashboard-section-link::after {
-    display: none;
   }
 }
