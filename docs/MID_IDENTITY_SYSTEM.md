@@ -184,6 +184,30 @@ Foreground rule: content wins over atmosphere.
 
 Environment changes must be state-driven, slow, subdued, lightweight, and reduced-motion safe.
 
+## 12.1 — Time × Weather Environment Logic
+
+MiD environment mood is computed as a composition, not a list of unrelated themes.
+
+The system combines:
+1. astronomical state — sun altitude and azimuth;
+2. day phase — night, dawn, morning, day, golden-hour, dusk;
+3. weather — clear, cloud, fog, precipitation, storm, snow;
+4. spatial response — light direction, atmospheric density, material contrast, moisture, and nature saturation.
+
+The sun position determines where directional light comes from. The canonical 145° MiD light direction remains the fallback/material reference, while available solar data drives the actual spatial light direction.
+
+Weather modifies the current time state rather than replacing it.
+
+Examples:
+- morning + clear → fresh natural contrast, soft directional sunlight, brighter moss/terrain;
+- morning + rain → cool diffuse light, damp darker ground, denser air, restrained highlights;
+- day + cloudy → flatter daylight, softer shadows, muted landscape;
+- golden-hour + clear → warm low-angle light and longer atmospheric gradients;
+- dusk + rain → cooler muted sky, wet ground, low visibility, subdued highlights;
+- night + storm → deep cool environment, high atmospheric density, minimal emissive light, no cheerful daylight cues.
+
+The purpose is continuity: the user should always feel that the same MiD place is changing naturally through time and weather.
+
 ## 13 — Module Personalities
 
 All modules share MiD identity.
