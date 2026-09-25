@@ -272,7 +272,7 @@ function dayTint(environment: EnvironmentState): Vec3 {
   }
 }
 
-export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
+export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const pointerRef = useRef({ x: 0, y: 0 })
   const environmentRef = useRef(environment)
