@@ -531,6 +531,59 @@ function drawSpatialPath(
   }
 }
 
+function drawWorldComposition(
+  draw: (
+    mesh: Mesh,
+    position: Vec3,
+    scale: Vec3,
+    color: Vec3,
+    kind: number,
+    emissive?: number,
+    rotation?: number,
+  ) => void,
+  box: Mesh,
+  rockA: Mesh,
+  rockB: Mesh,
+  foliage: Mesh,
+  composition: ReturnType<typeof worldModuleAnchor>['composition'],
+  stone: Vec3,
+  moss: Vec3,
+  fern: Vec3,
+  scale: number,
+) {
+  const [fx, , fz] = composition.foregroundLeft
+  const [rx, , rz] = composition.foregroundRight
+  const [hx, , hz] = composition.horizon
+  const [lx, ly, lz] = composition.landmark
+  const s = Math.max(0.72, Math.min(1.08, scale))
+
+  draw(rockA, [fx, 0.05, fz], [1.45 * s, 0.72 * s, 1.08 * s], stone, 3, 0, -0.18)
+  draw(rockB, [rx, 0.045, rz], [1.3 * s, 0.64 * s, 1.02 * s], moss, 3, 0, 0.16)
+
+  draw(rockC, [hx - 2.0 * s, 0.04, hz + 0.15], [2.05 * s, 0.66 * s, 1.1 * s], stone, 3, 0, -0.08)
+  draw(rockB, [hx + 1.2 * s, 0.035, hz - 0.1], [1.72 * s, 0.52 * s, 0.92 * s], moss, 3, 0, 0.14)
+  draw(rockA, [hx + 3.0 * s, 0.03, hz + 0.22], [1.18 * s, 0.44 * s, 0.76 * s], fern, 3, 0, -0.2)
+
+  if (composition.landmarkKind === 'grove') {
+    draw(foliage, [lx - 0.9 * s, ly - 0.05, lz], [1.0 * s, 0.92 * s, 1.0 * s], fern, 4, 0, -0.14)
+    draw(foliage, [lx + 0.2 * s, ly - 0.05, lz + 0.2 * s], [0.78 * s, 0.74 * s, 0.78 * s], moss, 4, 0, 0.2)
+    draw(rockC, [lx + 0.75 * s, 0.05, lz + 0.16 * s], [0.72 * s, 0.34 * s, 0.56 * s], stone, 3, 0, 0.08)
+    return
+  }
+
+  if (composition.landmarkKind === 'ridge') {
+    draw(rockA, [lx - 1.0 * s, 0.06, lz], [1.15 * s, 0.56 * s, 0.82 * s], stone, 3, 0, -0.14)
+    draw(rockB, [lx + 0.15 * s, 0.05, lz - 0.12 * s], [1.35 * s, 0.72 * s, 0.92 * s], moss, 3, 0, 0.12)
+    draw(rockC, [lx + 1.15 * s, 0.045, lz + 0.08 * s], [0.92 * s, 0.48 * s, 0.72 * s], fern, 3, 0, -0.18)
+    return
+  }
+
+  draw(box, [lx - 0.72 * s, 0.42 * s, lz], [0.22 * s, 0.42 * s, 0.82 * s], stone, 1)
+  draw(box, [lx + 0.72 * s, 0.38 * s, lz], [0.22 * s, 0.38 * s, 0.74 * s], moss, 1)
+  draw(box, [lx, 0.78 * s, lz - 0.08 * s], [0.94 * s, 0.08 * s, 0.18 * s], stone, 1)
+  draw(rockB, [lx, 0.04, lz + 0.54 * s], [0.72 * s, 0.34 * s, 0.48 * s], moss, 3, 0, 0.12)
+}
+
 export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const pointerRef = useRef({ x: 0, y: 0 })
@@ -768,6 +821,18 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
             [0, 0.02, 1.15],
             activeAnchor.position,
             moss,
+          )
+          drawWorldComposition(
+            draw,
+            box,
+            rockA,
+            rockB,
+            foliage,
+            activeAnchor.composition,
+            stone,
+            moss,
+            fern,
+            activeAnchor.composition.landmarkScale,
           )
         }
 
