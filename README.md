@@ -3,7 +3,7 @@
 Lightweight daily management workspace built around schedule, tasks, finance, and connected assistants.
 
 ## Product
-MiD-Daily is designed as a calm, nature-led daily workspace.
+MiD-Daily is a living personal operating workspace: a calm, precise space where schedule, tasks, finance, habits, insights, and connected tools come together around the reality of one person's day.
 
 Core:
 - Dashboard
@@ -23,15 +23,22 @@ Connected:
 
 The optional provider modules are designed to fail gracefully when credentials or provider permissions are not configured.
 
-## Visual direction
-Nature Cinematic + Natural Luxury:
-- cinematic forest atmosphere
-- moss, sage, stone, fog, and warm sunlight
-- restrained dew-glass surfaces
-- responsive feature landscape
-- desktop sidebar and mobile bottom navigation
-- reduced-motion support
-- keyboard-friendly modal interactions
+## Identity direction
+MiD's identity is **calm structure + living context + engineered material quality + personal relevance**.
+
+The visual language combines:
+- dark mineral surfaces
+- electric cyan as a restrained interaction signature
+- natural environmental atmosphere
+- measured 145deg directional light
+- editorial typography
+- numbered spatial workspaces
+- responsive Feature Landscape
+- reduced-motion and keyboard-safe interaction
+
+UNREAL is the material and interaction quality layer, not the product identity.
+
+See `docs/MID_IDENTITY_SYSTEM.md` for the canonical identity contract.
 
 ## Architecture
 Browser → Cloudflare Workers frontend → Cloudflare Worker API → Supabase Auth/PostgreSQL
