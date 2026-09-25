@@ -349,6 +349,18 @@ const natureTokens = readFileSync(join(srcDir, 'styles/tokens.css'), 'utf8')
 for (const token of ['--nature-ground', '--nature-moss-soft', '--nature-stone-warm']) {
   if (!natureTokens.includes(token)) failures.push('Nature identity token missing: ' + token)
 }
+const moodSource = readFileSync(join(srcDir, 'environment/mood.ts'), 'utf8')
+for (const contract of ['phaseMood', 'weatherMood', 'composeEnvironmentMood', 'environmentLightDirection']) {
+  if (!moodSource.includes(contract)) failures.push('Time-weather environment contract missing: ' + contract)
+}
+const environmentTypes = readFileSync(join(srcDir, 'environment/types.ts'), 'utf8')
+for (const visualField of ['lightWarmth', 'skyCoolness', 'natureSaturation', 'sunBeamOpacity', 'airDensity', 'wetness', 'worldContrast']) {
+  if (!environmentTypes.includes(visualField)) failures.push('Environment visual field missing: ' + visualField)
+}
+const worldRenderer = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
+if (!/environmentLightDirection/.test(worldRenderer)) failures.push('Spatial world must consume real solar direction when available.')
+if (!/DEFAULT_LIGHT_DIRECTION/.test(worldRenderer)) failures.push('Spatial world must retain the canonical 145deg fallback light.')
+
 const responsiveMainSource = readFileSync(join(srcDir, 'main.tsx'), 'utf8')
 if (!/styles\/responsive\.css/.test(responsiveMainSource)) failures.push('Responsive authority stylesheet must be loaded after experience.css.')
 
