@@ -4,7 +4,7 @@ Status: Identity Lock v1.0
 
 This document defines the product identity that must remain stable across future UI/UX redesigns, feature growth, integrations, and visual experiments.
 
-UNREAL is an execution and material-quality layer. It is not MiD's identity.
+UNREAL is an execution and spatial-quality layer. It is not MiD's identity.
 
 ## 01 — Identity in One Sentence
 
@@ -161,6 +161,8 @@ Numbers function as spatial orientation, not decoration.
 Feature Landscape is a brand-level experience element.
 
 It represents the idea that every part of the person's life has a place inside one connected workspace.
+
+In the spatial direction, this principle extends from a single component into the environment itself: the workspace should feel like one connected place, while navigation and information remain DOM-first.
 
 It must feel spatial, calm, discoverable, slightly surprising, and useful.
 
