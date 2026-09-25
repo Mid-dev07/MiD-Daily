@@ -1685,3 +1685,273 @@ textarea:focus,
     transform: none;
   }
 }
+
+
+/* =========================================================
+   SPATIAL UNREAL REDEFINITION — WORLD BRIDGE
+   The environment is now a real rendered world layer.
+   DOM remains the information layer.
+========================================================= */
+
+.environment-scene {
+  z-index: 0;
+  background: #06101a;
+}
+
+.environment-world-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: .92;
+  pointer-events: none;
+}
+
+.environment-scene[data-renderer="webgl"] .environment-terrain {
+  opacity: .18;
+}
+
+.environment-scene[data-renderer="webgl"] .environment-canopy {
+  opacity: .22;
+}
+
+.environment-scene[data-renderer="webgl"] .environment-horizon {
+  opacity: .20;
+}
+
+.environment-scene[data-renderer="webgl"] .environment-light-shafts {
+  opacity: .42;
+}
+
+.environment-scene[data-renderer="webgl"] .environment-clouds {
+  opacity: .58;
+}
+
+.environment-scene[data-renderer="webgl"] .environment-sun,
+.environment-scene[data-renderer="webgl"] .environment-moon,
+.environment-scene[data-renderer="webgl"] .environment-stars {
+  opacity: .66;
+}
+
+.app-frame {
+  background:
+    radial-gradient(900px 520px at 78% 8%, rgba(79,209,255,.022), transparent 68%),
+    rgba(10,17,25,.18);
+}
+
+.app-frame::after {
+  background:
+    linear-gradient(180deg, rgba(1,5,9,.02), rgba(1,5,9,.10) 74%, rgba(0,5,8,.22)),
+    linear-gradient(90deg, rgba(1,5,9,.10), transparent 18%, transparent 82%, rgba(1,5,9,.08));
+}
+
+/* Spatial object behavior: elevation is expressed by geometry, not card inflation. */
+.dashboard-command-deck,
+.dashboard-hero-aside {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.dashboard-command-deck {
+  min-height: 360px;
+  display: grid;
+  align-content: stretch;
+  background:
+    linear-gradient(145deg, rgba(20,34,46,.58), rgba(5,11,18,.74)),
+    rgba(7,14,21,.40);
+  border-color: rgba(220,235,229,.14);
+  box-shadow:
+    0 40px 100px rgba(0,0,0,.28),
+    inset 0 1px rgba(255,255,255,.08),
+    0 1px 0 rgba(79,209,255,.05);
+  transition:
+    transform 240ms var(--ease-spring),
+    border-color 180ms var(--ease-standard),
+    box-shadow 240ms var(--ease-standard);
+}
+
+.dashboard-command-deck[data-ux-lit="true"] {
+  transform: perspective(1400px)
+    rotateX(var(--ux-rx,0deg))
+    rotateY(var(--ux-ry,0deg))
+    translateY(calc(var(--ux-elevation,0) * -1px));
+  border-color: color-mix(in srgb, var(--module-accent, #4fd1ff) 30%, rgba(232,243,233,.16));
+  box-shadow:
+    0 44px 104px rgba(0,0,0,.32),
+    inset 0 1px rgba(255,255,255,.10),
+    0 0 0 1px color-mix(in srgb, var(--module-accent, #4fd1ff) 5%, transparent);
+}
+
+.dashboard-hero-aside {
+  border-radius: 16px 0 0 16px;
+  border-right: 0;
+  background:
+    linear-gradient(145deg, rgba(42,57,59,.24), rgba(4,11,17,.34)),
+    transparent;
+  box-shadow:
+    inset 1px 0 rgba(255,255,255,.05),
+    -12px 0 32px rgba(0,0,0,.08);
+}
+
+.dashboard-signal-grid {
+  grid-template-columns: 1.12fr .92fr .78fr 1.18fr;
+  gap: 0;
+  margin-top: 24px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(206,224,227,.08);
+}
+
+.dashboard-signal-card {
+  min-height: 112px;
+  padding: 16px 16px 20px;
+  border: 0;
+  border-left: 1px solid rgba(206,224,227,.08);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.dashboard-signal-card:first-child {
+  border-left: 0;
+}
+
+.dashboard-signal-card::before {
+  left: 0;
+  right: 0;
+  top: auto;
+  bottom: 0;
+  height: 1px;
+  border-radius: 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--module-accent, #4fd1ff) 36%, transparent), transparent 72%);
+  opacity: .38;
+}
+
+.dashboard-signal-card > span:first-child {
+  color: rgba(160,186,194,.64);
+}
+
+.dashboard-signal-card strong {
+  font-size: 29px;
+}
+
+.dashboard-signal-card.is-alert {
+  border-color: transparent;
+  border-left-color: rgba(251,113,133,.12);
+}
+
+.dashboard-habits,
+.dashboard-overview > .content-card,
+.dashboard-secondary-grid > .content-card {
+  background:
+    linear-gradient(145deg, rgba(18,31,42,.56), rgba(5,12,18,.70)),
+    rgba(7,14,21,.42);
+  box-shadow:
+    0 28px 76px rgba(0,0,0,.24),
+    inset 0 1px rgba(255,255,255,.055);
+}
+
+/* Panel vocabulary: varied surfaces instead of one universal card. */
+.dashboard-habits {
+  border-radius: 28px 12px 28px 12px;
+}
+
+.dashboard-overview > .content-card:first-child {
+  border-radius: 12px 28px 12px 28px;
+}
+
+.dashboard-overview > .content-card:nth-child(2) {
+  border-radius: 28px 12px 28px 12px;
+}
+
+@media (max-width: 900px) {
+  .dashboard-command-deck {
+    min-height: 0;
+  }
+
+  .dashboard-hero-aside {
+    border-right: 1px solid rgba(206,224,227,.08);
+    border-radius: 16px;
+  }
+
+  .dashboard-signal-grid {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+
+  .dashboard-signal-card:nth-child(3) {
+    border-left: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .environment-world-canvas {
+    opacity: .72;
+  }
+
+  .dashboard-command-deck {
+    padding: 20px;
+  }
+
+  .dashboard-signal-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .dashboard-signal-card,
+  .dashboard-signal-card:nth-child(3) {
+    border-left: 0;
+    border-top: 1px solid rgba(206,224,227,.07);
+  }
+
+  .dashboard-signal-card:first-child {
+    border-top: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-command-deck,
+  .dashboard-hero-aside {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .environment-world-canvas {
+    opacity: .62;
+  }
+}
+
+/* =========================================================
+   SPATIAL UNREAL — DOM MATERIAL RESPONSE
+========================================================= */
+.content-card,
+.glass-panel,
+.dashboard-signal-card,
+.dashboard-habits {
+  transform: translateZ(0);
+}
+
+.workspace::before {
+  inset: 8px 20px 40px;
+  background:
+    linear-gradient(145deg, rgba(229,240,230,.016), transparent 24%),
+    linear-gradient(180deg, transparent 0 72%, rgba(0,0,0,.12));
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.035);
+}
+
+.workspace-context-rail {
+  border-color: rgba(218,232,229,.09);
+  background:
+    linear-gradient(145deg, rgba(18,31,40,.38), rgba(4,11,17,.40)),
+    rgba(7,14,20,.24);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.045),
+    0 24px 56px rgba(0,0,0,.14);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .environment-world-canvas {
+    filter: none;
+  }
+}
