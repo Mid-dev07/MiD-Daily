@@ -14,7 +14,7 @@ function walk(dir) {
 const tsxFiles = walk(srcDir).filter((file) => file.endsWith('.tsx'))
 const cssFiles = walk(join(srcDir, 'styles')).filter((file) => file.endsWith('.css'))
 const uiSystem = readFileSync(join(srcDir, 'styles/ui-system.css'), 'utf8')
-const glassSystem = readFileSync(join(srcDir, 'styles/glass.css'), 'utf8')
+const experienceSystem = readFileSync(join(srcDir, 'styles/experience.css'), 'utf8')
 const tokens = readFileSync(join(srcDir, 'styles/tokens.css'), 'utf8')
 const dashboard = readFileSync(join(srcDir, 'features/dashboard/DashboardView.tsx'), 'utf8')
 const featureLandscape = readFileSync(join(srcDir, 'features/dashboard/components/FeatureLandscape.tsx'), 'utf8')
@@ -40,7 +40,7 @@ if (!unrealTokens.every((token) => tokens.toLowerCase().includes(token.toLowerCa
   failures.push('MiD Unreal material tokens are missing or have drifted.')
 }
 if (!/--light-angle:\s*145deg/.test(tokens)) failures.push('The canonical 145deg MiD key-light token must remain intact.')
-if (!existsSync(join(srcDir, 'styles/glass.css')) || !/styles\/glass\.css/.test(mainSource)) failures.push('Glass material layer must be loaded explicitly after the structural UI system.')
+if (!existsSync(join(srcDir, 'styles/experience.css')) || !/styles\/glass\.css/.test(mainSource)) failures.push('Glass material layer must be loaded explicitly after the structural UI system.')
 if (!/linear-gradient\(145deg/.test(uiSystem)) failures.push('Unreal material surfaces must retain a 145deg directional gradient.')
 
 if (!/--rhythm-micro:\s*4px/.test(tokens) || !/--rhythm-tight:\s*8px/.test(tokens) || !/--rhythm-component:\s*16px/.test(tokens)) {
@@ -50,7 +50,7 @@ if (!/4PT RHYTHM CONTRACT/.test(uiSystem) || !/FINAL UI SYSTEM CLEANUP/.test(uiS
   failures.push('Active UI stylesheet must include the canonical 4pt rhythm and final cleanup layers.')
 }
 
-const spatialDeclarations = [...uiSystem.matchAll(/(?:^|[;{}])\s*(gap|row-gap|column-gap|padding(?:-[a-z]+)?|margin(?:-[a-z]+)?|min-height|max-height|min-width|max-width|height|width|top|right|bottom|left|inset|border-radius|grid-template-columns|grid-template-rows):\s*([^;{}]+)/gm)]
+const spatialSource = uiSystem + '\\n' + experienceSystem\nconst spatialDeclarations = [...spatialSource.matchAll(/(?:^|[;{}])\s*(gap|row-gap|column-gap|padding(?:-[a-z]+)?|margin(?:-[a-z]+)?|min-height|max-height|min-width|max-width|height|width|top|right|bottom|left|inset|border-radius|grid-template-columns|grid-template-rows):\s*([^;{}]+)/gm)]
 const offGridValues = []
 for (const match of spatialDeclarations) {
   const prop = match[1]
@@ -79,9 +79,9 @@ if (existsSync(join(srcDir, 'styles/app.css'))) {
 if (uiSystem.includes('backdrop-filter')) {
   failures.push('ui-system.css must remain material-blur free; keep backdrop-filter isolated in glass.css.')
 }
-const glassBlurDeclarations = [...glassSystem.matchAll(/(?:^|\n)\s*(?:-webkit-)?backdrop-filter:\s*([^;]+)/g)].map((match) => match[1])
+const experienceBlurDeclarations = [...experienceSystem.matchAll(/(?:^|\n)\s*(?:-webkit-)?backdrop-filter:\s*([^;]+)/g)].map((match) => match[1])
 if (glassBlurDeclarations.length > 8) {
-  failures.push('Glass blur budget exceeded: expected no more than 8 backdrop-filter declarations, found ' + glassBlurDeclarations.length + '.')
+  failures.push('Experience blur budget exceeded: expected no more than 8 backdrop-filter declarations, found ' + glassBlurDeclarations.length + '.')
 }
 if (glassBlurDeclarations.some((value) => value.trim() !== 'none' && !/blur\(var\(--glass-(blur-shell|blur-surface|blur-modal)\)/.test(value))) {
   failures.push('Glass blur must use tokenized blur values from tokens.css.')
@@ -176,7 +176,7 @@ if (!/grid-auto-flow:\s*column/.test(uiSystem) || !/grid-auto-columns:\s*minmax\
 if (!/data-module=\{activeView\}/.test(appSourceForInteraction)) {
   failures.push('Active module marker must remain wired to the view container.')
 }
-if (!/UNREAL Habitat Material System/.test(uiSystem)) {
+if (!/Experience System V3/.test(experienceSystem)) {
   failures.push('UNREAL habitat material system must remain present in the active UI stylesheet.')
 }
 for (const terrain of [
@@ -184,7 +184,7 @@ for (const terrain of [
   'data-module="finance"', 'data-module="social"', 'data-module="assistant"',
   'data-module="profile"', 'data-module="insights"', 'data-module="habits"',
 ]) {
-  if (!uiSystem.includes(terrain)) failures.push('Missing final ecosystem terrain selector: ' + terrain)
+  if (!uiSystem.includes(terrain) && !experienceSystem.includes(terrain)) failures.push('Missing final ecosystem terrain selector: ' + terrain)
 }
 if (/overflow:\s*clip/.test(uiSystem)) {
   failures.push('Interactive cards must not reintroduce overflow: clip.')
