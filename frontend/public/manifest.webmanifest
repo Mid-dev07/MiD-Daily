@@ -1,12 +1,12 @@
 {
   "name": "MiD-Daily",
   "short_name": "MiD Daily",
-  "description": "A calm daily workspace for schedule, tasks, finance, and connected assistants.",
+  "description": "A living personal operating workspace for the reality of your day.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#0b100c",
-  "theme_color": "#10170f",
+  "background_color": "#0a1119",
+  "theme_color": "#0a1119",
   "lang": "id",
   "icons": [
     {
