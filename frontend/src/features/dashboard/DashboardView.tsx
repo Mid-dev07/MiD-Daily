@@ -103,17 +103,26 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
 
   return (
     <section className="workspace dashboard-page page-enter">
-      <div className="page-intro">
-        <div>
-          <span className="section-kicker">TODAY · {currentTimeLabel}</span>
-          <h2>Today</h2>
-          <p>{formatDate(today)} · your day at a glance.</p>
+      <section className="dashboard-command-deck" aria-label="Today command deck">
+        <div className="dashboard-hero-grid">
+          <div className="page-intro">
+            <div>
+              <span className="section-kicker">TODAY · {currentTimeLabel}</span>
+              <h2>Today</h2>
+              <p>{formatDate(today)} · your day at a glance.</p>
+            </div>
+            <div className="dashboard-hero-actions">
+              <button className="primary-button" type="button" onClick={() => onNavigate('tasks')}>Work on a task</button>
+              <button className="secondary-button" type="button" onClick={() => onNavigate('schedule')}>Open schedule</button>
+            </div>
+          </div>
+
+          <div className="dashboard-hero-aside">
+            <span className="dashboard-live"><i aria-hidden="true" /> LIVE WORKSPACE</span>
+            <strong>{currentSchedule ? 'In progress' : nextSchedule ? 'Next up' : 'Open space'}</strong>
+            <small>{currentSchedule ? currentSchedule.title : nextSchedule ? nextSchedule.title : 'No active schedule block right now.'}</small>
+          </div>
         </div>
-        <div className="dashboard-hero-actions">
-          <button className="primary-button" type="button" onClick={() => onNavigate('tasks')}>Work on a task</button>
-          <button className="secondary-button" type="button" onClick={() => onNavigate('schedule')}>Open schedule</button>
-        </div>
-      </div>
 
       <section className="dashboard-signal-grid" aria-label="Daily overview">
         <article className="dashboard-signal-card">
@@ -142,6 +151,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
           <strong className={monthBalance < 0 ? 'amount-negative' : 'amount-positive'}>{currency.format(monthBalance)}</strong>
           <small>month balance · {currency.format(todayExpense)} spent today</small>
         </article>
+      </section>
       </section>
 
       <div className="dashboard-overview">
