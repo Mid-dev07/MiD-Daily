@@ -1,6 +1,11 @@
 @import './tokens.css';
 
-* { box-sizing: border-box; }
+/* Global foundation only. Product materials and composition live in ui-system.css
+   and experience.css so there is one clear visual ownership path. */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
 
 html {
   scroll-behavior: smooth;
@@ -22,39 +27,45 @@ body {
   min-width: 320px;
   min-height: 100vh;
   color: var(--color-text);
-  background:
-    radial-gradient(circle at 70% 10%, rgba(180, 210, 130, .06), transparent 28rem),
-    #07100b;
+  background: var(--bg-void);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
-button, input, select, textarea { font: inherit; }
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color-scheme: dark;
+}
+
 button { -webkit-tap-highlight-color: transparent; }
-button, input, select, textarea { color-scheme: dark; }
 
 ::selection {
-  background: rgba(195, 216, 143, .28);
+  background: var(--accent-soft);
   color: #fff;
 }
 
 :focus-visible {
-  outline: 2px solid #edf5d4;
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
 ::-webkit-scrollbar { width: 9px; height: 9px; }
-::-webkit-scrollbar-track { background: #0b1710; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
 ::-webkit-scrollbar-thumb {
-  background: rgba(196, 216, 163, .28);
-  border: 2px solid #0b1710;
+  background: rgba(190, 207, 222, .28);
+  border: 2px solid var(--bg-deep);
   border-radius: 999px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(222, 235, 195, .42); }
+::-webkit-scrollbar-thumb:hover { background: rgba(210, 225, 237, .42); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: .001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: .001ms !important;
