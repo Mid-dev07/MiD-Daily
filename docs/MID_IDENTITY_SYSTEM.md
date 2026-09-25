@@ -112,9 +112,13 @@ Semantic states: success #4ade80, warning #fbbf24, danger #fb7185.
 
 Key light: 145deg. The same directional logic governs highlights, raised edges, bevel-like gradients, local reflections, and selected surfaces.
 
-Natural atmosphere remains part of MiD's identity, but it belongs primarily to the environmental/contextual layer, not the whole UI palette.
+Natural atmosphere is a primary emotional anchor of MiD. It is not wallpaper and it is not a separate theme mode.
 
-Use moss, sage, stone, fog, and muted warm sunlight to support mood and depth rather than recolor the product.
+The nature language should be felt across the environment and, selectively, at the spatial composition layer through grounded stone, moss, soft sunlight, organic silhouettes, terrain transitions, foliage-adjacent forms, and breathable depth.
+
+Use moss, sage, stone, fog, muted warm sunlight, and mineral neutrals to create a calm biophilic atmosphere. Keep cyan as the interaction signature; nature should establish mood and place, not compete with information.
+
+The product should feel like a calm personal workspace situated inside a quiet living environment—not a dashboard placed on top of a forest illustration.
 
 ## 08 — Material Identity
 
@@ -170,7 +174,7 @@ It must not become a game map, visual gimmick, or main navigation replacement.
 
 ## 12 — Environment Identity
 
-The living environment is MiD's ambient world.
+The living environment is MiD's ambient world and emotional anchor.
 
 It communicates time, mood, natural context, and progression through the day.
 
