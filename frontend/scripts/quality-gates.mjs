@@ -294,15 +294,27 @@ if (!existsSync(worldRendererPath)) {
   if (!/prefers-reduced-motion/.test(worldRenderer)) failures.push('Spatial world renderer must honor reduced-motion.')
   if (!/MAX_WORLD_PIXELS/.test(worldRenderer) || !/Math\.sqrt\(MAX_WORLD_PIXELS/.test(worldRenderer)) failures.push('Spatial world renderer must cap its pixel workload.')
   if (!/createVertexArray/.test(worldRenderer)) failures.push('Spatial world renderer must cache geometry through WebGL vertex arrays.')
-  const renderStart = worldRenderer.indexOf('const render =')
+  const renderStart = worldRenderer.indexOf('function render(')
   if (renderStart >= 0 && worldRenderer.slice(renderStart).includes('getBoundingClientRect(')) {
     failures.push('Spatial world renderer must keep layout reads outside its frame loop.')
   }
   if (!/removeEventListener\(['"]visibilitychange/.test(worldRenderer)) failures.push('Spatial world renderer must clean up visibility listeners.')
   if (/addEventListener\(['"]pointermove/.test(worldRenderer)) failures.push('Spatial world renderer must not own a second pointermove stream.')
+  if (!/const requestRender = \(\) =>/.test(worldRenderer) || !/renderRequested/.test(worldRenderer) || !/keepAnimating/.test(worldRenderer)) {
+    failures.push('Spatial world renderer must use an adaptive render budget instead of an unconditional idle loop.')
+  }
+  if (!/if \(renderRequested \|\| keepAnimating\)/.test(worldRenderer)) {
+    failures.push('Spatial world renderer must stop scheduling frames once camera and environment state settle.')
+  }
+  if (!/mid:world-invalidate/.test(worldRenderer)) {
+    failures.push('Spatial world renderer must expose an event-driven invalidation path for environment state changes.')
+  }
 }
 if (/pointermove/.test(environmentScene) || existsSync(join(srcDir, 'hooks/useLivingInteractions.ts'))) {
   failures.push('Environment shell must not reintroduce a local pointermove interaction handler.')
+}
+if (!/mid:world-invalidate/.test(environmentScene)) {
+  failures.push('Environment shell must wake the adaptive spatial renderer when environment/view state changes.')
 }
 if (!/mid:world-pointer/.test(appSourceForInteraction) || !/CustomEvent/.test(appSourceForInteraction)) {
   failures.push('The shared App interaction stream must route pointer state into the spatial world.')
