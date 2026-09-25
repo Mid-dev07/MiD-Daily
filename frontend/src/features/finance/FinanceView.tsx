@@ -129,7 +129,7 @@ export function FinanceView({ finance, budgets, onSaveFinance, onDeleteFinance, 
       <div className="stat-row workspace-metrics workspace-metrics--three">
         <article className="stat-card workspace-metric"><span>Income</span><strong className="amount-positive">{currency.format(income)}</strong><small>selected period</small></article>
         <article className="stat-card workspace-metric"><span>Expense</span><strong className="amount-negative">{currency.format(expense)}</strong><small>selected period</small></article>
-        <article className="stat-card"><span>Balance</span><strong>{currency.format(income - expense)}</strong><small>period net</small></article>
+        <article className="stat-card workspace-metric"><span>Balance</span><strong>{currency.format(income - expense)}</strong><small>period net</small></article>
       </div>
 
       <section className="content-card finance-budget-card">
