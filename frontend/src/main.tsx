@@ -8,6 +8,7 @@ import './styles/globals.css'
 import './styles/ui-system.css'
 import './styles/experience.css'
 import './styles/responsive.css'
+import './styles/spatial-composition.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
