@@ -299,7 +299,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
         </section>
       </div>
 
-      <Suspense fallback={<section className="content-card connection-loading">Preparing quick capture…</section>}>
+      <Suspense fallback={<section className="content-card connection-loading" data-spatial-role="instrument">Preparing quick capture…</section>}>
         <QuickCapture />
       </Suspense>
 
@@ -316,7 +316,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
         <summary><span>More context</span><small>Upcoming, flexible plans, and attention details</small><b>+</b></summary>
         <div className="dashboard-context-grid dashboard-secondary-grid">
         {flexiblePlans.length > 0 && (
-          <section className="content-card dashboard-flexible">
+          <section className="content-card dashboard-flexible" data-spatial-role="supporting">
             <div className="card-heading">
               <div>
                 <span className="section-kicker">Adaptive</span>
@@ -335,7 +335,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
           </section>
         )}
 
-        <section className="content-card dashboard-upcoming dashboard-secondary-upcoming">
+        <section className="content-card dashboard-upcoming dashboard-secondary-upcoming" data-spatial-role="archive">
           <div className="card-heading">
             <div>
               <span className="section-kicker">Next</span>
@@ -362,7 +362,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
           )}
         </section>
         {overdueTasks.length > 0 && (
-          <section className="content-card dashboard-attention">
+          <section className="content-card dashboard-attention" data-spatial-role="supporting">
           <div className="card-heading">
             <div>
               <span className="section-kicker">Attention</span>
