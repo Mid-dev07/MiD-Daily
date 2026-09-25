@@ -1,7 +1,3 @@
-function spatialSourceForMainSafe() {
-  return true
-}
-
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -351,10 +347,6 @@ if (!existsSync(spatialStyles)) {
     if (!spatialSource.includes(contract)) failures.push('Spatial composition contract missing: ' + contract)
   }
 }
-if (spatialSourceForMainSafe()) {
-  // no-op
-}
-
 const responsiveStyles = join(srcDir, 'styles/responsive.css')
 if (!existsSync(responsiveStyles)) {
   failures.push('Responsive experience authority stylesheet is missing.')
