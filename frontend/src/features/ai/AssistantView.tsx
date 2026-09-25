@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { WorkspaceHeader } from '../../components/ui/WorkspaceHeader'
 import { executeAIProposals, getAIStatus, sendAIMessage, type AIMessage, type AIProposal } from '../../integrations/aiApi'
 import {
   createTelegramLink,
@@ -165,9 +166,12 @@ export function AssistantView() {
 
   return (
     <section className="workspace page-enter">
-      <div className="page-intro">
-        <div><span className="section-kicker">ASSISTANT</span><h2>Work with your day.</h2><p>One assistant layer for the web app, Telegram, and WhatsApp. Read-only Instagram analytics live in Social.</p></div>
-      </div>
+      <WorkspaceHeader
+        index="006"
+        kicker="GUIDANCE"
+        title="Work with your day."
+        description="One assistant layer for the web app, Telegram, and WhatsApp. Read-only Instagram analytics live in Social."
+      />
 
       <section className="content-card integration-panel assistant-channels-card">
         <div className="card-heading">
