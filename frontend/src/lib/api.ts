@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 const configuredApiUrl = ((import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '').trim()
 const defaultApiUrl = import.meta.env.DEV
   ? 'http://localhost:8787'
-  : 'https://mid-daily-api.e41262272.workers.dev'
+  : 'https://api.mid-manager.xyz'
 
 // Never let a production build accidentally call a local development server.
 const isLocalApiUrl = /^(https?:\/\/)?(localhost|127\.0\.0\.1)(:\d+)?(?:\/|$)/i.test(configuredApiUrl)
