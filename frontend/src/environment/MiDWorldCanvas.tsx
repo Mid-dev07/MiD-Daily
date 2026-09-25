@@ -20,6 +20,7 @@ const LIGHT_DIRECTION: Vec3 = [
 const DESKTOP_FPS = 45
 const MOBILE_FPS = 30
 const MAX_WORLD_PIXELS = 2_200_000
+const MODULE_ANCHORS = worldModuleAnchors()
 
 const VERTEX_SHADER = `
 attribute vec3 aPosition;
@@ -443,8 +444,7 @@ export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
         draw(box, [0, 1.08, -0.01], [1.0, 0.025, 0.025], cyan, 1, 0.52)
         draw(box, [-4.9, 1.9, -2.7], [0.035, 0.52, 1.55], warm, 1, 0.18, t * 0.04)
 
-        const moduleAnchors = worldModuleAnchors()
-        for (const anchor of moduleAnchors) {
+        for (const anchor of MODULE_ANCHORS) {
           const active = anchor.view === activeViewRef.current
           const distance = Math.hypot(anchor.position[0] - activeAnchor.position[0], anchor.position[2] - activeAnchor.position[2])
           const emphasis = active ? 0.24 : distance < 6 ? 0.055 : 0.025
