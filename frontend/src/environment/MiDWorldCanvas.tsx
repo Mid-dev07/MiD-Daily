@@ -307,6 +307,48 @@ function dayTint(environment: EnvironmentState): Vec3 {
   }
 }
 
+function drawSpatialPath(
+  draw: (
+    mesh: Mesh,
+    position: Vec3,
+    scale: Vec3,
+    color: Vec3,
+    kind: number,
+    emissive?: number,
+    rotation?: number,
+  ) => void,
+  box: Mesh,
+  start: Vec3,
+  end: Vec3,
+  color: Vec3,
+) {
+  const dx = end[0] - start[0]
+  const dz = end[2] - start[2]
+  const distance = Math.hypot(dx, dz)
+  if (distance < 0.7) return
+
+  const segments = Math.min(7, Math.max(3, Math.ceil(distance / 1.2)))
+  const angle = Math.atan2(-dz, dx)
+
+  for (let index = 0; index < segments; index += 1) {
+    const a = index / segments
+    const b = (index + 1) / segments
+    const midX = start[0] + (dx * (a + b)) * 0.5
+    const midZ = start[2] + (dz * (a + b)) * 0.5
+    const segmentLength = distance * (b - a)
+
+    draw(
+      box,
+      [midX, 0.015, midZ],
+      [segmentLength * 0.44, 0.018, 0.075],
+      color,
+      1,
+      0.008,
+      angle,
+    )
+  }
+}
+
 export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const pointerRef = useRef({ x: 0, y: 0 })
@@ -528,6 +570,14 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         draw(box, [-7.4, 0.42, 3.2], [2.4, 0.42, 0.38], [0.08, 0.13, 0.16], 1)
         draw(box, [7.0, 0.34, 3.8], [1.8, 0.34, 0.38], [0.08, 0.13, 0.16], 1)
         draw(box, [0, 0.52, 1.15], [2.5, 0.52, 1.35], [0.08, 0.14, 0.17], 1, 0.01)
+
+        drawSpatialPath(
+          draw,
+          box,
+          [0, 0.02, 1.15],
+          activeAnchor.position,
+          moss,
+        )
 
         draw(box, [-7.0, 0.18, -0.3], [2.1, 0.07, 0.28], fern, 1, 0.015, -0.18)
         draw(box, [-4.8, 0.11, 2.1], [1.4, 0.045, 0.26], moss, 1, 0.01, 0.18)
