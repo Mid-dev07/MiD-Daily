@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import { MiDWorldCanvas } from './MiDWorldCanvas'
 import { environmentCssVariables } from './visual'
 import type { EnvironmentState } from './types'
@@ -16,20 +17,6 @@ const stars = [
 
 export function EnvironmentScene({ environment }: EnvironmentSceneProps) {
   const [worldReady, setWorldReady] = useState(false)
-
-  useEffect(() => {
-    const handlePointer = (event: PointerEvent) => {
-      window.dispatchEvent(new CustomEvent('mid:world-pointer', {
-        detail: {
-          x: (event.clientX / Math.max(1, window.innerWidth) - 0.5) * 2,
-          y: (event.clientY / Math.max(1, window.innerHeight) - 0.5) * 2,
-        },
-      }))
-    }
-
-    window.addEventListener('pointermove', handlePointer, { passive: true })
-    return () => window.removeEventListener('pointermove', handlePointer)
-  }, [])
 
   return (
     <div
@@ -50,7 +37,7 @@ export function EnvironmentScene({ environment }: EnvironmentSceneProps) {
               '--star-x': x,
               '--star-y': y,
               '--star-size': size,
-            } as React.CSSProperties}
+            } as CSSProperties}
           />
         ))}
       </div>
