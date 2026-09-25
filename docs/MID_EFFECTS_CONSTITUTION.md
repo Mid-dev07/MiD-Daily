@@ -15,6 +15,7 @@ Effects are communication, not decoration.
 
 1. Light — local specular response and directional material catch.
 2. Depth — elevation, press, recessed states, and spatial separation.
+3. World — bounded 3D environment geometry and camera perspective.
 3. Motion — short cause-and-effect transitions.
 4. Atmosphere — subdued environment response to real context.
 5. Feedback — visible confirmation that an action changed the system.
@@ -48,7 +49,7 @@ Meaningful state changes should transform the existing object instead of replaci
 After a user action, the UI should show the resulting state change through data, hierarchy, or a short local transition.
 
 ### Ambient Response
-The living environment may change slowly based on actual time, weather, workload, or module state.
+The living environment may change slowly based on actual time, weather, workload, or module state. The spatial world may also adjust light intensity and camera response, but never continuously perform for the user.
 
 ### Spatial Connection
 Related workspace areas may expose temporary visual relationships through proximity, light, line, or shared emphasis.
@@ -85,7 +86,8 @@ Reduced motion keeps state hierarchy while removing non-essential spatial moveme
 
 ## 08 — Performance
 
-CSS-first.
+CSS-first for product UI.
+The spatial world may use one bounded WebGL2 canvas for environment geometry only.
 No WebGL/canvas for ordinary UI.
 No new animation dependency.
 Pointer interaction stays delegated through one requestAnimationFrame stream.

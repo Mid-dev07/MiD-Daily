@@ -1,6 +1,6 @@
-/* MiD-Daily — Premium Unreal UI System
-   Visual rebuild: preserve MiD identity, replace the material language.
-   No persistent blur, no WebGL, no decorative runtime.
+/* MiD-Daily — Premium Spatial Unreal UI System
+   Visual rebuild: preserve MiD identity and connect DOM information to the world layer.
+   World rendering is isolated to the environment; product information remains DOM-first.
 */
 
 /* ==========================================================================
