@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { View } from '../../types'
 import { MiDIcon, type MiDIconName } from '../ui/MiDIcon'
+import { MiDMark } from '../ui/MiDMark'
 
 interface SidebarProps {
   activeView: View
@@ -29,10 +30,10 @@ export function Sidebar({ activeView, onNavigate }: SidebarProps) {
   return (
     <aside className="sidebar">
       <div className="brand">
-        <div className="brand-mark">M</div>
+        <div className="brand-mark" aria-hidden="true"><MiDMark size={34} /></div>
         <div className="brand-copy">
-          <strong>MiD-Daily</strong>
-          <span>Daily workspace</span>
+          <strong>MiD</strong>
+          <span>your day, in one place</span>
         </div>
       </div>
 

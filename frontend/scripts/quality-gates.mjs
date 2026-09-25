@@ -176,6 +176,10 @@ if (!tsxFiles.some((file) => file.endsWith('app/App.tsx') && /useEnvironment/.te
   failures.push('Living environment must be wired into the application shell.')
 }
 const sidebarSource = readFileSync(join(srcDir, 'components/layout/Sidebar.tsx'), 'utf8')
+const brandMarkSource = join(srcDir, 'components/ui/MiDMark.tsx')
+if (!existsSync(brandMarkSource)) failures.push('Canonical MiD brand mark component is missing.')
+if (!/MiDMark/.test(sidebarSource)) failures.push('Primary shell must use the canonical MiD brand mark.')
+if (!/CORE EXPERIENCE V1 — THE MI D ROOM/.test(experienceSystem)) failures.push('Core MiD room experience layer is missing from experience.css.')
 const appSource = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
 if (!/nav-index/.test(sidebarSource) || !/index: '001'/.test(sidebarSource) || !/index: '009'/.test(sidebarSource)) {
   failures.push('Field-guide navigation must keep explicit navigation indices.')

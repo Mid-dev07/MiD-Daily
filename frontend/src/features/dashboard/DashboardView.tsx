@@ -107,20 +107,20 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
         <div className="dashboard-hero-grid">
           <div className="page-intro">
             <div>
-              <span className="section-kicker">TODAY · {currentTimeLabel}</span>
+              <span className="section-kicker">YOUR DAY · {currentTimeLabel}</span>
               <h2>Today</h2>
-              <p>{formatDate(today)} · your day at a glance.</p>
+              <p>{formatDate(today)} · see what matters now, then decide what comes next.</p>
             </div>
             <div className="dashboard-hero-actions">
-              <button className="primary-button" type="button" onClick={() => onNavigate('tasks')}>Work on a task</button>
-              <button className="secondary-button" type="button" onClick={() => onNavigate('schedule')}>Open schedule</button>
+              <button className="primary-button" type="button" onClick={() => onNavigate('tasks')}>Focus on a task</button>
+              <button className="secondary-button" type="button" onClick={() => onNavigate('schedule')}>View schedule</button>
             </div>
           </div>
 
           <div className="dashboard-hero-aside">
-            <span className="dashboard-live"><i aria-hidden="true" /> LIVE WORKSPACE</span>
+            <span className="dashboard-live"><i aria-hidden="true" /> YOUR DAY, LIVE</span>
             <strong>{currentSchedule ? 'In progress' : nextSchedule ? 'Next up' : 'Open space'}</strong>
-            <small>{currentSchedule ? currentSchedule.title : nextSchedule ? nextSchedule.title : 'No active schedule block right now.'}</small>
+            <small>{currentSchedule ? 'You are here now.' : nextSchedule ? 'This is the next thing already on your path.' : 'There is no active block right now.'}</small>
           </div>
         </div>
 
