@@ -367,6 +367,34 @@ if (rockDrawCount < 8) {
   failures.push('Environmental geometry v1 must retain multiple low-poly landform placements.')
 }
 
+
+const materialWorldSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
+for (const contract of [
+  'uniform float uWetness;',
+  'function surfaceHash',
+  'float roughness = 0.9;',
+  'float wetResponse = 0.5;',
+  'float wet = clamp(uWetness * wetResponse',
+  'float specularPower',
+  'float wetDarken',
+  'const contactShadow',
+  'draw(box, [0, -0.02, 0.0]',
+]) {
+  if (!materialWorldSource.includes(contract)) failures.push('Environmental material v1 contract missing: ' + contract)
+}
+for (const materialKind of [
+  '], stone, 3',
+  '], fern, 4',
+  '], moss, 4',
+  'color, 5,',
+  'contactShadow, 6',
+]) {
+  if (!materialWorldSource.includes(materialKind)) failures.push('Environmental material kind missing: ' + materialKind)
+}
+if (!/uniforms\.wetness/.test(materialWorldSource) || !/gl\.uniform1f\(uniforms\.wetness, wetness\)/.test(materialWorldSource)) {
+  failures.push('Environmental wetness must reach the WebGL material shader.')
+}
+
 const spatialStyles = join(srcDir, 'styles/spatial-composition.css')
 if (!existsSync(spatialStyles)) {
   failures.push('Spatial workspace composition stylesheet is missing.')
