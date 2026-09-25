@@ -355,10 +355,15 @@ for (const contract of [
 if (spatialGeometrySource.includes('function planeGeometry') || spatialGeometrySource.includes('planeGeometry')) {
   failures.push('Environmental geometry v1 must not retain the obsolete flat floor plane.')
 }
-if ((spatialGeometrySource.match(/draw(foliage,/g) || []).length < 4) {
+const foliageDrawCount = spatialGeometrySource.split('draw(foliage,').length - 1
+const rockDrawCount = ['draw(rockA,', 'draw(rockB,', 'draw(rockC,'].reduce(
+  (count, token) => count + spatialGeometrySource.split(token).length - 1,
+  0,
+)
+if (foliageDrawCount < 4) {
   failures.push('Environmental geometry v1 must retain multiple restrained organic foliage clusters.')
 }
-if ((spatialGeometrySource.match(/draw(rock[ABC],/g) || []).length < 8) {
+if (rockDrawCount < 8) {
   failures.push('Environmental geometry v1 must retain multiple low-poly landform placements.')
 }
 
