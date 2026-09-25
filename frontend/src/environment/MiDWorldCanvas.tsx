@@ -723,7 +723,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         opacity: gl.getUniformLocation(program, 'uOpacity'),
       }
 
-      if ([uniforms.projection, uniforms.view, uniforms.model, uniforms.camera, uniforms.light, uniforms.base, uniforms.intensity, uniforms.emissive, uniforms.kind, uniforms.wetness, uniforms.lightWarmth, uniforms.skyCoolness, uniforms.airDensity].some((uniform) => !uniform)) {
+      if ([uniforms.projection, uniforms.view, uniforms.model, uniforms.camera, uniforms.light, uniforms.base, uniforms.intensity, uniforms.emissive, uniforms.kind, uniforms.wetness, uniforms.lightWarmth, uniforms.skyCoolness, uniforms.airDensity, uniforms.opacity].some((uniform) => !uniform)) {
         throw new Error('WebGL uniform contract is incomplete.')
       }
 
