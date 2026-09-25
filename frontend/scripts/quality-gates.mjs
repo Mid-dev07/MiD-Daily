@@ -83,13 +83,13 @@ const glassBlurDeclarations = [...glassSystem.matchAll(/(?:^|\n)\s*(?:-webkit-)?
 if (glassBlurDeclarations.length > 8) {
   failures.push('Glass blur budget exceeded: expected no more than 8 backdrop-filter declarations, found ' + glassBlurDeclarations.length + '.')
 }
-if (glassBlurDeclarations.some((value) => !/blur\(var\(--glass-(blur-shell|blur-surface|blur-modal)\)/.test(value))) {
+if (glassBlurDeclarations.some((value) => value.trim() !== 'none' && !/blur\(var\(--glass-(blur-shell|blur-surface|blur-modal)\)/.test(value))) {
   failures.push('Glass blur must use tokenized blur values from tokens.css.')
 }
 if (!/@supports\s+not\s*\(\s*backdrop-filter:\s*blur\(1px\)\s*\)/.test(glassSystem)) {
   failures.push('glass.css must provide a backdrop-filter feature-detection fallback contract.')
 }
-if (!/GLASSMORPHISM CONTRACT/.test(glassSystem) || !/G0 = living environment/.test(glassSystem) || !/G4 = dense glass/.test(glassSystem)) {
+if (!/MATERIAL MAP/.test(glassSystem) || !/G0 environment/.test(glassSystem) || !/G4 dense glass/.test(glassSystem)) {
   failures.push('Glassmorphism material hierarchy contract is missing or incomplete.')
 }
 if (!/data-ux-lit/.test(uiSystem) || !/feature-directory:has/.test(uiSystem) || !/prefers-reduced-motion:\s*reduce/.test(uiSystem)) {
@@ -112,6 +112,12 @@ if (/\.feature-landscape\s*\{[^}]*display:\s*none\s*!important/.test(uiSystem) |
 }
 if (!/FeatureLandscape/.test(dashboard) || !/<FeatureLandscape/.test(dashboard)) {
   failures.push('Dashboard must expose the spatial workspace compass as a live navigation surface.')
+}
+if (!/dashboard-command-deck/.test(dashboard) || !/dashboard-hero-aside/.test(dashboard) || !/dashboard-live/.test(dashboard)) {
+  failures.push('Dashboard visual redesign contract is missing the command deck, live status rail, or hero shell.')
+}
+if (!/opacity:0;visibility:hidden;pointer-events:none/.test(uiSystem)) {
+  failures.push('Sidebar hide state must remove the hidden rail from interaction and visual compositing.')
 }
 
 const iconSidebarSource = readFileSync(join(srcDir, 'components/layout/Sidebar.tsx'), 'utf8')
