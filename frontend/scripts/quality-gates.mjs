@@ -323,8 +323,17 @@ if (existsSync(moduleWorldPath)) {
   if (!/worldModuleAnchor/.test(spatialWorldSource)) {
     failures.push('Spatial renderer must resolve the active module through the shared module-world map.')
   }
+  if (!/activeAnchor\.camera\.eye/.test(spatialWorldSource) || !/activeAnchor\.camera\.target/.test(spatialWorldSource)) {
+    failures.push('Spatial renderer must consume explicit camera intent from the active module anchor.')
+  }
   if (!/function rockGeometry/.test(spatialWorldSource) || !/const moss/.test(spatialWorldSource)) {
     failures.push('Spatial world must retain the calm natural-form language.')
+  }
+  if ((moduleWorld.match(/camera:\s*\{\s*eye:/g) || []).length !== requiredViews.length) {
+    failures.push('Every spatial module anchor must define an explicit camera eye intent.')
+  }
+  if ((moduleWorld.match(/camera:\s*\{\s*eye:[^}]*target:/g) || []).length !== requiredViews.length) {
+    failures.push('Every spatial module anchor must define an explicit camera target intent.')
   }
 } 
 const spatialStyles = join(srcDir, 'styles/spatial-composition.css')
@@ -333,8 +342,12 @@ if (!existsSync(spatialStyles)) {
 } else {
   const spatialSource = readFileSync(spatialStyles, 'utf8')
   const moduleScopedDepthPattern = /\.view-key\[data-module="[^"]+"\][^{]*\[data-spatial-role="[^"]+"\]\s*\{[^}]*\btransform:\s*[^;]*translateZ\(/s
+  const moduleScopedHeaderDepthPattern = /\.view-key\[data-module\][^{}]*\.workspace-header[^{}]*\{[^}]*translateZ\(/s
   if (moduleScopedDepthPattern.test(spatialSource)) {
     failures.push('Spatial depth must remain owned by semantic roles, not module-specific selectors.')
+  }
+  if (moduleScopedHeaderDepthPattern.test(spatialSource)) {
+    failures.push('WorkspaceHeader depth must remain owned by its semantic role, not a component-specific selector.')
   }
 
   for (const contract of [
@@ -422,6 +435,9 @@ if (!/cameraState|desiredCamera|cameraBlend/.test(worldRenderer)) {
 }
 if (!/function drawSpatialPath/.test(worldRenderer) || !/drawSpatialPath\(\s*draw,\s*box/.test(worldRenderer)) {
   failures.push('Spatial world must connect the active module anchor to the workspace via the shared spatial path.')
+}
+if (!/spatialPathQuery/.test(worldRenderer) || !/spatialPathQuery\.matches/.test(worldRenderer)) {
+  failures.push('Spatial path must be reduced on small/touch layouts.')
 }
 if (!/DEFAULT_LIGHT_DIRECTION/.test(worldRenderer)) failures.push('Spatial world must retain the canonical 145deg fallback light.')
 
