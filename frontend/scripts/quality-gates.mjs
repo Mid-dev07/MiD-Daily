@@ -481,6 +481,27 @@ if (/uTime|timestamp * 0\\.001|Math\\.sin\(t/.test(environmentResponseSource)) {
   failures.push('Environmental response v1 must remain event/state driven with no perpetual decorative animation.')
 }
 
+
+const landmarkGroundingSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
+for (const contract of [
+  'const composition = activeAnchor.composition',
+  'landmarkShadowSoftness',
+  'landmarkShadowTint',
+  "composition.landmarkKind === 'grove'",
+  "composition.landmarkKind === 'ridge'",
+  'drawProjectedGroundShadow',
+  'coolAtmosphere',
+  'warmAtmosphere',
+]) {
+  if (!landmarkGroundingSource.includes(contract)) failures.push('Landmark grounding v1 contract missing: ' + contract)
+}
+if (!/spatialPathQuery\.matches[\s\S]{0,2200}drawProjectedGroundShadow/.test(landmarkGroundingSource)) {
+  failures.push('Landmark grounding must remain inside the desktop/fine-pointer spatial reduction boundary.')
+}
+if (!/coolAtmosphere[\s\S]*warmAtmosphere[\s\S]*uSkyCoolness/.test(landmarkGroundingSource)) {
+  failures.push('Atmospheric color must respond to both sky coolness and light warmth.')
+}
+
 const spatialStyles = join(srcDir, 'styles/spatial-composition.css')
 if (!existsSync(spatialStyles)) {
   failures.push('Spatial workspace composition stylesheet is missing.')
