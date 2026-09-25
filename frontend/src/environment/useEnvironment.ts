@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { fallbackLunarPosition, fallbackSolarPosition, inferDayPhase, lunarPosition, solarPosition } from './astronomy'
 import { permissionState, readStoredLocation, requestBrowserLocation, saveLocation } from './location'
 import { fetchWeather, getCachedWeather, weatherCacheIsStale } from './weather'
+import { composeEnvironmentMood } from './mood'
 import type { EnvironmentState, EnvironmentVisualState, WeatherSnapshot } from './types'
 
 function createVisualState(environment: Pick<EnvironmentState, 'dayPhase' | 'weather' | 'sun' | 'moon'>): EnvironmentVisualState {
@@ -44,14 +45,26 @@ function createVisualState(environment: Pick<EnvironmentState, 'dayPhase' | 'wea
     ? Math.max(0.08, environment.moon.illumination * 0.82)
     : Math.max(0, environment.moon.altitude > 5 ? environment.moon.illumination * 0.16 : 0)
 
+  const mood = composeEnvironmentMood(environment.dayPhase, condition ?? null)
+  const moodLight = lightIntensity * mood.lightMultiplier
+
   return {
-    lightIntensity,
-    cloudOpacity: Math.min(0.86, 0.07 + cloud * 0.78),
-    fogOpacity: Math.min(0.62, fogBase),
+    lightIntensity: Math.min(1, moodLight),
+    cloudOpacity: Math.min(0.92, 0.07 + cloud * 0.78 + mood.airDensity * 0.12),
+    fogOpacity: Math.min(0.68, fogBase + mood.airDensity * 0.2),
     precipitationOpacity: Math.min(0.58, rainBase),
     starOpacity: Math.min(0.8, starBase),
-    sunOpacity: environment.sun.altitude > -8 ? Math.min(0.9, Math.max(0, environment.sun.altitude + 4) / 50) : 0,
+    sunOpacity: environment.sun.altitude > -8
+      ? Math.min(0.9, Math.max(0, environment.sun.altitude + 4) / 50 * (0.65 + mood.beam * 0.35))
+      : 0,
     moonOpacity,
+    lightWarmth: mood.warmth,
+    skyCoolness: mood.skyCoolness,
+    natureSaturation: mood.natureSaturation,
+    sunBeamOpacity: mood.beam,
+    airDensity: mood.airDensity,
+    wetness: mood.wetness,
+    worldContrast: mood.contrast,
   }
 }
 
