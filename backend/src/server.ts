@@ -282,6 +282,14 @@ async function resolveOwnerId(req: IncomingMessage, res: ServerResponse) {
 
   return ensureOwnerId(req, res)
 }
+async function getGoogleLoginHint(ownerId: string) {
+  if (!supabaseAuthClient) return undefined
+
+  const { data, error } = await supabaseAuthClient.auth.admin.getUserById(ownerId)
+  if (error || !data.user?.email) return undefined
+
+  return data.user.email
+}
 
 function assertPersistenceConfigured() {
   if (!isGooglePersistenceConfigured()) {
@@ -528,6 +536,8 @@ async function createGoogleAuthUrl(req: IncomingMessage, res: ServerResponse) {
     assertPersistenceConfigured()
 
     const ownerId = await resolveOwnerId(req, res)
+    const existingConnection = await getGoogleConnection(ownerId)
+    const loginHint = await getGoogleLoginHint(ownerId)
     const state = base64Url(randomBytes(24))
     const verifier = createPkceVerifier()
     const stateCookie = encryptOAuthState({ state, verifier, createdAt: Date.now(), ownerId })
@@ -539,11 +549,14 @@ async function createGoogleAuthUrl(req: IncomingMessage, res: ServerResponse) {
       response_type: 'code',
       scope: CALENDAR_SCOPE,
       access_type: 'offline',
-      prompt: 'consent',
+      include_granted_scopes: 'true',
       state,
       code_challenge: createPkceChallenge(verifier),
       code_challenge_method: 'S256',
     })
+
+    if (!existingConnection) params.set('prompt', 'consent')
+    if (loginHint) params.set('login_hint', loginHint)
 
     return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
 }
