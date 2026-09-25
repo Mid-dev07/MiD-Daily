@@ -720,13 +720,10 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
       return
     }
 
+    const context: WebGL2RenderingContext = gl
+
     try {
-      const glContext = gl
-      if (!glContext) {
-        onReady?.(false)
-        return
-      }
-      const gl = glContext
+      const gl = context
       const program = createProgram(gl)
       const positionLocation = gl.getAttribLocation(program, 'aPosition')
       const normalLocation = gl.getAttribLocation(program, 'aNormal')
