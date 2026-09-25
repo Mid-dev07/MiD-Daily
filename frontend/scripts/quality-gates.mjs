@@ -374,7 +374,7 @@ for (const contract of [
   'float surfaceHash(vec2 position)',
   'float roughness = 0.9;',
   'float wetResponse = 0.5;',
-  'float wet = clamp(uWetness * wetResponse',
+  'float wet = clamp(max(uWetness, precipitation * 0.34)',
   'float specularPower',
   'float wetDarken',
   'const contactShadow',
@@ -506,7 +506,7 @@ if (!/coolAtmosphere[\s\S]*warmAtmosphere[\s\S]*uSkyCoolness/.test(landmarkGroun
 const weatherIntelligenceSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
 for (const contract of [
   'uniform float uPrecipitation;',
-  'const precipitation = clamp(uPrecipitation',
+  'float precipitation = clamp(uPrecipitation',
   'rainfallPooling',
   'puddleSpecular',
   'nearWeatherWash',
