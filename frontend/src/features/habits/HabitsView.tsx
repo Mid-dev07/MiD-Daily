@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { WorkspaceHeader } from '../../components/ui/WorkspaceHeader'
 import type { Habit, HabitLog } from '../../types'
 import { archiveHabit, createHabit, listHabitLogs, listHabits, toggleHabitLog, updateHabit } from './habitApi'
 import { shiftDate } from '../schedule/schedule.date'
@@ -115,13 +116,12 @@ export function HabitsView() {
 
   return (
     <section className="workspace page-enter">
-      <div className="page-intro">
-        <div>
-          <span className="section-kicker">HABITS</span>
-          <h2>Build your rhythm.</h2>
-          <p>Track repeatable habits without turning them into a pile of recurring tasks.</p>
-        </div>
-      </div>
+      <WorkspaceHeader
+        index="009"
+        kicker="RHYTHM"
+        title="Build your rhythm."
+        description="Track repeatable habits without turning them into a pile of recurring tasks."
+      />
 
       <section className="content-card habit-composer">
         <div className="card-heading">

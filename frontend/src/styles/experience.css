@@ -571,6 +571,117 @@ textarea:focus,
 }
 
 /* =========================================================
+   MODULE CONVERGENCE V2 — SHARED WORKSPACE IDENTITY
+   Every module keeps its own job, but enters the same MiD spatial language.
+========================================================= */
+
+.workspace-header {
+  min-height: 176px;
+  margin: 0 0 20px;
+  padding: 8px 4px 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 24px;
+}
+
+.workspace-header-main {
+  min-width: 0;
+}
+
+.workspace-header-code {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: rgba(128, 157, 172, .62);
+  font: 700 9px/1 var(--font-mono);
+  letter-spacing: .10em;
+  text-transform: uppercase;
+}
+
+.workspace-header-code span {
+  color: color-mix(in srgb, var(--module-accent) 72%, var(--mi-text-dim));
+}
+
+.workspace-header-code i {
+  color: rgba(128, 157, 172, .32);
+  font-style: normal;
+}
+
+.workspace-header-code strong {
+  color: rgba(225, 236, 232, .70);
+  font-weight: 750;
+}
+
+.workspace-header-code em {
+  color: rgba(128, 157, 172, .40);
+  font-style: normal;
+  font-weight: 650;
+}
+
+.workspace-header h2 {
+  margin: 8px 0 0;
+  color: #edf4f7;
+  font-size: clamp(44px, 6vw, 84px);
+  line-height: .96;
+  letter-spacing: -.075em;
+  text-shadow: 0 10px 42px rgba(0, 0, 0, .20);
+}
+
+.workspace-header p {
+  max-width: 640px;
+  margin: 12px 0 0;
+  color: rgba(222, 233, 226, .58);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.workspace-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 4px;
+}
+
+.workspace-header .section-kicker {
+  color: color-mix(in srgb, var(--module-accent) 72%, var(--mi-text-dim) 28%);
+}
+
+@media (max-width: 900px) {
+  .workspace-header {
+    min-height: 148px;
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: 16px;
+  }
+
+  .workspace-header-actions {
+    justify-content: flex-start;
+    padding-bottom: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .workspace-header {
+    min-height: 0;
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+
+  .workspace-header h2 {
+    font-size: clamp(38px, 11vw, 58px);
+  }
+
+  .workspace-header p {
+    font-size: 12px;
+  }
+}
+
+/* =========================================================
    MODULE CONVERGENCE V1B — TODAY RHYTHM SIGNAL
    Habits are surfaced as a quiet daily signal, not another task board.
 ========================================================= */

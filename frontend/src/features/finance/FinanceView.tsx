@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { FinanceForm } from './components/FinanceForm'
+import { WorkspaceHeader } from '../../components/ui/WorkspaceHeader'
 import { FinanceBudgetForm } from './components/FinanceBudgetForm'
 import { isInFinancePeriod, type FinancePeriod } from './finance.date'
 import type { FinanceBudget, FinanceBudgetDraft, FinanceEntry, FinanceEntryType } from '../../types'
@@ -94,13 +95,13 @@ export function FinanceView({ finance, budgets, onSaveFinance, onDeleteFinance, 
 
   return (
     <section className="workspace page-enter">
-      <div className="page-intro">
-        <div>
-          <h2>Finance</h2>
-          <p>Track real spending freely, then layer weekly or monthly budgets on top.</p>
-        </div>
-        <button className="primary-button" type="button" onClick={openCreate}>Add transaction</button>
-      </div>
+      <WorkspaceHeader
+        index="004"
+        kicker="MONEY"
+        title="Finance"
+        description="Track real spending freely, then layer weekly or monthly budgets on top."
+        action={<button className="primary-button" type="button" onClick={openCreate}>Add transaction</button>}
+      />
 
       <div className="finance-toolbar content-card">
         <div className="finance-toolbar-periods filter-row">
