@@ -1,4 +1,5 @@
-import type { CSSProperties } from 'react'
+import { useEffect, useState } from 'react'
+import { MiDWorldCanvas } from './MiDWorldCanvas'
 import { environmentCssVariables } from './visual'
 import type { EnvironmentState } from './types'
 
@@ -14,22 +15,42 @@ const stars = [
 ]
 
 export function EnvironmentScene({ environment }: EnvironmentSceneProps) {
-  const vars = environmentCssVariables(environment)
+  const [worldReady, setWorldReady] = useState(false)
+
+  useEffect(() => {
+    const handlePointer = (event: PointerEvent) => {
+      window.dispatchEvent(new CustomEvent('mid:world-pointer', {
+        detail: {
+          x: (event.clientX / Math.max(1, window.innerWidth) - 0.5) * 2,
+          y: (event.clientY / Math.max(1, window.innerHeight) - 0.5) * 2,
+        },
+      }))
+    }
+
+    window.addEventListener('pointermove', handlePointer, { passive: true })
+    return () => window.removeEventListener('pointermove', handlePointer)
+  }, [])
 
   return (
     <div
       className="environment-scene"
+      data-renderer={worldReady ? 'webgl' : 'css'}
       data-day-phase={environment.dayPhase}
       data-weather={environment.weather?.condition ?? 'clear'}
-      style={vars}
+      style={environmentCssVariables(environment)}
       aria-hidden="true"
     >
+      <MiDWorldCanvas environment={environment} onReady={setWorldReady} />
       <div className="environment-sky" />
       <div className="environment-stars">
         {stars.map(([x, y, size], index) => (
           <i
             key={index}
-            style={{ '--star-x': x, '--star-y': y, '--star-size': size } as CSSProperties}
+            style={{
+              '--star-x': x,
+              '--star-y': y,
+              '--star-size': size,
+            } as React.CSSProperties}
           />
         ))}
       </div>
