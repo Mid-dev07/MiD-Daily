@@ -151,14 +151,14 @@ export function App() {
     if (!(frame instanceof HTMLElement)) return
     if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
 
-    const microTiltSelector = '.feature-landscape'
+    const microTiltSelector = '.feature-landscape, .dashboard-command-deck, .dashboard-hero-aside'
 
     const surfaceSelector = [
       '.sidebar','.topbar','.content-card','.glass-panel','.stat-card','.dashboard-signal-card','.feature-directory-item',
       '.feature-node','.secondary-button','.filter-button','.icon-button','.profile-chip','.environment-control',
       '.search-trigger','.connections-toggle','.briefing-item','.planner-shortcut','.global-search-result',
       '.toast','.finance-budget-row','.task-item-card','.notification-card','.notification-popover','.secondary-panel','.global-search-dialog','.flexible-plan','.schedule-now-strip',
-      '.insights-metric','.habit-check','.habit-day','.dashboard-section-link'
+      '.insights-metric','.habit-check','.habit-day','.dashboard-section-link','.dashboard-command-deck','.dashboard-hero-aside'
     ].join(',')
 
     let activeSurface: HTMLElement | null = null
