@@ -339,10 +339,10 @@ if (!existsSync(responsiveStyles)) {
     if (!responsiveSource.includes(contract)) failures.push('Responsive contract missing: ' + contract)
   }
   if (!/environment-world-canvas/.test(responsiveSource)) failures.push('Responsive spatial world rules are missing.')
-  if (!/min-height:s*48px/.test(responsiveSource)) failures.push('Responsive touch controls must preserve 48px targets.')
+  if (!/min-height:\s*48px/.test(responsiveSource)) failures.push('Responsive touch controls must preserve 48px targets.')
 }
-const mainSource = readFileSync(join(srcDir, 'main.tsx'), 'utf8')
-if (!/styles/responsive.css/.test(mainSource)) failures.push('Responsive authority stylesheet must be loaded after experience.css.')
+const responsiveMainSource = readFileSync(join(srcDir, 'main.tsx'), 'utf8')
+if (!/styles\/responsive\.css/.test(responsiveMainSource)) failures.push('Responsive authority stylesheet must be loaded after experience.css.')
 
 const missingEnvironmentFiles = environmentFiles.filter((relative) => !existsSync(join(srcDir, relative)))
 if (missingEnvironmentFiles.length) {
