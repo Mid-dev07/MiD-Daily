@@ -20,4 +20,6 @@ export async function syncGoogleCalendarProviderToken(session: Session | null) {
       }),
     },
   )
+
+  window.dispatchEvent(new CustomEvent('mid-daily:google-calendar-connected'))
 }
