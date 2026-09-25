@@ -1069,43 +1069,9 @@ textarea:focus,
 
 }
 
-/* Atmospheric movement: slow world response rather than decorative floating UI. */
-.environment-clouds {
-  animation: mid-atmosphere-breathe var(--engine-atmosphere-slow) ease-in-out infinite alternate;
-  transform-origin: 50% 50%;
-}
-
-.environment-light-shafts {
-  animation: mid-light-breathe 22s ease-in-out infinite alternate;
-}
-
-.environment-fog {
-  animation: mid-fog-breathe 20s ease-in-out infinite alternate;
-}
-
-@keyframes mid-atmosphere-breathe {
-  from { transform: scale(1); }
-  to { transform: scale(1.025); }
-}
-
-@keyframes mid-light-breathe {
-  from { opacity: .72; }
-  to { opacity: 1; }
-}
-
-@keyframes mid-fog-breathe {
-  from { opacity: calc(var(--env-fog-opacity) * .78); }
-  to { opacity: var(--env-fog-opacity); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .environment-clouds,
-  .environment-light-shafts,
-  .environment-fog {
-    animation: none;
-  }
-
-}
+/* Environmental atmosphere is state-driven.
+   Time/weather transitions use existing CSS transitions and computed variables.
+   No perpetual decorative loops remain in the production environment. */
 
 
 /* =========================================================
@@ -1178,6 +1144,30 @@ textarea:focus,
   }
 }
 
+
+
+/* Interactive material catch:
+   delegated pointer coordinates already power shell/card surfaces; these two
+   controls now participate in the same reusable local-light contract. */
+.workspace-context-item[data-ux-lit="true"] {
+  background:
+    radial-gradient(170px 100px at var(--ux-x, 50%) var(--ux-y, 0%), rgba(235, 247, 239, .075), transparent 72%),
+    linear-gradient(145deg, rgba(19, 33, 43, .42), rgba(4, 11, 16, .46)),
+    rgba(7, 15, 21, .34);
+}
+
+.primary-button[data-ux-lit="true"] {
+  box-shadow:
+    0 16px 34px color-mix(in srgb, var(--module-accent) 16%, transparent),
+    inset 0 1px rgba(255, 255, 255, calc(.42 + var(--ux-elevation, 0) * .06));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-context-item[data-ux-lit="true"],
+  .primary-button[data-ux-lit="true"] {
+    box-shadow: inherit;
+  }
+}
 
 /* =========================================================
    CORE EXPERIENCE V1 — THE MI D ROOM
