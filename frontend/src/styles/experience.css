@@ -1205,7 +1205,7 @@ textarea:focus,
 .topbar {
   min-height: 64px;
   margin: 12px 20px 0;
-  padding: 10px 12px;
+  padding: 12px;
   border-radius: 16px;
   border-color: rgba(205, 221, 233, .11);
   background:
@@ -1353,7 +1353,7 @@ textarea:focus,
 }
 
 .dashboard-signal-progress {
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 /* Working region: information surfaces stay substantial but quiet. */
