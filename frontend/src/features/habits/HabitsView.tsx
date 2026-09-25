@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { WorkspaceHeader } from '../../components/ui/WorkspaceHeader'
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import type { Habit, HabitLog } from '../../types'
 import { archiveHabit, createHabit, listHabitLogs, listHabits, toggleHabitLog, updateHabit } from './habitApi'
 import { shiftDate } from '../schedule/schedule.date'
@@ -21,6 +22,7 @@ export function HabitsView() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [archiveTarget, setArchiveTarget] = useState<Habit>()
 
   const today = todayInAppTimezone()
   const dates = useMemo(() => weekDates(today), [today])
@@ -80,15 +82,20 @@ export function HabitsView() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const archive = async (habit: Habit) => {
-    if (!window.confirm('Archive "' + habit.name + '"? Your history will remain stored.')) return
+  const archive = (habit: Habit) => {
+    setArchiveTarget(habit)
+  }
+
+  const confirmArchive = async () => {
+    if (!archiveTarget) return
     setBusy(true)
     setError('')
     try {
-      await archiveHabit(habit.id)
-      setHabits((items) => items.filter((item) => item.id !== habit.id))
-      if (editingId === habit.id) resetForm()
+      await archiveHabit(archiveTarget.id)
+      setHabits((items) => items.filter((item) => item.id !== archiveTarget.id))
+      if (editingId === archiveTarget.id) resetForm()
       setNotice('Habit archived')
+      setArchiveTarget(undefined)
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Unable to archive habit.')
     } finally {
@@ -212,6 +219,17 @@ export function HabitsView() {
           </div>
         </section>
       )}
+      <ConfirmDialog
+        open={Boolean(archiveTarget)}
+        eyebrow="HABIT"
+        title="Archive this habit?"
+        description={archiveTarget ? '“' + archiveTarget.name + '” will leave your active rhythm. Its history will remain stored.' : ''}
+        confirmLabel="Archive habit"
+        tone="danger"
+        busy={busy}
+        onCancel={() => setArchiveTarget(undefined)}
+        onConfirm={confirmArchive}
+      />
     </section>
   )
 }

@@ -9,7 +9,7 @@ interface ScheduleItemCardProps {
   onView: (item: ScheduleItem) => void
   onEdit: (item: ScheduleItem) => void
   onSync: (item: ScheduleItem) => Promise<void>
-  onDelete: (item: ScheduleItem) => Promise<void>
+  onDelete: (item: ScheduleItem) => void | Promise<void>
 }
 
 export function ScheduleItemCard({ item, index, onView, onEdit, onSync, onDelete }: ScheduleItemCardProps) {
@@ -45,7 +45,6 @@ export function ScheduleItemCard({ item, index, onView, onEdit, onSync, onDelete
   }
 
   const remove = async () => {
-    if (!window.confirm('Delete “' + item.title + '”?')) return
     setError('')
     setBusy(true)
     try {

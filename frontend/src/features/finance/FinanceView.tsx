@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { FinanceForm } from './components/FinanceForm'
 import { WorkspaceHeader } from '../../components/ui/WorkspaceHeader'
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { FinanceBudgetForm } from './components/FinanceBudgetForm'
 import { isInFinancePeriod, type FinancePeriod } from './finance.date'
 import type { FinanceBudget, FinanceBudgetDraft, FinanceEntry, FinanceEntryType } from '../../types'
@@ -45,6 +46,7 @@ export function FinanceView({ finance, budgets, onSaveFinance, onDeleteFinance, 
   const [editingEntry, setEditingEntry] = useState<FinanceEntry>()
   const [budgetFormOpen, setBudgetFormOpen] = useState(false)
   const [editingBudget, setEditingBudget] = useState<FinanceBudget>()
+  const [confirmAction, setConfirmAction] = useState<{ kind: 'entry' | 'budget'; id: number; label: string }>()
 
   const categories = useMemo(() => ['ALL', ...Array.from(new Set(finance.map((entry) => entry.category).filter(Boolean))).sort()], [finance])
   const periodFinance = useMemo(() => finance.filter((entry) => isInFinancePeriod(entry.date, period)), [finance, period])
@@ -83,14 +85,19 @@ export function FinanceView({ finance, budgets, onSaveFinance, onDeleteFinance, 
 
   const remove = (id: number) => {
     const entry = finance.find((item) => item.id === id)
-    if (!entry || !window.confirm('Delete “' + entry.title + '”?')) return
-    onDeleteFinance(id)
+    if (entry) setConfirmAction({ kind: 'entry', id: entry.id, label: entry.title })
   }
 
   const removeBudget = (id: number) => {
     const budget = budgets.find((item) => item.id === id)
-    if (!budget || !window.confirm('Delete budget “' + budget.name + '”?')) return
-    onDeleteBudget(id)
+    if (budget) setConfirmAction({ kind: 'budget', id: budget.id, label: budget.name })
+  }
+
+  const confirmRemove = () => {
+    if (!confirmAction) return
+    if (confirmAction.kind === 'entry') onDeleteFinance(confirmAction.id)
+    else onDeleteBudget(confirmAction.id)
+    setConfirmAction(undefined)
   }
 
   return (
@@ -205,6 +212,22 @@ export function FinanceView({ finance, budgets, onSaveFinance, onDeleteFinance, 
 
       <FinanceForm open={formOpen} initialEntry={editingEntry} defaultDate={new Intl.DateTimeFormat('sv-SE').format(new Date())} onClose={() => setFormOpen(false)} onSubmit={onSaveFinance} />
       <FinanceBudgetForm open={budgetFormOpen} initialBudget={editingBudget} defaultDate={new Intl.DateTimeFormat('sv-SE').format(new Date())} onClose={() => setBudgetFormOpen(false)} onSubmit={onSaveBudget} />
+      <ConfirmDialog
+        open={Boolean(confirmAction)}
+        eyebrow={confirmAction?.kind === 'budget' ? 'BUDGET' : 'FINANCE'}
+        title={confirmAction?.kind === 'budget' ? 'Delete this budget?' : 'Delete this transaction?'}
+        description={
+          confirmAction
+            ? confirmAction.kind === 'budget'
+              ? '“' + confirmAction.label + '” will be removed. Existing transactions are not affected.'
+              : '“' + confirmAction.label + '” will be removed from this finance history. This action cannot be undone.'
+            : ''
+        }
+        confirmLabel={confirmAction?.kind === 'budget' ? 'Delete budget' : 'Delete transaction'}
+        tone="danger"
+        onCancel={() => setConfirmAction(undefined)}
+        onConfirm={confirmRemove}
+      />
     </section>
   )
 }

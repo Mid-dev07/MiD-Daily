@@ -25,6 +25,8 @@ const tokens = readFileSync(join(srcDir, 'styles/tokens.css'), 'utf8')
 const dashboard = readFileSync(join(srcDir, 'features/dashboard/DashboardView.tsx'), 'utf8')
 const actionFocus = readFileSync(join(srcDir, 'features/dashboard/components/ActionFocus.tsx'), 'utf8')
 const workspaceHeaderPath = join(srcDir, 'components/ui/WorkspaceHeader.tsx')
+const confirmDialogPath = join(srcDir, 'components/ui/ConfirmDialog.tsx')
+const confirmDialogSource = existsSync(confirmDialogPath) ? readFileSync(confirmDialogPath, 'utf8') : ''
 const workspaceHeaderSource = existsSync(workspaceHeaderPath) ? readFileSync(workspaceHeaderPath, 'utf8') : ''
 const convergedWorkspaceFiles = [
   'features/schedule/ScheduleView.tsx',
@@ -85,7 +87,7 @@ if (offGridValues.length) {
   failures.push('Active UI stylesheet contains off-grid spatial values: ' + [...new Set(offGridValues)].join(', '))
 }
 
-const requiredUiClasses = ["global-search-dialog","global-search-result","global-search-copy","global-search-footer","toast","dashboard-section-link","connection-loading","finance-toolbar-controls","stat-row","finance-budget-row","schedule-date-caption","schedule-now-strip","flexible-plan","secondary-panel","notification-card","task-item-card","task-item-footer","task-progress-track","task-actions-menu","profile-layout","profile-avatar-large","profile-form","profile-account-row","insights-metric-grid","insights-grid","review-note","insights-category-row","insights-schedule-row","habit-composer","habit-days","habit-board","habit-row","habit-week-grid","social-foundation-card","provider-details"]
+const requiredUiClasses = ["confirm-dialog","confirm-dialog-copy","confirm-dialog-actions","global-search-dialog","global-search-result","global-search-copy","global-search-footer","toast","dashboard-section-link","connection-loading","finance-toolbar-controls","stat-row","finance-budget-row","schedule-date-caption","schedule-now-strip","flexible-plan","secondary-panel","notification-card","task-item-card","task-item-footer","task-progress-track","task-actions-menu","profile-layout","profile-avatar-large","profile-form","profile-account-row","insights-metric-grid","insights-grid","review-note","insights-category-row","insights-schedule-row","habit-composer","habit-days","habit-board","habit-row","habit-week-grid","social-foundation-card","provider-details"]
 for (const className of requiredUiClasses) {
   const selector = new RegExp('\\.' + className + '(?=[^A-Za-z0-9_-]|$)')
   if (!selector.test(uiSystem)) failures.push('Missing component UI selector: ' + className)
@@ -153,6 +155,13 @@ if (/feature-(landscape|compass|node|core|directory)|Workspace Compass|Daily Com
   [dashboard, actionFocus, uiSystem, experienceSystem].join('\n'),
 )) {
   failures.push('Compass implementation or dead Compass styling remains in the active frontend surface.')
+}
+if (!existsSync(confirmDialogPath) || !/useModalBehavior/.test(confirmDialogSource) || !/role="dialog"/.test(confirmDialogSource) || !/aria-modal="true"/.test(confirmDialogSource)) {
+  failures.push('Shared ConfirmDialog must use the existing modal behavior and accessible dialog contract.')
+}
+const confirmationSources = tsxFiles.map((file) => readFileSync(file, 'utf8')).filter((source) => /window\.confirm/.test(source))
+if (confirmationSources.length) {
+  failures.push('Native browser confirm() dialogs must not remain in the MiD frontend; use the shared ConfirmDialog.')
 }
 if (!/WorkspaceContextRail/.test(appSourceForInteraction) || !/activeView !== 'dashboard'/.test(appSourceForInteraction) || !/workspace-context-rail/.test(experienceSystem)) {
   failures.push('Non-Today workspaces must retain a shared live context bridge back to schedule, tasks, and finance.')

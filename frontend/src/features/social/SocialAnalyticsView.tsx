@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { WorkspaceHeader } from '../../components/ui/WorkspaceHeader'
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import {
   disconnectInstagram,
   getInstagramInsights,
@@ -17,6 +18,7 @@ export function SocialAnalyticsView() {
   const [integration, setIntegration] = useState<IntegrationStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [connecting, setConnecting] = useState(false)
+  const [confirmDisconnect, setConfirmDisconnect] = useState(false)
   const [disconnecting, setDisconnecting] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -60,8 +62,11 @@ export function SocialAnalyticsView() {
     }
   }
 
+  const requestDisconnect = () => {
+    setConfirmDisconnect(true)
+  }
+
   const handleDisconnect = async () => {
-    if (!window.confirm('Disconnect Instagram from MiD-Daily?')) return
     setDisconnecting(true)
     setError('')
     try {
@@ -101,7 +106,7 @@ export function SocialAnalyticsView() {
               {loading ? 'CHECKING' : userConnected ? 'CONNECTED' : data?.scope === 'deployment' ? 'DEPLOYMENT READ' : connectable ? 'READY TO CONNECT' : 'SETUP NEEDED'}
             </span>
             {userConnected ? (
-              <button className="text-button danger" type="button" disabled={loading || disconnecting} onClick={() => void handleDisconnect()}>
+              <button className="text-button danger" type="button" disabled={loading || disconnecting} onClick={requestDisconnect}>
                 {disconnecting ? 'Disconnecting…' : 'Disconnect'}
               </button>
             ) : connectable ? (
@@ -157,6 +162,21 @@ export function SocialAnalyticsView() {
           </div>
         )}
       </div>
+      <ConfirmDialog
+        open={confirmDisconnect}
+        eyebrow="INSTAGRAM"
+        title="Disconnect Instagram?"
+        description="MiD will remove the current Instagram connection. Your saved workspace data will remain untouched."
+        confirmLabel="Disconnect"
+        tone="danger"
+        busy={disconnecting}
+        onCancel={() => setConfirmDisconnect(false)}
+        onConfirm={async () => {
+          await handleDisconnect()
+          setConfirmDisconnect(false)
+        }}
+      />
+
     </section>
   )
 }

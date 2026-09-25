@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { WorkspaceHeader } from '../../components/ui/WorkspaceHeader'
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { executeAIProposals, getAIStatus, sendAIMessage, type AIMessage, type AIProposal } from '../../integrations/aiApi'
 import {
   createTelegramLink,
@@ -29,6 +30,7 @@ export function AssistantView() {
   const [integrationError, setIntegrationError] = useState('')
   const [aiConfigured, setAiConfigured] = useState<boolean | null>(null)
   const [aiStatusError, setAiStatusError] = useState('')
+  const [confirmRequest, setConfirmRequest] = useState<{ kind: 'disconnect'; channel: 'telegram' | 'whatsapp' } | { kind: 'allow-writes' }>()
 
   const refreshIntegrations = async () => {
     setIntegrationLoading(true)
@@ -84,8 +86,11 @@ export function AssistantView() {
     }
   }
 
+  const requestDisconnect = (channel: 'telegram' | 'whatsapp') => {
+    setConfirmRequest({ kind: 'disconnect', channel })
+  }
+
   const disconnect = async (channel: 'telegram' | 'whatsapp') => {
-    if (!window.confirm('Disconnect ' + (channel === 'telegram' ? 'Telegram' : 'WhatsApp') + ' from MiD-Daily?')) return
     setIntegrationBusy(channel)
     setError('')
     try {
@@ -196,7 +201,7 @@ export function AssistantView() {
             {integrations?.telegram.configured ? (
               <div className="integration-actions">
                 {integrations.telegram.connected ? (
-                  <button className="text-button danger" type="button" disabled={integrationBusy !== null} onClick={() => void disconnect('telegram')}>Disconnect</button>
+                  <button className="text-button danger" type="button" disabled={integrationBusy !== null} onClick={() => requestDisconnect('telegram')}>Disconnect</button>
                 ) : (
                   <button className="secondary-button" type="button" disabled={integrationBusy !== null} onClick={() => void openConnectionLink('telegram')}>{integrationBusy === 'telegram' ? 'Opening…' : 'Connect'}</button>
                 )}
@@ -213,7 +218,7 @@ export function AssistantView() {
             {integrations?.whatsapp.configured ? (
               <div className="integration-actions">
                 {integrations.whatsapp.connected ? (
-                  <button className="text-button danger" type="button" disabled={integrationBusy !== null} onClick={() => void disconnect('whatsapp')}>Disconnect</button>
+                  <button className="text-button danger" type="button" disabled={integrationBusy !== null} onClick={() => requestDisconnect('whatsapp')}>Disconnect</button>
                 ) : (
                   <button className="secondary-button" type="button" disabled={integrationBusy !== null} onClick={() => void openConnectionLink('whatsapp')}>{integrationBusy === 'whatsapp' ? 'Opening…' : 'Connect'}</button>
                 )}
@@ -256,10 +261,11 @@ export function AssistantView() {
               disabled={aiConfigured !== true}
               checked={allowWrites}
               onChange={(event) => {
-                if (event.target.checked && !window.confirm('Allow MiD-Daily Assistant to create Tasks, Expenses, Activities, and Budgets only when you explicitly ask it to?')) {
+                if (event.target.checked) {
+                  setConfirmRequest({ kind: 'allow-writes' })
                   return
                 }
-                setAllowWrites(event.target.checked)
+                setAllowWrites(false)
               }}
             />
             <span>Allow actions</span>
@@ -356,6 +362,31 @@ export function AssistantView() {
           <button className="primary-button" disabled={!canSend} type="button" onClick={() => void send()}>{loading ? 'Working…' : 'Send'}</button>
         </div>
       </section>
+      <ConfirmDialog
+        open={Boolean(confirmRequest)}
+        eyebrow={confirmRequest?.kind === 'disconnect' ? 'CONNECTION' : 'ASSISTANT'}
+        title={confirmRequest?.kind === 'disconnect' ? 'Disconnect this channel?' : 'Enable write actions?'}
+        description={
+          confirmRequest?.kind === 'disconnect'
+            ? 'MiD will remove the active link for this channel. You can connect it again later.'
+            : 'The Assistant can propose changes first and only apply Tasks, Expenses, Activities, and Budgets when you explicitly confirm them.'
+        }
+        confirmLabel={confirmRequest?.kind === 'disconnect' ? 'Disconnect' : 'Enable actions'}
+        tone={confirmRequest?.kind === 'disconnect' ? 'danger' : 'default'}
+        busy={confirmRequest?.kind === 'disconnect' && integrationBusy !== null}
+        onCancel={() => setConfirmRequest(undefined)}
+        onConfirm={async () => {
+          if (!confirmRequest) return
+          if (confirmRequest.kind === 'disconnect') {
+            const channel = confirmRequest.channel
+            await disconnect(channel)
+            setConfirmRequest(undefined)
+            return
+          }
+          setAllowWrites(true)
+          setConfirmRequest(undefined)
+        }}
+      />
     </section>
   )
 }

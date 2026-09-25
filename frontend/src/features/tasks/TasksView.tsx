@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { TaskDetail } from './components/TaskDetail'
 import { WorkspaceHeader } from '../../components/ui/WorkspaceHeader'
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { TaskForm } from './components/TaskForm'
 import type { Task, TaskDraft, TaskPriority, TaskStatus } from '../../types'
 
@@ -25,6 +26,7 @@ export function TasksView({ tasks, onSaveTask, onToggleTask, onDeleteTask }: Tas
   const [formOpen, setFormOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<Task>()
   const [detailTask, setDetailTask] = useState<Task>()
+  const [deleteTask, setDeleteTask] = useState<Task>()
 
   const filtered = useMemo(() => tasks.filter((task) => {
     const queryValue = query.toLowerCase()
@@ -39,8 +41,13 @@ export function TasksView({ tasks, onSaveTask, onToggleTask, onDeleteTask }: Tas
 
   const remove = (id: number) => {
     const task = tasks.find((entry) => entry.id === id)
-    if (!task || !window.confirm('Delete “' + task.title + '”?')) return
-    onDeleteTask(id)
+    if (task) setDeleteTask(task)
+  }
+
+  const confirmDelete = () => {
+    if (!deleteTask) return
+    onDeleteTask(deleteTask.id)
+    setDeleteTask(undefined)
   }
 
   return (
@@ -102,6 +109,17 @@ export function TasksView({ tasks, onSaveTask, onToggleTask, onDeleteTask }: Tas
 
       <TaskForm open={formOpen} initialTask={editingTask} onClose={() => setFormOpen(false)} onSubmit={onSaveTask} />
       <TaskDetail task={detailTask} onClose={() => setDetailTask(undefined)} onEdit={openEdit} />
+
+      <ConfirmDialog
+        open={Boolean(deleteTask)}
+        eyebrow="TASK"
+        title="Delete this task?"
+        description={deleteTask ? '“' + deleteTask.title + '” will be removed from your task list. This action cannot be undone.' : ''}
+        confirmLabel="Delete task"
+        tone="danger"
+        onCancel={() => setDeleteTask(undefined)}
+        onConfirm={confirmDelete}
+      />
     </section>
   )
 }
