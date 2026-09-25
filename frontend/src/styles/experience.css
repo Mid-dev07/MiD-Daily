@@ -660,3 +660,222 @@ textarea:focus,
     transform: none;
   }
 }
+
+/* ==========================================================================
+   UNREAL RENDER CORE — PHASE 1
+   The environment is the world light. Interactive surfaces become rendered
+   material: local specular response, micro-tilt, elevation and edge energy.
+   All values remain CSS-composited and delegated through the App pointer stream.
+   ========================================================================== */
+
+.content-card,
+.glass-panel,
+.stat-card,
+.dashboard-signal-card,
+.feature-directory-item,
+.feature-node,
+.planner-shortcut,
+.global-search-result,
+.finance-budget-row,
+.task-item-card,
+.notification-card,
+.notification-popover,
+.secondary-panel,
+.flexible-plan,
+.schedule-now-strip,
+.insights-metric,
+.habit-check,
+.habit-day,
+.dashboard-section-link {
+  --ux-rx: 0deg;
+  --ux-ry: 0deg;
+  --ux-elevation: 0;
+  position: relative;
+  transform:
+    translate3d(0, 0, 0)
+    rotateX(var(--ux-rx))
+    rotateY(var(--ux-ry));
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: auto;
+  isolation: isolate;
+  transition:
+    transform 240ms var(--ease-spring),
+    border-color 180ms var(--ease-standard),
+    box-shadow 240ms var(--ease-standard);
+}
+
+.content-card::before,
+.glass-panel::before,
+.stat-card::before,
+.dashboard-signal-card::before,
+.feature-directory-item::before,
+.feature-node::before,
+.planner-shortcut::before,
+.global-search-result::before,
+.finance-budget-row::before,
+.task-item-card::before,
+.notification-card::before,
+.notification-popover::before,
+.secondary-panel::before,
+.flexible-plan::before,
+.schedule-now-strip::before,
+.insights-metric::before,
+.habit-check::before,
+.habit-day::before,
+.dashboard-section-link::before {
+  background:
+    radial-gradient(
+      var(--engine-specular-radius) 170px at var(--ux-x, 18%) var(--ux-y, 10%),
+      rgba(255 255 255 / calc(var(--engine-specular-strength) * (.35 + var(--ux-elevation)))),
+      transparent 62%
+    ),
+    linear-gradient(
+      var(--engine-key-angle),
+      rgba(255 255 255 / .045),
+      transparent 24% 72%,
+      color-mix(in srgb, var(--module-accent, var(--accent)) 7%, transparent)
+    );
+  mix-blend-mode: screen;
+  opacity: .34;
+  transition: opacity 180ms var(--ease-standard);
+}
+
+.content-card[data-ux-lit="true"],
+.glass-panel[data-ux-lit="true"],
+.stat-card[data-ux-lit="true"],
+.dashboard-signal-card[data-ux-lit="true"],
+.feature-directory-item[data-ux-lit="true"],
+.feature-node[data-ux-lit="true"],
+.planner-shortcut[data-ux-lit="true"],
+.global-search-result[data-ux-lit="true"],
+.finance-budget-row[data-ux-lit="true"],
+.task-item-card[data-ux-lit="true"],
+.notification-card[data-ux-lit="true"],
+.notification-popover[data-ux-lit="true"],
+.secondary-panel[data-ux-lit="true"],
+.flexible-plan[data-ux-lit="true"],
+.schedule-now-strip[data-ux-lit="true"],
+.insights-metric[data-ux-lit="true"],
+.habit-check[data-ux-lit="true"],
+.habit-day[data-ux-lit="true"],
+.dashboard-section-link[data-ux-lit="true"] {
+  transform:
+    translate3d(0, calc(var(--engine-depth-near) * -1 * (.55 + var(--ux-elevation))), 0)
+    rotateX(var(--ux-rx))
+    rotateY(var(--ux-ry))
+    scale(1.004);
+  will-change: transform;
+  box-shadow:
+    0 24px 62px rgb(0 0 0 / .3),
+    inset 0 1px rgb(255 255 255 / calc(.075 + var(--ux-elevation) * .05));
+}
+
+.content-card[data-ux-lit="true"]::before,
+.glass-panel[data-ux-lit="true"]::before,
+.stat-card[data-ux-lit="true"]::before,
+.dashboard-signal-card[data-ux-lit="true"]::before,
+.feature-directory-item[data-ux-lit="true"]::before,
+.feature-node[data-ux-lit="true"]::before,
+.planner-shortcut[data-ux-lit="true"]::before,
+.global-search-result[data-ux-lit="true"]::before,
+.finance-budget-row[data-ux-lit="true"]::before,
+.task-item-card[data-ux-lit="true"]::before,
+.notification-card[data-ux-lit="true"]::before,
+.notification-popover[data-ux-lit="true"]::before,
+.secondary-panel[data-ux-lit="true"]::before,
+.flexible-plan[data-ux-lit="true"]::before,
+.schedule-now-strip[data-ux-lit="true"]::before,
+.insights-metric[data-ux-lit="true"]::before,
+.habit-check[data-ux-lit="true"]::before,
+.habit-day[data-ux-lit="true"]::before,
+.dashboard-section-link[data-ux-lit="true"]::before {
+  opacity: 1;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .content-card,
+  .glass-panel,
+  .stat-card,
+  .dashboard-signal-card,
+  .feature-directory-item,
+  .feature-node,
+  .planner-shortcut,
+  .global-search-result,
+  .finance-budget-row,
+  .task-item-card,
+  .notification-card,
+  .notification-popover,
+  .secondary-panel,
+  .flexible-plan,
+  .schedule-now-strip,
+  .insights-metric,
+  .habit-check,
+  .habit-day,
+  .dashboard-section-link {
+    will-change: auto;
+    transform: none;
+  }
+}
+
+/* Atmospheric movement: slow world response rather than decorative floating UI. */
+.environment-clouds {
+  animation: mid-atmosphere-breathe var(--engine-atmosphere-slow) ease-in-out infinite alternate;
+  transform-origin: 50% 50%;
+}
+
+.environment-light-shafts {
+  animation: mid-light-breathe 22s ease-in-out infinite alternate;
+}
+
+.environment-fog {
+  animation: mid-fog-breathe 20s ease-in-out infinite alternate;
+}
+
+@keyframes mid-atmosphere-breathe {
+  from { transform: scale(1); }
+  to { transform: scale(1.025); }
+}
+
+@keyframes mid-light-breathe {
+  from { opacity: .72; }
+  to { opacity: 1; }
+}
+
+@keyframes mid-fog-breathe {
+  from { opacity: calc(var(--env-fog-opacity) * .78); }
+  to { opacity: var(--env-fog-opacity); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .environment-clouds,
+  .environment-light-shafts,
+  .environment-fog {
+    animation: none;
+  }
+
+  .content-card,
+  .glass-panel,
+  .stat-card,
+  .dashboard-signal-card,
+  .feature-directory-item,
+  .feature-node,
+  .planner-shortcut,
+  .global-search-result,
+  .finance-budget-row,
+  .task-item-card,
+  .notification-card,
+  .notification-popover,
+  .secondary-panel,
+  .flexible-plan,
+  .schedule-now-strip,
+  .insights-metric,
+  .habit-check,
+  .habit-day,
+  .dashboard-section-link {
+    transition:
+      border-color 180ms var(--ease-standard),
+      box-shadow 180ms var(--ease-standard);
+    transform: none;
+  }
+}

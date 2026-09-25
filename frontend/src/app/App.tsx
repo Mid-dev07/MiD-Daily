@@ -62,6 +62,13 @@ export function App() {
     if (!(frame instanceof HTMLElement)) return
     if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
 
+    const microTiltSelector = [
+      '.content-card','.glass-panel','.stat-card','.dashboard-signal-card','.feature-directory-item',
+      '.feature-node','.planner-shortcut','.global-search-result','.toast','.finance-budget-row',
+      '.task-item-card','.notification-card','.notification-popover','.secondary-panel','.flexible-plan',
+      '.schedule-now-strip','.insights-metric','.habit-check','.habit-day','.dashboard-section-link'
+    ].join(',')
+
     const surfaceSelector = [
       '.sidebar','.topbar','.content-card','.glass-panel','.stat-card','.dashboard-signal-card','.feature-directory-item',
       '.feature-node','.secondary-button','.filter-button','.icon-button','.profile-chip','.environment-control',
@@ -81,6 +88,9 @@ export function App() {
       activeSurface.removeAttribute('data-ux-lit')
       activeSurface.style.removeProperty('--ux-x')
       activeSurface.style.removeProperty('--ux-y')
+      activeSurface.style.removeProperty('--ux-rx')
+      activeSurface.style.removeProperty('--ux-ry')
+      activeSurface.style.removeProperty('--ux-elevation')
       activeSurface = null
     }
 
@@ -102,6 +112,17 @@ export function App() {
           const y = Math.max(0, Math.min(100, ((pointerY - rect.top) / Math.max(1, rect.height)) * 100))
           activeSurface.style.setProperty('--ux-x', x + '%')
           activeSurface.style.setProperty('--ux-y', y + '%')
+          const nx = ((pointerX - rect.left) / Math.max(1, rect.width)) - .5
+          const ny = ((pointerY - rect.top) / Math.max(1, rect.height)) - .5
+          const distance = Math.min(1, Math.hypot(nx, ny) * 1.414)
+          activeSurface.style.setProperty('--ux-elevation', (1 - distance).toFixed(3))
+          if (activeSurface.matches(microTiltSelector)) {
+            activeSurface.style.setProperty('--ux-rx', (-ny * 1.25).toFixed(2) + 'deg')
+            activeSurface.style.setProperty('--ux-ry', (nx * 1.25).toFixed(2) + 'deg')
+          } else {
+            activeSurface.style.removeProperty('--ux-rx')
+            activeSurface.style.removeProperty('--ux-ry')
+          }
         }
         if (landscape) {
           const rect = landscape.getBoundingClientRect()

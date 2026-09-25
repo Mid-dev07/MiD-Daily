@@ -227,3 +227,17 @@ A visual change is rejected when:
 - performance budget worsens without a clear product benefit.
 
 The correct result should feel like **MiD, but materially elevated** — not like a different application wearing the MiD logo.
+
+## Render Core — Phase 1
+
+The first runtime layer of the UNREAL experience is now implemented as a delegated, CSS-composited render core.
+
+It adds:
+- local pointer-driven light vectors rather than a binary hover glow;
+- pointer-relative micro-tilt capped at 1.25deg for interactive surfaces;
+- elevation response using local depth and shadow modulation;
+- a screen-space specular catch-light that follows the pointer;
+- slow world-atmosphere breathing on clouds, shafts, and fog;
+- reduced-motion and coarse-pointer fallbacks.
+
+The system still avoids WebGL/canvas and new animation dependencies. Future phases should build view-specific spatial composition and material-specific behavior on top of this render core instead of stacking unrelated global effects.

@@ -123,3 +123,12 @@
   --glass-blur-modal: 18px;
   --glass-saturate: 116%;
 }
+
+/* Unreal render-core tokens — visual behavior, not product semantics. */
+:root {
+  --engine-key-angle: 145deg;
+  --engine-specular-radius: 260px;
+  --engine-specular-strength: .16;
+  --engine-depth-near: 2px;
+  --engine-atmosphere-slow: 28s;
+}
