@@ -111,7 +111,6 @@
 
   /* Glassmorphism material tokens — shared, centralized, and tokenized. */
   --glass-clear: rgba(11, 24, 15, .38);
-  --glass-soft: rgba(12, 28, 17, .52);
   --glass-dense: rgba(9, 20, 12, .68);
   --glass-recessed: rgba(2, 8, 5, .44);
   --glass-rim: rgba(233, 242, 222, .15);
