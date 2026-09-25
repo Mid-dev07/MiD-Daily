@@ -33,9 +33,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
     }
 
     void supabase.auth.getSession()
-      .then(({ data }) => {
+      .then(async ({ data }) => {
         setSession(data.session)
-        void syncGoogleCalendarProviderToken(data.session).catch(() => undefined)
+        await syncGoogleCalendarProviderToken(data.session).catch(() => undefined)
       })
       .finally(() => setLoading(false))
 
