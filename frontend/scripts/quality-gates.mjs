@@ -314,7 +314,7 @@ if (existsSync(moduleWorldPath)) {
   const moduleWorld = readFileSync(moduleWorldPath, 'utf8')
   const requiredViews = ['dashboard', 'schedule', 'tasks', 'finance', 'social', 'assistant', 'profile', 'insights', 'habits']
   for (const view of requiredViews) {
-    if (!new RegExp("view:\s*'" + view + "'").test(moduleWorld)) {
+    if (!moduleWorld.includes("view: '" + view + "'")) {
       failures.push('Spatial module world anchor is missing: ' + view)
     }
   }
