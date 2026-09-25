@@ -352,7 +352,7 @@ for (const contract of [
 ]) {
   if (!spatialGeometrySource.includes(contract)) failures.push('Environmental geometry v1 contract missing: ' + contract)
 }
-if (/function planeGeometry/.test(spatialGeometrySource) || /createMesh(gl, planeGeometry/.test(spatialGeometrySource)) {
+if (spatialGeometrySource.includes('function planeGeometry') || spatialGeometrySource.includes('planeGeometry')) {
   failures.push('Environmental geometry v1 must not retain the obsolete flat floor plane.')
 }
 if ((spatialGeometrySource.match(/draw(foliage,/g) || []).length < 4) {
