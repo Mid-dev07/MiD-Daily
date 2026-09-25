@@ -83,7 +83,7 @@ const glassBlurDeclarations = [...glassSystem.matchAll(/(?:^|\n)\s*(?:-webkit-)?
 if (glassBlurDeclarations.length > 8) {
   failures.push('Glass blur budget exceeded: expected no more than 8 backdrop-filter declarations, found ' + glassBlurDeclarations.length + '.')
 }
-if (glassBlurDeclarations.some((value) => !/blur\(var\(--glass-(blur-shell|blur-surface|blur-modal)\)/.test(value))) {
+if (glassBlurDeclarations.some((value) => value.trim() !== 'none' && !/blur\(var\(--glass-(blur-shell|blur-surface|blur-modal)\)/.test(value))) {
   failures.push('Glass blur must use tokenized blur values from tokens.css.')
 }
 if (!/@supports\s+not\s*\(\s*backdrop-filter:\s*blur\(1px\)\s*\)/.test(glassSystem)) {
