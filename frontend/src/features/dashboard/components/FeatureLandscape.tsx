@@ -28,7 +28,7 @@ interface CompassState {
 }
 
 type SpatialFeature = {
-  id: Exclude<View, 'dashboard'>
+  id: View
   index: string
   label: string
   meta: string
