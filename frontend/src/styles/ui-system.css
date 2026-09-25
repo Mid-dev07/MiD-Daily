@@ -637,7 +637,7 @@ input[type="date"],
 input[type="time"],
 input[type="datetime-local"],
 input[type="month"] {
-  padding-right: 10px;
+  padding-right: 12px;
   font-variant-numeric: tabular-nums;
   cursor: pointer;
 }
@@ -725,7 +725,7 @@ textarea:disabled {
 }
 
 .money-input .field-control--money {
-  padding-left: 42px;
+  padding-left: 40px;
 }
 
 .money-prefix {
@@ -744,7 +744,7 @@ textarea:disabled {
   min-height: 44px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .switch-field > input[type="checkbox"] {
@@ -767,8 +767,8 @@ textarea:disabled {
   position: absolute;
   width: 16px;
   height: 16px;
-  left: 3px;
-  top: 3px;
+  left: 4px;
+  top: 4px;
   border-radius: 50%;
   background: #8da5b3;
   box-shadow: 0 2px 8px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.26);
@@ -800,7 +800,7 @@ input[type="file"] {
 input[type="file"]::file-selector-button {
   min-height: 28px;
   margin-right: 8px;
-  padding: 0 10px;
+  padding: 0 8px;
   border: 1px solid rgba(202,219,229,.14);
   border-radius: 8px;
   color: #e7eff4;
