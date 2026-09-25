@@ -379,8 +379,8 @@ export function AssistantView() {
           if (!confirmRequest) return
           if (confirmRequest.kind === 'disconnect') {
             const channel = confirmRequest.channel
-            setConfirmRequest(undefined)
             await disconnect(channel)
+            setConfirmRequest(undefined)
             return
           }
           setAllowWrites(true)
