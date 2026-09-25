@@ -22,6 +22,11 @@
   --nature-stone: #7f8992;
   --nature-sun: #d9ad6d;
   --nature-fog: #c9d5dc;
+  --nature-ground: #172821;
+  --nature-moss-soft: #526f59;
+  --nature-moss-deep: #304b3b;
+  --nature-stone-warm: #766653;
+  --nature-sun-soft: #bfa77a;
 
   /* Semantic state language. */
   --state-success: #4ade80;
