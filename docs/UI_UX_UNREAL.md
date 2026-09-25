@@ -29,19 +29,30 @@ A screen should read as dark neutral material first and accent second.
 UNREAL uses three principal material roles:
 
 ### 1. Glass panel
-Painted translucency, not mandatory GPU blur.
+MiD now uses glassmorphism as the primary surface language while keeping the living environment visible underneath.
+
+Glass is intentionally hierarchical:
+
+- **G0 — environment:** the photographic/natural scene remains the source of ambient color and depth.
+- **G1 — shell glass:** sidebar and topbar use controlled frosted glass.
+- **G2 — clear glass:** cards and data surfaces use translucent layered glass with rim light; most do not invoke backdrop blur.
+- **G3 — recessed glass:** inputs and quiet controls use inward depth and restrained translucency.
+- **G4 — dense glass:** search, modal and command surfaces use stronger frost and depth.
 
 Use:
-- layered gradients;
-- subtle inner rim;
+- layered translucent gradients;
+- a restrained rim and top-left highlight;
 - soft occlusion shadow;
-- controlled transparency;
-- local pointer highlight.
+- local pointer reflection through the existing delegated interaction stream;
+- natural environment color bleeding through translucent surfaces.
 
 Do not:
-- cover every component in glass;
-- use persistent blur;
-- create a uniformly glossy interface.
+- cover every component in heavy blur;
+- animate blur itself;
+- stack opaque glass over opaque glass without hierarchy;
+- turn every interaction into a glow effect.
+
+The result should read as **material glass**, not transparent rectangles.
 
 ### 2. Emissive
 Reserved for meaningful attention:
@@ -186,12 +197,14 @@ UNREAL is an art direction constraint, not a runtime excuse.
 
 Required:
 - no WebGL/canvas runtime for ordinary UI;
-- no persistent blur;
+- backdrop blur is limited to shell and transient command/modal surfaces;
+- blur values stay tokenized and are never animated;
 - no new animation dependency unless justified;
 - no image added solely for decoration;
 - keep the existing asset budgets;
 - use CSS compositing before JavaScript;
-- reuse the existing delegated interaction system.
+- reuse the existing delegated interaction system;
+- keep glass appearance isolated in `glass.css` so future cleanup does not scatter material overrides across the layout system.
 
 ## Acceptance criteria
 
