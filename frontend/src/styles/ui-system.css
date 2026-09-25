@@ -8,85 +8,40 @@
    ========================================================================== */
 
 :root {
-  --mi-void: #0a1119;
-  --mi-deep: #0d151f;
-  --mi-panel: #111c28;
-  --mi-panel-raised: #152333;
-  --mi-panel-soft: #0f1924;
-  --mi-recessed: #070d14;
+  /* MiD aliases — canonical geometry/type tokens live in tokens.css. */
+  --mi-void: var(--bg-void);
+  --mi-deep: var(--bg-deep);
+  --mi-panel: var(--surface-2);
+  --mi-panel-raised: var(--surface-3);
+  --mi-panel-soft: var(--surface-1);
+  --mi-recessed: var(--surface-recessed);
 
-  --mi-text: #edf4f8;
-  --mi-text-soft: #a9b9c6;
-  --mi-text-dim: #728391;
+  --mi-text: var(--color-text);
+  --mi-text-soft: var(--color-text-muted);
+  --mi-text-dim: var(--color-text-faint);
   --mi-text-quiet: #536572;
 
-  --mi-line: rgba(190, 208, 220, .13);
-  --mi-line-strong: rgba(210, 226, 237, .24);
-  --mi-highlight: rgba(255, 255, 255, .11);
+  --mi-line: var(--line);
+  --mi-line-strong: var(--line-strong);
+  --mi-highlight: var(--spec-highlight);
 
-  --mi-cyan: #4fd1ff;
-  --mi-cyan-soft: rgba(79, 209, 255, .12);
-  --mi-cyan-glow: rgba(79, 209, 255, .18);
-  --mi-green: #4ade80;
-  --mi-amber: #fbbf24;
-  --mi-rose: #fb7185;
+  --mi-cyan: var(--accent);
+  --mi-cyan-soft: var(--accent-soft);
+  --mi-cyan-glow: var(--accent-glow);
+  --mi-green: var(--state-success);
+  --mi-amber: var(--state-warning);
+  --mi-rose: var(--state-danger);
   --mi-violet: #9b8cff;
   --mi-indigo: #718bff;
 
   --module-accent: var(--mi-cyan);
   --module-glow: rgba(79, 209, 255, .14);
 
-  --light-angle: 145deg;
-  --ease-spring: cubic-bezier(.18, .88, .22, 1);
+  /* Deep/environmental shadows remain UI-system-specific. */
   --shadow-ambient: 0 22px 56px rgba(0, 0, 0, .27);
   --shadow-deep: 0 32px 88px rgba(0, 0, 0, .37);
-  --shadow-inset: inset 0 1px rgba(255,255,255,.07);
-
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
-
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-
-  --font-ui: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-display: Inter, ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-
-  --content-max: 1320px;
-  --content-gutter: clamp(16px, 3vw, 48px);
-  --control-h: 44px;
-  --touch-target: 48px;
-  --text-display: clamp(38px, 5vw, 72px);
 }
 
-*,
-*::before,
-*::after { box-sizing: border-box; }
-
-html { color-scheme: dark; }
-
-body {
-  margin: 0;
-  min-width: 320px;
-  background: var(--mi-void);
-  color: var(--mi-text);
-  font-family: var(--font-ui);
-  text-rendering: optimizeLegibility;
-}
-
-button,
-input,
-select,
-textarea { font: inherit; }
-
-button { -webkit-tap-highlight-color: transparent; }
 
 .app-frame {
   position: relative;
@@ -126,93 +81,8 @@ button { -webkit-tap-highlight-color: transparent; }
   from { opacity: .78; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 /* ==========================================================================
-   02. ENVIRONMENT
-   ========================================================================== */
-
-.environment-scene,
-.environment-sky,
-.environment-photograph,
-.environment-photograph img,
-.environment-light-shafts,
-.environment-fog,
-.environment-vignette {
-  position: absolute;
-  inset: 0;
-}
-
-.environment-scene {
-  position: fixed;
-  z-index: -4;
-  overflow: hidden;
-  pointer-events: none;
-  background: #081019;
-}
-
-.environment-sky {
-  background:
-    radial-gradient(circle at 68% 16%, rgba(230, 188, 118, .22), transparent 17%),
-    linear-gradient(180deg, rgba(53, 74, 67, .72), rgba(30, 45, 50, .66) 46%, #07111a 100%);
-}
-
-.environment-photograph {
-  opacity: .42;
-  mix-blend-mode: screen;
-}
-
-.environment-photograph img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 48%;
-  filter: saturate(.60) contrast(1.04) brightness(.48);
-  transform: scale(1.03);
-}
-
-.environment-scene::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background:
-    linear-gradient(180deg, rgba(6,14,21,.18), transparent 24%, transparent 56%, rgba(2,7,12,.82)),
-    linear-gradient(90deg, rgba(3,9,15,.60), transparent 20%, transparent 80%, rgba(3,9,15,.36));
-}
-
-.environment-scene::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  background:
-    radial-gradient(ellipse at 68% 18%, rgba(224, 184, 117, .08), transparent 24%),
-    radial-gradient(ellipse at 50% 62%, rgba(184, 208, 201, .035), transparent 38%);
-}
-
-.environment-light-shafts {
-  z-index: 3;
-  opacity: .28;
-  background:
-    linear-gradient(116deg, transparent 39%, rgba(246, 233, 205, .06) 47%, transparent 56%),
-    linear-gradient(108deg, transparent 53%, rgba(200, 225, 220, .04) 59%, transparent 67%);
-}
-
-.environment-fog {
-  z-index: 4;
-  background:
-    linear-gradient(180deg, transparent 28%, rgba(188, 205, 201, .025) 52%, transparent 73%),
-    radial-gradient(ellipse at 52% 62%, rgba(215, 229, 224, .04), transparent 44%);
-}
-
-.environment-vignette {
-  z-index: 6;
-  background:
-    radial-gradient(ellipse at center, transparent 38%, rgba(0,5,10,.64) 100%);
-}
-
-/* ==========================================================================
-   03. SHELL
+   02. SHELL
    ========================================================================== */
 
 .sidebar {

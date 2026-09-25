@@ -106,6 +106,13 @@ if (/pointermove/.test(environmentScene)) {
 if (!/--font-ui\s*:/.test(tokens) || !/--font-display\s*:/.test(tokens) || !/--ease-spring\s*:/.test(tokens)) {
   failures.push('Canonical MiD design tokens are missing from tokens.css.')
 }
+const canonicalTokenPattern = /--(?:space-[0-9]+|rhythm-|radius-|font-|ease-spring|light-angle|content-max|content-gutter|text-display|control-h|touch-target)\s*:/
+if (canonicalTokenPattern.test(uiSystem)) {
+  failures.push('Canonical geometry/type tokens must be defined only in tokens.css, not redefined by ui-system.css.')
+}
+if (/environment-photograph/.test(uiSystem)) {
+  failures.push('Obsolete photographic environment selectors must not remain in ui-system.css.')
+}
 if (!/feature-landscape/.test(featureLandscape) || !/onNavigate/.test(featureLandscape)) {
   failures.push('Feature Landscape field guide must remain available as a real navigation surface.')
 }
