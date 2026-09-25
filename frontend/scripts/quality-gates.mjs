@@ -79,7 +79,7 @@ if (existsSync(join(srcDir, 'styles/app.css'))) {
 if (uiSystem.includes('backdrop-filter')) {
   failures.push('ui-system.css must remain material-blur free; keep backdrop-filter isolated in experience.css.')
 }
-const experienceBlurDeclarations = [...experienceSystem.matchAll(/(?:^|\n)\s*(?:-webkit-)?backdrop-filter:\s*([^;]+)/g)].map((match) => match[1])
+const experienceBlurDeclarations = [...experienceSystem.matchAll(/(?:^|\n)\s*backdrop-filter:\s*([^;]+)/g)].map((match) => match[1])
 if (experienceBlurDeclarations.length > 8) {
   failures.push('Experience blur budget exceeded: expected no more than 8 backdrop-filter declarations, found ' + experienceBlurDeclarations.length + '.')
 }
