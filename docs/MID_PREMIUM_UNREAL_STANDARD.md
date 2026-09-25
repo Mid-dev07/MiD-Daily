@@ -676,3 +676,29 @@ Allowed landmark languages:
 Composition must remain subordinate to DOM content, disable/reduce on touch layouts, and remain event/state driven with no continuous animation.
 
 A cinematic composition pass is successful when navigation changes not only the camera framing but also the environmental context in which the workspace is situated.
+
+
+## 23 — Environmental Response & Shadowing Standard v1
+
+Environmental realism is not only a static material color change. Weather and solar state must produce believable surface response and grounding while remaining lightweight.
+
+Required response:
+- weather transitions may ease over a short event-driven interval so the world does not snap between dry/wet or warm/cool states;
+- wetness must remain material-aware: rock and stone gain controlled reflection and darkening, terrain becomes damp rather than glossy, foliage remains primarily diffuse;
+- major elevated forms may receive projected ground-shadow approximations derived from the active solar light vector;
+- projected shadows must soften as cloud/air density increases and remain below DOM attention levels;
+- contact grounding remains separate from projected cast-shadow approximation so silhouettes do not become a single dark plate;
+- shadow geometry is static, cached, low-profile, and uses no additional render pass or texture map.
+
+Solar relationship:
+- shadow direction follows the same astronomical light direction used by the material shader;
+- the canonical 145deg direction remains fallback-only when solar altitude is unavailable or below the daylight threshold;
+- low-altitude light is clamped to avoid physically extreme shadow lengths that would damage composition.
+
+Performance and motion:
+- environmental easing is a bounded response to state changes, not perpetual animation;
+- no `uTime`, time-based decorative loops, particle systems, shadow maps, or new 3D libraries are required;
+- the existing WebGL2, 2.2M-pixel, desktop/mobile frame targets remain unchanged;
+- touch/reduced-motion layouts retain the same environmental semantics while reducing spatial intensity.
+
+Quality target: after a weather or day-phase change, the user should perceive a coherent shift in wetness, reflectivity, atmosphere, and grounding rather than a palette swap.

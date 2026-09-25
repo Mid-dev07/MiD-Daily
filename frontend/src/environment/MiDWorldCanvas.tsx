@@ -55,6 +55,7 @@ uniform float uWetness;
 uniform float uLightWarmth;
 uniform float uSkyCoolness;
 uniform float uAirDensity;
+uniform float uOpacity;
 
 varying vec3 vWorldPosition;
 varying vec3 vWorldNormal;
@@ -70,7 +71,7 @@ void main() {
 
   if (uKind > 5.5) {
     float contactFalloff = 0.72 + 0.18 * max(normal.y, 0.0);
-    gl_FragColor = vec4(uBaseColor * contactFalloff, 1.0);
+    gl_FragColor = vec4(uBaseColor * contactFalloff, uOpacity);
     return;
   }
 
@@ -99,8 +100,11 @@ void main() {
   }
 
   float wet = clamp(uWetness * wetResponse, 0.0, 1.0);
+  float groundWet = smoothstep(0.0, 0.7, max(vWorldPosition.y, 0.0));
+  float materialWetness = wet * mix(1.0, 0.72, groundWet);
   float specularPower = mix(10.0, 72.0, 1.0 - roughness);
-  float specularStrength = mix(0.025, 0.16, 1.0 - roughness) + wet * 0.2;
+  float weatherSpecular = uKind > 3.5 && uKind < 4.5 ? wet * 0.035 : materialWetness * 0.24;
+  float specularStrength = mix(0.025, 0.16, 1.0 - roughness) + weatherSpecular;
   float specular = pow(max(dot(normal, halfVector), 0.0), specularPower) * specularStrength;
   float rim = pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0) * 0.05;
 
@@ -114,10 +118,12 @@ void main() {
     materialBase *= naturalBreak;
   } else if (uKind > 3.5 && uKind < 4.5) {
     float leafBacklight = pow(max(dot(-normal, lightDir), 0.0), 1.6) * 0.09;
-    materialBase += vec3(0.012, 0.028, 0.016) * leafBacklight;
+    float dampLeaf = mix(1.0, 1.08, wet * 0.46);
+    materialBase *= dampLeaf;
+    materialBase += vec3(0.012, 0.028, 0.016) * leafBacklight * (1.0 - wet * 0.3);
   }
 
-  float wetDarken = mix(1.0, 0.76, wet);
+  float wetDarken = mix(1.0, 0.76, materialWetness);
   materialBase *= wetDarken;
 
   float contact = 1.0;
@@ -169,7 +175,7 @@ void main() {
   );
   color = mix(color, atmosphereColor, atmosphericFade);
 
-  gl_FragColor = vec4(color, 1.0);
+  gl_FragColor = vec4(color, uOpacity);
 }
 `
 
@@ -455,6 +461,28 @@ function foliageGeometry() {
   return new Float32Array(vertices)
 }
 
+function groundShadowGeometry() {
+  const vertices: number[] = []
+  const segments = 14
+
+  for (let index = 0; index < segments; index += 1) {
+    const a0 = (index / segments) * Math.PI * 2
+    const a1 = ((index + 1) / segments) * Math.PI * 2
+    const r0 = 0.9 + 0.08 * Math.sin(index * 1.7)
+    const r1 = 0.9 + 0.08 * Math.sin((index + 1) * 1.7)
+
+    for (const point of [
+      [0, 0, 0],
+      [Math.cos(a0) * r0, 0, Math.sin(a0) * r0],
+      [Math.cos(a1) * r1, 0, Math.sin(a1) * r1],
+    ] as Vec3[]) {
+      vertices.push(point[0], point[1], point[2], 0, 1, 0)
+    }
+  }
+
+  return new Float32Array(vertices)
+}
+
 function createMesh(gl: WebGL2RenderingContext, data: Float32Array, positionLocation: number, normalLocation: number): Mesh {
   const vao = gl.createVertexArray()
   const buffer = gl.createBuffer()
@@ -487,6 +515,57 @@ function dayTint(environment: EnvironmentState): Vec3 {
     default:
       return [0.18, 0.24, 0.24]
   }
+}
+
+function drawProjectedGroundShadow(
+  draw: (
+    mesh: Mesh,
+    position: Vec3,
+    scale: Vec3,
+    color: Vec3,
+    kind: number,
+    emissive?: number,
+    rotation?: number,
+    opacity?: number,
+  ) => void,
+  shadowMesh: Mesh,
+  lightDirection: Vec3,
+  position: Vec3,
+  height: number,
+  footprint: [number, number],
+  color: Vec3,
+  softness: number,
+) {
+  const verticalLight = Math.max(0.28, lightDirection[1])
+  const horizontalLength = Math.min(
+    5.4,
+    Math.max(0.25, height / verticalLight) * (0.62 + softness * 0.32),
+  )
+  const horizontalX = -lightDirection[0]
+  const horizontalZ = -lightDirection[2]
+  const horizontalMagnitude = Math.hypot(horizontalX, horizontalZ) || 1
+  const dirX = horizontalX / horizontalMagnitude
+  const dirZ = horizontalZ / horizontalMagnitude
+  const rotation = Math.atan2(-dirX, dirZ)
+  const centerX = position[0] + dirX * horizontalLength * 0.5
+  const centerZ = position[2] + dirZ * horizontalLength * 0.5
+  const scaleX = Math.max(footprint[0], 0.32)
+  const scaleZ = Math.max(footprint[1] * 0.56 + horizontalLength * 0.5, 0.46)
+  const opacity = Math.max(
+    0.08,
+    Math.min(0.28, (0.1 + height * 0.022) * (1 - softness * 0.42)),
+  )
+
+  draw(
+    shadowMesh,
+    [centerX, 0.006, centerZ],
+    [scaleX, 1, scaleZ],
+    color,
+    6,
+    0,
+    rotation,
+    opacity,
+  )
 }
 
 function drawSpatialPath(
@@ -641,9 +720,10 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         lightWarmth: gl.getUniformLocation(program, 'uLightWarmth'),
         skyCoolness: gl.getUniformLocation(program, 'uSkyCoolness'),
         airDensity: gl.getUniformLocation(program, 'uAirDensity'),
+        opacity: gl.getUniformLocation(program, 'uOpacity'),
       }
 
-      if ([uniforms.projection, uniforms.view, uniforms.model, uniforms.camera, uniforms.light, uniforms.base, uniforms.intensity, uniforms.emissive, uniforms.kind, uniforms.wetness, uniforms.lightWarmth, uniforms.skyCoolness, uniforms.airDensity].some((uniform) => !uniform)) {
+      if ([uniforms.projection, uniforms.view, uniforms.model, uniforms.camera, uniforms.light, uniforms.base, uniforms.intensity, uniforms.emissive, uniforms.kind, uniforms.wetness, uniforms.lightWarmth, uniforms.skyCoolness, uniforms.airDensity, uniforms.opacity].some((uniform) => !uniform)) {
         throw new Error('WebGL uniform contract is incomplete.')
       }
 
@@ -653,6 +733,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
       const rockC = createMesh(gl, rockGeometry(2), positionLocation, normalLocation)
       const terrain = createMesh(gl, terrainGeometry(), positionLocation, normalLocation)
       const foliage = createMesh(gl, foliageGeometry(), positionLocation, normalLocation)
+      const shadow = createMesh(gl, groundShadowGeometry(), positionLocation, normalLocation)
 
       const projection = new Float32Array(16)
       const view = new Float32Array(16)
@@ -670,6 +751,13 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
       let height = 1
       let lastRender = -Infinity
       let lastTimestamp = 0
+      let visualState = {
+        intensity: 0.68,
+        wetness: 0,
+        lightWarmth: 0.42,
+        skyCoolness: 0.2,
+        airDensity: 0.08,
+      }
 
       const pointerListener = (event: Event) => {
         const detail = event instanceof CustomEvent ? event.detail as { x?: number; y?: number } : null
@@ -703,6 +791,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
       gl.useProgram(program)
       gl.uniform3f(uniforms.light, DEFAULT_LIGHT_DIRECTION[0], DEFAULT_LIGHT_DIRECTION[1], DEFAULT_LIGHT_DIRECTION[2])
+      gl.uniform1f(uniforms.opacity, 1)
 
       const render = (timestamp: number) => {
         if (!running) return
@@ -746,15 +835,30 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         const target = targetState
         const env = environmentRef.current
         const tint = dayTint(env)
-        const intensity = Math.max(0.28, Math.min(1, env.visual.lightIntensity + 0.24))
+        const targetVisual = {
+          intensity: Math.max(0.28, Math.min(1, env.visual.lightIntensity + 0.24)),
+          wetness: Math.max(0, Math.min(1, env.visual.wetness)),
+          lightWarmth: Math.max(0, Math.min(1, env.visual.lightWarmth)),
+          skyCoolness: Math.max(0, Math.min(1, env.visual.skyCoolness)),
+          airDensity: Math.max(0, Math.min(1, env.visual.airDensity)),
+        }
+        const environmentBlend = reduceMotion.matches ? 1 : Math.min(1, delta * 6.5)
+        visualState = {
+          intensity: visualState.intensity + (targetVisual.intensity - visualState.intensity) * environmentBlend,
+          wetness: visualState.wetness + (targetVisual.wetness - visualState.wetness) * environmentBlend,
+          lightWarmth: visualState.lightWarmth + (targetVisual.lightWarmth - visualState.lightWarmth) * environmentBlend,
+          skyCoolness: visualState.skyCoolness + (targetVisual.skyCoolness - visualState.skyCoolness) * environmentBlend,
+          airDensity: visualState.airDensity + (targetVisual.airDensity - visualState.airDensity) * environmentBlend,
+        }
+        const intensity = visualState.intensity
         const lightDirection = env.sun.altitude > -6
           ? environmentLightDirection(env.sun.azimuth, env.sun.altitude)
           : DEFAULT_LIGHT_DIRECTION
         const naturalDepth = env.visual.worldContrast
-        const wetness = env.visual.wetness
-        const lightWarmth = Math.max(0, Math.min(1, env.visual.lightWarmth))
-        const skyCoolness = Math.max(0, Math.min(1, env.visual.skyCoolness))
-        const airDensity = Math.max(0, Math.min(1, env.visual.airDensity))
+        const wetness = visualState.wetness
+        const lightWarmth = visualState.lightWarmth
+        const skyCoolness = visualState.skyCoolness
+        const airDensity = visualState.airDensity
 
         lookAt(view, camera, target, [0, 1, 0])
 
@@ -770,13 +874,14 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         gl.uniform1f(uniforms.skyCoolness, skyCoolness)
         gl.uniform1f(uniforms.airDensity, airDensity)
 
-        const draw = (mesh: Mesh, position: Vec3, scale: Vec3, color: Vec3, kind: number, emissive = 0, rotation = 0) => {
+        const draw = (mesh: Mesh, position: Vec3, scale: Vec3, color: Vec3, kind: number, emissive = 0, rotation = 0, opacity = 1) => {
           gl.bindVertexArray(mesh.vao)
           modelMatrix(model, position, scale, rotation)
           gl.uniformMatrix4fv(uniforms.model, false, model)
           gl.uniform3f(uniforms.base, color[0], color[1], color[2])
           gl.uniform1f(uniforms.kind, kind)
           gl.uniform1f(uniforms.emissive, emissive)
+          gl.uniform1f(uniforms.opacity, opacity)
           gl.drawArrays(gl.TRIANGLES, 0, mesh.vertexCount)
         }
 
@@ -806,6 +911,67 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         const warm: Vec3 = [0.42 + tint[0] * 0.05, 0.3 + tint[1] * 0.03, 0.18]
 
         draw(terrain, [0, -0.2, 0], [1, 1, 1], mineral, 2)
+
+        const shadowSoftness = Math.min(
+          1,
+          Math.max(0.12, (0.18 + env.visual.airDensity * 0.56 + env.visual.cloudOpacity * 0.22)),
+        )
+        const shadowTint: Vec3 = [
+          mineral[0] * 0.26,
+          mineral[1] * 0.28,
+          mineral[2] * 0.30,
+        ]
+
+        drawProjectedGroundShadow(
+          draw,
+          shadow,
+          lightDirection,
+          [0, 0.08, 0],
+          0.6,
+          [4.7, 2.8],
+          shadowTint,
+          shadowSoftness,
+        )
+        drawProjectedGroundShadow(
+          draw,
+          shadow,
+          lightDirection,
+          [-5.8, 1.15, -2.0],
+          1.15,
+          [0.78, 1.9],
+          shadowTint,
+          shadowSoftness,
+        )
+        drawProjectedGroundShadow(
+          draw,
+          shadow,
+          lightDirection,
+          [5.8, 1.05, -1.4],
+          1.05,
+          [0.92, 1.7],
+          shadowTint,
+          shadowSoftness,
+        )
+        drawProjectedGroundShadow(
+          draw,
+          shadow,
+          lightDirection,
+          [-3.7, 2.0, -5.8],
+          2.0,
+          [2.1, 0.42],
+          shadowTint,
+          shadowSoftness,
+        )
+        drawProjectedGroundShadow(
+          draw,
+          shadow,
+          lightDirection,
+          [3.2, 1.65, -6.5],
+          1.65,
+          [1.55, 0.36],
+          shadowTint,
+          shadowSoftness,
+        )
         draw(box, [0, 0.08, 0], [4.8, 0.14, 2.7], stone, 1)
         draw(box, [-5.8, 1.15, -2.0], [0.55, 1.15, 2.7], [0.09, 0.15, 0.18], 1)
         draw(box, [5.8, 1.05, -1.4], [0.7, 1.05, 2.4], [0.09, 0.15, 0.18], 1)
@@ -843,11 +1009,11 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
           mineral[1] * 0.3,
           mineral[2] * 0.28,
         ]
-        draw(box, [0, -0.02, 0.0], [4.9, 0.008, 2.8], contactShadow, 6)
-        draw(box, [-5.2, 0.004, 3.0], [0.9, 0.008, 0.68], contactShadow, 6, 0, -0.12)
-        draw(box, [5.1, 0.004, 2.8], [0.78, 0.008, 0.6], contactShadow, 6, 0, 0.22)
-        draw(box, [-8.4, 0.004, 5.6], [1.72, 0.008, 1.3], contactShadow, 6, 0, 0.12)
-        draw(box, [7.6, 0.004, -7.2], [1.66, 0.008, 1.26], contactShadow, 6, 0, -0.18)
+        draw(box, [0, -0.02, 0.0], [4.9, 0.008, 2.8], contactShadow, 6, 0, 0, 0.22)
+        draw(box, [-5.2, 0.004, 3.0], [0.9, 0.008, 0.68], contactShadow, 6, 0, -0.12, 0.3)
+        draw(box, [5.1, 0.004, 2.8], [0.78, 0.008, 0.6], contactShadow, 6, 0, 0.22, 0.3)
+        draw(box, [-8.4, 0.004, 5.6], [1.72, 0.008, 1.3], contactShadow, 6, 0, 0.12, 0.28)
+        draw(box, [7.6, 0.004, -7.2], [1.66, 0.008, 1.26], contactShadow, 6, 0, -0.18, 0.28)
 
         draw(rockA, [-5.2, 0.06, 3.0], [0.72, 0.42, 0.54], stone, 3, 0.0, -0.12)
         draw(rockB, [5.1, 0.04, 2.8], [0.62, 0.34, 0.48], warm, 3, 0.0, 0.22)
@@ -918,6 +1084,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         gl.deleteVertexArray(rockC.vao)
         gl.deleteVertexArray(terrain.vao)
         gl.deleteVertexArray(foliage.vao)
+        gl.deleteVertexArray(shadow.vao)
         gl.deleteProgram(program)
       }
     } catch {
