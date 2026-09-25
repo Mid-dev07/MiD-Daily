@@ -92,7 +92,13 @@
    Spatial elevation is owned by the semantic role, never by a module-specific selector.
 */
 .view-key[data-module] [data-spatial-role] {
+  --spatial-z: 0px;
+  --spatial-x: 0px;
+  --spatial-hover-z: 0px;
+  transform: translate3d(var(--spatial-x), 0, var(--spatial-z));
   transform-style: preserve-3d;
+  transform-origin: 50% 72%;
+  backface-visibility: hidden;
   will-change: auto;
   transition:
     transform var(--unreal-motion-scene) var(--ease-standard),
@@ -100,28 +106,67 @@
     box-shadow var(--unreal-motion-normal) var(--ease-standard);
 }
 
-.view-key[data-module] [data-spatial-role="orientation"] { transform: translateZ(16px); }
-.view-key[data-module] [data-spatial-role="controls"] { transform: translateZ(7px); }
-.view-key[data-module] [data-spatial-role="metrics"] { transform: translateZ(12px); }
+.view-key[data-module] [data-spatial-role="orientation"] {
+  --spatial-z: 16px;
+  --spatial-hover-z: 18px;
+}
+.view-key[data-module] [data-spatial-role="controls"] {
+  --spatial-z: 7px;
+  --spatial-x: -3px;
+  --spatial-hover-z: 9px;
+}
+.view-key[data-module] [data-spatial-role="metrics"] {
+  --spatial-z: 12px;
+  --spatial-hover-z: 14px;
+}
 .view-key[data-module] [data-spatial-role="primary"] {
-  transform: translateZ(14px);
+  --spatial-z: 14px;
+  --spatial-hover-z: 18px;
   border-color: color-mix(in srgb, var(--spatial-accent) 18%, var(--mi-line));
   box-shadow:
     0 26px 72px rgba(0,0,0,.28),
     0 0 46px color-mix(in srgb, var(--spatial-accent) 5%, transparent),
     inset 0 1px rgba(255,255,255,.07);
 }
-.view-key[data-module] [data-spatial-role="focus"] { transform: translateZ(11px); }
-.view-key[data-module] [data-spatial-role="rhythm"] { transform: translateZ(5px); }
-.view-key[data-module] [data-spatial-role="secondary-group"] { transform: translateZ(6px); }
-.view-key[data-module] [data-spatial-role="supporting"] { transform: translateZ(5px); }
-.view-key[data-module] [data-spatial-role="utility"] { transform: translateZ(0); }
-.view-key[data-module] [data-spatial-role="archive"] { transform: translateZ(2px); }
+.view-key[data-module] [data-spatial-role="focus"] {
+  --spatial-z: 11px;
+  --spatial-x: 6px;
+  --spatial-hover-z: 18px;
+}
+.view-key[data-module] [data-spatial-role="rhythm"] {
+  --spatial-z: 5px;
+  --spatial-x: -5px;
+  --spatial-hover-z: 7px;
+}
+.view-key[data-module] [data-spatial-role="secondary-group"] {
+  --spatial-z: 6px;
+  --spatial-x: 4px;
+  --spatial-hover-z: 8px;
+}
+.view-key[data-module] [data-spatial-role="supporting"] {
+  --spatial-z: 5px;
+  --spatial-x: 10px;
+  --spatial-hover-z: 7px;
+}
+.view-key[data-module] [data-spatial-role="utility"] {
+  --spatial-z: 0px;
+  --spatial-hover-z: 2px;
+}
+.view-key[data-module] [data-spatial-role="archive"] {
+  --spatial-z: 2px;
+  --spatial-x: 14px;
+  --spatial-hover-z: 4px;
+}
 .view-key[data-module] [data-spatial-role="identity"] {
-  transform: translateZ(15px);
+  --spatial-z: 15px;
+  --spatial-x: -4px;
+  --spatial-hover-z: 17px;
   border-color: color-mix(in srgb, var(--spatial-accent) 16%, var(--mi-line));
 }
-.view-key[data-module] [data-spatial-role="instrument"] { transform: translateZ(2px); }
+.view-key[data-module] [data-spatial-role="instrument"] {
+  --spatial-z: 2px;
+  --spatial-hover-z: 4px;
+}
 
 /* Shared surface treatment: shallow edge + grounded contact, not glow everywhere. */
 .view-key[data-module] [data-spatial-role="primary"]::after,
@@ -293,7 +338,7 @@
   .view-key[data-module] [data-spatial-role="primary"]:hover,
   .view-key[data-module] [data-spatial-role="focus"]:hover,
   .view-key[data-module] [data-spatial-role="identity"]:hover {
-    transform: translateY(-2px) translateZ(18px);
+    transform: translate3d(var(--spatial-x), -2px, var(--spatial-hover-z));
     box-shadow:
       0 30px 76px rgba(0,0,0,.30),
       0 0 42px color-mix(in srgb, var(--spatial-accent) 6%, transparent),
@@ -323,6 +368,7 @@
 
   .view-key[data-module] [data-spatial-role] {
     transform: none;
+    --spatial-x: 0px;
     transition:
       border-color var(--unreal-motion-normal) var(--ease-standard),
       box-shadow var(--unreal-motion-normal) var(--ease-standard);
@@ -343,6 +389,9 @@
   .view-key[data-module] [data-spatial-role],
   .view-key[data-module] [data-spatial-role]:hover {
     transform: none !important;
+    --spatial-x: 0px;
+    --spatial-z: 0px;
+    --spatial-hover-z: 0px;
     transition: none !important;
   }
 
