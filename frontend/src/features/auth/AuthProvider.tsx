@@ -43,7 +43,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setSession(nextSession)
       if (event === 'PASSWORD_RECOVERY') setRecovery(true)
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
-        void syncGoogleCalendarProviderToken(nextSession).catch(() => undefined)
+        window.setTimeout(() => {
+          void syncGoogleCalendarProviderToken(nextSession).catch(() => undefined)
+        }, 0)
       }
     })
 
