@@ -227,11 +227,16 @@ function boxGeometry() {
   return new Float32Array(vertices)
 }
 
-function rockGeometry() {
+function rockGeometry(variant = 0) {
   const vertices: number[] = []
   const sides = 7
-  const radii = [1, .88, 1.08, .92, 1.03, .9, 1.06]
-  const heights = [.82, .95, .76, .9, .72, .88, .78]
+  const phase = variant * 0.83
+  const radii = Array.from({ length: sides }, (_, index) => (
+    0.84 + 0.17 * ((Math.sin(index * 1.71 + phase) + 1) * 0.5)
+  ))
+  const heights = Array.from({ length: sides }, (_, index) => (
+    0.68 + 0.28 * ((Math.cos(index * 1.43 + phase * 0.7) + 1) * 0.5)
+  ))
 
   for (let i = 0; i < sides; i += 1) {
     const next = (i + 1) % sides
@@ -245,7 +250,7 @@ function rockGeometry() {
     const q0: Vec3 = [Math.cos(a0) * r0 * .82, heights[i], Math.sin(a0) * r0 * .82]
     const normal: Vec3 = [
       Math.cos((a0 + a1) * .5),
-      .22,
+      .22 + (variant * .025),
       Math.sin((a0 + a1) * .5),
     ]
 
@@ -253,7 +258,7 @@ function rockGeometry() {
       vertices.push(corner[0], corner[1], corner[2], normal[0], normal[1], normal[2])
     }
 
-    const centerTop: Vec3 = [0, .86, 0]
+    const centerTop: Vec3 = [0, .82 + variant * .045, 0]
     for (const corner of [q0, q1, centerTop]) {
       vertices.push(corner[0], corner[1], corner[2], 0, 1, 0)
     }
@@ -262,15 +267,106 @@ function rockGeometry() {
   return new Float32Array(vertices)
 }
 
-function planeGeometry() {
-  return new Float32Array([
-    -1, 0, -1, 0, 1, 0,
-     1, 0, -1, 0, 1, 0,
-     1, 0,  1, 0, 1, 0,
-    -1, 0, -1, 0, 1, 0,
-     1, 0,  1, 0, 1, 0,
-    -1, 0,  1, 0, 1, 0,
-  ])
+function terrainHeight(x: number, z: number) {
+  const radial = Math.min(1, Math.hypot(x, z) / 18)
+  const centerCalm = Math.max(0, 1 - Math.hypot(x, z) / 6.4)
+  const broadRidge = Math.sin(x * 0.22 + 0.8) * 0.1
+  const crossRidge = Math.cos(z * 0.28 - 0.6) * 0.08
+  const organicBreak = Math.sin((x - z) * 0.14) * 0.055
+  const edgeLift = Math.pow(radial, 2) * 0.07
+  return (broadRidge + crossRidge + organicBreak + edgeLift) * (1 - centerCalm * 0.82)
+}
+
+function terrainGeometry() {
+  const segments = 20
+  const size = 18
+  const step = (size * 2) / segments
+  const vertices: number[] = []
+
+  const point = (x: number, z: number): Vec3 => [x, terrainHeight(x, z), z]
+  const normalAt = (x: number, z: number): Vec3 => {
+    const left = terrainHeight(x - step, z)
+    const right = terrainHeight(x + step, z)
+    const down = terrainHeight(x, z - step)
+    const up = terrainHeight(x, z + step)
+    let nx = -(right - left) / (2 * step)
+    let ny = 1
+    let nz = -(up - down) / (2 * step)
+    const length = Math.hypot(nx, ny, nz) || 1
+    nx /= length
+    ny /= length
+    nz /= length
+    return [nx, ny, nz]
+  }
+
+  const pushTriangle = (
+    a: Vec3,
+    b: Vec3,
+    c: Vec3,
+    normal: Vec3,
+  ) => {
+    for (const corner of [a, b, c]) {
+      vertices.push(corner[0], corner[1], corner[2], normal[0], normal[1], normal[2])
+    }
+  }
+
+  for (let row = 0; row < segments; row += 1) {
+    const z0 = -size + row * step
+    const z1 = z0 + step
+
+    for (let column = 0; column < segments; column += 1) {
+      const x0 = -size + column * step
+      const x1 = x0 + step
+
+      const a = point(x0, z0)
+      const b = point(x1, z0)
+      const c = point(x1, z1)
+      const d = point(x0, z1)
+
+      pushTriangle(a, b, c, normalAt((x0 + x1) * 0.5, (z0 + z1) * 0.5))
+      pushTriangle(a, c, d, normalAt((x0 + x1) * 0.5, (z0 + z1) * 0.5))
+    }
+  }
+
+  return new Float32Array(vertices)
+}
+
+function foliageGeometry() {
+  const vertices: number[] = []
+  const blades = 6
+  const heights = [0.68, 0.82, 0.74, 0.92, 0.76, 0.86]
+
+  for (let index = 0; index < blades; index += 1) {
+    const angle = (index / blades) * Math.PI * 2
+    const cos = Math.cos(angle)
+    const sin = Math.sin(angle)
+    const width = 0.11 + (index % 2) * 0.025
+    const height = heights[index]
+    const lean = 0.08 + (index % 3) * 0.028
+    const bottomLeft: Vec3 = [-width, 0, 0]
+    const bottomRight: Vec3 = [width, 0, 0]
+    const tip: Vec3 = [lean, height, 0]
+
+    const rotate = (point: Vec3): Vec3 => [
+      point[0] * cos - point[2] * sin,
+      point[1],
+      point[0] * sin + point[2] * cos,
+    ]
+
+    const a = rotate(bottomLeft)
+    const b = rotate(bottomRight)
+    const c = rotate(tip)
+    const normal: Vec3 = [sin, 0.18, cos]
+
+    for (const corner of [a, b, c]) {
+      vertices.push(corner[0], corner[1], corner[2], normal[0], normal[1], normal[2])
+    }
+    for (const corner of [b, a, c]) {
+      vertices.push(corner[0], corner[1], corner[2], -normal[0], -normal[1], -normal[2])
+    }
+  }
+
+  return new Float32Array(vertices)
 }
 
 function createMesh(gl: WebGL2RenderingContext, data: Float32Array, positionLocation: number, normalLocation: number): Mesh {
@@ -408,8 +504,11 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
       }
 
       const box = createMesh(gl, boxGeometry(), positionLocation, normalLocation)
-      const rock = createMesh(gl, rockGeometry(), positionLocation, normalLocation)
-      const floor = createMesh(gl, planeGeometry(), positionLocation, normalLocation)
+      const rockA = createMesh(gl, rockGeometry(0), positionLocation, normalLocation)
+      const rockB = createMesh(gl, rockGeometry(1), positionLocation, normalLocation)
+      const rockC = createMesh(gl, rockGeometry(2), positionLocation, normalLocation)
+      const terrain = createMesh(gl, terrainGeometry(), positionLocation, normalLocation)
+      const foliage = createMesh(gl, foliageGeometry(), positionLocation, normalLocation)
 
       const projection = new Float32Array(16)
       const view = new Float32Array(16)
@@ -555,7 +654,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         const cyan: Vec3 = [0.11, 0.42, 0.52]
         const warm: Vec3 = [0.42 + tint[0] * 0.05, 0.3 + tint[1] * 0.03, 0.18]
 
-        draw(floor, [0, -0.12, 0], [18, 1, 18], mineral, 0)
+        draw(terrain, [0, -0.2, 0], [1, 1, 1], mineral, 2)
         draw(box, [0, 0.08, 0], [4.8, 0.14, 2.7], stone, 1)
         draw(box, [-5.8, 1.15, -2.0], [0.55, 1.15, 2.7], [0.09, 0.15, 0.18], 1)
         draw(box, [5.8, 1.05, -1.4], [0.7, 1.05, 2.4], [0.09, 0.15, 0.18], 1)
@@ -575,13 +674,22 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
           )
         }
 
-        draw(box, [-7.0, 0.18, -0.3], [2.1, 0.07, 0.28], fern, 1, 0.015, -0.18)
-        draw(box, [-4.8, 0.11, 2.1], [1.4, 0.045, 0.26], moss, 1, 0.01, 0.18)
-        draw(box, [4.4, 0.09, 1.8], [1.65, 0.04, 0.22], moss, 1, 0.01, -0.12)
-        draw(rock, [-5.2, 0.06, 3.0], [0.72, 0.42, 0.54], stone, 1, 0.0, -0.12)
-        draw(rock, [5.1, 0.04, 2.8], [0.62, 0.34, 0.48], warm, 1, 0.0, 0.22)
-        draw(rock, [-3.3, 0.03, -3.9], [0.52, 0.28, 0.44], fern, 1, 0.0, -0.32)
-        draw(rock, [3.8, 0.04, -4.5], [0.7, 0.36, 0.52], moss, 1, 0.0, 0.16)
+        draw(rockA, [-5.2, 0.06, 3.0], [0.72, 0.42, 0.54], stone, 1, 0.0, -0.12)
+        draw(rockB, [5.1, 0.04, 2.8], [0.62, 0.34, 0.48], warm, 1, 0.0, 0.22)
+        draw(rockC, [-3.3, 0.03, -3.9], [0.52, 0.28, 0.44], fern, 1, 0.0, -0.32)
+        draw(rockA, [3.8, 0.04, -4.5], [0.7, 0.36, 0.52], moss, 1, 0.0, 0.16)
+        draw(rockB, [-8.4, 0.02, 5.6], [1.55, 0.72, 1.2], stone, 1, 0.0, 0.12)
+        draw(rockC, [8.1, 0.02, 4.8], [1.38, 0.68, 1.1], mineral, 1, 0.0, -0.22)
+        draw(rockA, [-8.8, 0.02, -6.8], [1.7, 0.82, 1.25], warm, 1, 0.0, 0.28)
+        draw(rockB, [7.6, 0.02, -7.2], [1.5, 0.74, 1.18], moss, 1, 0.0, -0.18)
+        draw(rockC, [-1.0, 0.02, -7.8], [1.05, 0.5, 0.86], stone, 1, 0.0, 0.05)
+
+        draw(foliage, [-7.2, -0.02, -0.8], [1.15, 0.95, 1.15], fern, 1, 0, 0.2)
+        draw(foliage, [-5.9, -0.02, 1.5], [0.82, 0.72, 0.82], moss, 1, 0, -0.25)
+        draw(foliage, [6.5, -0.02, 0.6], [1.0, 0.84, 1.0], fern, 1, 0, -0.12)
+        draw(foliage, [4.7, -0.02, -2.3], [0.86, 0.78, 0.86], moss, 1, 0, 0.24)
+        draw(foliage, [-2.9, -0.02, -5.2], [1.05, 0.9, 1.05], fern, 1, 0, -0.18)
+        draw(foliage, [3.9, -0.02, -6.4], [0.92, 0.8, 0.92], moss, 1, 0, 0.16)
 
         draw(box, [-2.2, 0.63, 0.0], [0.04, 0.63, 0.96], cyan, 1, 0.42)
         draw(box, [2.2, 0.63, 0.0], [0.04, 0.63, 0.96], cyan, 1, 0.42)
