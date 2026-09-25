@@ -336,6 +336,37 @@ if (existsSync(moduleWorldPath)) {
     failures.push('Every spatial module anchor must define an explicit camera target intent.')
   }
 } 
+
+const spatialGeometrySource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
+for (const contract of [
+  'function terrainHeight',
+  'function terrainGeometry',
+  'function foliageGeometry',
+  'function rockGeometry(variant = 0)',
+  'const terrain = createMesh',
+  'const rockA = createMesh',
+  'const rockB = createMesh',
+  'const rockC = createMesh',
+  'const foliage = createMesh',
+  'draw(terrain, [0, -0.2, 0]',
+]) {
+  if (!spatialGeometrySource.includes(contract)) failures.push('Environmental geometry v1 contract missing: ' + contract)
+}
+if (spatialGeometrySource.includes('function planeGeometry') || spatialGeometrySource.includes('planeGeometry')) {
+  failures.push('Environmental geometry v1 must not retain the obsolete flat floor plane.')
+}
+const foliageDrawCount = spatialGeometrySource.split('draw(foliage,').length - 1
+const rockDrawCount = ['draw(rockA,', 'draw(rockB,', 'draw(rockC,'].reduce(
+  (count, token) => count + spatialGeometrySource.split(token).length - 1,
+  0,
+)
+if (foliageDrawCount < 4) {
+  failures.push('Environmental geometry v1 must retain multiple restrained organic foliage clusters.')
+}
+if (rockDrawCount < 8) {
+  failures.push('Environmental geometry v1 must retain multiple low-poly landform placements.')
+}
+
 const spatialStyles = join(srcDir, 'styles/spatial-composition.css')
 if (!existsSync(spatialStyles)) {
   failures.push('Spatial workspace composition stylesheet is missing.')
