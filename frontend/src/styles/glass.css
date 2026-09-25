@@ -270,6 +270,7 @@ textarea:focus,
 .global-search-dialog,
 .modal > *,
 .dialog-overlay > * {
+  position: relative;
   border-color: rgba(233, 242, 222, .2);
   background:
     radial-gradient(500px 220px at var(--ux-x, 18%) var(--ux-y, 8%), rgba(224, 241, 192, .1), transparent 72%),
