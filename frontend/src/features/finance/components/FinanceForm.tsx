@@ -73,7 +73,7 @@ export function FinanceForm({ open, initialEntry, defaultDate, onClose, onSubmit
           <button className="icon-button" type="button" disabled={saving} onClick={onClose} aria-label="Close finance form">×</button>
         </div>
 
-        <form className="schedule-form" onSubmit={submit}>
+        <form className="schedule-form" aria-busy={saving} data-form-state={saving ? 'saving' : error ? 'error' : 'ready'} onSubmit={submit}>
           <div className="form-grid two">
             <label>Type<select disabled={saving} value={draft.type} onChange={(event) => setField('type', event.target.value as FinanceEntryType)}><option value="expense">Expense</option><option value="income">Income</option></select></label>
             <label>Date<input disabled={saving} type="date" value={draft.date} onChange={(event) => setField('date', event.target.value)} /></label>
@@ -82,13 +82,13 @@ export function FinanceForm({ open, initialEntry, defaultDate, onClose, onSubmit
           <label>Title<input disabled={saving} value={draft.title} onChange={(event) => setField('title', event.target.value)} placeholder="e.g. Internet bill" autoFocus maxLength={200} /></label>
 
           <div className="form-grid two">
-            <label>Amount<input disabled={saving} type="number" min="1" step="1" value={draft.amount || ''} onChange={(event) => setField('amount', Number(event.target.value))} placeholder="0" /></label>
+            <label className="form-field form-field--money"><span>Amount</span><div className="money-input"><span className="money-prefix" aria-hidden="true">Rp</span><input className="field-control--money" disabled={saving} type="number" min="1" step="1" value={draft.amount || ''} onChange={(event) => setField('amount', Number(event.target.value))} placeholder="0" /></div></label>
             <label>Category<input disabled={saving} value={draft.category} onChange={(event) => setField('category', event.target.value)} placeholder="e.g. Food" maxLength={100} /></label>
           </div>
 
           <label>Notes<textarea disabled={saving} rows={4} value={draft.notes ?? ''} onChange={(event) => setField('notes', event.target.value)} placeholder="Optional note" maxLength={5000} /></label>
 
-          {error && <div className="form-error" role="alert">{error}</div>}
+          {error && <div className="form-status form-status--error" role="alert">{error}</div>}
           <div className="modal-actions"><button className="secondary-button" disabled={saving} type="button" onClick={onClose}>Cancel</button><button className="primary-button" disabled={saving} type="submit">{saving ? 'Saving…' : initialEntry ? 'Save changes' : 'Add transaction'}</button></div>
         </form>
       </section>
