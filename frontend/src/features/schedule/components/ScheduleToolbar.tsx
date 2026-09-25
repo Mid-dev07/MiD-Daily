@@ -20,7 +20,7 @@ const filters: Array<{ id: ScheduleType | 'ALL'; label: string }> = [
 
 export function ScheduleToolbar({ date, filter, onShiftDate, onResetDate, onFilterChange }: ScheduleToolbarProps) {
   return (
-    <div className="schedule-toolbar content-card motion-card">
+    <div className="schedule-toolbar workspace-toolbar-surface content-card motion-card">
       <div className="date-control">
         <button className="icon-button" type="button" onClick={() => onShiftDate(-1)} aria-label="Previous day">←</button>
         <button className="date-label" type="button" onClick={onResetDate}>
