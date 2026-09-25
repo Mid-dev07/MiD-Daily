@@ -1,9 +1,11 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
-import type { FinanceEntry, Task, View } from '../../types'
+import type { FinanceEntry, Habit, HabitLog, Task, View } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
 import { scheduleOccursOnDate, shiftDate } from '../schedule/schedule.date'
 import { currency, formatDate } from '../../lib/format'
 import { FeatureLandscape } from './components/FeatureLandscape'
+import { listHabitLogs, listHabits } from '../habits/habitApi'
+import { weekday } from '../habits/habitRules'
 
 interface DashboardViewProps {
   tasks: Task[]
@@ -21,12 +23,37 @@ const FocusMode = lazy(() => import('./components/FocusMode').then((module) => (
 
 export function DashboardView({ tasks, schedule, finance, onToggleTask, onNavigate, timezone = LOCAL_TIMEZONE }: DashboardViewProps) {
   const [now, setNow] = useState(() => new Date())
+  const [habits, setHabits] = useState<Habit[]>([])
+  const [habitLogs, setHabitLogs] = useState<HabitLog[]>([])
+  const [habitsLoading, setHabitsLoading] = useState(true)
+  const [habitError, setHabitError] = useState(false)
   const today = new Intl.DateTimeFormat('en-CA', { timeZone: timezone }).format(new Date())
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 60_000)
     return () => window.clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    let active = true
+    setHabitsLoading(true)
+    setHabitError(false)
+
+    void Promise.all([listHabits(), listHabitLogs(today, today)])
+      .then(([nextHabits, nextLogs]) => {
+        if (!active) return
+        setHabits(nextHabits)
+        setHabitLogs(nextLogs)
+      })
+      .catch(() => {
+        if (active) setHabitError(true)
+      })
+      .finally(() => {
+        if (active) setHabitsLoading(false)
+      })
+
+    return () => { active = false }
+  }, [today])
 
   const todaySchedule = useMemo(() => schedule
     .filter((item) => scheduleOccursOnDate(item, today))
@@ -46,6 +73,9 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
   const monthExpense = monthFinance.filter((entry) => entry.type === 'expense').reduce((sum, entry) => sum + entry.amount, 0)
   const monthBalance = monthIncome - monthExpense
 
+  const habitLogSet = useMemo(() => new Set(habitLogs.map((log) => log.habitId + ':' + log.date)), [habitLogs])
+  const todayHabits = useMemo(() => habits.filter((habit) => habit.targetDays.includes(weekday(today))), [habits, today])
+  const completedTodayHabits = useMemo(() => todayHabits.filter((habit) => habitLogSet.has(habit.id + ':' + today)), [todayHabits, habitLogSet, today])
   const focusTasks = useMemo(() => [...tasks]
     .filter((task) => task.status !== 'done')
     .sort((a, b) => {
@@ -152,6 +182,54 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
           <small>month balance · {currency.format(todayExpense)} spent today</small>
         </article>
       </section>
+      </section>
+
+      <section className="content-card dashboard-habits" aria-label="Today's habits">
+        <div className="card-heading">
+          <div>
+            <span className="section-kicker">RHYTHM</span>
+            <h3>Today’s habits</h3>
+          </div>
+          <button className="dashboard-section-link" type="button" onClick={() => onNavigate('habits')}>
+            Open habits <span aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        {habitsLoading ? (
+          <div className="dashboard-habits-summary">
+            <strong>Checking your rhythm…</strong>
+            <span>Loading today's habit signal.</span>
+          </div>
+        ) : habitError ? (
+          <div className="dashboard-habits-summary">
+            <strong>Rhythm data is unavailable.</strong>
+            <span>Open Habits to check the detailed workspace.</span>
+          </div>
+        ) : todayHabits.length === 0 ? (
+          <div className="dashboard-habits-summary">
+            <strong>No habits due today.</strong>
+            <span>Your rhythm is intentionally open.</span>
+          </div>
+        ) : (
+          <>
+            <div className="dashboard-habits-summary">
+              <strong>{completedTodayHabits.length}/{todayHabits.length}</strong>
+              <span>due habits completed today</span>
+            </div>
+            <div className="dashboard-habit-list">
+              {todayHabits.slice(0, 4).map((habit) => {
+                const complete = habitLogSet.has(habit.id + ':' + today)
+                return (
+                  <button className={complete ? 'dashboard-habit-row is-done' : 'dashboard-habit-row'} key={habit.id} type="button" onClick={() => onNavigate('habits')}>
+                    <span className="dashboard-habit-state" aria-hidden="true">{complete ? '✓' : '·'}</span>
+                    <strong>{habit.name}</strong>
+                    <small>{complete ? 'done today' : 'due today'}</small>
+                  </button>
+                )
+              })}
+            </div>
+          </>
+        )}
       </section>
 
       <div className="dashboard-overview">
