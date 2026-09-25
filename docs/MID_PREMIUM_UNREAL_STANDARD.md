@@ -752,3 +752,19 @@ Environmental motion:
 - any future ambient animation requires explicit evidence that it improves state communication and remains below the attention budget.
 
 Quality target: MiD should feel responsive when the user interacts, but visually calm when the user does nothing.
+
+
+## 27 — Adaptive Spatial Render Budget v1
+
+The spatial world must spend GPU time only while something meaningful is changing.
+
+The renderer:
+- wakes on pointer, navigation, environment, visibility, and explicit invalidation events;
+- keeps the existing 45 FPS desktop / 30 FPS mobile ceiling while camera or environmental state is settling;
+- stops requesting new animation frames once camera and visual state converge within a bounded tolerance;
+- resumes rendering immediately when a new interaction or environment change requires visual reconciliation;
+- never uses continuous rendering as a substitute for ambient animation.
+
+This is a performance rule, not a visual fallback. The world should feel responsive during change and remain computationally quiet when the user is simply reading.
+
+Quality target: visual fidelity must scale with state change, not with idle time.
