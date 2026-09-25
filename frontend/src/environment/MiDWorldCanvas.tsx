@@ -52,6 +52,9 @@ uniform float uLightIntensity;
 uniform float uEmissive;
 uniform float uKind;
 uniform float uWetness;
+uniform float uLightWarmth;
+uniform float uSkyCoolness;
+uniform float uAirDensity;
 
 varying vec3 vWorldPosition;
 varying vec3 vWorldNormal;
@@ -132,13 +135,39 @@ void main() {
     grid = max(line * 0.16, fine * 0.045);
   }
 
-  vec3 base = materialBase * (0.31 + halfLambert * 0.69 * uLightIntensity) * contact;
+  float verticalBlend = clamp(normal.y * 0.5 + 0.5, 0.0, 1.0);
+  vec3 skyFill = vec3(0.11, 0.17, 0.22) * (0.82 + uSkyCoolness * 0.45);
+  vec3 groundFill = mix(
+    vec3(0.09, 0.11, 0.1),
+    vec3(0.16, 0.11, 0.07),
+    uLightWarmth,
+  );
+  vec3 ambientFill = mix(groundFill, skyFill, verticalBlend) * (0.13 + uLightIntensity * 0.06);
+  vec3 sunColor = mix(
+    vec3(0.82, 0.88, 0.94),
+    vec3(1.0, 0.76, 0.5),
+    uLightWarmth,
+  );
+  vec3 directionalLight = sunColor * (0.2 + halfLambert * 0.7 * uLightIntensity);
+
+  vec3 base = materialBase * (ambientFill + directionalLight) * contact;
   vec3 reflected = vec3(specular + rim);
   vec3 emissive = uBaseColor * uEmissive;
   vec3 color = base + reflected + emissive + uBaseColor * grid;
 
   float distanceFade = smoothstep(24.0, 6.0, length(vWorldPosition.xz));
-  color *= mix(0.9, 1.0, distanceFade);
+  float localContrast = mix(0.92, 1.0, distanceFade);
+  color *= localContrast;
+
+  float viewDistance = length(uCameraPosition - vWorldPosition);
+  float atmosphericDensity = clamp(uAirDensity * 0.45, 0.0, 0.64);
+  float atmosphericFade = smoothstep(10.0, 30.0, viewDistance) * atmosphericDensity;
+  vec3 atmosphereColor = mix(
+    vec3(0.055, 0.08, 0.095),
+    vec3(0.12, 0.11, 0.095),
+    uLightWarmth,
+  );
+  color = mix(color, atmosphereColor, atmosphericFade);
 
   gl_FragColor = vec4(color, 1.0);
 }
@@ -555,9 +584,12 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         emissive: gl.getUniformLocation(program, 'uEmissive'),
         kind: gl.getUniformLocation(program, 'uKind'),
         wetness: gl.getUniformLocation(program, 'uWetness'),
+        lightWarmth: gl.getUniformLocation(program, 'uLightWarmth'),
+        skyCoolness: gl.getUniformLocation(program, 'uSkyCoolness'),
+        airDensity: gl.getUniformLocation(program, 'uAirDensity'),
       }
 
-      if ([uniforms.projection, uniforms.view, uniforms.model, uniforms.camera, uniforms.light, uniforms.base, uniforms.intensity, uniforms.emissive, uniforms.kind, uniforms.wetness].some((uniform) => !uniform)) {
+      if ([uniforms.projection, uniforms.view, uniforms.model, uniforms.camera, uniforms.light, uniforms.base, uniforms.intensity, uniforms.emissive, uniforms.kind, uniforms.wetness, uniforms.lightWarmth, uniforms.skyCoolness, uniforms.airDensity].some((uniform) => !uniform)) {
         throw new Error('WebGL uniform contract is incomplete.')
       }
 
@@ -666,6 +698,9 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
           : DEFAULT_LIGHT_DIRECTION
         const naturalDepth = env.visual.worldContrast
         const wetness = env.visual.wetness
+        const lightWarmth = Math.max(0, Math.min(1, env.visual.lightWarmth))
+        const skyCoolness = Math.max(0, Math.min(1, env.visual.skyCoolness))
+        const airDensity = Math.max(0, Math.min(1, env.visual.airDensity))
 
         lookAt(view, camera, target, [0, 1, 0])
 
@@ -677,6 +712,9 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         gl.uniform3f(uniforms.light, lightDirection[0], lightDirection[1], lightDirection[2])
         gl.uniform1f(uniforms.intensity, intensity)
         gl.uniform1f(uniforms.wetness, wetness)
+        gl.uniform1f(uniforms.lightWarmth, lightWarmth)
+        gl.uniform1f(uniforms.skyCoolness, skyCoolness)
+        gl.uniform1f(uniforms.airDensity, airDensity)
 
         const draw = (mesh: Mesh, position: Vec3, scale: Vec3, color: Vec3, kind: number, emissive = 0, rotation = 0) => {
           gl.bindVertexArray(mesh.vao)
