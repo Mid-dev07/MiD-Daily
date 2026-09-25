@@ -89,6 +89,7 @@ export function FinanceForm({ open, initialEntry, defaultDate, onClose, onSubmit
           <label>Notes<textarea disabled={saving} rows={4} value={draft.notes ?? ''} onChange={(event) => setField('notes', event.target.value)} placeholder="Optional note" maxLength={5000} /></label>
 
           {error && <div className="form-status form-status--error" role="alert">{error}</div>}
+          {saving && <div className="form-status form-status--saving" role="status" aria-live="polite">Saving transaction…</div>}
           <div className="modal-actions"><button className="secondary-button" disabled={saving} type="button" onClick={onClose}>Cancel</button><button className="primary-button" disabled={saving} type="submit">{saving ? 'Saving…' : initialEntry ? 'Save changes' : 'Add transaction'}</button></div>
         </form>
       </section>
