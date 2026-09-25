@@ -359,7 +359,16 @@ export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
         canvas.width = width
         canvas.height = height
         gl.viewport(0, 0, width, height)
+        perspective(projection, Math.PI / 4.8, width / Math.max(1, height), 0.1, 80)
       }
+
+      gl.clearColor(0, 0, 0, 0)
+      gl.enable(gl.DEPTH_TEST)
+      gl.enable(gl.CULL_FACE)
+      gl.enable(gl.BLEND)
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+      gl.useProgram(program)
+      gl.uniform3f(uniforms.light, LIGHT_DIRECTION[0], LIGHT_DIRECTION[1], LIGHT_DIRECTION[2])
 
       const render = (timestamp: number) => {
         if (!running) return
@@ -380,17 +389,9 @@ export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
         const tint = dayTint(environmentRef.current)
         const intensity = Math.max(0.35, Math.min(1, environmentRef.current.visual.lightIntensity + 0.24))
 
-        perspective(projection, Math.PI / 4.8, width / Math.max(1, height), 0.1, 80)
         lookAt(view, camera, target, [0, 1, 0])
 
-        gl.viewport(0, 0, width, height)
-        gl.clearColor(0, 0, 0, 0)
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-        gl.enable(gl.DEPTH_TEST)
-        gl.enable(gl.CULL_FACE)
-        gl.enable(gl.BLEND)
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-        gl.useProgram(program)
 
         gl.uniformMatrix4fv(uniforms.projection, false, projection)
         gl.uniformMatrix4fv(uniforms.view, false, view)
@@ -440,8 +441,7 @@ export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
       resize()
       const resizeObserver = new ResizeObserver(resize)
       resizeObserver.observe(canvas)
-      window.addEventListener('mid:world-pointer', pointerListener)
-      document.addEventListener('visibilitychange', () => {
+      const handleVisibility = () => {
         if (document.visibilityState === 'hidden') {
           running = false
           window.cancelAnimationFrame(frame)
@@ -452,7 +452,10 @@ export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
           running = true
           frame = window.requestAnimationFrame(render)
         }
-      })
+      }
+
+      window.addEventListener('mid:world-pointer', pointerListener)
+      document.addEventListener('visibilitychange', handleVisibility)
       onReady?.(true)
       frame = window.requestAnimationFrame(render)
 
@@ -461,9 +464,10 @@ export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
         window.cancelAnimationFrame(frame)
         resizeObserver.disconnect()
         window.removeEventListener('mid:world-pointer', pointerListener)
-        gl?.deleteVertexArray(box.vao)
-        gl?.deleteVertexArray(floor.vao)
-        gl?.deleteProgram(program)
+        document.removeEventListener('visibilitychange', handleVisibility)
+        gl.deleteVertexArray(box.vao)
+        gl.deleteVertexArray(floor.vao)
+        gl.deleteProgram(program)
       }
     } catch {
       onReady?.(false)
