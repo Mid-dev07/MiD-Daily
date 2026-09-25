@@ -1,3 +1,7 @@
+function spatialSourceForMainSafe() {
+  return true
+}
+
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -326,6 +330,31 @@ if (existsSync(moduleWorldPath)) {
     failures.push('Spatial world must retain the calm natural-form language.')
   }
 } 
+const spatialStyles = join(srcDir, 'styles/spatial-composition.css')
+if (!existsSync(spatialStyles)) {
+  failures.push('Spatial workspace composition stylesheet is missing.')
+} else {
+  const spatialSource = readFileSync(spatialStyles, 'utf8')
+  for (const contract of [
+    'perspective:',
+    'data-module="dashboard"',
+    'data-module="schedule"',
+    'data-module="tasks"',
+    'data-module="finance"',
+    'data-module="social"',
+    'data-module="assistant"',
+    'data-module="profile"',
+    'data-module="insights"',
+    'data-module="habits"',
+    'prefers-reduced-motion: reduce',
+  ]) {
+    if (!spatialSource.includes(contract)) failures.push('Spatial composition contract missing: ' + contract)
+  }
+}
+if (spatialSourceForMainSafe()) {
+  // no-op
+}
+
 const responsiveStyles = join(srcDir, 'styles/responsive.css')
 if (!existsSync(responsiveStyles)) {
   failures.push('Responsive experience authority stylesheet is missing.')
