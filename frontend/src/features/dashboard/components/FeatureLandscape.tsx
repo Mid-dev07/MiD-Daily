@@ -145,7 +145,7 @@ export function FeatureLandscape({ activeView, onNavigate, tasks, schedule, fina
             <i>/</i>
             <strong>MID DAILY</strong>
           </div>
-          <span className="section-kicker">DAILY COMPASS · {compass.status}</span>
+          <span className="section-kicker">DAILY COMPASS · WORKSPACE COMPASS · {compass.status}</span>
           <h3 id="feature-landscape-title">Everything has a place.</h3>
           <p>
             The center is Today. The needle reads your live day and points toward the workspace that matters next.
@@ -196,7 +196,7 @@ export function FeatureLandscape({ activeView, onNavigate, tasks, schedule, fina
           type="button"
           style={compassStyle}
           onClick={() => onNavigate(compass.target)}
-          aria-label={compass.action + ': ' + compass.title}
+          aria-label={compass.action + ': ' + compass.title + '. Return to Today from the center.'}
           aria-current={activeIsToday && compass.target === 'dashboard' ? 'page' : undefined}
         >
           <span className="feature-core-needle" aria-hidden="true" />
