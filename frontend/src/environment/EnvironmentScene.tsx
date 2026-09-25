@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { MiDWorldCanvas } from './MiDWorldCanvas'
 import { environmentCssVariables } from './visual'
 import type { View } from '../types'
@@ -18,6 +18,10 @@ const stars = [
 
 export function EnvironmentScene({ environment, activeView }: EnvironmentSceneProps) {
   const [worldReady, setWorldReady] = useState(false)
+
+  useEffect(() => {
+    window.dispatchEvent(new Event('mid:world-invalidate'))
+  }, [environment, activeView])
 
   return (
     <div
