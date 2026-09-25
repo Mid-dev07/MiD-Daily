@@ -189,7 +189,7 @@ if (!/dashboard-command-deck/.test(dashboard) || !/dashboard-hero-aside/.test(da
 if (!/listHabits/.test(dashboard) || !/Today’s habits/.test(dashboard) || !/dashboard-habits/.test(experienceSystem)) {
   failures.push('Today must surface a live habit rhythm signal as part of Module Convergence.')
 }
-if (!/opacity:0;visibility:hidden;pointer-events:none/.test(uiSystem)) {
+if (!/opacity\s*:\s*0[\s;]+visibility\s*:\s*hidden[\s;]+pointer-events\s*:\s*none/.test(uiSystem + experienceSystem)) {
   failures.push('Sidebar hide state must remove the hidden rail from interaction and visual compositing.')
 }
 
@@ -228,7 +228,8 @@ if (!/SIDEBAR_HIDDEN_STORAGE_KEY/.test(appSourceForInteraction) || !/setSidebarH
 if (!/sidebarHidden={sidebarHidden}/.test(appSourceForInteraction) || !/onToggleSidebar={toggleSidebar}/.test(appSourceForInteraction)) {
   failures.push('Topbar must remain wired to the sidebar visibility controller.')
 }
-if (!/sidebar-hidden/.test(uiSystem) || !/\.app-frame\.sidebar-hidden/.test(uiSystem) || !/\.sidebar-hidden \.sidebar/.test(uiSystem)) {
+const shellStyles = uiSystem + experienceSystem
+if (!/sidebar-hidden/.test(shellStyles) || !/\.app-frame\.sidebar-hidden/.test(shellStyles) || !/\.sidebar-hidden \.sidebar/.test(shellStyles)) {
   failures.push('Sidebar visibility state must have bounded desktop/mobile presentation rules.')
 }
 if (!tsxFiles.some((file) => file.endsWith('app/App.tsx') && /useEnvironment/.test(readFileSync(file, 'utf8')) && /EnvironmentScene/.test(readFileSync(file, 'utf8')))) {
@@ -326,6 +327,29 @@ if (existsSync(moduleWorldPath)) {
     failures.push('Spatial world must retain the calm natural-form language.')
   }
 } 
+const spatialStyles = join(srcDir, 'styles/spatial-composition.css')
+if (!existsSync(spatialStyles)) {
+  failures.push('Spatial workspace composition stylesheet is missing.')
+} else {
+  const spatialSource = readFileSync(spatialStyles, 'utf8')
+  for (const contract of [
+    'perspective:',
+    'data-module="dashboard"',
+    'data-module="schedule"',
+    'data-module="tasks"',
+    'data-module="finance"',
+    'data-module="social"',
+    'data-module="assistant"',
+    'data-module="profile"',
+    'data-module="insights"',
+    'data-module="habits"',
+    'prefers-reduced-motion: reduce',
+  ]) {
+    if (!spatialSource.includes(contract)) failures.push('Spatial composition contract missing: ' + contract)
+  }
+}
+if (!mainSource.includes("styles/spatial-composition.css")) failures.push('Spatial composition stylesheet must be loaded by main.tsx.')
+
 const responsiveStyles = join(srcDir, 'styles/responsive.css')
 if (!existsSync(responsiveStyles)) {
   failures.push('Responsive experience authority stylesheet is missing.')

@@ -1,0 +1,313 @@
+/* MiD Daily — Spatial Workspace Composition
+   Turns the existing DOM workspaces into one reusable spatial composition layer.
+   Environment remains WebGL; information remains DOM-first.
+*/
+
+.view-key {
+  --spatial-accent: var(--module-accent, var(--mi-cyan));
+  --spatial-nature: rgba(91, 123, 95, .16);
+  --spatial-depth: 1400px;
+}
+
+.view-key[data-module="dashboard"] { --spatial-accent: #4fd1ff; }
+.view-key[data-module="schedule"] { --spatial-accent: #9b8cff; }
+.view-key[data-module="tasks"] { --spatial-accent: #4ade80; }
+.view-key[data-module="finance"] { --spatial-accent: #d9ad6d; }
+.view-key[data-module="social"] { --spatial-accent: #fb7185; }
+.view-key[data-module="assistant"] { --spatial-accent: #65d9ef; }
+.view-key[data-module="profile"] { --spatial-accent: #c6ced4; }
+.view-key[data-module="insights"] { --spatial-accent: #718bff; }
+.view-key[data-module="habits"] { --spatial-accent: #79a96e; }
+
+.view-key[data-module] .workspace {
+  position: relative;
+  isolation: isolate;
+  perspective: var(--spatial-depth);
+  perspective-origin: 50% 18%;
+}
+
+.view-key[data-module] .workspace::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: clamp(18px, 4vw, 64px);
+  right: clamp(18px, 4vw, 64px);
+  bottom: 42px;
+  height: 42%;
+  border-radius: 48% 48% 22% 22%;
+  background:
+    radial-gradient(ellipse at 50% 58%, var(--spatial-nature), transparent 68%),
+    linear-gradient(180deg, rgba(37, 55, 47, .02), rgba(17, 31, 25, .16));
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.view-key[data-module] .workspace::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: 8%;
+  right: 8%;
+  top: 35%;
+  height: 1px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--spatial-accent) 12%, transparent) 26%,
+      rgba(188, 207, 196, .08) 50%,
+      color-mix(in srgb, var(--spatial-accent) 10%, transparent) 74%,
+      transparent
+    );
+  opacity: .9;
+  pointer-events: none;
+}
+
+.view-key[data-module] .workspace > * {
+  position: relative;
+  z-index: 1;
+}
+
+.view-key[data-module] .workspace-header {
+  transform: translateZ(14px);
+  transform-style: preserve-3d;
+}
+
+.view-key[data-module] .workspace-header-main {
+  position: relative;
+}
+
+.view-key[data-module] .workspace-header-main::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -12px;
+  width: min(280px, 38%);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--spatial-accent) 42%, transparent),
+    rgba(188, 207, 196, .08),
+    transparent
+  );
+}
+
+/* Spatial roles: only selected semantic surfaces receive depth.
+   Ordinary rows remain flat so the product does not become a card wall. */
+.view-key[data-module] .workspace > .workspace-toolbar-surface {
+  transform: translateZ(7px);
+  transform-style: preserve-3d;
+}
+
+.view-key[data-module] .workspace > .workspace-metrics {
+  transform: translateZ(10px);
+  transform-style: preserve-3d;
+}
+
+.view-key[data-module] .workspace > .dashboard-command-deck,
+.view-key[data-module] .workspace > .content-card:first-of-type,
+.view-key[data-module] .workspace > .profile-layout,
+.view-key[data-module] .workspace > .insights-grid {
+  transform: translateZ(12px);
+  transform-style: preserve-3d;
+}
+
+/* Primary spatial surfaces vary by module instead of sharing one generic card stack. */
+.view-key[data-module="dashboard"] .dashboard-command-deck {
+  border-color: color-mix(in srgb, var(--spatial-accent) 18%, var(--mi-line));
+  box-shadow:
+    0 32px 88px rgba(0, 0, 0, .34),
+    0 0 54px color-mix(in srgb, var(--spatial-accent) 5%, transparent),
+    inset 0 1px rgba(255,255,255,.07);
+}
+
+.view-key[data-module="dashboard"] .dashboard-habits {
+  transform: translateZ(5px);
+}
+
+.view-key[data-module="dashboard"] .dashboard-overview {
+  transform: translateZ(8px);
+}
+
+.view-key[data-module="dashboard"] .dashboard-overview > .dashboard-agenda {
+  transform: translateZ(5px);
+}
+
+.view-key[data-module="dashboard"] .dashboard-overview > .dashboard-focus {
+  transform: translateZ(13px);
+}
+
+.view-key[data-module="dashboard"] .dashboard-secondary-grid {
+  transform: translateZ(2px);
+}
+
+.view-key[data-module="dashboard"] .dashboard-focus-disclosure {
+  transform: translateZ(-1px);
+}
+
+.view-key[data-module="schedule"] .schedule-now-strip {
+  transform: translateZ(16px);
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, .24),
+    0 0 30px color-mix(in srgb, var(--spatial-accent) 8%, transparent);
+}
+
+.view-key[data-module="schedule"] .schedule-events-card {
+  transform: translateZ(12px);
+  min-height: 260px;
+}
+
+.view-key[data-module="schedule"] .flexible-plans-card {
+  transform: translateZ(5px);
+}
+
+.view-key[data-module="schedule"] .secondary-panel {
+  transform: translateZ(0);
+}
+
+.view-key[data-module="tasks"] .task-toolbar {
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, .24),
+    inset 0 1px rgba(255,255,255,.055);
+}
+
+.view-key[data-module="tasks"] .module-list {
+  transform: translateZ(12px);
+  min-height: 260px;
+}
+
+.view-key[data-module="tasks"] .task-item-card {
+  transform: translateZ(1px);
+}
+
+.view-key[data-module="finance"] .workspace-metrics {
+  transform: translateZ(14px);
+}
+
+.view-key[data-module="finance"] .finance-budget-card {
+  transform: translateZ(11px);
+}
+
+.view-key[data-module="finance"] .finance-insights {
+  transform: translateZ(5px);
+}
+
+.view-key[data-module="finance"] .module-list {
+  transform: translateZ(2px);
+}
+
+.view-key[data-module="social"] .social-foundation-card,
+.view-key[data-module="assistant"] .assistant-channels-card {
+  transform: translateZ(12px);
+}
+
+.view-key[data-module="social"] .social-foundation-card {
+  border-color: color-mix(in srgb, var(--spatial-accent) 16%, var(--mi-line));
+}
+
+.view-key[data-module="assistant"] .assistant-channel-card {
+  transform: translateZ(3px);
+}
+
+.view-key[data-module="profile"] .profile-layout {
+  align-items: start;
+}
+
+.view-key[data-module="profile"] .profile-hero-card {
+  transform: translateZ(15px);
+}
+
+.view-key[data-module="profile"] .profile-form-card {
+  transform: translateZ(8px);
+}
+
+.view-key[data-module="insights"] .workspace-metrics {
+  transform: translateZ(13px);
+}
+
+.view-key[data-module="insights"] .insights-grid {
+  transform: translateZ(8px);
+}
+
+.view-key[data-module="insights"] .workspace > .content-card:last-of-type {
+  transform: translateZ(3px);
+}
+
+.view-key[data-module="habits"] .habit-composer {
+  transform: translateZ(14px);
+}
+
+.view-key[data-module="habits"] .habit-board {
+  transform: translateZ(8px);
+}
+
+.view-key[data-module="habits"] .habit-row {
+  transform: translateZ(1px);
+}
+
+/* Material hierarchy inside spatial surfaces. */
+.view-key[data-module] .workspace > .content-card,
+.view-key[data-module] .workspace > .workspace-toolbar-surface,
+.view-key[data-module] .workspace > .workspace-metrics {
+  transition:
+    transform var(--unreal-motion-scene) var(--ease-standard),
+    border-color var(--unreal-motion-normal) var(--ease-standard),
+    box-shadow var(--unreal-motion-normal) var(--ease-standard);
+  transform-style: preserve-3d;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .view-key[data-module="dashboard"] .dashboard-command-deck:hover,
+  .view-key[data-module="schedule"] .schedule-events-card:hover,
+  .view-key[data-module="tasks"] .module-list:hover,
+  .view-key[data-module="finance"] .finance-budget-card:hover,
+  .view-key[data-module="social"] .social-foundation-card:hover,
+  .view-key[data-module="assistant"] .assistant-channels-card:hover,
+  .view-key[data-module="profile"] .profile-hero-card:hover,
+  .view-key[data-module="habits"] .habit-board:hover {
+    transform: translateY(-2px) translateZ(16px);
+  }
+}
+
+/* Smaller screens keep composition but remove parallax-like depth. */
+@media (max-width: 820px) {
+  .view-key[data-module] .workspace {
+    perspective: none;
+  }
+
+  .view-key[data-module] .workspace::before {
+    left: 10px;
+    right: 10px;
+    bottom: 48px;
+    height: 30%;
+    filter: blur(14px);
+  }
+
+  .view-key[data-module] .workspace::after {
+    left: 3%;
+    right: 3%;
+    top: 31%;
+  }
+
+  .view-key[data-module] .workspace > .workspace-header,
+  .view-key[data-module] .workspace > .workspace-toolbar-surface,
+  .view-key[data-module] .workspace > .workspace-metrics,
+  .view-key[data-module] .workspace > .dashboard-command-deck,
+  .view-key[data-module] .workspace > .content-card,
+  .view-key[data-module] .workspace > .profile-layout,
+  .view-key[data-module] .workspace > .insights-grid {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view-key[data-module] .workspace > *,
+  .view-key[data-module] .workspace > *:hover {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .view-key[data-module] .workspace::before {
+    filter: blur(12px);
+  }
+}

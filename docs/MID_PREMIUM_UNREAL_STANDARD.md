@@ -450,6 +450,23 @@ Rules:
 
 Responsive changes must be intentional composition changes, not simply smaller typography.
 
+## 14.1 — Spatial Workspace Composition
+
+The WebGL environment and the DOM workspace form one spatial composition.
+
+Rules:
+- the world establishes place, atmosphere, depth, and contextual orientation;
+- DOM remains authoritative for all product information and actions;
+- each workspace has one clear primary spatial surface, supporting instruments, and quiet background layers;
+- not every section becomes a raised card;
+- depth is semantic: orientation surfaces sit forward, working surfaces occupy the main plane, supporting information recedes;
+- module personality changes small accents and emphasis, not the entire material vocabulary;
+- mobile and touch layouts remove depth transforms while retaining hierarchy;
+- reduced motion retains hierarchy and state while removing spatial movement;
+- spatial composition must remain usable when the environment renderer falls back to CSS.
+
+The composition system is reusable across all nine modules and should be extended through semantic roles before adding one-off visual hacks.
+
 ## 15 — Accessibility Standard
 
 Required:
