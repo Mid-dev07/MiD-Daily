@@ -1562,3 +1562,35 @@ textarea:focus,
     grid-column: auto;
   }
 }
+
+
+/* =========================================================
+   UNREAL FINAL RENDER CORE — PHASE 1 COMPLETE
+   The delegated pointer stream now drives the actual surface
+   response. The rotation stays intentionally sub-degree.
+========================================================= */
+
+@media (hover: hover) and (pointer: fine) {
+  [data-ux-lit="true"] {
+    transform:
+      perspective(1200px)
+      rotateX(var(--ux-rx, 0deg))
+      rotateY(var(--ux-ry, 0deg))
+      translateY(calc(var(--ux-elevation, 0) * -1px));
+    transform-origin: center;
+    transition: transform var(--unreal-motion-normal) var(--ease-spring), border-color var(--unreal-motion-normal) var(--ease-standard), box-shadow var(--unreal-motion-normal) var(--ease-standard);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-ux-lit="true"] {
+    transform: none;
+    transition: border-color var(--unreal-motion-normal) var(--ease-standard), box-shadow var(--unreal-motion-normal) var(--ease-standard);
+  }
+
+  .environment-clouds,
+  .environment-light-shafts,
+  .environment-fog {
+    animation: none;
+  }
+}
