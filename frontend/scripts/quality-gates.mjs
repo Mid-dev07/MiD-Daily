@@ -4,6 +4,10 @@ import { join } from 'node:path'
 const root = new URL('..', import.meta.url).pathname
 const operatingStandardPath = join(root, '../docs/MID_PREMIUM_UNREAL_STANDARD.md')
 if (!existsSync(operatingStandardPath)) failures.push('Premium Unreal operating standard document is missing.')
+const identityPath = join(root, '../docs/MID_IDENTITY_SYSTEM.md')
+const effectsPath = join(root, '../docs/MID_EFFECTS_CONSTITUTION.md')
+if (!existsSync(identityPath)) failures.push('MiD core identity system document is missing.')
+if (!existsSync(effectsPath)) failures.push('MiD effects constitution document is missing.')
 const srcDir = join(root, 'src')
 
 function walk(dir) {
@@ -187,6 +191,15 @@ if (!/data-module=\{activeView\}/.test(appSourceForInteraction)) {
 }
 if (!/Experience System V3/.test(experienceSystem)) {
   failures.push('Experience System V3 must remain present in the active visual stylesheet.')
+}
+if (!/EFFECTS CONSTITUTION V1/.test(experienceSystem)) {
+  failures.push('Effects Constitution V1 implementation layer is missing from experience.css.')
+}
+if (!/--effect-hover-lift:/.test(tokens) || !/--effect-press-scale:/.test(tokens)) {
+  failures.push('Canonical interaction response tokens are missing from tokens.css.')
+}
+if (!/data-workload=/.test(appSourceForInteraction)) {
+  failures.push('Living workload state must remain available to the effect layer.')
 }
 for (const terrain of [
   'data-module="dashboard"', 'data-module="schedule"', 'data-module="tasks"',
