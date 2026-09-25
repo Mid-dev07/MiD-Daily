@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import type { CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { MiDWorldCanvas } from './MiDWorldCanvas'
 import { environmentCssVariables } from './visual'
 import type { EnvironmentState } from './types'
