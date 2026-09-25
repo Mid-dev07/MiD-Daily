@@ -132,6 +132,20 @@ if (/environment-photograph/.test(uiSystem)) {
 if (!/ActionFocus/.test(actionFocus) || !/buildActionFocus/.test(actionFocus) || !/action-focus/.test(actionFocus)) {
   failures.push('Action Focus must remain a live, state-driven daily priority surface.')
 }
+
+const terrainFiles = [
+  ['schedule toolbar', join(srcDir, 'features/schedule/components/ScheduleToolbar.tsx'), /workspace-toolbar-surface/],
+  ['tasks toolbar', join(srcDir, 'features/tasks/TasksView.tsx'), /workspace-toolbar-surface/],
+  ['finance toolbar', join(srcDir, 'features/finance/FinanceView.tsx'), /workspace-toolbar-surface/],
+  ['finance metrics', join(srcDir, 'features/finance/FinanceView.tsx'), /workspace-metrics|workspace-metric/],
+  ['insights metrics', join(srcDir, 'features/insights/InsightsView.tsx'), /workspace-metrics--four|workspace-metric/],
+]
+for (const [label, file, pattern] of terrainFiles) {
+  if (!pattern.test(readFileSync(file, 'utf8'))) failures.push('Shared content terrain missing from ' + label + '.')
+}
+if (!/workspace-toolbar-surface/.test(uiSystem) || !/workspace-metrics/.test(uiSystem) || !/empty-state/.test(uiSystem)) {
+  failures.push('Shared content terrain CSS contract is missing.')
+}
 if (!/ActionFocus/.test(dashboard) || !/<ActionFocus/.test(dashboard) || /FeatureLandscape/.test(dashboard)) {
   failures.push('Dashboard must expose Action Focus and must not retain the Compass component.')
 }

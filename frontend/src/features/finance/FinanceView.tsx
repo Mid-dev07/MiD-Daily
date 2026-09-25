@@ -103,7 +103,7 @@ export function FinanceView({ finance, budgets, onSaveFinance, onDeleteFinance, 
         action={<button className="primary-button" type="button" onClick={openCreate}>Add transaction</button>}
       />
 
-      <div className="finance-toolbar content-card">
+      <div className="finance-toolbar workspace-toolbar-surface content-card">
         <div className="finance-toolbar-periods filter-row">
           {periodOptions.map((option) => (
             <button key={option.value} className={period === option.value ? 'filter-button is-active' : 'filter-button'} type="button" onClick={() => setPeriod(option.value)}>
@@ -126,10 +126,10 @@ export function FinanceView({ finance, budgets, onSaveFinance, onDeleteFinance, 
         </div>
       </div>
 
-      <div className="stat-row">
-        <article className="stat-card"><span>Income</span><strong className="amount-positive">{currency.format(income)}</strong><small>selected period</small></article>
-        <article className="stat-card"><span>Expense</span><strong className="amount-negative">{currency.format(expense)}</strong><small>selected period</small></article>
-        <article className="stat-card"><span>Balance</span><strong>{currency.format(income - expense)}</strong><small>period net</small></article>
+      <div className="stat-row workspace-metrics workspace-metrics--three">
+        <article className="stat-card workspace-metric"><span>Income</span><strong className="amount-positive">{currency.format(income)}</strong><small>selected period</small></article>
+        <article className="stat-card workspace-metric"><span>Expense</span><strong className="amount-negative">{currency.format(expense)}</strong><small>selected period</small></article>
+        <article className="stat-card workspace-metric"><span>Balance</span><strong>{currency.format(income - expense)}</strong><small>period net</small></article>
       </div>
 
       <section className="content-card finance-budget-card">

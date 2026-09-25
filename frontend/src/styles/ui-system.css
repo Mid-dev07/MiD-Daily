@@ -1281,6 +1281,187 @@ textarea:focus {
 
 
 /* ==========================================================================
+   09. CONTENT TERRAIN — SHARED CONTROL + METRIC SURFACES
+   Every workspace keeps its own semantics, but controls and key numbers obey
+   one geometry language so users do not relearn the interface per module.
+   ========================================================================== */
+
+.workspace-toolbar-surface {
+  min-height: 68px;
+  margin: 16px 0;
+  padding: 12px;
+  display: grid;
+  align-items: center;
+  gap: 12px;
+  border-radius: 16px;
+}
+
+.schedule-toolbar.workspace-toolbar-surface {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.task-toolbar.workspace-toolbar-surface {
+  grid-template-columns: minmax(220px, 1fr) auto minmax(160px, 220px);
+}
+
+.finance-toolbar.workspace-toolbar-surface {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.finance-toolbar-controls {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(160px, 200px);
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.workspace-toolbar-surface .filter-row {
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.workspace-toolbar-surface .filter-button {
+  flex: 0 0 auto;
+}
+
+.workspace-metrics {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 0;
+}
+
+.workspace-metrics--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.workspace-metrics--four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.workspace-metric {
+  min-width: 0;
+  min-height: 116px;
+  padding: 16px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.workspace-metric > span:first-child {
+  color: var(--mi-text-dim);
+  font: 700 9px/1 var(--font-mono);
+  letter-spacing: .10em;
+  text-transform: uppercase;
+}
+
+.workspace-metric > strong {
+  overflow: hidden;
+  color: #f1f7fa;
+  font-size: 25px;
+  letter-spacing: -.05em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace-metric > small {
+  color: var(--mi-text-dim);
+  font-size: 10px;
+}
+
+.empty-state {
+  min-height: 96px;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 8px;
+  padding: 20px;
+  border: 1px dashed rgba(198,218,228,.10);
+  border-radius: 12px;
+  color: var(--mi-text-soft);
+  background: rgba(7,13,20,.20);
+}
+
+.empty-state strong {
+  color: var(--mi-text);
+  font-size: 12px;
+}
+
+.empty-state span {
+  max-width: 560px;
+  color: var(--mi-text-dim);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.card-heading .text-button,
+.card-heading .dashboard-section-link {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 900px) {
+  .schedule-toolbar.workspace-toolbar-surface,
+  .finance-toolbar.workspace-toolbar-surface {
+    grid-template-columns: 1fr;
+  }
+
+  .task-toolbar.workspace-toolbar-surface {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .task-toolbar.workspace-toolbar-surface select {
+    grid-column: 1 / -1;
+  }
+
+  .finance-toolbar-controls {
+    grid-template-columns: minmax(160px, 1fr) auto minmax(140px, 180px);
+  }
+
+  .workspace-metrics--four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workspace-toolbar-surface .filter-row {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .workspace-toolbar-surface {
+    margin-top: 12px;
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .task-toolbar.workspace-toolbar-surface,
+  .finance-toolbar-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .task-toolbar.workspace-toolbar-surface select,
+  .finance-toolbar-controls .filter-row {
+    grid-column: auto;
+  }
+
+  .workspace-toolbar-surface .filter-row {
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
+
+  .workspace-metrics--three,
+  .workspace-metrics--four {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-metric {
+    min-height: 96px;
+    padding: 12px;
+  }
+
+  .empty-state {
+    min-height: 84px;
+    padding: 16px;
+  }
+}
+
+/* ==========================================================================
    09. MODULE PERSONALITY
    ========================================================================== */
 
