@@ -33,7 +33,7 @@ MiD now uses glassmorphism as the primary surface language while keeping the liv
 
 Glass is intentionally hierarchical:
 
-- **G0 — environment:** the photographic/natural scene remains the source of ambient color and depth.
+- **G0 — environment:** the procedural living scene remains the source of ambient color and depth.
 - **G1 — shell glass:** sidebar and topbar use controlled frosted glass.
 - **G2 — clear glass:** cards and data surfaces use translucent layered glass with rim light; most do not invoke backdrop blur.
 - **G3 — recessed glass:** inputs and quiet controls use inward depth and restrained translucency.
@@ -53,6 +53,12 @@ Do not:
 - turn every interaction into a glow effect.
 
 The result should read as **material glass**, not transparent rectangles.
+
+### Experience System V3
+The current implementation has one visual authority after the structural UI system:
+- `experience.css` owns environment presentation, shell material, page stage, glass hierarchy, module terrain, responsive composition, and hide-state compositing;
+- `ui-system.css` owns shared structural/component behavior and the 4pt rhythm;
+- superseded `glass.css` overrides are intentionally removed to prevent cascade drift.
 
 ### 2. Emissive
 Reserved for meaningful attention:
@@ -118,11 +124,11 @@ The module accent changes small details: active rail, kicker, indicator, progres
 The existing MiD living environment remains part of the identity.
 
 The environment is:
-- contextual rather than decorative wallpaper;
+- procedural rather than a static wallpaper;
 - responsive to day/weather/workload state;
 - subdued enough to protect content;
 - lightweight and CSS-driven;
-- allowed to retain natural texture and warm light.
+- allowed to retain natural terrain, fog, celestial light, and warm atmospheric color.
 
 The environment is not replaced by a sci-fi blue gradient.
 
@@ -204,7 +210,7 @@ Required:
 - keep the existing asset budgets;
 - use CSS compositing before JavaScript;
 - reuse the existing delegated interaction system;
-- keep glass appearance isolated in `glass.css` so future cleanup does not scatter material overrides across the layout system.
+- keep the complete visual material system isolated in `experience.css` so future cleanup does not scatter material overrides across the structural layout system.
 
 ## Acceptance criteria
 
