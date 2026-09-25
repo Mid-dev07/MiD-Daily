@@ -6,66 +6,105 @@ interface FeatureLandscapeProps {
   onNavigate: (view: View) => void
 }
 
-const features: Array<{ id: View; index: string; label: string; meta: string; icon: MiDIconName }> = [
-  { id: 'dashboard', index: '01', label: 'Today', meta: 'orientation & daily signals', icon: 'home' },
-  { id: 'schedule', index: '02', label: 'Schedule', meta: 'time, rhythm & commitments', icon: 'clock' },
-  { id: 'tasks', index: '03', label: 'Tasks', meta: 'focus, progress & priorities', icon: 'check' },
-  { id: 'finance', index: '04', label: 'Finance', meta: 'spending, budgets & resources', icon: 'wallet' },
-  { id: 'social', index: '05', label: 'Social', meta: 'read-only digital pulse', icon: 'pulse' },
-  { id: 'assistant', index: '06', label: 'Assistant', meta: 'guided next actions', icon: 'spark' },
-  { id: 'profile', index: '07', label: 'Profile', meta: 'identity & preferences', icon: 'user' },
-  { id: 'insights', index: '08', label: 'Insights', meta: 'current patterns & signals', icon: 'chart' },
-  { id: 'habits', index: '09', label: 'Habits', meta: 'rhythm & consistency', icon: 'habit' },
+type CompassPosition = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
+
+interface WorkspaceFeature {
+  id: View
+  index: string
+  label: string
+  meta: string
+  icon: MiDIconName
+  position?: CompassPosition
+}
+
+const features: WorkspaceFeature[] = [
+  { id: 'dashboard', index: '001', label: 'Today', meta: 'orientation & daily signals', icon: 'home' },
+  { id: 'schedule', index: '002', label: 'Schedule', meta: 'time, rhythm & commitments', icon: 'clock', position: 'n' },
+  { id: 'insights', index: '008', label: 'Insights', meta: 'patterns & signals', icon: 'chart', position: 'ne' },
+  { id: 'tasks', index: '003', label: 'Tasks', meta: 'focus, progress & priorities', icon: 'check', position: 'e' },
+  { id: 'habits', index: '009', label: 'Habits', meta: 'rhythm & consistency', icon: 'habit', position: 'se' },
+  { id: 'finance', index: '004', label: 'Finance', meta: 'spending & resources', icon: 'wallet', position: 's' },
+  { id: 'social', index: '005', label: 'Social', meta: 'digital pulse & signals', icon: 'pulse', position: 'sw' },
+  { id: 'assistant', index: '006', label: 'Assistant', meta: 'guided next actions', icon: 'spark', position: 'w' },
+  { id: 'profile', index: '007', label: 'Profile', meta: 'identity & preferences', icon: 'user', position: 'nw' },
 ]
 
-const spatialFeatures = features.slice(0, 6)
+const compassFeatures = features.filter((feature) => feature.position)
 
 export function FeatureLandscape({ activeView, onNavigate }: FeatureLandscapeProps) {
   const activeFeature = features.find((feature) => feature.id === activeView) ?? features[0]
+  const activeIsToday = activeView === 'dashboard'
 
   return (
     <section className="feature-landscape" aria-labelledby="feature-landscape-title">
       <div className="feature-landscape-heading">
         <div>
-          <div className="feature-level" aria-hidden="true"><span>FIELD GUIDE 001</span><i>/</i><strong>MIĐ DAILY</strong></div>
-          <span className="section-kicker">SYSTEM COMPASS</span>
+          <div className="feature-level" aria-hidden="true">
+            <span>FIELD GUIDE 001</span>
+            <i>/</i>
+            <strong>MID DAILY</strong>
+          </div>
+          <span className="section-kicker">WORKSPACE COMPASS</span>
           <h3 id="feature-landscape-title">Everything has a place.</h3>
-          <p>Move through your day from one living workspace. Focused modules catch light; the rest recede into the environment.</p>
+          <p>
+            Use the compass as your spatial navigator. The center always returns to Today;
+            the surrounding points take you directly into each workspace.
+          </p>
         </div>
-        <span className="feature-landscape-hint">Hover a workspace</span>
+        <span className="feature-landscape-hint">Click a point to enter</span>
       </div>
 
-      <div className="feature-scene" aria-label="Core workspace compass">
-        {spatialFeatures.map((feature) => {
+      <div className="feature-compass-status" aria-live="polite">
+        <span className="feature-compass-status-label">{activeIsToday ? 'HOME' : 'YOU ARE HERE'}</span>
+        <strong>{activeFeature.index} · {activeFeature.label}</strong>
+        <span>{activeFeature.meta}</span>
+      </div>
+
+      <div className="feature-scene" aria-label={`Workspace compass. Current workspace: ${activeFeature.label}`}>
+        <div className="feature-compass-orbit feature-compass-orbit-a" aria-hidden="true" />
+        <div className="feature-compass-orbit feature-compass-orbit-b" aria-hidden="true" />
+        <div className="feature-compass-crosshair feature-compass-crosshair-x" aria-hidden="true" />
+        <div className="feature-compass-crosshair feature-compass-crosshair-y" aria-hidden="true" />
+
+        {compassFeatures.map((feature) => {
           const active = activeView === feature.id
           return (
             <button
               key={feature.id}
               type="button"
-              className={active ? 'feature-node is-active' : 'feature-node'}
+              className={active ? `feature-node feature-node--${feature.position} is-active` : `feature-node feature-node--${feature.position}`}
               data-feature={feature.id}
               aria-current={active ? 'page' : undefined}
+              aria-label={`Open ${feature.label} workspace`}
               onClick={() => onNavigate(feature.id)}
             >
               <span className="feature-node-label">
                 <span className="feature-node-icon"><MiDIcon name={feature.icon} size={20} /></span>
                 <span className="feature-node-title">{feature.label}</span>
+                <span className="feature-node-index">{feature.index}</span>
               </span>
               <span className="feature-node-meta">{feature.meta}</span>
+              <span className="feature-node-status">{active ? 'HERE' : 'OPEN'}</span>
             </button>
           )
         })}
 
-        <button className="feature-core" type="button" onClick={() => onNavigate('dashboard')} aria-label="Open Today dashboard">
+        <button
+          className={activeIsToday ? 'feature-core is-active' : 'feature-core'}
+          type="button"
+          onClick={() => onNavigate('dashboard')}
+          aria-label="Return to Today workspace"
+          aria-current={activeIsToday ? 'page' : undefined}
+        >
           <span className="feature-core-label">
             <strong>M</strong>
-            <span>{activeFeature.label}</span>
+            <span>001 · Today</span>
           </span>
         </button>
 
         <div className="feature-scene-caption" aria-hidden="true">
           <span className="scene-caption-line" />
-          <span>ACTIVE TERRAIN</span>
+          <span>{activeIsToday ? 'CENTER' : 'CURRENT WORKSPACE'}</span>
           <strong>{activeFeature.index} · {activeFeature.label}</strong>
         </div>
       </div>
