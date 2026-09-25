@@ -124,7 +124,7 @@ if (!/WORKSPACE COMPASS/.test(featureLandscape) || !/feature-compass-status/.tes
   failures.push('Workspace Compass must expose current-location context, not only visual navigation.')
 }
 for (const position of ['feature-node--n', 'feature-node--ne', 'feature-node--e', 'feature-node--se', 'feature-node--s', 'feature-node--sw', 'feature-node--w', 'feature-node--nw']) {
-  if (!featureLandscape.includes(position)) failures.push('Workspace Compass is missing positional node: ' + position)
+  if (!uiSystem.includes(position)) failures.push('Workspace Compass is missing positional CSS: ' + position)
 }
 if (!/feature-core/.test(featureLandscape) || !/Return to Today/.test(featureLandscape)) {
   failures.push('Workspace Compass center must remain a functional return-to-Today control.')
