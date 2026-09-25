@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { WorkspaceHeader } from '../../components/ui/WorkspaceHeader'
 import {
   disconnectInstagram,
   getInstagramInsights,
@@ -79,13 +80,12 @@ export function SocialAnalyticsView() {
 
   return (
     <section className="workspace page-enter">
-      <div className="page-intro">
-        <div>
-          <span className="section-kicker">SOCIAL ANALYTICS</span>
-          <h2>See the signal.</h2>
-          <p>Read-only Instagram Professional analytics, kept separate from your Tasks, Finance, and Schedule data.</p>
-        </div>
-      </div>
+      <WorkspaceHeader
+        index="005"
+        kicker="DIGITAL PULSE"
+        title="See the signal."
+        description="Read-only Instagram Professional analytics, kept separate from your Tasks, Finance, and Schedule data."
+      />
 
       {notice && <div className="ai-availability-note" role="status"><strong>{notice}</strong><span>You can disconnect the account at any time from this workspace.</span></div>}
       {error && <div className="form-error" role="alert">{error}</div>}
