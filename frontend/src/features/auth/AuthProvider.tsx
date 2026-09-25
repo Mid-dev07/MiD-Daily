@@ -20,6 +20,8 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
+const AUTH_REDIRECT_URL = (import.meta.env.VITE_APP_URL as string | undefined)?.trim() || window.location.origin
+
 export function AuthProvider({ children }: PropsWithChildren) {
   const [loading, setLoading] = useState(supabaseConfigured)
   const [session, setSession] = useState<Session | null>(null)
@@ -72,7 +74,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: window.location.origin },
+        options: { emailRedirectTo: AUTH_REDIRECT_URL },
       })
       return {
         error: error?.message ?? null,
@@ -83,14 +85,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
       if (!supabase) return 'Authentication is not configured.'
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin },
+        options: { redirectTo: AUTH_REDIRECT_URL },
       })
       return error?.message ?? null
     },
     resetPassword: async (email) => {
       if (!supabase) return 'Authentication is not configured.'
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin,
+        redirectTo: AUTH_REDIRECT_URL,
       })
       return error?.message ?? null
     },
