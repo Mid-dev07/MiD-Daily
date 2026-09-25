@@ -189,7 +189,7 @@ if (!/dashboard-command-deck/.test(dashboard) || !/dashboard-hero-aside/.test(da
 if (!/listHabits/.test(dashboard) || !/Today’s habits/.test(dashboard) || !/dashboard-habits/.test(experienceSystem)) {
   failures.push('Today must surface a live habit rhythm signal as part of Module Convergence.')
 }
-if (!/opacity:0;visibility:hidden;pointer-events:none/.test(uiSystem)) {
+if (!/opacity:0;visibility:hidden;pointer-events:none/.test(uiSystem + experienceSystem)) {
   failures.push('Sidebar hide state must remove the hidden rail from interaction and visual compositing.')
 }
 
@@ -228,7 +228,8 @@ if (!/SIDEBAR_HIDDEN_STORAGE_KEY/.test(appSourceForInteraction) || !/setSidebarH
 if (!/sidebarHidden={sidebarHidden}/.test(appSourceForInteraction) || !/onToggleSidebar={toggleSidebar}/.test(appSourceForInteraction)) {
   failures.push('Topbar must remain wired to the sidebar visibility controller.')
 }
-if (!/sidebar-hidden/.test(uiSystem) || !/\.app-frame\.sidebar-hidden/.test(uiSystem) || !/\.sidebar-hidden \.sidebar/.test(uiSystem)) {
+const shellStyles = uiSystem + experienceSystem
+if (!/sidebar-hidden/.test(shellStyles) || !/\.app-frame\.sidebar-hidden/.test(shellStyles) || !/\.sidebar-hidden \.sidebar/.test(shellStyles)) {
   failures.push('Sidebar visibility state must have bounded desktop/mobile presentation rules.')
 }
 if (!tsxFiles.some((file) => file.endsWith('app/App.tsx') && /useEnvironment/.test(readFileSync(file, 'utf8')) && /EnvironmentScene/.test(readFileSync(file, 'utf8')))) {
