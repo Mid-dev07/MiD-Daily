@@ -467,6 +467,8 @@ Rules:
 - workspace navigation may move the camera along a bounded semantic rail tied to module anchors.
 - spatial motion is event-driven: navigation and pointer response may move the scene, but the world must not rely on perpetual decorative animation loops.
 - a calm workspace should feel alive through light, weather, state, and composition rather than constant movement.
+- the active module may have a restrained ground-level spatial path connecting its world anchor to the shared workspace core.
+- the path is contextual orientation, not decoration: it should remain subtle, non-animated, and disappear naturally on small/touch layouts when the spatial world is reduced.
 
 The composition system is reusable across all nine modules and should be extended through semantic roles before adding one-off visual hacks.
 
