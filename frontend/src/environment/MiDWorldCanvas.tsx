@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { View } from '../types'
 import { worldModuleAnchor, worldModuleAnchors } from './moduleWorld'
+import { environmentLightDirection } from './mood'
 import type { EnvironmentState } from './types'
 
 interface MiDWorldCanvasProps {
@@ -11,7 +12,7 @@ interface MiDWorldCanvasProps {
 
 type Vec3 = [number, number, number]
 
-const LIGHT_DIRECTION: Vec3 = [
+const DEFAULT_LIGHT_DIRECTION: Vec3 = [
   Math.cos((145 * Math.PI) / 180),
   0.82,
   Math.sin((145 * Math.PI) / 180),
@@ -436,8 +437,14 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
           1.4 + pitch * 1.1,
           activeAnchor.position[2] * 0.035,
         ]
-        const tint = dayTint(environmentRef.current)
-        const intensity = Math.max(0.35, Math.min(1, environmentRef.current.visual.lightIntensity + 0.24))
+        const env = environmentRef.current
+        const tint = dayTint(env)
+        const intensity = Math.max(0.28, Math.min(1, env.visual.lightIntensity + 0.24))
+        const lightDirection = env.sun.altitude > -6
+          ? environmentLightDirection(env.sun.azimuth, env.sun.altitude)
+          : DEFAULT_LIGHT_DIRECTION
+        const naturalDepth = env.visual.worldContrast
+        const wetness = env.visual.wetness
 
         lookAt(view, camera, target, [0, 1, 0])
 
@@ -446,7 +453,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         gl.uniformMatrix4fv(uniforms.projection, false, projection)
         gl.uniformMatrix4fv(uniforms.view, false, view)
         gl.uniform3f(uniforms.camera, camera[0], camera[1], camera[2])
-        gl.uniform3f(uniforms.light, LIGHT_DIRECTION[0], LIGHT_DIRECTION[1], LIGHT_DIRECTION[2])
+        gl.uniform3f(uniforms.light, DEFAULT_LIGHT_DIRECTION[0], DEFAULT_LIGHT_DIRECTION[1], DEFAULT_LIGHT_DIRECTION[2])
         gl.uniform1f(uniforms.intensity, intensity)
         gl.uniform1f(uniforms.time, reduceMotion.matches ? 0 : t)
 
@@ -460,10 +467,28 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
           gl.drawArrays(gl.TRIANGLES, 0, mesh.vertexCount)
         }
 
-        const mineral: Vec3 = [0.11 + tint[0] * 0.25, 0.17 + tint[1] * 0.18, 0.2 + tint[2] * 0.16]
-        const stone: Vec3 = [0.17 + tint[0] * 0.2, 0.23 + tint[1] * 0.16, 0.25 + tint[2] * 0.14]
-        const moss: Vec3 = [0.17 + tint[0] * 0.12, 0.27 + tint[1] * 0.16, 0.20 + tint[2] * 0.08]
-        const fern: Vec3 = [0.10 + tint[0] * 0.08, 0.20 + tint[1] * 0.12, 0.14 + tint[2] * 0.06]
+        const naturalSaturation = env.visual.natureSaturation
+        const damp = wetness * 0.14
+        const mineral: Vec3 = [
+          (0.11 + tint[0] * 0.25) * naturalDepth,
+          (0.17 + tint[1] * 0.18) * naturalDepth,
+          (0.2 + tint[2] * 0.16) * naturalDepth,
+        ]
+        const stone: Vec3 = [
+          (0.17 + tint[0] * 0.2) * (1 - damp * 0.5),
+          (0.23 + tint[1] * 0.16) * (1 - damp * 0.28),
+          (0.25 + tint[2] * 0.14) * (1 - damp * 0.18),
+        ]
+        const moss: Vec3 = [
+          Math.min(1, (0.17 + tint[0] * 0.12) * naturalSaturation),
+          Math.min(1, (0.27 + tint[1] * 0.16) * naturalSaturation),
+          Math.min(1, (0.20 + tint[2] * 0.08) * naturalSaturation),
+        ]
+        const fern: Vec3 = [
+          Math.min(1, (0.10 + tint[0] * 0.08) * naturalSaturation),
+          Math.min(1, (0.20 + tint[1] * 0.12) * naturalSaturation),
+          Math.min(1, (0.14 + tint[2] * 0.06) * naturalSaturation),
+        ]
         const cyan: Vec3 = [0.11, 0.42, 0.52]
         const warm: Vec3 = [0.42 + tint[0] * 0.05, 0.3 + tint[1] * 0.03, 0.18]
 
