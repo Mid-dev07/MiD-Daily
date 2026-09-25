@@ -1055,7 +1055,7 @@ textarea:focus,
   filter: saturate(.94) brightness(.96);
 }
 
-.app-frame[data-workload="calm"] .environment-scene {
+.app-frame[data-workload="low"] .environment-scene {
   filter: saturate(1.02) brightness(1.01);
 }
 
