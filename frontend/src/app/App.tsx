@@ -302,6 +302,10 @@ export function App() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
+  useEffect(() => {
+    window.dispatchEvent(new Event('mid:world-invalidate'))
+  }, [activeView])
+
   const navigate = (view: View) => {
     navigateToView(view)
     setActiveView(view)
