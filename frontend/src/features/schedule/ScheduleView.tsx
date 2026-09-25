@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { WorkspaceHeader } from '../../components/ui/WorkspaceHeader'
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { formatDateLong, scheduleOccursOnDate, shiftDate } from './schedule.date'
 import { normalizeScheduleList } from './schedule.migration'
 import { ScheduleDetail } from './components/ScheduleDetail'
@@ -37,6 +38,9 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
   const [editingItem, setEditingItem] = useState<ScheduleItem>()
   const [detailItem, setDetailItem] = useState<ScheduleItem>()
   const [notificationSupport, setNotificationSupport] = useState(getNotificationSupport)
+  const [confirmRequest, setConfirmRequest] = useState<{ kind: 'delete'; item: ScheduleItem } | { kind: 'reset' }>()
+  const [confirmBusy, setConfirmBusy] = useState(false)
+  const [confirmError, setConfirmError] = useState('')
 
   const today = getAppToday(APP_TIMEZONE)
   const isToday = date === today
@@ -88,16 +92,40 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
     return null
   }
 
+  const requestDeleteSchedule = (item: ScheduleItem) => {
+    setConfirmError('')
+    setConfirmRequest({ kind: 'delete', item })
+  }
+
   const deleteSchedule = async (item: ScheduleItem) => {
-    if (!window.confirm('Delete “' + item.title + '”?')) return
     if (item.googleCalendar.eventId) await deleteGoogleCalendarEvent(item, item.googleCalendar.eventId)
     await onScheduleChange(normalizedSchedule.filter((entry) => entry.id !== item.id))
   }
 
+  const requestResetToSeed = () => {
+    if (!demoMode) return
+    setConfirmError('')
+    setConfirmRequest({ kind: 'reset' })
+  }
+
   const resetToSeed = async () => {
     if (!demoMode) return
-    if (!window.confirm('Reset schedule to the starter activities?')) return
     await onScheduleChange(initialScheduleItems)
+  }
+
+  const confirmScheduleAction = async () => {
+    if (!confirmRequest) return
+    setConfirmBusy(true)
+    setConfirmError('')
+    try {
+      if (confirmRequest.kind === 'delete') await deleteSchedule(confirmRequest.item)
+      else await resetToSeed()
+      setConfirmRequest(undefined)
+    } catch (reason) {
+      setConfirmError(reason instanceof Error ? reason.message : 'The schedule action could not be completed.')
+    } finally {
+      setConfirmBusy(false)
+    }
   }
 
   const enableNotifications = async () => {
@@ -182,7 +210,7 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
         description="Plan classes, work, study, and personal time in one place."
         action={(
           <div className="schedule-header-actions">
-            {demoMode && <button className="secondary-button" type="button" onClick={() => void resetToSeed()}>Reset demo</button>}
+            {demoMode && <button className="secondary-button" type="button" onClick={requestResetToSeed}>Reset demo</button>}
             <button className="primary-button" type="button" onClick={openCreate}>Add activity</button>
           </div>
         )}
@@ -215,7 +243,7 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
               onView={() => setDetailItem(source)}
               onEdit={() => openEdit(source)}
               onSync={() => syncSchedule(source)}
-              onDelete={() => deleteSchedule(source)}
+              onDelete={() => requestDeleteSchedule(source)}
             />
           ))}</div>}
       </div>
@@ -271,6 +299,23 @@ export function ScheduleView({ schedule, onScheduleChange, demoMode = false }: S
 
       <ScheduleForm open={formOpen} initialItem={editingItem} defaultDate={date} onClose={() => setFormOpen(false)} onSubmit={saveSchedule} />
       <ScheduleDetail item={detailItem} onClose={() => setDetailItem(undefined)} onEdit={openEdit} onSync={syncSchedule} />
+      <ConfirmDialog
+        open={Boolean(confirmRequest)}
+        eyebrow="SCHEDULE"
+        title={confirmRequest?.kind === 'reset' ? 'Reset the demo schedule?' : 'Delete this activity?'}
+        description={
+          (confirmRequest?.kind === 'reset'
+            ? 'Starter activities will replace the current demo schedule. This is intended only for demo data.'
+            : confirmRequest
+              ? '“' + confirmRequest.item.title + '” will be removed. Its Google Calendar event will be removed too when linked.'
+              : '') + (confirmError ? ' ' + confirmError : '')
+        }
+        confirmLabel={confirmRequest?.kind === 'reset' ? 'Reset schedule' : 'Delete activity'}
+        tone="danger"
+        busy={confirmBusy}
+        onCancel={() => setConfirmRequest(undefined)}
+        onConfirm={confirmScheduleAction}
+      />
     </section>
   )
 }
