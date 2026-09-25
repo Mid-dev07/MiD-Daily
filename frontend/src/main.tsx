@@ -7,6 +7,7 @@ import { App } from './app/App'
 import './styles/globals.css'
 import './styles/ui-system.css'
 import './styles/experience.css'
+import './styles/responsive.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
