@@ -326,6 +326,11 @@ async function handleProviderToken(req: IncomingMessage, res: ServerResponse) {
     throw httpError(401, 'Google provider access token is invalid or expired.')
   }
 
+  const audience = typeof tokenInfo.aud === 'string' ? tokenInfo.aud : ''
+  if (audience && audience !== GOOGLE_CLIENT_ID) {
+    throw httpError(403, 'Google provider client does not match MiD-Daily Calendar credentials.')
+  }
+
   const scope = typeof tokenInfo.scope === 'string' ? tokenInfo.scope : ''
   const scopes = new Set(scope.split(/\\s+/).filter(Boolean))
   if (!scopes.has(CALENDAR_SCOPE)) {
