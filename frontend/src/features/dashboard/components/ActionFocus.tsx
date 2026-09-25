@@ -180,7 +180,7 @@ export function ActionFocus({ onNavigate, tasks, schedule, finance, now, timezon
   const accentStyle = { '--action-accent': 'var(--mi-' + focus.tone + ')' } as CSSProperties
 
   return (
-    <section className="content-card action-focus" style={accentStyle} aria-labelledby="action-focus-title">
+    <section className="content-card action-focus" data-spatial-role="focus" style={accentStyle} aria-labelledby="action-focus-title">
       <div className="action-focus-main">
         <div className="action-focus-code" aria-hidden="true">
           <span>{focus.index}</span>

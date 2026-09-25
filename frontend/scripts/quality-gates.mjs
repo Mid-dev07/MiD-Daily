@@ -368,6 +368,9 @@ if (!existsSync(spatialStyles)) {
     'data-spatial-role="instrument"',
     'data-spatial-role="rhythm"',
     'data-spatial-role="identity"',
+    'data-spatial-role="archive"',
+    'data-spatial-role="focus"',
+    'translate3d(var(--spatial-x), 0, var(--spatial-z))',
     'backdrop-filter: blur(10px)',
     'inset 0 1px 6px',
 
@@ -376,15 +379,15 @@ if (!existsSync(spatialStyles)) {
   }
 }
 const spatialRoleContracts = {
-  'features/dashboard/DashboardView.tsx': ['primary', 'rhythm', 'secondary-group', 'supporting', 'focus'],
+  'features/dashboard/DashboardView.tsx': ['primary', 'rhythm', 'secondary-group', 'supporting', 'focus', 'archive', 'instrument'],
   'features/schedule/ScheduleView.tsx': ['orientation', 'primary', 'supporting', 'utility'],
   'features/tasks/TasksView.tsx': ['controls', 'primary', 'instrument'],
   'features/finance/FinanceView.tsx': ['metrics', 'primary', 'supporting', 'archive'],
   'features/social/SocialAnalyticsView.tsx': ['primary'],
-  'features/ai/AssistantView.tsx': ['primary', 'instrument'],
+  'features/ai/AssistantView.tsx': ['primary', 'instrument', 'focus', 'supporting'],
   'features/profile/ProfileView.tsx': ['identity', 'primary'],
-  'features/insights/InsightsView.tsx': ['metrics', 'primary', 'supporting'],
-  'features/habits/HabitsView.tsx': ['primary', 'focus', 'instrument'],
+  'features/insights/InsightsView.tsx': ['metrics', 'primary', 'supporting', 'archive'],
+  'features/habits/HabitsView.tsx': ['primary', 'focus', 'instrument', 'archive'],
   'components/ui/WorkspaceHeader.tsx': ['orientation'],
 }
 for (const [relative, roles] of Object.entries(spatialRoleContracts)) {

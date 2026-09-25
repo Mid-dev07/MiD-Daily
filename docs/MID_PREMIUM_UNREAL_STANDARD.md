@@ -473,6 +473,8 @@ Rules:
 - the path is contextual orientation, not decoration: it should remain subtle, non-animated, and disappear naturally on small/touch layouts when the spatial world is reduced.
 
 The composition system is reusable across all nine modules and should be extended through semantic roles before adding one-off visual hacks.
+- semantic roles also own micro-lateral stage offsets so the workspace reads as a composed field rather than a flat stack of equal-width cards;
+- lateral offsets stay small, deterministic, role-owned, and disappear on touch/mobile and reduced-motion modes.
 
 ## 14.2 — Spatial Semantic Roles
 

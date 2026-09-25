@@ -156,7 +156,7 @@ export function HabitsView() {
       </section>
 
       {habits.length === 0 ? (
-        <section className="content-card empty-state habit-empty">
+        <section className="content-card empty-state habit-empty" data-spatial-role="archive">
           <strong>No habits yet.</strong>
           <span>Create one above and your weekly rhythm will appear here.</span>
         </section>

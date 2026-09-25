@@ -47,7 +47,7 @@ export function QuickCapture() {
   }
 
   return (
-    <section className="content-card quick-capture-card">
+    <section className="content-card quick-capture-card" data-spatial-role="instrument">
       <div className="card-heading">
         <div>
           <span className="section-kicker">QUICK CAPTURE</span>
