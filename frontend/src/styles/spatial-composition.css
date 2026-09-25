@@ -95,7 +95,9 @@
   );
 }
 
-/* Semantic depth map. */
+/* Semantic depth map.
+   Spatial elevation is owned by the semantic role, never by a module-specific selector.
+*/
 .view-key[data-module] [data-spatial-role] {
   transform-style: preserve-3d;
   will-change: auto;
@@ -159,7 +161,9 @@
   border-color: color-mix(in srgb, var(--spatial-accent) 12%, transparent);
 }
 
-/* Module-specific composition accents. */
+/* Module-specific composition accents.
+   These may tune material/emphasis only; depth remains role-owned.
+*/
 .view-key[data-module="dashboard"] [data-spatial-role="primary"] {
   box-shadow:
     0 32px 88px rgba(0,0,0,.34),
@@ -197,26 +201,17 @@
   min-height: 260px;
 }
 
-.view-key[data-module="tasks"] [data-spatial-role="instrument"] {
-  transform: translateZ(2px);
-}
 
 .view-key[data-module="finance"] [data-spatial-role="metrics"] {
   --spatial-accent: #d9ad6d;
 }
 
-.view-key[data-module="finance"] [data-spatial-role="supporting"] {
-  transform: translateZ(6px);
-}
 
 .view-key[data-module="social"] [data-spatial-role="primary"],
 .view-key[data-module="assistant"] [data-spatial-role="primary"] {
   border-color: color-mix(in srgb, var(--spatial-accent) 16%, var(--mi-line));
 }
 
-.view-key[data-module="assistant"] [data-spatial-role="instrument"] {
-  transform: translateZ(3px);
-}
 
 .view-key[data-module="profile"] [data-spatial-role="identity"] {
   min-height: 100%;
@@ -226,21 +221,7 @@
   min-height: 100%;
 }
 
-.view-key[data-module="insights"] [data-spatial-role="metrics"] {
-  transform: translateZ(13px);
-}
 
-.view-key[data-module="insights"] [data-spatial-role="primary"] {
-  transform: translateZ(8px);
-}
-
-.view-key[data-module="habits"] [data-spatial-role="focus"] {
-  transform: translateZ(8px);
-}
-
-.view-key[data-module="habits"] [data-spatial-role="instrument"] {
-  transform: translateZ(1px);
-}
 
 /* Hover changes material response, never information position. */
 @media (hover: hover) and (pointer: fine) {
