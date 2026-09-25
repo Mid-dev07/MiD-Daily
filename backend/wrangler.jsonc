@@ -10,13 +10,19 @@
   "ai": {
     "binding": "AI"
   },
+  "routes": [
+    {
+      "pattern": "api.mid-manager.xyz",
+      "custom_domain": true
+    }
+  ],
   "vars": {
     "SUPABASE_URL": "https://ywpvwxhfzgxwmxrwcfsf.supabase.co",
-    "FRONTEND_URL": "https://mid-daily.e41262272.workers.dev",
-    "GOOGLE_REDIRECT_URI": "https://mid-daily-api.e41262272.workers.dev/auth/google/callback",
+    "FRONTEND_URL": "https://mid-manager.xyz",
+    "GOOGLE_REDIRECT_URI": "https://api.mid-manager.xyz/auth/google/callback",
     "COOKIE_SECURE": "true",
     "APP_TIMEZONE": "Asia/Jakarta",
-    "INSTAGRAM_REDIRECT_URI": "https://mid-daily-api.e41262272.workers.dev/auth/instagram/callback"
+    "INSTAGRAM_REDIRECT_URI": "https://api.mid-manager.xyz/auth/instagram/callback"
   },
   "triggers": {
     "crons": ["* * * * *"]

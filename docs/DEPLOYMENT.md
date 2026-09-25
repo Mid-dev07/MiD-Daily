@@ -5,24 +5,38 @@ Browser → Cloudflare Workers (frontend) → Cloudflare Worker API (backend) �
 
 Optional provider connections extend the backend to Google Calendar, Telegram, WhatsApp, Instagram analytics, and OpenAI.
 
+## Custom domain
+
+Production frontend: `https://mid-manager.xyz`
+
+Production API: `https://api.mid-manager.xyz`
+
+Cloudflare Worker Custom Domains provision DNS records and certificates after the zone is active. Add the apex domain to the frontend Worker and `api.mid-manager.xyz` to the backend Worker. citeturn400080search0turn400080search9
+
 ## Cloudflare
 
 Frontend:
-`https://mid-daily.e41262272.workers.dev`
+`https://mid-manager.xyz`
 
 Backend:
-`https://mid-daily-api.e41262272.workers.dev`
+`https://api.mid-manager.xyz`
 
 The frontend is a Vite SPA deployed from `frontend/` using Cloudflare Workers Assets. The backend is a TypeScript Worker deployed from `backend/`.
 
 Frontend build variables:
 ```env
-VITE_API_BASE_URL=https://mid-daily-api.e41262272.workers.dev
+VITE_API_BASE_URL=https://api.mid-manager.xyz
 VITE_SUPABASE_URL=https://<project-ref>.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=<publishable-key>
 ```
 
 Backend runtime values are configured in Wrangler plus Worker secrets. Keep all provider secrets server-side.
+
+## Domain cutover
+
+At Rumahweb, replace the domain nameservers with the two nameservers assigned by Cloudflare. Rumahweb notes that nameserver propagation can take roughly 1–24 hours. citeturn400080search7
+
+After the zone is Active, deploy the custom-domain Worker configuration. Do not create manual CNAME records for these Worker hostnames; Cloudflare provisions the records for Custom Domains. citeturn400080search0
 
 ## Supabase
 
@@ -76,7 +90,7 @@ OAuth configuration:
 ```env
 INSTAGRAM_CLIENT_ID=<server-side app id>
 INSTAGRAM_CLIENT_SECRET=<server-side app secret>
-INSTAGRAM_REDIRECT_URI=https://mid-daily-api.e41262272.workers.dev/auth/instagram/callback
+INSTAGRAM_REDIRECT_URI=https://api.mid-manager.xyz/auth/instagram/callback
 INSTAGRAM_GRAPH_VERSION=<current supported Graph version>
 ```
 
