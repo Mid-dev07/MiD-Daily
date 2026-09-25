@@ -471,7 +471,7 @@ for (const contract of [
 if (!/drawProjectedGroundShadow\([\s\S]*lightDirection[\s\S]*shadow/.test(environmentResponseSource)) {
   failures.push('Projected ground shadows must derive direction from the active solar light vector.')
 }
-if (!/draw\(shadowMesh[\s\S]*kind\s*,?\s*6[\s\S]*opacity/.test(environmentResponseSource)) {
+if (!/draw\(\s*shadowMesh[\s\S]*,\s*6,[\s\S]*opacity/.test(environmentResponseSource)) {
   failures.push('Projected ground shadows must use the dedicated low-opacity contact material path.')
 }
 if (!/groundWet = smoothstep/.test(environmentResponseSource) || !/weatherSpecular/.test(environmentResponseSource)) {
