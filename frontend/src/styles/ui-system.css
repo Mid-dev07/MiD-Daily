@@ -1323,9 +1323,10 @@ textarea:focus {
 .feature-core-needle::before {
   content: "";
   position: absolute;
-  left: calc(50% - 1px);
+  left: 50%;
   top: 4px;
-  width: 2px;
+  width: 4px;
+  transform: translateX(-50%);
   height: 40%;
   border-radius: 2px;
   background: linear-gradient(180deg, #f4fbff, rgba(79,209,255,.22));
