@@ -60,7 +60,7 @@ export function TasksView({ tasks, onSaveTask, onToggleTask, onDeleteTask }: Tas
         action={<button className="primary-button" type="button" onClick={openCreate}>+ Add task</button>}
       />
 
-      <div className="task-toolbar workspace-toolbar-surface content-card">
+      <div className="task-toolbar workspace-toolbar-surface content-card" data-spatial-role="controls">
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search title or category" aria-label="Search tasks" />
         <div className="filter-row">
           {statusOptions.map((option) => <button key={option.value} className={status === option.value ? 'filter-button is-active' : 'filter-button'} type="button" onClick={() => setStatus(option.value)}>{option.label}</button>)}
@@ -70,7 +70,7 @@ export function TasksView({ tasks, onSaveTask, onToggleTask, onDeleteTask }: Tas
         </select>
       </div>
 
-      <div className="content-card module-list">
+      <div className="content-card module-list" data-spatial-role="primary">
         {filtered.length === 0 ? (
           <div className="empty-state"><strong>No matching tasks</strong><span>Adjust the filters or create a new task.</span></div>
         ) : filtered.map((task) => {
@@ -78,7 +78,7 @@ export function TasksView({ tasks, onSaveTask, onToggleTask, onDeleteTask }: Tas
           const showProgress = typeof task.progress === 'number' || task.status === 'done'
           const statusLabel = task.status === 'in-progress' ? 'In progress' : task.status === 'done' ? 'Complete' : 'To do'
           return (
-            <article className="task-item-card" key={task.id}>
+            <article className="task-item-card" data-spatial-role="instrument" key={task.id}>
               <button className="task-row" type="button" onClick={() => onToggleTask(task.id)}>
                 <span className={task.status === 'done' ? 'task-check is-done' : 'task-check'}>{task.status === 'done' ? '✓' : ''}</span>
                 <span className="task-copy"><strong className={task.status === 'done' ? 'is-complete' : ''}>{task.title}</strong><small>{task.category}{task.dueDate ? ' · due ' + task.dueDate : ''}</small></span>
