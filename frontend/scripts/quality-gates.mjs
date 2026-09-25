@@ -420,6 +420,9 @@ if (/uTime|const t = timestamp \* 0\.001|Math\.sin\(t/.test(worldRenderer)) {
 if (!/cameraState|desiredCamera|cameraBlend/.test(worldRenderer)) {
   failures.push('Spatial world must use the event-driven semantic camera rail.')
 }
+if (!/function drawSpatialPath/.test(worldRenderer) || !/drawSpatialPath\(\s*draw,\s*box/.test(worldRenderer)) {
+  failures.push('Spatial world must connect the active module anchor to the workspace via the shared spatial path.')
+}
 if (!/DEFAULT_LIGHT_DIRECTION/.test(worldRenderer)) failures.push('Spatial world must retain the canonical 145deg fallback light.')
 
 const responsiveMainSource = readFileSync(join(srcDir, 'main.tsx'), 'utf8')
