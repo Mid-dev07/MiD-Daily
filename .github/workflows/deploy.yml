@@ -34,6 +34,7 @@ jobs:
       - name: Build frontend
         env:
           VITE_API_BASE_URL: https://api.mid-manager.xyz
+          VITE_APP_URL: https://mid-manager.xyz
           VITE_SUPABASE_URL: https://ywpvwxhfzgxwmxrwcfsf.supabase.co
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
           VITE_APP_TIMEZONE: Asia/Jakarta
