@@ -733,3 +733,22 @@ Required:
 
 Quality target:
 clear conditions should read crisp and dry; light rain should introduce subdued surface pooling and cooler distance; heavier rain should produce deeper dampness, softer shadows, and stronger but still restrained atmospheric compression.
+
+
+## 26 — Interaction & Environmental Motion Standard v1
+
+Interaction polish must make the interface respond to the user without turning the environment into a continuously moving screensaver.
+
+Interaction:
+- interactive workspace surfaces may share one delegated pointer stream for local light catch, bounded micro-tilt, and elevation response;
+- newly connected interactive surfaces must reuse the existing `data-ux-lit`, `--ux-x`, `--ux-y`, and `--ux-elevation` contract rather than adding per-element listeners;
+- primary actions and contextual navigation may receive local specular response, but information layout must not shift under pointer movement;
+- touch and reduced-motion modes remove mechanical tilt while preserving focus, state, and hierarchy.
+
+Environmental motion:
+- clouds, fog, and light shafts must not use perpetual decorative CSS animation loops;
+- environmental changes are driven by astronomy/weather/workload state and bounded CSS/WebGL transitions;
+- reduced-motion must be a reduction of motion, not a separate visual theme;
+- any future ambient animation requires explicit evidence that it improves state communication and remains below the attention budget.
+
+Quality target: MiD should feel responsive when the user interacts, but visually calm when the user does nothing.
