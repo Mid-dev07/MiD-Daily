@@ -414,7 +414,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
       gl.enable(gl.BLEND)
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
       gl.useProgram(program)
-      gl.uniform3f(uniforms.light, LIGHT_DIRECTION[0], LIGHT_DIRECTION[1], LIGHT_DIRECTION[2])
+      gl.uniform3f(uniforms.light, DEFAULT_LIGHT_DIRECTION[0], DEFAULT_LIGHT_DIRECTION[1], DEFAULT_LIGHT_DIRECTION[2])
 
       const render = (timestamp: number) => {
         if (!running) return
