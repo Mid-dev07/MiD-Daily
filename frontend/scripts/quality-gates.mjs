@@ -374,7 +374,7 @@ for (const contract of [
   'float surfaceHash(vec2 position)',
   'float roughness = 0.9;',
   'float wetResponse = 0.5;',
-  'float wet = clamp(uWetness * wetResponse',
+  'float wet = clamp(max(uWetness, precipitation * 0.34)',
   'float specularPower',
   'float wetDarken',
   'const contactShadow',
@@ -500,6 +500,36 @@ if (!/spatialPathQuery\.matches[\s\S]{0,2200}drawProjectedGroundShadow/.test(lan
 }
 if (!/coolAtmosphere[\s\S]*warmAtmosphere[\s\S]*uSkyCoolness/.test(landmarkGroundingSource)) {
   failures.push('Atmospheric color must respond to both sky coolness and light warmth.')
+}
+
+
+const weatherIntelligenceSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
+for (const contract of [
+  'uniform float uPrecipitation;',
+  'float precipitation = clamp(uPrecipitation',
+  'rainfallPooling',
+  'puddleSpecular',
+  'nearWeatherWash',
+  'visualState.precipitation',
+  'puddleOpacity',
+  'puddleColor',
+]) {
+  if (!weatherIntelligenceSource.includes(contract)) failures.push('Weather intelligence v2 contract missing: ' + contract)
+}
+if (!/spatialPathQuery\.matches[\s\S]{0,2600}puddleOpacity/.test(weatherIntelligenceSource)) {
+  failures.push('Weather puddling must remain bounded to the desktop/fine-pointer spatial world.')
+}
+if (!/environmentBlend[\s\S]*precipitation/.test(weatherIntelligenceSource)) {
+  failures.push('Precipitation changes must use the existing bounded event-driven environment response.')
+}
+if (!/rainfallPooling[\s\S]*horizontalWetness/.test(weatherIntelligenceSource)) {
+  failures.push('Rain response must remain surface-orientation aware rather than applying uniform gloss.')
+}
+if (!/nearWeatherWash[\s\S]*atmosphericFade/.test(weatherIntelligenceSource)) {
+  failures.push('Weather air density must contribute to spatial atmospheric wash.')
+}
+if (/uTime|timestamp *0\.001|Math\.sin\(t/.test(weatherIntelligenceSource)) {
+  failures.push('Weather intelligence v2 must remain event/state driven with no perpetual decorative animation.')
 }
 
 const spatialStyles = join(srcDir, 'styles/spatial-composition.css')

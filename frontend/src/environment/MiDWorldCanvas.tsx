@@ -55,6 +55,7 @@ uniform float uWetness;
 uniform float uLightWarmth;
 uniform float uSkyCoolness;
 uniform float uAirDensity;
+uniform float uPrecipitation;
 uniform float uOpacity;
 
 varying vec3 vWorldPosition;
@@ -99,11 +100,19 @@ void main() {
     wetResponse = 0.56;
   }
 
-  float wet = clamp(uWetness * wetResponse, 0.0, 1.0);
+  float precipitation = clamp(uPrecipitation, 0.0, 1.0);
+  float wet = clamp(max(uWetness, precipitation * 0.34) * wetResponse, 0.0, 1.0);
+  float horizontalWetness = smoothstep(0.84, 1.0, max(normal.y, 0.0));
   float groundWet = smoothstep(0.0, 0.7, max(vWorldPosition.y, 0.0));
-  float materialWetness = wet * mix(1.0, 0.72, groundWet);
+  float rainfallPooling = precipitation * horizontalWetness * (uKind > 1.5 && uKind < 5.5 ? 0.18 : 0.04);
+  float materialWetness = clamp(wet * mix(1.0, 0.72, groundWet) + rainfallPooling, 0.0, 1.0);
   float specularPower = mix(10.0, 72.0, 1.0 - roughness);
-  float weatherSpecular = uKind > 3.5 && uKind < 4.5 ? wet * 0.035 : materialWetness * 0.24;
+  float puddleSpecular = uKind > 4.5 && uKind < 5.5
+    ? precipitation * horizontalWetness * 0.14
+    : 0.0;
+  float weatherSpecular = uKind > 3.5 && uKind < 4.5
+    ? wet * 0.035
+    : materialWetness * 0.24 + puddleSpecular;
   float specularStrength = mix(0.025, 0.16, 1.0 - roughness) + weatherSpecular;
   float specular = pow(max(dot(normal, halfVector), 0.0), specularPower) * specularStrength;
   float rim = pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0) * 0.05;
@@ -167,7 +176,11 @@ void main() {
 
   float viewDistance = length(uCameraPosition - vWorldPosition);
   float atmosphericDensity = clamp(uAirDensity * 0.45, 0.0, 0.64);
-  float atmosphericFade = smoothstep(10.0, 30.0, viewDistance) * atmosphericDensity;
+  float nearWeatherWash = smoothstep(18.0, 5.0, viewDistance) * atmosphericDensity * 0.08;
+  float atmosphericFade = min(
+    0.8,
+    smoothstep(10.0, 30.0, viewDistance) * atmosphericDensity + nearWeatherWash,
+  );
   vec3 coolAtmosphere = mix(
     vec3(0.045, 0.07, 0.09),
     vec3(0.075, 0.11, 0.13),
@@ -726,6 +739,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         lightWarmth: gl.getUniformLocation(program, 'uLightWarmth'),
         skyCoolness: gl.getUniformLocation(program, 'uSkyCoolness'),
         airDensity: gl.getUniformLocation(program, 'uAirDensity'),
+        precipitation: gl.getUniformLocation(program, 'uPrecipitation'),
         opacity: gl.getUniformLocation(program, 'uOpacity'),
       }
 
@@ -763,6 +777,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         lightWarmth: 0.42,
         skyCoolness: 0.2,
         airDensity: 0.08,
+        precipitation: 0,
       }
 
       const pointerListener = (event: Event) => {
@@ -847,6 +862,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
           lightWarmth: Math.max(0, Math.min(1, env.visual.lightWarmth)),
           skyCoolness: Math.max(0, Math.min(1, env.visual.skyCoolness)),
           airDensity: Math.max(0, Math.min(1, env.visual.airDensity)),
+          precipitation: Math.max(0, Math.min(1, env.visual.precipitationOpacity)),
         }
         const environmentBlend = reduceMotion.matches ? 1 : Math.min(1, delta * 6.5)
         visualState = {
@@ -855,6 +871,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
           lightWarmth: visualState.lightWarmth + (targetVisual.lightWarmth - visualState.lightWarmth) * environmentBlend,
           skyCoolness: visualState.skyCoolness + (targetVisual.skyCoolness - visualState.skyCoolness) * environmentBlend,
           airDensity: visualState.airDensity + (targetVisual.airDensity - visualState.airDensity) * environmentBlend,
+          precipitation: visualState.precipitation + (targetVisual.precipitation - visualState.precipitation) * environmentBlend,
         }
         const intensity = visualState.intensity
         const lightDirection = env.sun.altitude > -6
@@ -865,6 +882,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         const lightWarmth = visualState.lightWarmth
         const skyCoolness = visualState.skyCoolness
         const airDensity = visualState.airDensity
+        const precipitation = visualState.precipitation
 
         lookAt(view, camera, target, [0, 1, 0])
 
@@ -879,6 +897,7 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         gl.uniform1f(uniforms.lightWarmth, lightWarmth)
         gl.uniform1f(uniforms.skyCoolness, skyCoolness)
         gl.uniform1f(uniforms.airDensity, airDensity)
+        gl.uniform1f(uniforms.precipitation, precipitation)
 
         const draw = (mesh: Mesh, position: Vec3, scale: Vec3, color: Vec3, kind: number, emissive = 0, rotation = 0, opacity = 1) => {
           gl.bindVertexArray(mesh.vao)
@@ -917,6 +936,48 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         const warm: Vec3 = [0.42 + tint[0] * 0.05, 0.3 + tint[1] * 0.03, 0.18]
 
         draw(terrain, [0, -0.2, 0], [1, 1, 1], mineral, 2)
+
+        if (spatialPathQuery.matches) {
+          const puddleOpacity = Math.min(
+            0.2,
+            0.03 + precipitation * 0.24 + wetness * 0.08,
+          )
+          const puddleColor: Vec3 = [
+            mineral[0] * 0.48,
+            mineral[1] * 0.54,
+            mineral[2] * 0.58,
+          ]
+          draw(
+            box,
+            [-2.8, 0.012, 2.5],
+            [1.45, 0.006, 0.44],
+            puddleColor,
+            5,
+            0,
+            -0.16,
+            puddleOpacity,
+          )
+          draw(
+            box,
+            [3.25, 0.014, 1.8],
+            [1.05, 0.006, 0.34],
+            puddleColor,
+            5,
+            0,
+            0.22,
+            puddleOpacity * 0.82,
+          )
+          draw(
+            box,
+            [-4.9, 0.012, -4.0],
+            [0.82, 0.006, 0.28],
+            puddleColor,
+            5,
+            0,
+            0.12,
+            puddleOpacity * 0.72,
+          )
+        }
 
         const shadowSoftness = Math.min(
           1,

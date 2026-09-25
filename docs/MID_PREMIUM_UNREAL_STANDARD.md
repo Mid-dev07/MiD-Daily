@@ -716,3 +716,20 @@ Required:
 - atmospheric distance fade must use both sky coolness and light warmth so distant forms inherit the current environmental condition rather than fading into a fixed color.
 
 Quality target: a workspace landmark should feel planted into the terrain and atmosphere, not like an isolated low-poly object placed on top of the scene.
+
+
+## 25 — Weather Intelligence Standard v2
+
+Weather must alter the physical reading of the spatial world, not only its background atmosphere.
+
+Required:
+- precipitation reaches the WebGL material model as a bounded environmental input;
+- horizontal surfaces may accumulate a restrained rainfall-pooling response, while foliage remains mostly diffuse;
+- puddle-like wet patches may appear only as subtle, static environmental cues and must remain subordinate to the workspace;
+- wet response must be driven by surface orientation and material family so rain does not create uniform gloss;
+- atmospheric density contributes both distance fade and a small near-weather wash for dense fog/rain conditions;
+- precipitation transitions use the existing bounded environment easing and contain no continuous decorative animation;
+- the same 2.2M-pixel, 45 FPS desktop, 30 FPS mobile, reduced-motion, and touch-reduction constraints remain in force.
+
+Quality target:
+clear conditions should read crisp and dry; light rain should introduce subdued surface pooling and cooler distance; heavier rain should produce deeper dampness, softer shadows, and stronger but still restrained atmospheric compression.
