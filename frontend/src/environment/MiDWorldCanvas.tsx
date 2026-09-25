@@ -301,6 +301,7 @@ export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
       let running = true
       let width = 1
       let height = 1
+      let lastRender = 0
 
       const pointerListener = (event: Event) => {
         const detail = event instanceof CustomEvent
@@ -330,6 +331,13 @@ export function MiDWorldCanvas({ environment, onReady }: MiDWorldCanvasProps) {
       
       const render = (timestamp: number) => {
         if (!running) return
+
+        const interval = reduceMotion.matches ? 1000 : (window.innerWidth < 700 ? 1000 / 30 : 1000 / 45)
+        if (timestamp - lastRender < interval) {
+          frame = window.requestAnimationFrame(render)
+          return
+        }
+        lastRender = timestamp
 
         resize()
 
