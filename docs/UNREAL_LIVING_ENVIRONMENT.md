@@ -27,11 +27,13 @@ The renderer is intentionally dependency-free and procedural:
 1. CSS gradients define sky and horizon atmosphere.
 2. SVG-free CSS shapes represent sun and moon.
 3. A small deterministic star field is rendered as simple elements.
-4. Clouds are a low-frequency CSS texture with slow motion.
+4. Clouds are a low-frequency CSS texture with state-driven transitions.
 5. Rain is a lightweight repeating gradient rather than hundreds of DOM particles.
 6. Fog is built from low-opacity radial gradients.
-7. Content surfaces remain opaque enough for readability.
-8. No persistent backdrop-filter or full-screen video assets are used.
+7. One bounded WebGL2 canvas may add restrained procedural terrain, depth, camera perspective, and contact shadows on capable desktop/fine-pointer layouts.
+8. Content surfaces remain opaque enough for readability.
+9. No persistent backdrop-filter or full-screen video assets are used.
+10. The spatial renderer sleeps when camera/environment state settles and wakes only for interaction, resize, visibility, or environment/view changes.
 
 The renderer exposes environmental values through CSS custom properties and data attributes.
 
@@ -89,13 +91,15 @@ Reduced motion disables environment animation. The environment never carries ess
 
 Performance guardrails:
 
-- no default WebGL/3D engine
+- no general-purpose 3D engine
 - no full-screen video backgrounds
+- one bounded WebGL2 environmental canvas only where the spatial reduction boundary permits
 - bounded DOM effect count
 - no permanent blur filters
 - minute-scale environment calculations
 - cached weather requests
 - environment paused from meaningful animation when reduced motion is requested
+- WebGL environmental rendering uses an adaptive render budget and does not retain an unconditional idle loop
 
 ## Weather data attribution and license note
 
