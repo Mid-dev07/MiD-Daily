@@ -241,7 +241,7 @@ It adds:
 - pointer-relative micro-tilt capped at 1.25deg for interactive surfaces;
 - elevation response using local depth and shadow modulation;
 - a screen-space specular catch-light that follows the pointer;
-- slow world-atmosphere breathing on clouds, shafts, and fog;
+- bounded state-driven world transitions for clouds, shafts, fog, lighting, and weather; no perpetual decorative atmosphere loop;
 - reduced-motion and coarse-pointer fallbacks.
 
-The system still avoids WebGL/canvas and new animation dependencies. Future phases should build view-specific spatial composition and material-specific behavior on top of this render core instead of stacking unrelated global effects.
+The product UI remains CSS/DOM-first and uses no canvas for ordinary interface presentation. A single bounded WebGL2 canvas is permitted only for the environmental spatial layer; it sleeps when state and camera settle, wakes on interaction/state changes, and degrades to the CSS environment when unavailable. Future phases should build view-specific spatial composition and material-specific behavior on top of this render core instead of stacking unrelated global effects.
