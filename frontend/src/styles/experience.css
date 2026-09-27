@@ -336,8 +336,6 @@
   box-shadow:
     0 26px 70px rgba(0, 0, 0, .34),
     inset 0 1px 0 rgba(255, 255, 255, .08);
-  -webkit-backdrop-filter: blur(var(--glass-blur-shell)) saturate(var(--glass-saturate));
-  backdrop-filter: blur(var(--glass-blur-shell)) saturate(var(--glass-saturate));
 }
 
 .brand {
