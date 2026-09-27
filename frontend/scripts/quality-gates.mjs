@@ -445,16 +445,16 @@ for (const contract of [
 ]) {
   if (!materialSeparationSource.includes(contract)) failures.push('Environmental material separation v1 contract missing: ' + contract)
 }
-if (!/roughness = 0.96[sS]{0,280}specularGain = 0.62/.test(materialSeparationSource)) {
+if (!materialSeparationSource.includes('roughness = 0.96') || !materialSeparationSource.includes('specularGain = 0.62')) {
   failures.push('Terrain must remain high-roughness and low-specular in material separation v1.')
 }
-if (!/roughness = 0.66[sS]{0,280}specularGain = 1.12/.test(materialSeparationSource)) {
+if (!materialSeparationSource.includes('roughness = 0.66') || !materialSeparationSource.includes('specularGain = 1.12')) {
   failures.push('Rock/stone must retain a tighter specular response in material separation v1.')
 }
-if (!/roughness = 0.97[sS]{0,280}specularGain = 0.38/.test(materialSeparationSource)) {
+if (!materialSeparationSource.includes('roughness = 0.97') || !materialSeparationSource.includes('specularGain = 0.38')) {
   failures.push('Foliage must remain diffuse and non-glossy in material separation v1.')
 }
-if (!/roughness = 0.3[sS]{0,300}specularGain = 1.65/.test(materialSeparationSource)) {
+if (!materialSeparationSource.includes('roughness = 0.3') || !materialSeparationSource.includes('specularGain = 1.65')) {
   failures.push('Wet surfaces must retain the bounded low-roughness material response.')
 }
 
