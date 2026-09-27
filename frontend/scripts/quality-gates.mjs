@@ -622,6 +622,16 @@ if (!interactionMotionSource.includes('.app-frame[data-workload="high"] .environ
 if (!pointerBridgeSource.includes('--ux-focus-strength')) {
   failures.push('Semantic focus must remain connected to the shared foreground interaction stream.')
 }
+if (!/addEventListener\('focusin'/.test(pointerBridgeSource) || !/addEventListener\('focusout'/.test(pointerBridgeSource)) {
+  failures.push('Keyboard focus must reuse the delegated application interaction boundary.')
+}
+if (!/data-ux-focus/.test(pointerBridgeSource) || !/\[data-ux-focus="true"\]/.test(materialSystem)) {
+  failures.push('Keyboard focus must expose a quiet material state separate from pointer lighting.')
+}
+if (!/keyboardFocusStrength/.test(pointerBridgeSource) || !/mid:world-pointer/.test(pointerBridgeSource)) {
+  failures.push('Keyboard focus must be able to restore the shared world interaction state.')
+}
+
 
 const spatialStyles = join(srcDir, 'styles/spatial-composition.css')
 if (!existsSync(spatialStyles)) {
