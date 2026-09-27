@@ -155,3 +155,21 @@ The intent is perceptual separation through **light response**, not through addi
 Quality target:
 
 > Under the same environmental light, terrain, rock, foliage, and wet surfaces should read as different physical substances before the viewer consciously inspects their colors.
+
+
+## Natural stage v2
+
+The spatial environment now prioritizes a daylight-first natural reading over a technical 3D-demo reading.
+
+- the authored camera rail is lower so terrain and horizon read as a place rather than a top-down diorama;
+- terrain relief is stronger without increasing the WebGL grid budget;
+- rock and foliage meshes use slightly richer silhouettes while remaining reusable and dependency-free;
+- architectural-looking cyan bars and high-emissive world markers are removed from the environmental layer;
+- shelter landmarks use organic stone/foliage compositions instead of box-built structures;
+- the renderer-aware CSS stage reduces canopy and vignette occlusion when WebGL is active;
+- day and golden-hour sky states expose more natural daylight range while retaining the MiD dark product shell;
+- active workspace anchors remain discoverable through small organic markers rather than glowing technical nodes.
+
+Quality target:
+
+> The user should perceive a calm, believable outdoor spatial setting first and the rendering technique second.
