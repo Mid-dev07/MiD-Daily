@@ -598,6 +598,16 @@ if (!existsSync(spatialStyles)) {
     failures.push('WorkspaceHeader depth must remain owned by its semantic role, not a component-specific selector.')
   }
 
+  if (/--spatial-x:\s*-?\d+(?:\.\d+)?px/.test(spatialSource) || /translate3d\(var\(--spatial-x/.test(spatialSource)) {
+    failures.push('Spatial depth must not use horizontal offsets as a substitute for Z depth.')
+  }
+  if (!/--spatial-z:\s*18px/.test(spatialSource) || !/--spatial-z:\s*14px/.test(spatialSource) || !/--spatial-z:\s*6px/.test(spatialSource)) {
+    failures.push('Spatial depth tiers must retain explicit orientation, primary, and supporting Z levels.')
+  }
+  if (!/--spatial-contact-blur:\s*9px/.test(spatialSource) || !/--spatial-contact-opacity:\s*\.58/.test(spatialSource)) {
+    failures.push('Elevated spatial roles must expose grounded contact-shadow response.')
+  }
+
   for (const contract of [
     'perspective:',
     'data-module="dashboard"',
