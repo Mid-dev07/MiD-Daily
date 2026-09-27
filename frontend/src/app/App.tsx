@@ -168,6 +168,7 @@ export function App() {
     let pointerX = 0
     let pointerY = 0
     let focusStrength = 0
+    let keyboardFocusStrength = 0
     let focusedSurface: HTMLElement | null = null
 
     frame.style.setProperty('--ux-focus-strength', '0')
@@ -181,8 +182,8 @@ export function App() {
       activeSurface.style.removeProperty('--ux-ry')
       activeSurface.style.removeProperty('--ux-elevation')
       activeSurface = null
-      focusStrength = 0
-      frame.style.setProperty('--ux-focus-strength', '0')
+      focusStrength = keyboardFocusStrength
+      frame.style.setProperty('--ux-focus-strength', String(focusStrength))
     }
 
     const clearLandscape = () => {
@@ -302,6 +303,7 @@ export function App() {
       const nextFocus = focusedSurface.matches('.dashboard-command-deck, .dashboard-hero-aside, .primary-button, .workspace-context-item')
         ? 1
         : .62
+      keyboardFocusStrength = nextFocus
       focusStrength = nextFocus
       frame.style.setProperty('--ux-focus-strength', String(focusStrength))
       emitWorldPointer(rect.left + rect.width / 2, rect.top + rect.height / 2, focusStrength)
@@ -312,6 +314,7 @@ export function App() {
       if (relatedTarget instanceof Node && frame.contains(relatedTarget)) return
 
       clearFocusSurface()
+      keyboardFocusStrength = 0
       focusStrength = 0
       frame.style.setProperty('--ux-focus-strength', '0')
       emitWorldPointer(window.innerWidth / 2, window.innerHeight / 2, 0)
@@ -322,10 +325,14 @@ export function App() {
       animationFrame = 0
       clearSurface()
       clearLandscape()
-      clearFocusSurface()
-      focusStrength = 0
-      frame.style.setProperty('--ux-focus-strength', '0')
-      emitWorldPointer(window.innerWidth / 2, window.innerHeight / 2, 0)
+      focusStrength = keyboardFocusStrength
+      frame.style.setProperty('--ux-focus-strength', String(focusStrength))
+      if (focusedSurface instanceof HTMLElement && keyboardFocusStrength > 0) {
+        const rect = focusedSurface.getBoundingClientRect()
+        emitWorldPointer(rect.left + rect.width / 2, rect.top + rect.height / 2, keyboardFocusStrength)
+      } else {
+        emitWorldPointer(window.innerWidth / 2, window.innerHeight / 2, 0)
+      }
     }
 
     frame.addEventListener('pointerover', onPointerOver, { passive: true })
@@ -341,6 +348,8 @@ export function App() {
       clearSurface()
       clearLandscape()
       clearFocusSurface()
+      keyboardFocusStrength = 0
+      focusStrength = 0
       frame.style.removeProperty('--ux-focus-strength')
     }
   }, [])
