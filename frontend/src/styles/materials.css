@@ -199,6 +199,18 @@ textarea:focus,
     inset 0 1px 0 rgba(255, 255, 255, .09);
 }
 
+/* Keyboard focus uses a separate, quiet material edge; it never needs a glow. */
+[data-ux-focus="true"] {
+  border-color: color-mix(
+    in srgb,
+    var(--module-accent, var(--mi-cyan)) 34%,
+    var(--material-edge-strong)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .07),
+    0 10px 28px rgba(0, 0, 0, .12);
+}
+
 /* Lit state: emissive response is reserved for meaningful active states. */
 [data-ux-lit="true"] {
   --material-emissive-alpha: var(--material-emissive-soft);
