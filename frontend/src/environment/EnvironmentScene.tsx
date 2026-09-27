@@ -59,6 +59,7 @@ export function EnvironmentScene({ environment, activeView, workload }: Environm
       <div className="environment-terrain" />
       <div className="environment-canopy" />
       <div className="environment-light-shafts" />
+      <div className="environment-stage-depth" />
       <div className="environment-rain" />
       <div className="environment-fog" />
       <div className="environment-vignette" />
