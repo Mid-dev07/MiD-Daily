@@ -613,6 +613,15 @@ for (const contract of [
   if (!interactionMotionSource.includes(contract)) failures.push('Interaction/motion cleanup contract missing: ' + contract)
 }
 
+if (!interactionMotionSource.includes('.app-frame[data-workload="high"] .environment-scene')
+  || !interactionMotionSource.includes('--ux-world-opacity: .78')
+  || !interactionMotionSource.includes('environment-world-canvas')) {
+  failures.push('Workload must have a bounded environment-emphasis response in experience.css.')
+}
+if (!pointerBridgeSource.includes('--ux-focus-strength')) {
+  failures.push('Semantic focus must remain connected to the shared foreground interaction stream.')
+}
+
 const spatialStyles = join(srcDir, 'styles/spatial-composition.css')
 if (!existsSync(spatialStyles)) {
   failures.push('Spatial workspace composition stylesheet is missing.')
