@@ -532,7 +532,7 @@ for (const contract of [
 if (!/environmentLightDirection/.test(lightingWorldSource) || !/uniforms\.light, lightDirection/.test(lightingWorldSource)) {
   failures.push('Lighting/atmosphere v1 must retain solar direction as the primary directional light input.')
 }
-if (/uTime|timestamp * 0\.001|Math\.sin\(t/.test(lightingWorldSource)) {
+if (/\buTime\b|timestamp\s*\*\s*0\.001|Math\.sin\(\s*t\b/.test(lightingWorldSource)) {
   failures.push('Lighting/atmosphere v1 must remain event/state driven with no perpetual time animation.')
 }
 
@@ -617,7 +617,7 @@ if (!/draw\(\s*shadowMesh[\s\S]*,\s*6,[\s\S]*opacity/.test(environmentResponseSo
 if (!/groundWet = smoothstep/.test(environmentResponseSource) || !/weatherSpecular/.test(environmentResponseSource)) {
   failures.push('Weather response must remain material-aware instead of applying one global glossy treatment.')
 }
-if (/uTime|timestamp * 0\\.001|Math\\.sin\(t/.test(environmentResponseSource)) {
+if (/\buTime\b|timestamp\s*\*\s*0\.001|Math\.sin\(\s*t\b/.test(environmentResponseSource)) {
   failures.push('Environmental response v1 must remain event/state driven with no perpetual decorative animation.')
 }
 
@@ -668,7 +668,7 @@ if (!/rainfallPooling[\s\S]*horizontalWetness/.test(weatherIntelligenceSource)) 
 if (!/nearWeatherWash[\s\S]*atmosphericFade/.test(weatherIntelligenceSource)) {
   failures.push('Weather air density must contribute to spatial atmospheric wash.')
 }
-if (/uTime|timestamp *0\.001|Math\.sin\(t/.test(weatherIntelligenceSource)) {
+if (/\buTime\b|timestamp\s*\*\s*0\.001|Math\.sin\(\s*t\b/.test(weatherIntelligenceSource)) {
   failures.push('Weather intelligence v2 must remain event/state driven with no perpetual decorative animation.')
 }
 
@@ -833,7 +833,7 @@ if (!/environmentLightDirection/.test(worldRenderer)) failures.push('Spatial wor
 if (!/uniforms\.light, lightDirection\[0\], lightDirection\[1\], lightDirection\[2\]/.test(worldRenderer)) {
   failures.push('Spatial world must upload the calculated solar direction to WebGL lighting.')
 }
-if (/uTime|const t = timestamp \* 0\.001|Math\.sin\(t/.test(worldRenderer)) {
+if (/\buTime\b|timestamp\s*\*\s*0\.001|Math\.sin\(\s*t\b/.test(worldRenderer)) {
   failures.push('Spatial world must not use perpetual time-based animation loops.')
 }
 if (!/cameraState|desiredCamera|cameraBlend/.test(worldRenderer)) {
