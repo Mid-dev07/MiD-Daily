@@ -82,23 +82,44 @@ void main() {
   float halfLambert = clamp((diffuse + wrap) / (1.0 + wrap), 0.0, 1.0);
   vec3 halfVector = normalize(lightDir + viewDir);
 
+  /* Material family profile:
+     1 mineral/architectural, 2 terrain, 3 rock/stone, 4 foliage, 5 wet surface. */
   float roughness = 0.9;
   float wetResponse = 0.5;
+  float materialDiffuseResponse = 1.0;
+  float specularGain = 1.0;
+  float moistureRetention = 0.82;
+
   if (uKind > 0.5 && uKind < 1.5) {
-    roughness = 0.78;
-    wetResponse = 0.82;
+    roughness = 0.82;
+    wetResponse = 0.62;
+    materialDiffuseResponse = 1.0;
+    specularGain = 0.9;
+    moistureRetention = 0.78;
   } else if (uKind > 1.5 && uKind < 2.5) {
-    roughness = 0.94;
-    wetResponse = 1.0;
-  } else if (uKind > 2.5 && uKind < 3.5) {
-    roughness = 0.58;
-    wetResponse = 0.92;
-  } else if (uKind > 3.5 && uKind < 4.5) {
     roughness = 0.96;
-    wetResponse = 0.38;
-  } else if (uKind > 4.5 && uKind < 5.5) {
-    roughness = 0.9;
     wetResponse = 0.56;
+    materialDiffuseResponse = 0.96;
+    specularGain = 0.62;
+    moistureRetention = 0.72;
+  } else if (uKind > 2.5 && uKind < 3.5) {
+    roughness = 0.66;
+    wetResponse = 0.88;
+    materialDiffuseResponse = 1.03;
+    specularGain = 1.12;
+    moistureRetention = 0.9;
+  } else if (uKind > 3.5 && uKind < 4.5) {
+    roughness = 0.97;
+    wetResponse = 0.28;
+    materialDiffuseResponse = 0.92;
+    specularGain = 0.38;
+    moistureRetention = 0.55;
+  } else if (uKind > 4.5 && uKind < 5.5) {
+    roughness = 0.3;
+    wetResponse = 1.0;
+    materialDiffuseResponse = 0.84;
+    specularGain = 1.65;
+    moistureRetention = 1.0;
   }
 
   float precipitation = clamp(uPrecipitation, 0.0, 1.0);
@@ -114,7 +135,7 @@ void main() {
   float weatherSpecular = uKind > 3.5 && uKind < 4.5
     ? wet * 0.035
     : materialWetness * 0.24 + puddleSpecular;
-  float specularStrength = mix(0.025, 0.16, 1.0 - roughness) + weatherSpecular;
+  float specularStrength = (mix(0.025, 0.16, 1.0 - roughness) + weatherSpecular) * specularGain;
   float specular = pow(max(dot(normal, halfVector), 0.0), specularPower) * specularStrength;
   float rim = pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0) * 0.05;
 
@@ -137,7 +158,7 @@ void main() {
     materialBase += vec3(0.012, 0.028, 0.016) * leafBacklight * (1.0 - wet * 0.3);
   }
 
-  float wetDarken = mix(1.0, 0.76, materialWetness);
+  float wetDarken = mix(1.0, 0.76, clamp(materialWetness * moistureRetention, 0.0, 1.0));
   materialBase *= wetDarken;
 
   float contact = 1.0;
@@ -170,7 +191,8 @@ void main() {
   );
   vec3 directionalLight = sunColor * (0.2 + halfLambert * 0.7 * uLightIntensity);
 
-  vec3 base = materialBase * (ambientFill + directionalLight) * contact;
+  vec3 materialLighting = ambientFill + directionalLight * materialDiffuseResponse;
+  vec3 base = materialBase * materialLighting * contact;
   vec3 reflected = vec3(specular + rim);
   vec3 emissive = uBaseColor * uEmissive;
   vec3 color = base + reflected + emissive + uBaseColor * grid;
