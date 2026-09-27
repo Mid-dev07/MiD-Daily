@@ -168,6 +168,7 @@ export function App() {
     let pointerX = 0
     let pointerY = 0
     let focusStrength = 0
+    let focusedSurface: HTMLElement | null = null
 
     frame.style.setProperty('--ux-focus-strength', '0')
 
@@ -190,6 +191,22 @@ export function App() {
       landscape.style.removeProperty('--ux-tilt-x')
       landscape.style.removeProperty('--ux-tilt-y')
       landscape = null
+    }
+
+    const clearFocusSurface = () => {
+      if (!focusedSurface) return
+      focusedSurface.removeAttribute('data-ux-focus')
+      focusedSurface = null
+    }
+
+    const emitWorldPointer = (clientX: number, clientY: number, focus: number) => {
+      window.dispatchEvent(new CustomEvent('mid:world-pointer', {
+        detail: {
+          x: (clientX / Math.max(1, window.innerWidth) - 0.5) * 2,
+          y: (clientY / Math.max(1, window.innerHeight) - 0.5) * 2,
+          focus,
+        },
+      }))
     }
 
     const schedule = () => {
@@ -263,14 +280,41 @@ export function App() {
     const onPointerMove = (event: PointerEvent) => {
       pointerX = event.clientX
       pointerY = event.clientY
-      window.dispatchEvent(new CustomEvent('mid:world-pointer', {
-        detail: {
-          x: (event.clientX / Math.max(1, window.innerWidth) - 0.5) * 2,
-          y: (event.clientY / Math.max(1, window.innerHeight) - 0.5) * 2,
-          focus: focusStrength,
-        },
-      }))
+      emitWorldPointer(event.clientX, event.clientY, focusStrength)
       if (activeSurface || landscape) schedule()
+    }
+
+    const onFocusIn = (event: FocusEvent) => {
+      const target = event.target instanceof Element ? event.target : null
+      const nextSurface = target?.closest(surfaceSelector)
+      const focusTarget = nextSurface instanceof HTMLElement
+        ? nextSurface
+        : target instanceof HTMLElement
+          ? target
+          : null
+      if (!focusTarget) return
+
+      clearFocusSurface()
+      focusedSurface = focusTarget
+      focusedSurface.setAttribute('data-ux-focus', 'true')
+
+      const rect = focusedSurface.getBoundingClientRect()
+      const nextFocus = focusedSurface.matches('.dashboard-command-deck, .dashboard-hero-aside, .primary-button, .workspace-context-item')
+        ? 1
+        : .62
+      focusStrength = nextFocus
+      frame.style.setProperty('--ux-focus-strength', String(focusStrength))
+      emitWorldPointer(rect.left + rect.width / 2, rect.top + rect.height / 2, focusStrength)
+    }
+
+    const onFocusOut = (event: FocusEvent) => {
+      const relatedTarget = event.relatedTarget
+      if (relatedTarget instanceof Node && frame.contains(relatedTarget)) return
+
+      clearFocusSurface()
+      focusStrength = 0
+      frame.style.setProperty('--ux-focus-strength', '0')
+      emitWorldPointer(window.innerWidth / 2, window.innerHeight / 2, 0)
     }
 
     const onPointerLeave = () => {
@@ -278,11 +322,10 @@ export function App() {
       animationFrame = 0
       clearSurface()
       clearLandscape()
+      clearFocusSurface()
       focusStrength = 0
       frame.style.setProperty('--ux-focus-strength', '0')
-      window.dispatchEvent(new CustomEvent('mid:world-pointer', {
-        detail: { x: 0, y: 0, focus: 0 },
-      }))
+      emitWorldPointer(window.innerWidth / 2, window.innerHeight / 2, 0)
     }
 
     frame.addEventListener('pointerover', onPointerOver, { passive: true })
@@ -293,8 +336,11 @@ export function App() {
       frame.removeEventListener('pointerover', onPointerOver)
       frame.removeEventListener('pointermove', onPointerMove)
       frame.removeEventListener('pointerleave', onPointerLeave)
+      frame.removeEventListener('focusin', onFocusIn)
+      frame.removeEventListener('focusout', onFocusOut)
       clearSurface()
       clearLandscape()
+      clearFocusSurface()
       frame.style.removeProperty('--ux-focus-strength')
     }
   }, [])
