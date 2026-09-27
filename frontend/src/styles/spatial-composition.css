@@ -190,7 +190,13 @@
 }
 
 /* Shared surface treatment: visible contact only where elevation exists. */
-.view-key[data-module] [data-spatial-role]::after {
+.view-key[data-module] [data-spatial-role="orientation"]::after,
+.view-key[data-module] [data-spatial-role="primary"]::after,
+.view-key[data-module] [data-spatial-role="identity"]::after,
+.view-key[data-module] [data-spatial-role="focus"]::after,
+.view-key[data-module] [data-spatial-role="metrics"]::after,
+.view-key[data-module] [data-spatial-role="secondary-group"]::after,
+.view-key[data-module] [data-spatial-role="supporting"]::after {
   content: "";
   position: absolute;
   left: 8%;
@@ -347,7 +353,7 @@
   .view-key[data-module] [data-spatial-role="primary"]:hover,
   .view-key[data-module] [data-spatial-role="focus"]:hover,
   .view-key[data-module] [data-spatial-role="identity"]:hover {
-    transform: translate3d(var(--spatial-x), -2px, var(--spatial-hover-z));
+    transform: translate3d(0, -2px, var(--spatial-hover-z));
     box-shadow:
       0 30px 76px rgba(0,0,0,.30),
       0 0 42px color-mix(in srgb, var(--spatial-accent) 6%, transparent),
