@@ -126,7 +126,6 @@
     opacity var(--env-transition-normal) var(--ease-standard),
     filter var(--env-transition-slow) var(--ease-standard);
 }
-}
 
 .environment-cloud {
   position: absolute;
@@ -866,7 +865,6 @@ textarea:focus,
 }
 
 /* Environment state changes should ease into the new world, not jump between snapshots. */
-@media (prefers-reduced-motion: reduce) {
   .environment-scene,
   .environment-sky,
   .environment-sun,
@@ -1703,6 +1701,21 @@ textarea:focus,
   [data-ux-lit="true"] {
     transform: none;
     transition: border-color var(--unreal-motion-normal) var(--ease-standard), box-shadow var(--unreal-motion-normal) var(--ease-standard);
+  }
+
+  .environment-scene,
+  .environment-sky,
+  .environment-sun,
+  .environment-moon,
+  .environment-clouds,
+  .environment-horizon,
+  .environment-terrain,
+  .environment-canopy,
+  .environment-light-shafts,
+  .environment-rain,
+  .environment-fog,
+  .environment-vignette {
+    transition: none !important;
   }
 
   .environment-clouds,
