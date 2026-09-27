@@ -590,7 +590,9 @@ if (/uTime|timestamp *0\.001|Math\.sin\(t/.test(weatherIntelligenceSource)) {
 
 const interactionMotionSource = readFileSync(join(srcDir, 'styles/experience.css'), 'utf8')
 const pointerBridgeSource = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
-if (!/focus:\s*focusStrength/.test(pointerBridgeSource) || !/detail:\s*\{ x: 0, y: 0, focus: 0 \}/.test(pointerBridgeSource)) {
+if (!/detail:\s*\{[\s\S]*focus,/.test(pointerBridgeSource)
+  || !/const emitWorldPointer = \(clientX: number, clientY: number, focus: number\)/.test(pointerBridgeSource)
+  || !/emitWorldPointer\(window\.innerWidth \/ 2, window\.innerHeight \/ 2, 0\)/.test(pointerBridgeSource)) {
   failures.push('Shared pointer state must carry semantic focus and recenter the world on pointer leave.')
 }
 
@@ -622,6 +624,16 @@ if (!interactionMotionSource.includes('.app-frame[data-workload="high"] .environ
 if (!pointerBridgeSource.includes('--ux-focus-strength')) {
   failures.push('Semantic focus must remain connected to the shared foreground interaction stream.')
 }
+if (!/addEventListener\('focusin'/.test(pointerBridgeSource) || !/addEventListener\('focusout'/.test(pointerBridgeSource)) {
+  failures.push('Keyboard focus must reuse the delegated application interaction boundary.')
+}
+if (!/data-ux-focus/.test(pointerBridgeSource) || !/\[data-ux-focus="true"\]/.test(materialSystem)) {
+  failures.push('Keyboard focus must expose a quiet material state separate from pointer lighting.')
+}
+if (!/keyboardFocusStrength/.test(pointerBridgeSource) || !/mid:world-pointer/.test(pointerBridgeSource)) {
+  failures.push('Keyboard focus must be able to restore the shared world interaction state.')
+}
+
 
 const spatialStyles = join(srcDir, 'styles/spatial-composition.css')
 if (!existsSync(spatialStyles)) {
