@@ -167,6 +167,9 @@ export function App() {
     let animationFrame = 0
     let pointerX = 0
     let pointerY = 0
+    let focusStrength = 0
+
+    frame.style.setProperty('--ux-focus-strength', '0')
 
     const clearSurface = () => {
       if (!activeSurface) return
@@ -177,6 +180,8 @@ export function App() {
       activeSurface.style.removeProperty('--ux-ry')
       activeSurface.style.removeProperty('--ux-elevation')
       activeSurface = null
+      focusStrength = 0
+      frame.style.setProperty('--ux-focus-strength', '0')
     }
 
     const clearLandscape = () => {
@@ -234,6 +239,16 @@ export function App() {
         landscape = nextLandscape
         landscape.setAttribute('data-ux-lit', 'true')
       }
+
+      if (nextSurface instanceof HTMLElement) {
+        focusStrength = nextSurface.matches('.dashboard-command-deck, .dashboard-hero-aside, .primary-button, .workspace-context-item')
+          ? 1
+          : .68
+      } else if (nextLandscape instanceof HTMLElement) {
+        focusStrength = .52
+      }
+      frame.style.setProperty('--ux-focus-strength', String(focusStrength))
+
       pointerX = event.clientX
       pointerY = event.clientY
       schedule()
@@ -246,6 +261,7 @@ export function App() {
         detail: {
           x: (event.clientX / Math.max(1, window.innerWidth) - 0.5) * 2,
           y: (event.clientY / Math.max(1, window.innerHeight) - 0.5) * 2,
+          focus: focusStrength,
         },
       }))
       if (activeSurface || landscape) schedule()
@@ -256,6 +272,11 @@ export function App() {
       animationFrame = 0
       clearSurface()
       clearLandscape()
+      focusStrength = 0
+      frame.style.setProperty('--ux-focus-strength', '0')
+      window.dispatchEvent(new CustomEvent('mid:world-pointer', {
+        detail: { x: 0, y: 0, focus: 0 },
+      }))
     }
 
     frame.addEventListener('pointerover', onPointerOver, { passive: true })
@@ -268,6 +289,7 @@ export function App() {
       frame.removeEventListener('pointerleave', onPointerLeave)
       clearSurface()
       clearLandscape()
+      frame.style.removeProperty('--ux-focus-strength')
     }
   }, [])
 
@@ -617,7 +639,7 @@ export function App() {
       data-workload={workload}
       style={environmentCssVariables(environment)}
     >
-      <EnvironmentScene environment={environment} activeView={activeView} />
+      <EnvironmentScene environment={environment} activeView={activeView} workload={workload} />
       <Sidebar activeView={activeView} onNavigate={navigate} />
       <main className="main-content">
         <Topbar view={activeView} profile={profile} onProfile={() => navigate('profile')} onSearch={() => setSearchOpen(true)} sidebarHidden={sidebarHidden} onToggleSidebar={toggleSidebar} onNavigate={navigate} userId={userId} tasks={tasks} finance={finance} schedule={schedule} environment={environment} onEnvironmentAction={() => void (environment.location ? refreshEnvironment() : requestLocation())} />
