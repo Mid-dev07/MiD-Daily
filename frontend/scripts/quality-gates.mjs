@@ -610,7 +610,7 @@ if (!existsSync(spatialStyles)) {
     'data-spatial-role="archive"',
     'data-spatial-role="focus"',
     'translate3d(var(--spatial-x), 0, var(--spatial-z))',
-undefined    'inset 0 1px 6px',
+    'inset 0 1px 6px',
 
   ]) {
     if (!spatialSource.includes(contract)) failures.push('Spatial composition contract missing: ' + contract)
