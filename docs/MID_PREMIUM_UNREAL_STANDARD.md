@@ -768,3 +768,21 @@ The renderer:
 This is a performance rule, not a visual fallback. The world should feel responsive during change and remain computationally quiet when the user is simply reading.
 
 Quality target: visual fidelity must scale with state change, not with idle time.
+
+
+## 28 — Environmental Microstructure Standard v1
+
+The spatial world now receives a restrained microstructure pass so terrain reads as a shaped natural surface rather than a low-poly floor with a uniform material.
+
+Required:
+- terrain geometry uses a slightly denser deterministic grid while staying inside the existing WebGL2 budget;
+- terrain material uses bounded macro, micro, and fine deterministic variation in the same shader pass;
+- slope-aware response slightly suppresses exposed terrain brightness so form is readable from light direction rather than color alone;
+- shallow cavity variation remains extremely small and cannot become visible noise;
+- no textures, extra render passes, normal maps, particles, or continuous animation are introduced;
+- the pass must preserve the existing 2.2M-pixel cap, adaptive render budget, reduced-motion behavior, touch reduction, and CSS fallback.
+
+Quality target:
+at a glance the ground should read as a continuous, naturally varied surface with believable local light response; on closer inspection it may reveal restrained material variation, but never procedural noise as a visual effect.
+
+This layer belongs to geometry/material readability. It must not be used to compensate for weak composition, typography, or content hierarchy.
