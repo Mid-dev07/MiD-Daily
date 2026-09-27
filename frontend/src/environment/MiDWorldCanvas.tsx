@@ -667,7 +667,6 @@ function drawWorldComposition(
     emissive?: number,
     rotation?: number,
   ) => void,
-  box: Mesh,
   rockA: Mesh,
   rockB: Mesh,
   rockC: Mesh,
@@ -1016,7 +1015,6 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
           Math.min(1, (0.20 + tint[1] * 0.12) * naturalSaturation),
           Math.min(1, (0.14 + tint[2] * 0.06) * naturalSaturation),
         ]
-        const cyan: Vec3 = [0.11, 0.42, 0.52]
         const warm: Vec3 = [0.42 + tint[0] * 0.05, 0.3 + tint[1] * 0.03, 0.18]
 
         draw(terrain, [0, -0.2, 0], [1, 1, 1], mineral, 2)
@@ -1142,7 +1140,6 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
           )
           drawWorldComposition(
             draw,
-            box,
             rockA,
             rockB,
             rockC,
