@@ -64,6 +64,15 @@ if (!unrealTokens.every((token) => tokens.toLowerCase().includes(token.toLowerCa
 if (!/--light-angle:\s*145deg/.test(tokens)) failures.push('The canonical 145deg MiD key-light token must remain intact.')
 if (!existsSync(join(srcDir, 'styles/experience.css')) || !/styles\/experience\.css/.test(mainSource)) failures.push('Glass material layer must be loaded explicitly after the structural UI system.')
 if (!/linear-gradient\(145deg/.test(uiSystem) && !/linear-gradient\(145deg/.test(experienceSystem)) failures.push('Unreal material surfaces must retain a 145deg directional gradient.')
+if (!/--cinematic-key-x/.test(readFileSync(join(srcDir, 'environment/visual.ts'), 'utf8')) || !/--cinematic-key-y/.test(readFileSync(join(srcDir, 'environment/visual.ts'), 'utf8'))) {
+  failures.push('Environment visual state must expose the cinematic key-light position.')
+}
+if (!/var\(--cinematic-key-x/.test(experienceSystem) || !/var\(--cinematic-key-share/.test(experienceSystem)) {
+  failures.push('Workspace composition must consume the environment-driven cinematic key light.')
+}
+if (!/var\(--light-angle, 145deg\)/.test(readFileSync(join(srcDir, 'styles/materials.css'), 'utf8'))) {
+  failures.push('Primary material surfaces must consume the live key-light direction.')
+}
 
 if (!/--rhythm-micro:\s*4px/.test(tokens) || !/--rhythm-tight:\s*8px/.test(tokens) || !/--rhythm-component:\s*16px/.test(tokens)) {
   failures.push('Canonical 4pt spacing tokens are missing from tokens.css.')
