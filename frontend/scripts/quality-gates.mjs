@@ -431,6 +431,33 @@ if (rockDrawCount < 8) {
 
 
 const materialWorldSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
+const materialSeparationSource = materialWorldSource
+for (const contract of [
+  'float materialDiffuseResponse = 1.0;',
+  'float specularGain = 1.0;',
+  'float moistureRetention = 0.82;',
+  'materialDiffuseResponse = 0.96;',
+  'materialDiffuseResponse = 1.03;',
+  'materialDiffuseResponse = 0.92;',
+  'materialDiffuseResponse = 0.84;',
+  'float materialLighting =',
+  'clamp(materialWetness * moistureRetention',
+]) {
+  if (!materialSeparationSource.includes(contract)) failures.push('Environmental material separation v1 contract missing: ' + contract)
+}
+if (!/roughness = 0.96[sS]{0,280}specularGain = 0.62/.test(materialSeparationSource)) {
+  failures.push('Terrain must remain high-roughness and low-specular in material separation v1.')
+}
+if (!/roughness = 0.66[sS]{0,280}specularGain = 1.12/.test(materialSeparationSource)) {
+  failures.push('Rock/stone must retain a tighter specular response in material separation v1.')
+}
+if (!/roughness = 0.97[sS]{0,280}specularGain = 0.38/.test(materialSeparationSource)) {
+  failures.push('Foliage must remain diffuse and non-glossy in material separation v1.')
+}
+if (!/roughness = 0.3[sS]{0,300}specularGain = 1.65/.test(materialSeparationSource)) {
+  failures.push('Wet surfaces must retain the bounded low-roughness material response.')
+}
+
 for (const contract of [
   'uniform float uWetness;',
   'float surfaceHash(vec2 position)',
