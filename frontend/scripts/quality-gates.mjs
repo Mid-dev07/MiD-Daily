@@ -364,9 +364,6 @@ if (!/activeView={activeView}/.test(appSourceForInteraction)) {
 if (!/workload={workload}/.test(appSourceForInteraction) || !/workload: 'low' \| 'medium' \| 'high'/.test(environmentScene)) {
   failures.push('Workload state must be wired through the environment scene.')
 }
-if (!/focus:\s*focusStrength/.test(pointerBridgeSource) || !/detail:\s*\{ x: 0, y: 0, focus: 0 \}/.test(pointerBridgeSource)) {
-  failures.push('Shared pointer state must carry semantic focus and recenter the world on pointer leave.')
-}
 
 const moduleWorldPath = join(srcDir, 'environment/moduleWorld.ts')
 if (existsSync(moduleWorldPath)) {
@@ -593,6 +590,10 @@ if (/uTime|timestamp *0\.001|Math\.sin\(t/.test(weatherIntelligenceSource)) {
 
 const interactionMotionSource = readFileSync(join(srcDir, 'styles/experience.css'), 'utf8')
 const pointerBridgeSource = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
+if (!/focus:\s*focusStrength/.test(pointerBridgeSource) || !/detail:\s*\{ x: 0, y: 0, focus: 0 \}/.test(pointerBridgeSource)) {
+  failures.push('Shared pointer state must carry semantic focus and recenter the world on pointer leave.')
+}
+
 if (/animation:\s*mid-(atmosphere|light|fog)-breathe|@keyframes\s+mid-(atmosphere|light|fog)-breathe/.test(interactionMotionSource)) {
   failures.push('Environment motion must not use perpetual atmospheric animation loops.')
 }
