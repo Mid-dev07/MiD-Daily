@@ -73,6 +73,15 @@ if (!/var\(--env-material-wetness/.test(materialSystem) || !/var\(--env-material
 if (!/var\(--env-atmosphere-softness/.test(experienceSystem)) {
   failures.push('Workspace atmosphere must consume the live environment density signal.')
 }
+if (!/--env-transition-fast:\s*700ms/.test(tokens) || !/--env-transition-normal:\s*1200ms/.test(tokens) || !/--env-transition-slow:\s*1600ms/.test(tokens)) {
+  failures.push('Environment transition duration tokens are missing from tokens.css.')
+}
+if (!/\.environment-sun[\s\S]*transition:[\s\S]*left var\(--env-transition-slow\)/.test(experienceSystem) || !/\.environment-rain[\s\S]*transition:[\s\S]*opacity var\(--env-transition-fast\)/.test(experienceSystem)) {
+  failures.push('Time and weather layers must use tokenized state transitions.')
+}
+if (!/@media \(prefers-reduced-motion: reduce\)[\s\S]*\.environment-sky[\s\S]*transition: none !important/.test(experienceSystem)) {
+  failures.push('Environment transitions must fully disable under reduced motion.')
+}
 
 if (!/--cinematic-key-x/.test(readFileSync(join(srcDir, 'environment/visual.ts'), 'utf8')) || !/--cinematic-key-y/.test(readFileSync(join(srcDir, 'environment/visual.ts'), 'utf8'))) {
   failures.push('Environment visual state must expose the cinematic key-light position.')
