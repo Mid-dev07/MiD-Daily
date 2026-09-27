@@ -690,12 +690,6 @@ textarea:focus {
   min-width: 0;
   border: 1px solid var(--mi-line);
   border-radius: var(--radius-lg);
-  background:
-    linear-gradient(var(--light-angle), rgba(29,45,59,.42), rgba(7,14,22,.78)),
-    rgba(9,17,26,.80);
-  box-shadow:
-    var(--shadow-ambient),
-    inset 0 1px rgba(255,255,255,.065);
   overflow: hidden;
 }
 
@@ -721,8 +715,6 @@ textarea:focus {
   inset: 0;
   pointer-events: none;
   border-radius: inherit;
-  background:
-    radial-gradient(240px 180px at var(--ux-x, 18%) var(--ux-y, 8%), rgba(232,243,248,.06), transparent 72%);
 }
 
 .content-card > *,
@@ -782,14 +774,6 @@ textarea:focus {
 }
 
 .empty-state strong { color: var(--mi-text); }
-
-[data-ux-lit="true"] {
-  border-color: color-mix(in srgb, var(--module-accent, var(--mi-cyan)) 24%, rgba(210,225,234,.12));
-  box-shadow:
-    0 22px 56px rgba(0,0,0,.31),
-    inset 0 1px rgba(255,255,255,.085),
-    0 0 0 1px color-mix(in srgb, var(--module-accent, var(--mi-cyan)) 4%, transparent);
-}
 
 /* ==========================================================================
    07. DASHBOARD COMMAND DECK
