@@ -120,12 +120,16 @@ void main() {
 
   float macroNoise = surfaceHash(floor(vWorldPosition.xz * 1.35));
   float microNoise = surfaceHash(floor(vWorldPosition.xz * 4.5));
-  float surfaceVariation = mix(0.91, 1.08, macroNoise * 0.78 + microNoise * 0.22);
+  float fineNoise = surfaceHash(floor(vWorldPosition.xz * 11.0));
+  float surfaceVariation = mix(0.91, 1.08, macroNoise * 0.68 + microNoise * 0.22 + fineNoise * 0.10);
 
   vec3 materialBase = uBaseColor * surfaceVariation;
   if (uKind > 1.5 && uKind < 2.5) {
-    float naturalBreak = mix(0.88, 1.1, macroNoise);
-    materialBase *= naturalBreak;
+    float naturalBreak = mix(0.84, 1.06, macroNoise * 0.72 + microNoise * 0.28);
+    float slope = 1.0 - max(normal.y, 0.0);
+    float shallowCavity = 1.0 - smoothstep(0.25, 0.82, macroNoise);
+    float groundVariation = 1.0 - slope * 0.16 - shallowCavity * 0.035;
+    materialBase *= naturalBreak * groundVariation;
   } else if (uKind > 3.5 && uKind < 4.5) {
     float leafBacklight = pow(max(dot(-normal, lightDir), 0.0), 1.6) * 0.09;
     float dampLeaf = mix(1.0, 1.08, wet * 0.46);
@@ -390,7 +394,7 @@ function terrainHeight(x: number, z: number) {
 }
 
 function terrainGeometry() {
-  const segments = 20
+  const segments = 24
   const size = 18
   const step = (size * 2) / segments
   const vertices: number[] = []
