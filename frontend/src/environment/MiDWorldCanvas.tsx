@@ -407,13 +407,31 @@ function rockGeometry(variant = 0) {
 
 function terrainHeight(x: number, z: number) {
   const radial = Math.min(1, Math.hypot(x, z) / 18)
-  const centerCalm = Math.max(0, 1 - Math.hypot(x, z) / 6.4)
-  const broadRidge = Math.sin(x * 0.22 + 0.8) * 0.1
-  const crossRidge = Math.cos(z * 0.28 - 0.6) * 0.08
-  const organicBreak = Math.sin((x - z) * 0.14) * 0.055
-  const edgeLift = Math.pow(radial, 2) * 0.07
-  const relief = (broadRidge + crossRidge + organicBreak + edgeLift) * 2.2
-  return relief * (1 - centerCalm * 0.82)
+  const centerCalm = Math.max(0, 1 - Math.hypot(x, z) / 7.4)
+
+  const broadLandform =
+    Math.sin(x * 0.16 + 0.8) * 0.13 +
+    Math.cos(z * 0.19 - 0.6) * 0.09
+  const crossLandform =
+    Math.sin((x + z) * 0.115) * 0.075 +
+    Math.cos((x - z) * 0.17) * 0.05
+  const midsizeBreak =
+    Math.sin(x * 0.46 + z * 0.19) * 0.038 +
+    Math.cos(z * 0.52 - x * 0.14) * 0.028
+  const microRelief =
+    Math.sin(x * 1.08 - z * 0.62) * 0.014 +
+    Math.cos(z * 1.22 + x * 0.42) * 0.011
+  const edgeLift = Math.pow(radial, 2.2) * 0.1
+
+  const relief = (
+    broadLandform +
+    crossLandform +
+    midsizeBreak +
+    microRelief +
+    edgeLift
+  ) * 2.65
+
+  return relief * (1 - centerCalm * 0.78)
 }
 
 function terrainGeometry() {
@@ -502,6 +520,87 @@ function foliageGeometry() {
     }
     for (const corner of [b, a, c]) {
       vertices.push(corner[0], corner[1], corner[2], -normal[0], -normal[1], -normal[2])
+    }
+  }
+
+  return new Float32Array(vertices)
+}
+
+function treeTrunkGeometry() {
+  const vertices: number[] = []
+  const sides = 7
+  const phase = 0.31
+
+  for (let index = 0; index < sides; index += 1) {
+    const next = (index + 1) % sides
+    const a0 = (index / sides) * Math.PI * 2 + phase
+    const a1 = (next / sides) * Math.PI * 2 + phase
+    const bottomRadius0 = 0.28 + (index % 2) * 0.025
+    const bottomRadius1 = 0.28 + (next % 2) * 0.025
+    const topRadius0 = 0.2 + ((index + 1) % 3) * 0.012
+    const topRadius1 = 0.2 + ((next + 1) % 3) * 0.012
+
+    const p0: Vec3 = [Math.cos(a0) * bottomRadius0, 0, Math.sin(a0) * bottomRadius0]
+    const p1: Vec3 = [Math.cos(a1) * bottomRadius1, 0, Math.sin(a1) * bottomRadius1]
+    const q1: Vec3 = [Math.cos(a1) * topRadius1, 2.15, Math.sin(a1) * topRadius1]
+    const q0: Vec3 = [Math.cos(a0) * topRadius0, 2.15, Math.sin(a0) * topRadius0]
+
+    const nx = Math.cos((a0 + a1) * 0.5)
+    const nz = Math.sin((a0 + a1) * 0.5)
+    const normal: Vec3 = [nx, 0.14, nz]
+
+    for (const corner of [p0, p1, q1, p0, q1, q0]) {
+      vertices.push(corner[0], corner[1], corner[2], normal[0], normal[1], normal[2])
+    }
+  }
+
+  return new Float32Array(vertices)
+}
+
+function canopyGeometry() {
+  const vertices: number[] = []
+  const segments = 10
+  const rings = 4
+
+  const point = (ring: number, index: number): { position: Vec3; normal: Vec3 } => {
+    const theta = (ring / rings) * Math.PI
+    const y = Math.cos(theta)
+    const radius = Math.sin(theta)
+    const angle = (index / segments) * Math.PI * 2
+
+    const position: Vec3 = [
+      Math.cos(angle) * radius,
+      y,
+      Math.sin(angle) * radius,
+    ]
+    const normalLength = Math.hypot(position[0], position[1], position[2]) || 1
+    const normal: Vec3 = [
+      position[0] / normalLength,
+      position[1] / normalLength,
+      position[2] / normalLength,
+    ]
+    return { position, normal }
+  }
+
+  for (let ring = 0; ring < rings; ring += 1) {
+    const nextRing = ring + 1
+    for (let index = 0; index < segments; index += 1) {
+      const nextIndex = (index + 1) % segments
+      const a = point(ring, index)
+      const b = point(ring, nextIndex)
+      const c = point(nextRing, nextIndex)
+      const d = point(nextRing, index)
+
+      for (const corner of [a, b, c, a, c, d]) {
+        vertices.push(
+          corner.position[0],
+          corner.position[1],
+          corner.position[2],
+          corner.normal[0],
+          corner.normal[1],
+          corner.normal[2],
+        )
+      }
     }
   }
 
@@ -710,6 +809,67 @@ function drawWorldComposition(
   draw(foliage, [lx - 0.1 * s, 0.03, lz + 0.78 * s], [0.58 * s, 0.62 * s, 0.58 * s], fern, 4, 0, 0.18)
 }
 
+function drawTree(
+  draw: (
+    mesh: Mesh,
+    position: Vec3,
+    scale: Vec3,
+    color: Vec3,
+    kind: number,
+    emissive?: number,
+    rotation?: number,
+    opacity?: number,
+  ) => void,
+  trunk: Mesh,
+  canopy: Mesh,
+  shadowMesh: Mesh,
+  lightDirection: Vec3,
+  position: Vec3,
+  scale: number,
+  trunkColor: Vec3,
+  canopyColor: Vec3,
+  shadowColor: Vec3,
+  shadowSoftness: number,
+) {
+  drawProjectedGroundShadow(
+    draw,
+    shadowMesh,
+    lightDirection,
+    [position[0], position[1] + 0.72 * scale, position[2]],
+    1.7 * scale,
+    [0.76 * scale, 1.18 * scale],
+    shadowColor,
+    shadowSoftness,
+  )
+  draw(
+    trunk,
+    [position[0], position[1], position[2]],
+    [0.72 * scale, 1.1 * scale, 0.72 * scale],
+    trunkColor,
+    1,
+    0,
+    position[0] * 0.06,
+  )
+  draw(
+    canopy,
+    [position[0], position[1] + 2.0 * scale, position[2]],
+    [1.72 * scale, 1.16 * scale, 1.48 * scale],
+    canopyColor,
+    4,
+    0,
+    position[2] * 0.035,
+  )
+  draw(
+    canopy,
+    [position[0] + 0.62 * scale, position[1] + 2.16 * scale, position[2] - 0.18 * scale],
+    [0.84 * scale, 0.72 * scale, 0.72 * scale],
+    canopyColor,
+    4,
+    0,
+    -position[0] * 0.035,
+  )
+}
+
 export function MiDWorldCanvas({ environment, activeView, workload, onReady }: MiDWorldCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const pointerRef = useRef({ x: 0, y: 0 })
@@ -789,6 +949,8 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
       const rockC = createMesh(gl, rockGeometry(2), positionLocation, normalLocation)
       const terrain = createMesh(gl, terrainGeometry(), positionLocation, normalLocation)
       const foliage = createMesh(gl, foliageGeometry(), positionLocation, normalLocation)
+      const treeTrunk = createMesh(gl, treeTrunkGeometry(), positionLocation, normalLocation)
+      const treeCanopy = createMesh(gl, canopyGeometry(), positionLocation, normalLocation)
       const shadow = createMesh(gl, groundShadowGeometry(), positionLocation, normalLocation)
 
       const projection = new Float32Array(16)
@@ -1121,14 +1283,22 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
           shadowTint,
           shadowSoftness,
         )
-        draw(box, [0, 0.08, 0], [4.8, 0.14, 2.7], stone, 1)
-        draw(box, [-5.8, 1.15, -2.0], [0.55, 1.15, 2.7], [0.09, 0.15, 0.18], 1)
-        draw(box, [5.8, 1.05, -1.4], [0.7, 1.05, 2.4], [0.09, 0.15, 0.18], 1)
-        draw(box, [-3.7, 2.0, -5.8], [2.2, 2.0, 0.28], [0.12, 0.18, 0.2], 1, 0.02)
-        draw(box, [3.2, 1.65, -6.5], [1.6, 1.65, 0.22], [0.11, 0.17, 0.19], 1, 0.02)
-        draw(box, [-7.4, 0.42, 3.2], [2.4, 0.42, 0.38], [0.08, 0.13, 0.16], 1)
-        draw(box, [7.0, 0.34, 3.8], [1.8, 0.34, 0.38], [0.08, 0.13, 0.16], 1)
-        draw(box, [0, 0.52, 1.15], [2.5, 0.52, 1.35], [0.08, 0.14, 0.17], 1, 0.01)
+        // Natural grounding objects replace the former architectural primitives.
+        draw(rockB, [0, 0.08, 0.8], [2.9, 0.42, 1.9], stone, 3, 0, -0.08)
+        draw(rockC, [-5.8, 0.22, -2.0], [0.9, 0.62, 1.8], moss, 3, 0, 0.16)
+        draw(rockA, [5.7, 0.18, -1.4], [1.15, 0.62, 1.7], stone, 3, 0, -0.18)
+        draw(rockC, [-3.7, 0.08, -5.8], [2.5, 0.48, 0.72], stone, 3, 0, -0.08)
+        draw(rockA, [3.2, 0.06, -6.5], [1.9, 0.4, 0.58], moss, 3, 0, 0.16)
+        draw(rockB, [-7.4, 0.06, 3.2], [2.2, 0.5, 0.7], stone, 3, 0, 0.08)
+        draw(rockC, [7.0, 0.05, 3.8], [1.7, 0.42, 0.64], warm, 3, 0, -0.12)
+        draw(rockA, [0, 0.08, 1.15], [1.8, 0.46, 1.2], moss, 3, 0, 0.04)
+
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [-6.7, 0.04, -2.4], 1.02, warm, fern, contactShadow, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [6.5, 0.04, -1.8], 0.88, warm, moss, contactShadow, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [-8.2, 0.03, 1.8], 1.16, warm, fern, contactShadow, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [8.4, 0.03, 2.5], 1.04, warm, moss, contactShadow, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [-3.2, 0.03, -7.0], 0.78, warm, fern, contactShadow, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [3.6, 0.03, -7.5], 0.82, warm, moss, contactShadow, shadowSoftness)
 
         if (spatialPathQuery.matches) {
           drawSpatialPath(
@@ -1291,6 +1461,8 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
         gl.deleteVertexArray(rockC.vao)
         gl.deleteVertexArray(terrain.vao)
         gl.deleteVertexArray(foliage.vao)
+        gl.deleteVertexArray(treeTrunk.vao)
+        gl.deleteVertexArray(treeCanopy.vao)
         gl.deleteVertexArray(shadow.vao)
         gl.deleteProgram(program)
       }
