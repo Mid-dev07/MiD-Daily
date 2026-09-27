@@ -550,13 +550,6 @@
 }
 
 
-.content-card[data-ux-lit="true"],
-.glass-panel[data-ux-lit="true"],
-.stat-card[data-ux-lit="true"],
-.dashboard-signal-card[data-ux-lit="true"] {
-  border-color: color-mix(in srgb, var(--module-accent) 34%, rgba(232, 243, 233, .15));
-}
-
 /* =========================================================
    G3 · RECESSED CONTROLS
 ========================================================= */
