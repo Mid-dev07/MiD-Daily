@@ -7,6 +7,7 @@ import type { EnvironmentState } from './types'
 interface EnvironmentSceneProps {
   environment: EnvironmentState
   activeView: View
+  workload: 'low' | 'medium' | 'high'
 }
 
 const stars = [
@@ -16,12 +17,12 @@ const stars = [
   ['37%', '31%', '1px'], ['55%', '34%', '1px'], ['72%', '31%', '1px'], ['89%', '36%', '2px'],
 ]
 
-export function EnvironmentScene({ environment, activeView }: EnvironmentSceneProps) {
+export function EnvironmentScene({ environment, activeView, workload }: EnvironmentSceneProps) {
   const [worldReady, setWorldReady] = useState(false)
 
   useEffect(() => {
     window.dispatchEvent(new Event('mid:world-invalidate'))
-  }, [environment, activeView])
+  }, [environment, activeView, workload])
 
   return (
     <div
@@ -33,7 +34,7 @@ export function EnvironmentScene({ environment, activeView }: EnvironmentScenePr
       style={environmentCssVariables(environment)}
       aria-hidden="true"
     >
-      <MiDWorldCanvas environment={environment} activeView={activeView} onReady={setWorldReady} />
+      <MiDWorldCanvas environment={environment} activeView={activeView} workload={workload} onReady={setWorldReady} />
       <div className="environment-sky" />
       <div className="environment-stars">
         {stars.map(([x, y, size], index) => (

@@ -7,6 +7,7 @@ import type { EnvironmentState } from './types'
 interface MiDWorldCanvasProps {
   environment: EnvironmentState
   activeView: View
+  workload: 'low' | 'medium' | 'high'
   onReady?: (ready: boolean) => void
 }
 
@@ -683,11 +684,13 @@ function drawWorldComposition(
   draw(rockB, [lx, 0.04, lz + 0.54 * s], [0.72 * s, 0.34 * s, 0.48 * s], moss, 3, 0, 0.12)
 }
 
-export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCanvasProps) {
+export function MiDWorldCanvas({ environment, activeView, workload, onReady }: MiDWorldCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const pointerRef = useRef({ x: 0, y: 0 })
+  const pointerFocusRef = useRef(0)
   const environmentRef = useRef(environment)
   const activeViewRef = useRef(activeView)
+  const workloadRef = useRef(workload)
 
   useEffect(() => {
     environmentRef.current = environment
@@ -696,6 +699,10 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
   useEffect(() => {
     activeViewRef.current = activeView
   }, [activeView])
+
+  useEffect(() => {
+    workloadRef.current = workload
+  }, [workload])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -792,9 +799,12 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
       }
 
       const pointerListener = (event: Event) => {
-        const detail = event instanceof CustomEvent ? event.detail as { x?: number; y?: number } : null
+        const detail = event instanceof CustomEvent
+          ? event.detail as { x?: number; y?: number; focus?: number }
+          : null
         pointerRef.current.x = Number(detail?.x ?? 0)
         pointerRef.current.y = Number(detail?.y ?? 0)
+        pointerFocusRef.current = Math.max(0, Math.min(1, Number(detail?.focus ?? 0)))
         requestRender()
       }
 
@@ -847,11 +857,19 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         const delta = lastTimestamp > 0 ? Math.min(0.08, (timestamp - lastTimestamp) / 1000) : 1
         lastTimestamp = timestamp
         const pointer = pointerRef.current
+        const focus = pointerFocusRef.current
+        const workloadPressure = workloadRef.current === 'high'
+          ? 0.82
+          : workloadRef.current === 'medium'
+            ? 0.54
+            : 0.18
         const activeAnchor = worldModuleAnchor(activeViewRef.current)
-        const pointerStrength = reduceMotion.matches ? 0 : 1
+        const pointerStrength = reduceMotion.matches
+          ? 0
+          : (0.86 + focus * 0.24) * (1 - workloadPressure * 0.08)
         const yaw = pointer.x * 0.055 * pointerStrength
         const pitch = pointer.y * 0.035 * pointerStrength
-        const pointerOrbit = 0.6
+        const pointerOrbit = 0.48 + focus * 0.24
         const desiredCamera: Vec3 = [
           activeAnchor.camera.eye[0] + Math.sin(yaw) * pointerOrbit,
           activeAnchor.camera.eye[1] + pitch * 0.8,
@@ -1194,8 +1212,13 @@ export function MiDWorldCanvas({ environment, activeView, onReady }: MiDWorldCan
         for (const anchor of MODULE_ANCHORS) {
           const active = anchor.view === activeViewRef.current
           const distance = Math.hypot(anchor.position[0] - activeAnchor.position[0], anchor.position[2] - activeAnchor.position[2])
-          const emphasis = active ? 0.24 : distance < 6 ? 0.055 : 0.025
-          const scale: Vec3 = active ? [0.9, 0.035, 0.52] : [0.64, 0.022, 0.38]
+          const activeEmphasis = Math.min(0.42, 0.24 + focus * 0.12)
+          const nearbyEmphasis = 0.055 * (1 - workloadPressure * 0.28)
+          const distantEmphasis = 0.025 * (1 - workloadPressure * 0.34)
+          const emphasis = active ? activeEmphasis : distance < 6 ? nearbyEmphasis : distantEmphasis
+          const scale: Vec3 = active
+            ? [0.9 + focus * 0.05, 0.035, 0.52 + focus * 0.02]
+            : [0.64, 0.022, 0.38]
           draw(box, anchor.position, scale, anchor.color, 1, emphasis, active ? 0.08 : 0)
         }
 

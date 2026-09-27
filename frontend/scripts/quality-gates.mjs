@@ -341,6 +341,12 @@ if (!existsSync(worldRendererPath)) {
   if (!/mid:world-invalidate/.test(worldRenderer)) {
     failures.push('Spatial world renderer must expose an event-driven invalidation path for environment state changes.')
   }
+  if (!/workloadRef/.test(worldRenderer) || !/pointerFocusRef/.test(worldRenderer) || !/workloadPressure/.test(worldRenderer)) {
+    failures.push('Spatial world interaction must consume workload pressure and semantic focus.')
+  }
+  if (!/const activeEmphasis/.test(worldRenderer) || !/nearbyEmphasis/.test(worldRenderer)) {
+    failures.push('Spatial world interaction must route focus/workload into landmark emphasis.')
+  }
 }
 if (/pointermove/.test(environmentScene) || existsSync(join(srcDir, 'hooks/useLivingInteractions.ts'))) {
   failures.push('Environment shell must not reintroduce a local pointermove interaction handler.')
@@ -354,6 +360,11 @@ if (!/mid:world-pointer/.test(appSourceForInteraction) || !/CustomEvent/.test(ap
 if (!/activeView={activeView}/.test(appSourceForInteraction)) {
   failures.push('The active workspace must be wired into the spatial environment.')
 }
+
+if (!/workload={workload}/.test(appSourceForInteraction) || !/workload: 'low' \| 'medium' \| 'high'/.test(environmentScene)) {
+  failures.push('Workload state must be wired through the environment scene.')
+}
+
 const moduleWorldPath = join(srcDir, 'environment/moduleWorld.ts')
 if (existsSync(moduleWorldPath)) {
   const moduleWorld = readFileSync(moduleWorldPath, 'utf8')
@@ -579,6 +590,10 @@ if (/uTime|timestamp *0\.001|Math\.sin\(t/.test(weatherIntelligenceSource)) {
 
 const interactionMotionSource = readFileSync(join(srcDir, 'styles/experience.css'), 'utf8')
 const pointerBridgeSource = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
+if (!/focus:\s*focusStrength/.test(pointerBridgeSource) || !/detail:\s*\{ x: 0, y: 0, focus: 0 \}/.test(pointerBridgeSource)) {
+  failures.push('Shared pointer state must carry semantic focus and recenter the world on pointer leave.')
+}
+
 if (/animation:\s*mid-(atmosphere|light|fog)-breathe|@keyframes\s+mid-(atmosphere|light|fog)-breathe/.test(interactionMotionSource)) {
   failures.push('Environment motion must not use perpetual atmospheric animation loops.')
 }
@@ -597,6 +612,15 @@ for (const contract of [
   'No perpetual decorative loops remain',
 ]) {
   if (!interactionMotionSource.includes(contract)) failures.push('Interaction/motion cleanup contract missing: ' + contract)
+}
+
+if (!interactionMotionSource.includes('.app-frame[data-workload="high"] .environment-scene')
+  || !interactionMotionSource.includes('--ux-world-opacity: .78')
+  || !interactionMotionSource.includes('environment-world-canvas')) {
+  failures.push('Workload must have a bounded environment-emphasis response in experience.css.')
+}
+if (!pointerBridgeSource.includes('--ux-focus-strength')) {
+  failures.push('Semantic focus must remain connected to the shared foreground interaction stream.')
 }
 
 const spatialStyles = join(srcDir, 'styles/spatial-composition.css')

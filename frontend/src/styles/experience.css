@@ -1154,15 +1154,33 @@ textarea:focus,
 
 /* 06 · Ambient response stays slow, bounded, and behind content. */
 .environment-scene {
-  transition: filter 360ms var(--ease-standard);
+  --ux-world-opacity: .92;
+  transition:
+    filter 360ms var(--ease-standard),
+    opacity var(--env-transition-normal) var(--ease-standard);
 }
 
 .app-frame[data-workload="high"] .environment-scene {
+  --ux-world-opacity: .78;
+  opacity: .91;
   filter: saturate(.94) brightness(.96);
 }
 
+.app-frame[data-workload="medium"] .environment-scene {
+  --ux-world-opacity: .86;
+  opacity: .95;
+  filter: saturate(.98) brightness(.99);
+}
+
 .app-frame[data-workload="low"] .environment-scene {
+  --ux-world-opacity: .92;
+  opacity: .98;
   filter: saturate(1.02) brightness(1.01);
+}
+
+.environment-world-canvas {
+  opacity: var(--ux-world-opacity);
+  transition: opacity var(--env-transition-normal) var(--ease-standard);
 }
 
 /* Touch devices retain press feedback but never depend on hover. */
@@ -1176,8 +1194,13 @@ textarea:focus,
 
 
   .app-frame[data-workload="high"] .environment-scene,
-  .app-frame[data-workload="calm"] .environment-scene {
+  .app-frame[data-workload="medium"] .environment-scene,
+  .app-frame[data-workload="low"] .environment-scene {
     filter: none;
+  }
+
+  .environment-world-canvas {
+    transition: none !important;
   }
 }
 
@@ -1835,7 +1858,7 @@ textarea:focus,
   display: block;
   width: 100%;
   height: 100%;
-  opacity: .92;
+  opacity: var(--ux-world-opacity, .92);
   pointer-events: none;
 }
 
@@ -2082,4 +2105,3 @@ textarea:focus,
     inset 0 1px 20px rgba(191, 221, 225, calc(var(--env-material-wetness, 0) * 3%)),
     0 24px 56px rgba(0,0,0,.14);
 }
-
