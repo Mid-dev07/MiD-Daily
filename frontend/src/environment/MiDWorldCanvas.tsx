@@ -367,13 +367,13 @@ function boxGeometry() {
 
 function rockGeometry(variant = 0) {
   const vertices: number[] = []
-  const sides = 7
+  const sides = 9
   const phase = variant * 0.83
   const radii = Array.from({ length: sides }, (_, index) => (
-    0.84 + 0.17 * ((Math.sin(index * 1.71 + phase) + 1) * 0.5)
+    0.76 + 0.24 * ((Math.sin(index * 1.71 + phase) + 1) * 0.5)
   ))
   const heights = Array.from({ length: sides }, (_, index) => (
-    0.68 + 0.28 * ((Math.cos(index * 1.43 + phase * 0.7) + 1) * 0.5)
+    0.58 + 0.42 * ((Math.cos(index * 1.43 + phase * 0.7) + 1) * 0.5)
   ))
 
   for (let i = 0; i < sides; i += 1) {
@@ -412,7 +412,8 @@ function terrainHeight(x: number, z: number) {
   const crossRidge = Math.cos(z * 0.28 - 0.6) * 0.08
   const organicBreak = Math.sin((x - z) * 0.14) * 0.055
   const edgeLift = Math.pow(radial, 2) * 0.07
-  return (broadRidge + crossRidge + organicBreak + edgeLift) * (1 - centerCalm * 0.82)
+  const relief = (broadRidge + crossRidge + organicBreak + edgeLift) * 2.2
+  return relief * (1 - centerCalm * 0.82)
 }
 
 function terrainGeometry() {
@@ -471,16 +472,16 @@ function terrainGeometry() {
 
 function foliageGeometry() {
   const vertices: number[] = []
-  const blades = 6
-  const heights = [0.68, 0.82, 0.74, 0.92, 0.76, 0.86]
+  const blades = 10
+  const heights = [0.62, 0.78, 0.69, 0.88, 0.73, 0.81, 0.66, 0.91, 0.75, 0.84]
 
   for (let index = 0; index < blades; index += 1) {
     const angle = (index / blades) * Math.PI * 2
     const cos = Math.cos(angle)
     const sin = Math.sin(angle)
-    const width = 0.11 + (index % 2) * 0.025
+    const width = 0.095 + (index % 3) * 0.026
     const height = heights[index]
-    const lean = 0.08 + (index % 3) * 0.028
+    const lean = 0.07 + (index % 4) * 0.024
     const bottomLeft: Vec3 = [-width, 0, 0]
     const bottomRight: Vec3 = [width, 0, 0]
     const tip: Vec3 = [lean, height, 0]
@@ -704,10 +705,10 @@ function drawWorldComposition(
     return
   }
 
-  draw(box, [lx - 0.72 * s, 0.42 * s, lz], [0.22 * s, 0.42 * s, 0.82 * s], stone, 1)
-  draw(box, [lx + 0.72 * s, 0.38 * s, lz], [0.22 * s, 0.38 * s, 0.74 * s], moss, 1)
-  draw(box, [lx, 0.78 * s, lz - 0.08 * s], [0.94 * s, 0.08 * s, 0.18 * s], stone, 1)
-  draw(rockB, [lx, 0.04, lz + 0.54 * s], [0.72 * s, 0.34 * s, 0.48 * s], moss, 3, 0, 0.12)
+  draw(rockA, [lx - 0.72 * s, 0.06, lz], [0.86 * s, 0.42 * s, 0.68 * s], stone, 3, 0, -0.22)
+  draw(rockB, [lx + 0.02 * s, 0.08 * s, lz + 0.08 * s], [1.15 * s, 0.58 * s, 0.76 * s], moss, 3, 0, 0.08)
+  draw(rockC, [lx + 0.82 * s, 0.045, lz - 0.06 * s], [0.7 * s, 0.34 * s, 0.54 * s], fern, 3, 0, -0.12)
+  draw(foliage, [lx - 0.1 * s, 0.03, lz + 0.78 * s], [0.58 * s, 0.62 * s, 0.58 * s], fern, 4, 0, 0.18)
 }
 
 export function MiDWorldCanvas({ environment, activeView, workload, onReady }: MiDWorldCanvasProps) {
@@ -960,7 +961,7 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
         const lightDirection = env.sun.altitude > -6
           ? environmentLightDirection(env.sun.azimuth, env.sun.altitude)
           : DEFAULT_LIGHT_DIRECTION
-        const naturalDepth = env.visual.worldContrast
+        const naturalDepth = Math.max(0.86, Math.min(1.06, env.visual.worldContrast * 1.08))
         const wetness = visualState.wetness
         const lightWarmth = visualState.lightWarmth
         const skyCoolness = visualState.skyCoolness
@@ -1230,25 +1231,27 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
         draw(foliage, [-2.9, -0.02, -5.2], [1.05, 0.9, 1.05], fern, 4, 0, -0.18)
         draw(foliage, [3.9, -0.02, -6.4], [0.92, 0.8, 0.92], moss, 4, 0, 0.16)
 
-        draw(box, [-2.2, 0.63, 0.0], [0.04, 0.63, 0.96], cyan, 1, 0.42)
-        draw(box, [2.2, 0.63, 0.0], [0.04, 0.63, 0.96], cyan, 1, 0.42)
-        draw(box, [0, 1.08, -0.01], [1.0, 0.025, 0.025], cyan, 1, 0.52)
-        draw(box, [-4.9, 1.9, -2.7], [0.035, 0.52, 1.55], warm, 1, 0.18, 0.04)
-
         for (const anchor of MODULE_ANCHORS) {
           const active = anchor.view === activeViewRef.current
           const distance = Math.hypot(anchor.position[0] - activeAnchor.position[0], anchor.position[2] - activeAnchor.position[2])
-          const activeEmphasis = Math.min(0.42, 0.24 + focus * 0.12)
-          const nearbyEmphasis = 0.055 * (1 - workloadPressure * 0.28)
-          const distantEmphasis = 0.025 * (1 - workloadPressure * 0.34)
-          const emphasis = active ? activeEmphasis : distance < 6 ? nearbyEmphasis : distantEmphasis
+          const emphasis = active
+            ? Math.min(0.055, 0.028 + focus * 0.018)
+            : distance < 6
+              ? 0.012
+              : 0.005
           const scale: Vec3 = active
-            ? [0.9 + focus * 0.05, 0.035, 0.52 + focus * 0.02]
-            : [0.64, 0.022, 0.38]
-          draw(box, anchor.position, scale, anchor.color, 1, emphasis, active ? 0.08 : 0)
+            ? [0.5 + focus * 0.04, 0.13, 0.34 + focus * 0.02]
+            : [0.3, 0.08, 0.22]
+          draw(
+            rockA,
+            anchor.position,
+            scale,
+            active ? anchor.color : moss,
+            3,
+            emphasis,
+            active ? 0.05 : 0,
+          )
         }
-
-        draw(box, [0, 0.95, -0.05], [1.15, 0.035, 1.15], cyan, 1, 0.16, 0)
 
         gl.bindVertexArray(null)
 
