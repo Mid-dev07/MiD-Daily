@@ -534,6 +534,31 @@ if (/uTime|timestamp * 0\.001|Math\.sin\(t/.test(lightingWorldSource)) {
 }
 
 
+const livingWorldSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
+for (const contract of [
+  'function treeTrunkGeometry()',
+  'function canopyGeometry()',
+  'function drawTree(',
+  'const treeTrunk = createMesh',
+  'const treeCanopy = createMesh',
+  'drawTree(draw, treeTrunk, treeCanopy',
+  'microRelief',
+  'midsizeBreak',
+]) {
+  if (!livingWorldSource.includes(contract)) failures.push('Living-world finalization contract missing: ' + contract)
+}
+for (const obsolete of [
+  'draw(box, [0, 0.08, 0], [4.8, 0.14, 2.7], stone, 1)',
+  'draw(box, [-5.8, 1.15, -2.0], [0.55, 1.15, 2.7]',
+  'draw(box, [5.8, 1.05, -1.4], [0.7, 1.05, 2.4]',
+  'draw(box, [-3.7, 2.0, -5.8], [2.2, 2.0, 0.28]',
+]) {
+  if (livingWorldSource.includes(obsolete)) failures.push('Obsolete technical/architectural landmark primitive remains: ' + obsolete.slice(0, 48))
+}
+if (!/treeTrunk\.vao/.test(livingWorldSource) || !/treeCanopy\.vao/.test(livingWorldSource)) {
+  failures.push('Tree geometry must be released during WebGL cleanup.')
+}
+
 const compositionSource = readFileSync(join(srcDir, 'environment/moduleWorld.ts'), 'utf8')
 const compositionRendererSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
 for (const contract of [
