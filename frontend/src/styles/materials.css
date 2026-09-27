@@ -14,7 +14,6 @@
   --material-recess-dark: rgba(2, 8, 13, .72);
   --material-recess-light: rgba(16, 27, 35, .36);
   --material-emissive-soft: .07;
-  --material-emissive-active: .14;
 }
 
 .app-frame {
@@ -195,13 +194,8 @@ textarea:focus,
 }
 
 /* Lit state: emissive response is reserved for meaningful active states. */
-[data-ux-lit="true"],
-.nav-item.is-active,
-.dashboard-live i {
-  --material-emissive-alpha: var(--material-emissive-soft);
-}
-
 [data-ux-lit="true"] {
+  --material-emissive-alpha: var(--material-emissive-soft);
   border-color: color-mix(
     in srgb,
     var(--module-accent, var(--mi-cyan)) 28%,
