@@ -865,6 +865,7 @@ textarea:focus,
 }
 
 /* Environment state changes should ease into the new world, not jump between snapshots. */
+@media (prefers-reduced-motion: reduce) {
   .environment-scene,
   .environment-sky,
   .environment-sun,
