@@ -42,6 +42,29 @@ const convergedWorkspaceFiles = [
 const modalCandidates = tsxFiles.filter((file) => /role="dialog"[\s\S]{0,240}aria-modal="true"/.test(readFileSync(file, 'utf8')))
 const mainSource = readFileSync(join(srcDir, 'main.tsx'), 'utf8')
 const environmentScene = readFileSync(join(srcDir, 'environment/EnvironmentScene.tsx'), 'utf8')
+const environmentStageStylePath = join(srcDir, 'styles/environment-depth.css')
+const environmentStageStyle = existsSync(environmentStageStylePath) ? readFileSync(environmentStageStylePath, 'utf8') : ''
+const worldModuleSource = readFileSync(join(srcDir, 'environment/moduleWorld.ts'), 'utf8')
+if (!environmentStageStyle.includes('MiD Unreal Living Environment — Stage V2')
+  || !environmentStageStyle.includes('daylight')
+  || !environmentStageStyle.includes('environment-scene[data-renderer="webgl"] .environment-canopy')) {
+  failures.push('Living environment Stage V2 must preserve daylight-first, renderer-aware environmental hierarchy.')
+}
+if (!environmentScene.includes('environment-stage-depth')) {
+  failures.push('Living environment Stage V2 must expose the restrained stage-depth layer.')
+}
+if (!/const relief = .*\* 2\.2/.test(readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8'))
+  || !/const sides = 9/.test(readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8'))
+  || !/const blades = 10/.test(readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8'))) {
+  failures.push('Living environment Stage V2 must retain the denser organic geometry contract without increasing the renderer dependency surface.')
+}
+if (!/eye: \[[^\]]+, 3\.(?:0|1|2|25|15)/.test(worldModuleSource)) {
+  failures.push('Living environment Stage V2 must use the lower authored nature camera rail.')
+}
+if (/draw\(box, \[-2\.2, 0\.63, 0\.0\][\s\S]{0,260}draw\(box, \[0, 1\.08, -0\.01\]/.test(readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8'))) {
+  failures.push('Legacy cyan architectural bars must not remain in the natural environment stage.')
+}
+
 const appSourceForInteraction = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
 const environmentFiles = [
   'environment/types.ts',
