@@ -173,3 +173,19 @@ The spatial environment now prioritizes a daylight-first natural reading over a 
 Quality target:
 
 > The user should perceive a calm, believable outdoor spatial setting first and the rendering technique second.
+
+
+## Living world finalization
+
+The spatial renderer is now explicitly structured around natural landforms rather than architectural primitives:
+
+- terrain uses layered broad, midsize, and micro relief;
+- rocks provide foreground, midground, and horizon grounding;
+- procedural low-poly trunks and canopies create an organic tree silhouette without external assets;
+- projected shadows use the real solar direction and remain bounded to the existing world renderer;
+- module camera rails sit lower to preserve a grounded eye-level reading;
+- CSS atmosphere remains a restrained envelope around the WebGL world instead of carrying the scene by itself.
+
+The quality rule is:
+
+> Remove anything that makes the environment read like a technical demo before adding another effect.
