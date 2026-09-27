@@ -228,7 +228,13 @@ export function App() {
       const target = event.target instanceof Element ? event.target : null
       const nextSurface = target?.closest(surfaceSelector)
       const nextLandscape = target?.closest('.feature-landscape')
-      if (!(nextSurface instanceof HTMLElement) && !(nextLandscape instanceof HTMLElement)) return
+      if (!(nextSurface instanceof HTMLElement) && !(nextLandscape instanceof HTMLElement)) {
+        clearSurface()
+        clearLandscape()
+        focusStrength = 0
+        frame.style.setProperty('--ux-focus-strength', '0')
+        return
+      }
       if (nextSurface instanceof HTMLElement && nextSurface !== activeSurface) {
         clearSurface()
         activeSurface = nextSurface
