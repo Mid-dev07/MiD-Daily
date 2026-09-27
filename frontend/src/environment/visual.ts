@@ -45,6 +45,9 @@ export function environmentCssVariables(environment: EnvironmentState): CSSPrope
     '--env-air-density': String(environment.visual.airDensity),
     '--env-wetness': String(environment.visual.wetness),
     '--env-world-contrast': String(environment.visual.worldContrast),
+    '--env-material-wetness': String(environment.visual.wetness),
+    '--env-material-air-density': String(environment.visual.airDensity),
+    '--env-atmosphere-softness': String(0.04 + environment.visual.airDensity * 0.14),
   } as CSSProperties
 }
 

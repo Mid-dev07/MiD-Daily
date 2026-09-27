@@ -62,7 +62,13 @@
     );
   box-shadow:
     0 22px 56px rgba(0, 0, 0, .24),
-    inset 0 1px 0 var(--material-highlight),
+    inset 0 1px 0 color-mix(
+      in srgb,
+      var(--material-highlight) 82%,
+      rgba(192, 222, 226, calc(var(--env-material-wetness, 0) * 18%))
+    ),
+    inset 0 1px calc(10px + var(--env-material-air-density, 0) * 10px)
+      rgba(205, 221, 218, var(--env-atmosphere-softness, .04)),
     inset 0 -1px 0 rgba(0, 0, 0, .12);
 }
 

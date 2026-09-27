@@ -64,6 +64,16 @@ if (!unrealTokens.every((token) => tokens.toLowerCase().includes(token.toLowerCa
 if (!/--light-angle:\s*145deg/.test(tokens)) failures.push('The canonical 145deg MiD key-light token must remain intact.')
 if (!existsSync(join(srcDir, 'styles/experience.css')) || !/styles\/experience\.css/.test(mainSource)) failures.push('Glass material layer must be loaded explicitly after the structural UI system.')
 if (!/linear-gradient\(145deg/.test(uiSystem) && !/linear-gradient\(145deg/.test(experienceSystem)) failures.push('Unreal material surfaces must retain a 145deg directional gradient.')
+if (!/--env-material-wetness/.test(readFileSync(join(srcDir, 'environment/visual.ts'), 'utf8')) || !/--env-material-air-density/.test(readFileSync(join(srcDir, 'environment/visual.ts'), 'utf8'))) {
+  failures.push('Environment visual state must expose wetness and air-density material coupling.')
+}
+if (!/var\(--env-material-wetness/.test(materialSystem) || !/var\(--env-material-air-density/.test(materialSystem)) {
+  failures.push('Material system must consume live atmospheric coupling variables.')
+}
+if (!/var\(--env-atmosphere-softness/.test(experienceSystem)) {
+  failures.push('Workspace atmosphere must consume the live environment density signal.')
+}
+
 if (!/--cinematic-key-x/.test(readFileSync(join(srcDir, 'environment/visual.ts'), 'utf8')) || !/--cinematic-key-y/.test(readFileSync(join(srcDir, 'environment/visual.ts'), 'utf8'))) {
   failures.push('Environment visual state must expose the cinematic key-light position.')
 }
