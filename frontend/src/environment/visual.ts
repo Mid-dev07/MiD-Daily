@@ -29,7 +29,6 @@ export function environmentCssVariables(environment: EnvironmentState): CSSPrope
     '--cinematic-key-y': `${screenY(sun.altitude)}%`,
     '--cinematic-key-share': `${Math.round(4 + environment.visual.lightIntensity * 7)}%`,
     '--cinematic-fill-share': `${Math.round(2 + environment.visual.lightIntensity * 3)}%`,
-    '--cinematic-vignette-share': `${Math.round(10 + (1 - environment.visual.lightIntensity) * 8)}%`,
     '--env-light-intensity': String(environment.visual.lightIntensity),
     '--env-cloud-opacity': String(environment.visual.cloudOpacity),
     '--env-fog-opacity': String(environment.visual.fogOpacity),
