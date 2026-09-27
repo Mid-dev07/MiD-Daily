@@ -1858,7 +1858,7 @@ textarea:focus,
   display: block;
   width: 100%;
   height: 100%;
-  opacity: .92;
+  opacity: var(--ux-world-opacity, .92);
   pointer-events: none;
 }
 
