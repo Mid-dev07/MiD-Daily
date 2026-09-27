@@ -598,7 +598,7 @@ if (!existsSync(spatialStyles)) {
     failures.push('WorkspaceHeader depth must remain owned by its semantic role, not a component-specific selector.')
   }
 
-  if (/--spatial-x:\s*-?\d+(?:\.\d+)?px/.test(spatialSource) || /translate3d\(var\(--spatial-x/.test(spatialSource)) {
+  if (/--spatial-x\s*:/.test(spatialSource) || !/translate3d\(0, 0, var\(--spatial-z\)\)/.test(spatialSource)) {
     failures.push('Spatial depth must not use horizontal offsets as a substitute for Z depth.')
   }
   if (!/--spatial-z:\s*18px/.test(spatialSource) || !/--spatial-z:\s*14px/.test(spatialSource) || !/--spatial-z:\s*6px/.test(spatialSource)) {
@@ -628,7 +628,7 @@ if (!existsSync(spatialStyles)) {
     'data-spatial-role="identity"',
     'data-spatial-role="archive"',
     'data-spatial-role="focus"',
-    'translate3d(var(--spatial-x), 0, var(--spatial-z))',
+    'translate3d(0, 0, var(--spatial-z))',
     'inset 0 1px 6px',
 
   ]) {
