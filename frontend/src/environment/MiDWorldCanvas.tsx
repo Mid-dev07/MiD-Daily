@@ -1231,11 +1231,10 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
         for (const anchor of MODULE_ANCHORS) {
           const active = anchor.view === activeViewRef.current
           const distance = Math.hypot(anchor.position[0] - activeAnchor.position[0], anchor.position[2] - activeAnchor.position[2])
-          const emphasis = active
-            ? Math.min(0.055, 0.028 + focus * 0.018)
-            : distance < 6
-              ? 0.012
-              : 0.005
+          const activeEmphasis = Math.min(0.055, (0.028 + focus * 0.018) * (1 - workloadPressure * 0.16))
+          const nearbyEmphasis = 0.012 * (1 - workloadPressure * 0.1)
+          const distantEmphasis = 0.005 * (1 - workloadPressure * 0.14)
+          const emphasis = active ? activeEmphasis : distance < 6 ? nearbyEmphasis : distantEmphasis
           const scale: Vec3 = active
             ? [0.5 + focus * 0.04, 0.13, 0.34 + focus * 0.02]
             : [0.3, 0.08, 0.22]
