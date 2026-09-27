@@ -249,8 +249,12 @@ export function App() {
       if (!(nextSurface instanceof HTMLElement) && !(nextLandscape instanceof HTMLElement)) {
         clearSurface()
         clearLandscape()
-        focusStrength = 0
-        frame.style.setProperty('--ux-focus-strength', '0')
+        focusStrength = keyboardFocusStrength
+        frame.style.setProperty('--ux-focus-strength', String(focusStrength))
+        if (focusedSurface instanceof HTMLElement && keyboardFocusStrength > 0) {
+          const rect = focusedSurface.getBoundingClientRect()
+          emitWorldPointer(rect.left + rect.width / 2, rect.top + rect.height / 2, keyboardFocusStrength)
+        }
         return
       }
       if (nextSurface instanceof HTMLElement && nextSurface !== activeSurface) {
@@ -315,9 +319,9 @@ export function App() {
 
       clearFocusSurface()
       keyboardFocusStrength = 0
-      focusStrength = 0
-      frame.style.setProperty('--ux-focus-strength', '0')
-      emitWorldPointer(window.innerWidth / 2, window.innerHeight / 2, 0)
+      focusStrength = activeSurface ? .68 : 0
+      frame.style.setProperty('--ux-focus-strength', String(focusStrength))
+      emitWorldPointer(pointerX || window.innerWidth / 2, pointerY || window.innerHeight / 2, focusStrength)
     }
 
     const onPointerLeave = () => {
