@@ -7,8 +7,8 @@
 
    Performance rule:
    Only the visible shell and dense command surfaces use backdrop blur.
-   Primary cards use a single bounded surface blur on larger screens.
-   Mobile disables card blur and keeps the environment lightweight.
+   Primary content surfaces stay clear and use material response for depth.
+   Mobile keeps the environment and lighting field lightweight.
 */
 
 @supports not (backdrop-filter: blur(1px)) {
@@ -492,8 +492,25 @@
   border: 1px solid rgba(222, 234, 228, .045);
   border-radius: 36px;
   background:
-    linear-gradient(180deg, rgba(229, 240, 230, .018), transparent 24%),
-    radial-gradient(70% 30% at 50% 0%, color-mix(in srgb, var(--module-accent) 7%, transparent), transparent 70%);
+    radial-gradient(
+      620px 360px at var(--cinematic-key-x, 72%) var(--cinematic-key-y, 14%),
+      color-mix(in srgb, var(--nature-sun) var(--cinematic-key-share, 6%), transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      70% 30% at 50% 100%,
+      color-mix(in srgb, var(--nature-sage) var(--cinematic-fill-share, 4%), transparent),
+      transparent 72%
+    ),
+    linear-gradient(
+      var(--light-angle, 145deg),
+      rgba(229, 240, 230, .018),
+      transparent 36%,
+      rgba(0, 0, 0, .045) 100%
+    );
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.035),
+    inset 0 -1px color-mix(in srgb, var(--nature-stone) 3%, transparent);
   pointer-events: none;
 }
 
