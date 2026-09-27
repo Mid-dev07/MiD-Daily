@@ -10,6 +10,7 @@ import './styles/experience.css'
 import './styles/materials.css'
 import './styles/responsive.css'
 import './styles/spatial-composition.css'
+import './styles/environment-depth.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
