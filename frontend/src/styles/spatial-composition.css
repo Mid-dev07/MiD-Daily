@@ -89,13 +89,15 @@
 }
 
 /* Semantic depth map.
-   Spatial elevation is owned by the semantic role, never by a module-specific selector.
+   Z depth changes spatial hierarchy without moving content horizontally.
 */
 .view-key[data-module] [data-spatial-role] {
   --spatial-z: 0px;
-  --spatial-x: 0px;
-  --spatial-hover-z: 0px;
-  transform: translate3d(var(--spatial-x), 0, var(--spatial-z));
+  --spatial-hover-z: 1px;
+  --spatial-contact-y: 5px;
+  --spatial-contact-blur: 5px;
+  --spatial-contact-opacity: .42;
+  transform: translate3d(0, 0, var(--spatial-z));
   transform-style: preserve-3d;
   transform-origin: 50% 72%;
   backface-visibility: hidden;
@@ -107,88 +109,105 @@
 }
 
 .view-key[data-module] [data-spatial-role="orientation"] {
-  --spatial-z: 16px;
-  --spatial-hover-z: 18px;
-}
-.view-key[data-module] [data-spatial-role="controls"] {
-  --spatial-z: 7px;
-  --spatial-x: -3px;
-  --spatial-hover-z: 9px;
-}
-.view-key[data-module] [data-spatial-role="metrics"] {
-  --spatial-z: 12px;
-  --spatial-hover-z: 14px;
+  --spatial-z: 18px;
+  --spatial-hover-z: 20px;
+  --spatial-contact-y: 8px;
+  --spatial-contact-blur: 8px;
+  --spatial-contact-opacity: .52;
 }
 .view-key[data-module] [data-spatial-role="primary"] {
   --spatial-z: 14px;
-  --spatial-hover-z: 18px;
+  --spatial-hover-z: 16px;
+  --spatial-contact-y: 9px;
+  --spatial-contact-blur: 9px;
+  --spatial-contact-opacity: .58;
   border-color: color-mix(in srgb, var(--spatial-accent) 18%, var(--mi-line));
-  box-shadow:
-    0 26px 72px rgba(0,0,0,.28),
-    0 0 46px color-mix(in srgb, var(--spatial-accent) 5%, transparent),
-    inset 0 1px rgba(255,255,255,.07);
-}
-.view-key[data-module] [data-spatial-role="focus"] {
-  --spatial-z: 11px;
-  --spatial-x: 6px;
-  --spatial-hover-z: 18px;
-}
-.view-key[data-module] [data-spatial-role="rhythm"] {
-  --spatial-z: 5px;
-  --spatial-x: -5px;
-  --spatial-hover-z: 7px;
-}
-.view-key[data-module] [data-spatial-role="secondary-group"] {
-  --spatial-z: 6px;
-  --spatial-x: 4px;
-  --spatial-hover-z: 8px;
-}
-.view-key[data-module] [data-spatial-role="supporting"] {
-  --spatial-z: 5px;
-  --spatial-x: 10px;
-  --spatial-hover-z: 7px;
-}
-.view-key[data-module] [data-spatial-role="utility"] {
-  --spatial-z: 0px;
-  --spatial-hover-z: 2px;
-}
-.view-key[data-module] [data-spatial-role="archive"] {
-  --spatial-z: 2px;
-  --spatial-x: 14px;
-  --spatial-hover-z: 4px;
 }
 .view-key[data-module] [data-spatial-role="identity"] {
   --spatial-z: 15px;
-  --spatial-x: -4px;
   --spatial-hover-z: 17px;
+  --spatial-contact-y: 9px;
+  --spatial-contact-blur: 9px;
+  --spatial-contact-opacity: .56;
   border-color: color-mix(in srgb, var(--spatial-accent) 16%, var(--mi-line));
 }
+.view-key[data-module] [data-spatial-role="focus"] {
+  --spatial-z: 11px;
+  --spatial-hover-z: 13px;
+  --spatial-contact-y: 7px;
+  --spatial-contact-blur: 7px;
+  --spatial-contact-opacity: .50;
+}
+.view-key[data-module] [data-spatial-role="metrics"] {
+  --spatial-z: 9px;
+  --spatial-hover-z: 10px;
+  --spatial-contact-y: 6px;
+  --spatial-contact-blur: 6px;
+  --spatial-contact-opacity: .44;
+}
+.view-key[data-module] [data-spatial-role="secondary-group"] {
+  --spatial-z: 7px;
+  --spatial-hover-z: 8px;
+  --spatial-contact-y: 5px;
+  --spatial-contact-blur: 5px;
+  --spatial-contact-opacity: .38;
+}
+.view-key[data-module] [data-spatial-role="supporting"] {
+  --spatial-z: 6px;
+  --spatial-hover-z: 7px;
+  --spatial-contact-y: 5px;
+  --spatial-contact-blur: 5px;
+  --spatial-contact-opacity: .34;
+}
+.view-key[data-module] [data-spatial-role="rhythm"] {
+  --spatial-z: 4px;
+  --spatial-hover-z: 5px;
+  --spatial-contact-y: 4px;
+  --spatial-contact-blur: 4px;
+  --spatial-contact-opacity: .28;
+}
+.view-key[data-module] [data-spatial-role="controls"],
 .view-key[data-module] [data-spatial-role="instrument"] {
   --spatial-z: 2px;
-  --spatial-hover-z: 4px;
+  --spatial-hover-z: 3px;
+  --spatial-contact-y: 3px;
+  --spatial-contact-blur: 3px;
+  --spatial-contact-opacity: .24;
+}
+.view-key[data-module] [data-spatial-role="archive"] {
+  --spatial-z: 1px;
+  --spatial-hover-z: 2px;
+  --spatial-contact-y: 2px;
+  --spatial-contact-blur: 2px;
+  --spatial-contact-opacity: .18;
+}
+.view-key[data-module] [data-spatial-role="utility"] {
+  --spatial-z: 0px;
+  --spatial-hover-z: 1px;
+  --spatial-contact-y: 2px;
+  --spatial-contact-blur: 2px;
+  --spatial-contact-opacity: .14;
 }
 
-/* Shared surface treatment: shallow edge + grounded contact, not glow everywhere. */
-.view-key[data-module] [data-spatial-role="primary"]::after,
-.view-key[data-module] [data-spatial-role="focus"]::after,
-.view-key[data-module] [data-spatial-role="identity"]::after {
+/* Shared surface treatment: visible contact only where elevation exists. */
+.view-key[data-module] [data-spatial-role]::after {
   content: "";
   position: absolute;
   left: 8%;
   right: 8%;
-  bottom: -9px;
+  bottom: calc(var(--spatial-contact-y) * -1);
   height: 12px;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(0,0,0,.34), transparent 72%);
-  filter: blur(5px);
-  opacity: .72;
+  background: radial-gradient(ellipse, rgba(0,0,0,.38), transparent 72%);
+  filter: blur(var(--spatial-contact-blur));
+  opacity: var(--spatial-contact-opacity);
   pointer-events: none;
 }
 
 .view-key[data-module] [data-spatial-role="primary"] {
   background:
     linear-gradient(
-      145deg,
+      var(--light-angle, 145deg),
       color-mix(in srgb, var(--spatial-accent) 5%, rgba(29,45,59,.42)),
       rgba(7,14,22,.78)
     ),
@@ -203,10 +222,7 @@
    These may tune material/emphasis only; depth remains role-owned.
 */
 .view-key[data-module="dashboard"] [data-spatial-role="primary"] {
-  box-shadow:
-    0 32px 88px rgba(0,0,0,.34),
-    0 0 54px color-mix(in srgb, var(--spatial-accent) 5%, transparent),
-    inset 0 1px rgba(255,255,255,.07);
+  border-color: color-mix(in srgb, var(--spatial-accent) 20%, var(--mi-line));
 }
 
 .view-key[data-module="dashboard"] [data-spatial-role="secondary-group"] {
@@ -361,7 +377,6 @@
 
   .view-key[data-module] [data-spatial-role] {
     transform: none;
-    --spatial-x: 0px;
     transition:
       border-color var(--unreal-motion-normal) var(--ease-standard),
       box-shadow var(--unreal-motion-normal) var(--ease-standard);
