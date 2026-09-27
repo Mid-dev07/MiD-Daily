@@ -21,6 +21,7 @@ const tsxFiles = walk(srcDir).filter((file) => file.endsWith('.tsx'))
 const cssFiles = walk(join(srcDir, 'styles')).filter((file) => file.endsWith('.css'))
 const uiSystem = readFileSync(join(srcDir, 'styles/ui-system.css'), 'utf8')
 const experienceSystem = readFileSync(join(srcDir, 'styles/experience.css'), 'utf8')
+const materialSystem = readFileSync(join(srcDir, 'styles/materials.css'), 'utf8')
 const tokens = readFileSync(join(srcDir, 'styles/tokens.css'), 'utf8')
 const dashboard = readFileSync(join(srcDir, 'features/dashboard/DashboardView.tsx'), 'utf8')
 const actionFocus = readFileSync(join(srcDir, 'features/dashboard/components/ActionFocus.tsx'), 'utf8')
@@ -98,6 +99,9 @@ for (const className of requiredUiClasses) {
 if (existsSync(join(srcDir, 'styles/app.css'))) {
   failures.push('Legacy styles/app.css must remain removed from the active stylesheet tree.')
 }
+if (materialSystem.includes('backdrop-filter')) {
+  failures.push('materials.css must remain material-blur free; keep backdrop-filter isolated in experience.css.')
+}
 if (uiSystem.includes('backdrop-filter')) {
   failures.push('ui-system.css must remain material-blur free; keep backdrop-filter isolated in experience.css.')
 }
@@ -114,7 +118,7 @@ if (!/@supports\s+not\s*\(\s*backdrop-filter:\s*blur\(1px\)\s*\)/.test(experienc
 if (!/G0/.test(experienceSystem) || !/G1/.test(experienceSystem) || !/G2/.test(experienceSystem) || !/G3/.test(experienceSystem) || !/G4/.test(experienceSystem)) {
   failures.push('Experience material hierarchy contract is missing or incomplete.')
 }
-if (!/data-ux-lit/.test(uiSystem) || !/action-focus/.test(uiSystem) || !/prefers-reduced-motion:\s*reduce/.test(uiSystem)) {
+if (!/data-ux-lit/.test(uiSystem + '\n' + materialSystem) || !/action-focus/.test(uiSystem) || !/prefers-reduced-motion:\s*reduce/.test(uiSystem)) {
   failures.push('Living material interaction contract is missing from the active UI stylesheet.')
 }
 if (!/surfaceSelector/.test(appSourceForInteraction) || !/requestAnimationFrame/.test(appSourceForInteraction) || !/pointermove/.test(appSourceForInteraction)) {
@@ -572,7 +576,11 @@ if (!existsSync(spatialStyles)) {
   failures.push('Spatial workspace composition stylesheet is missing.')
 } else {
   const spatialSource = readFileSync(spatialStyles, 'utf8')
-  const moduleScopedDepthPattern = /\.view-key\[data-module="[^"]+"\][^{]*\[data-spatial-role="[^"]+"\]\s*\{[^}]*\btransform:\s*[^;]*translateZ\(/s
+  if (/backdrop-filter:\s*blur\(/.test(spatialSource)) {
+    failures.push('Spatial content surfaces must remain blur-free; glass blur is reserved for the shell and transient dialog surfaces.')
+  }
+
+    const moduleScopedDepthPattern = /\.view-key\[data-module="[^"]+"\][^{]*\[data-spatial-role="[^"]+"\]\s*\{[^}]*\btransform:\s*[^;]*translateZ\(/s
   const moduleScopedHeaderDepthPattern = /\.view-key\[data-module\][^{}]*\.workspace-header[^{}]*\{[^}]*translateZ\(/s
   if (moduleScopedDepthPattern.test(spatialSource)) {
     failures.push('Spatial depth must remain owned by semantic roles, not module-specific selectors.')
@@ -602,8 +610,7 @@ if (!existsSync(spatialStyles)) {
     'data-spatial-role="archive"',
     'data-spatial-role="focus"',
     'translate3d(var(--spatial-x), 0, var(--spatial-z))',
-    'backdrop-filter: blur(10px)',
-    'inset 0 1px 6px',
+undefined    'inset 0 1px 6px',
 
   ]) {
     if (!spatialSource.includes(contract)) failures.push('Spatial composition contract missing: ' + contract)
