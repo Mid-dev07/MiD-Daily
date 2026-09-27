@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
 const root = new URL('..', import.meta.url).pathname
+const failures = []
 const operatingStandardPath = join(root, '../docs/MID_PREMIUM_UNREAL_STANDARD.md')
 if (!existsSync(operatingStandardPath)) failures.push('Premium Unreal operating standard document is missing.')
 const identityPath = join(root, '../docs/MID_IDENTITY_SYSTEM.md')
@@ -53,13 +54,16 @@ if (!environmentStageStyle.includes('MiD Unreal Living Environment — Stage V2'
 if (!environmentScene.includes('environment-stage-depth')) {
   failures.push('Living environment Stage V2 must expose the restrained stage-depth layer.')
 }
-if (!/const relief = .*\* 2\.2/.test(readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8'))
-  || !/const sides = 9/.test(readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8'))
-  || !/const blades = 10/.test(readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8'))) {
-  failures.push('Living environment Stage V2 must retain the denser organic geometry contract without increasing the renderer dependency surface.')
+const worldCanvasSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
+if (!/const relief = [\s\S]*\* 2\.65/.test(worldCanvasSource)
+  || !/const sides = 9/.test(worldCanvasSource)
+  || !/const blades = 10/.test(worldCanvasSource)
+  || !/function treeTrunkGeometry/.test(worldCanvasSource)
+  || !/function canopyGeometry/.test(worldCanvasSource)) {
+  failures.push('Living environment finalization must retain layered terrain relief and organic low-poly geometry without increasing the renderer dependency surface.')
 }
-if (!/eye: \[[^\]]+, 3\.(?:0|1|2|25|15)/.test(worldModuleSource)) {
-  failures.push('Living environment Stage V2 must use the lower authored nature camera rail.')
+if (!/eye: \[[^\]]+, 2\.(?:5|6|7|8)/.test(worldModuleSource)) {
+  failures.push('Living environment finalization must use the grounded authored nature camera rail.')
 }
 if (/draw\(box, \[-2\.2, 0\.63, 0\.0\][\s\S]{0,260}draw\(box, \[0, 1\.08, -0\.01\]/.test(readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8'))) {
   failures.push('Legacy cyan architectural bars must not remain in the natural environment stage.')
@@ -78,7 +82,6 @@ const environmentFiles = [
   'environment/moduleWorld.ts',
 ]
 
-const failures = []
 
 const unrealTokens = ['#0a1119', '#0d151f', '#4fd1ff', '#4ade80', '#fbbf24', '#fb7185']
 if (!unrealTokens.every((token) => tokens.toLowerCase().includes(token.toLowerCase()))) {
@@ -529,10 +532,35 @@ for (const contract of [
 if (!/environmentLightDirection/.test(lightingWorldSource) || !/uniforms\.light, lightDirection/.test(lightingWorldSource)) {
   failures.push('Lighting/atmosphere v1 must retain solar direction as the primary directional light input.')
 }
-if (/uTime|timestamp * 0\.001|Math\.sin\(t/.test(lightingWorldSource)) {
+if (/\buTime\b|timestamp\s*\*\s*0\.001|Math\.sin\(\s*t\b/.test(lightingWorldSource)) {
   failures.push('Lighting/atmosphere v1 must remain event/state driven with no perpetual time animation.')
 }
 
+
+const livingWorldSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
+for (const contract of [
+  'function treeTrunkGeometry()',
+  'function canopyGeometry()',
+  'function drawTree(',
+  'const treeTrunk = createMesh',
+  'const treeCanopy = createMesh',
+  'drawTree(draw, treeTrunk, treeCanopy',
+  'microRelief',
+  'midsizeBreak',
+]) {
+  if (!livingWorldSource.includes(contract)) failures.push('Living-world finalization contract missing: ' + contract)
+}
+for (const obsolete of [
+  'draw(box, [0, 0.08, 0], [4.8, 0.14, 2.7], stone, 1)',
+  'draw(box, [-5.8, 1.15, -2.0], [0.55, 1.15, 2.7]',
+  'draw(box, [5.8, 1.05, -1.4], [0.7, 1.05, 2.4]',
+  'draw(box, [-3.7, 2.0, -5.8], [2.2, 2.0, 0.28]',
+]) {
+  if (livingWorldSource.includes(obsolete)) failures.push('Obsolete technical/architectural landmark primitive remains: ' + obsolete.slice(0, 48))
+}
+if (!/treeTrunk\.vao/.test(livingWorldSource) || !/treeCanopy\.vao/.test(livingWorldSource)) {
+  failures.push('Tree geometry must be released during WebGL cleanup.')
+}
 
 const compositionSource = readFileSync(join(srcDir, 'environment/moduleWorld.ts'), 'utf8')
 const compositionRendererSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
@@ -589,7 +617,7 @@ if (!/draw\(\s*shadowMesh[\s\S]*,\s*6,[\s\S]*opacity/.test(environmentResponseSo
 if (!/groundWet = smoothstep/.test(environmentResponseSource) || !/weatherSpecular/.test(environmentResponseSource)) {
   failures.push('Weather response must remain material-aware instead of applying one global glossy treatment.')
 }
-if (/uTime|timestamp * 0\\.001|Math\\.sin\(t/.test(environmentResponseSource)) {
+if (/\buTime\b|timestamp\s*\*\s*0\.001|Math\.sin\(\s*t\b/.test(environmentResponseSource)) {
   failures.push('Environmental response v1 must remain event/state driven with no perpetual decorative animation.')
 }
 
@@ -640,7 +668,7 @@ if (!/rainfallPooling[\s\S]*horizontalWetness/.test(weatherIntelligenceSource)) 
 if (!/nearWeatherWash[\s\S]*atmosphericFade/.test(weatherIntelligenceSource)) {
   failures.push('Weather air density must contribute to spatial atmospheric wash.')
 }
-if (/uTime|timestamp *0\.001|Math\.sin\(t/.test(weatherIntelligenceSource)) {
+if (/\buTime\b|timestamp\s*\*\s*0\.001|Math\.sin\(\s*t\b/.test(weatherIntelligenceSource)) {
   failures.push('Weather intelligence v2 must remain event/state driven with no perpetual decorative animation.')
 }
 
@@ -805,7 +833,7 @@ if (!/environmentLightDirection/.test(worldRenderer)) failures.push('Spatial wor
 if (!/uniforms\.light, lightDirection\[0\], lightDirection\[1\], lightDirection\[2\]/.test(worldRenderer)) {
   failures.push('Spatial world must upload the calculated solar direction to WebGL lighting.')
 }
-if (/uTime|const t = timestamp \* 0\.001|Math\.sin\(t/.test(worldRenderer)) {
+if (/\buTime\b|timestamp\s*\*\s*0\.001|Math\.sin\(\s*t\b/.test(worldRenderer)) {
   failures.push('Spatial world must not use perpetual time-based animation loops.')
 }
 if (!/cameraState|desiredCamera|cameraBlend/.test(worldRenderer)) {

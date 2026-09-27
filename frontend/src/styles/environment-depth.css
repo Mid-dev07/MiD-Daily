@@ -71,3 +71,66 @@
     opacity: .28;
   }
 }
+
+
+/* =========================================================
+   LIVING WORLD FINALIZATION · NATURAL LIGHT FIELD
+   WebGL is the spatial authority on capable desktop layouts;
+   CSS remains a restrained atmospheric envelope.
+========================================================= */
+
+.environment-scene[data-renderer="webgl"] .environment-sky {
+  background:
+    radial-gradient(
+      26% 34% at var(--env-sun-x) var(--env-sun-y),
+      rgba(255, 241, 198, calc(.16 * var(--env-sun-opacity))),
+      transparent 72%
+    ),
+    radial-gradient(
+      74% 58% at 52% 48%,
+      rgba(162, 184, 171, calc(.07 + .05 * var(--env-light-intensity))),
+      transparent 74%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #5b7783 calc(42% + var(--env-sky-coolness) * 18%), #2c4750),
+      #718b8a 45%,
+      #748875 68%,
+      #182a25 100%
+    );
+}
+
+.environment-scene[data-renderer="webgl"] .environment-horizon {
+  top: 50%;
+  height: 50%;
+  opacity: calc(.18 + var(--env-light-intensity) * .10);
+  background:
+    radial-gradient(
+      62% 34% at 48% 18%,
+      rgba(205, 218, 198, calc(.06 + var(--env-air-density) * .08)),
+      transparent 74%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(177, 193, 177, .04),
+      rgba(39, 60, 48, .08) 42%,
+      rgba(7, 17, 15, .24) 100%
+    );
+}
+
+.environment-scene[data-renderer="webgl"] .environment-vignette {
+  opacity: calc(var(--env-vignette-opacity) * .52);
+}
+
+.environment-scene[data-renderer="webgl"] .environment-light-shafts {
+  mix-blend-mode: screen;
+  opacity: calc(var(--env-sun-beam) * .28);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .environment-scene[data-renderer="webgl"] .environment-sky,
+  .environment-scene[data-renderer="webgl"] .environment-horizon,
+  .environment-scene[data-renderer="webgl"] .environment-vignette {
+    transition: none;
+  }
+}
