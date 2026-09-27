@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
 const root = new URL('..', import.meta.url).pathname
+const failures = []
 const operatingStandardPath = join(root, '../docs/MID_PREMIUM_UNREAL_STANDARD.md')
 if (!existsSync(operatingStandardPath)) failures.push('Premium Unreal operating standard document is missing.')
 const identityPath = join(root, '../docs/MID_IDENTITY_SYSTEM.md')
@@ -53,13 +54,16 @@ if (!environmentStageStyle.includes('MiD Unreal Living Environment — Stage V2'
 if (!environmentScene.includes('environment-stage-depth')) {
   failures.push('Living environment Stage V2 must expose the restrained stage-depth layer.')
 }
-if (!/const relief = .*\* 2\.2/.test(readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8'))
-  || !/const sides = 9/.test(readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8'))
-  || !/const blades = 10/.test(readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8'))) {
-  failures.push('Living environment Stage V2 must retain the denser organic geometry contract without increasing the renderer dependency surface.')
+const worldCanvasSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
+if (!/const relief = [\s\S]*\* 2\.65/.test(worldCanvasSource)
+  || !/const sides = 9/.test(worldCanvasSource)
+  || !/const blades = 10/.test(worldCanvasSource)
+  || !/function treeTrunkGeometry/.test(worldCanvasSource)
+  || !/function canopyGeometry/.test(worldCanvasSource)) {
+  failures.push('Living environment finalization must retain layered terrain relief and organic low-poly geometry without increasing the renderer dependency surface.')
 }
-if (!/eye: \[[^\]]+, 3\.(?:0|1|2|25|15)/.test(worldModuleSource)) {
-  failures.push('Living environment Stage V2 must use the lower authored nature camera rail.')
+if (!/eye: \[[^\]]+, 2\.(?:5|6|7|8)/.test(worldModuleSource)) {
+  failures.push('Living environment finalization must use the grounded authored nature camera rail.')
 }
 if (/draw\(box, \[-2\.2, 0\.63, 0\.0\][\s\S]{0,260}draw\(box, \[0, 1\.08, -0\.01\]/.test(readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8'))) {
   failures.push('Legacy cyan architectural bars must not remain in the natural environment stage.')
@@ -78,7 +82,6 @@ const environmentFiles = [
   'environment/moduleWorld.ts',
 ]
 
-const failures = []
 
 const unrealTokens = ['#0a1119', '#0d151f', '#4fd1ff', '#4ade80', '#fbbf24', '#fb7185']
 if (!unrealTokens.every((token) => tokens.toLowerCase().includes(token.toLowerCase()))) {
