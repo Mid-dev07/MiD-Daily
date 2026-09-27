@@ -156,4 +156,7 @@
   --unreal-motion-micro: 140ms;
   --unreal-motion-normal: 210ms;
   --unreal-motion-scene: 320ms;
+  --env-transition-fast: 700ms;
+  --env-transition-normal: 1200ms;
+  --env-transition-slow: 1600ms;
 }

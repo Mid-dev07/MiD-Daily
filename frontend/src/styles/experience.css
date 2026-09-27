@@ -60,7 +60,7 @@
   background:
     radial-gradient(120% 80% at 50% 110%, rgba(104, 125, 109, .32), transparent 62%),
     linear-gradient(180deg, #08111c 0%, #132538 42%, #172a38 64%, #08131d 100%);
-  transition: background 600ms var(--ease-standard);
+  transition: background var(--env-transition-slow) var(--ease-standard);
 }
 
 .environment-sun,
@@ -72,7 +72,13 @@
   top: var(--env-sun-y);
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  will-change: opacity;
+  will-change: auto;
+  transition:
+    left var(--env-transition-slow) var(--ease-standard),
+    top var(--env-transition-slow) var(--ease-standard),
+    opacity var(--env-transition-normal) var(--ease-standard),
+    filter var(--env-transition-normal) var(--ease-standard),
+    box-shadow var(--env-transition-normal) var(--ease-standard);
 }
 
 .environment-sun {
@@ -116,7 +122,9 @@
 .environment-clouds {
   z-index: 2;
   opacity: var(--env-cloud-opacity);
-  transition: opacity 500ms var(--ease-standard);
+  transition:
+    opacity var(--env-transition-normal) var(--ease-standard),
+    filter var(--env-transition-slow) var(--ease-standard);
 }
 
 .environment-cloud {
@@ -144,6 +152,7 @@
     linear-gradient(180deg, rgba(139, 163, 143, .04), transparent 34%),
     radial-gradient(ellipse at 40% 10%, rgba(187, 204, 190, .08), transparent 48%);
   opacity: var(--env-horizon-opacity);
+  transition: opacity var(--env-transition-slow) var(--ease-standard), filter var(--env-transition-slow) var(--ease-standard);
 }
 
 .environment-terrain {
@@ -155,6 +164,7 @@
     linear-gradient(18deg, rgba(4, 13, 10, .92) 0 46%, transparent 47%),
     linear-gradient(180deg, rgba(26, 46, 37, .22), rgba(3, 10, 12, .94));
   clip-path: polygon(0 36%, 12% 29%, 23% 40%, 36% 18%, 47% 34%, 58% 14%, 72% 31%, 84% 17%, 100% 32%, 100% 100%, 0 100%);
+  transition: filter var(--env-transition-slow) var(--ease-standard), opacity var(--env-transition-slow) var(--ease-standard);
 }
 
 .environment-canopy {
@@ -165,6 +175,7 @@
     radial-gradient(ellipse at 92% 10%, rgba(4, 13, 10, .7) 0 26%, transparent 27%),
     linear-gradient(180deg, rgba(2, 9, 9, .62), transparent 55%);
   opacity: .84;
+  transition: opacity var(--env-transition-slow) var(--ease-standard), filter var(--env-transition-slow) var(--ease-standard);
 }
 
 .environment-light-shafts {
@@ -183,11 +194,13 @@
       transparent 68%
     );
   mix-blend-mode: screen;
+  transition: opacity var(--env-transition-fast) var(--ease-standard), filter var(--env-transition-normal) var(--ease-standard);
 }
 
 .environment-rain {
   z-index: 8;
   opacity: var(--env-rain-opacity);
+  transition: opacity var(--env-transition-fast) var(--ease-standard), filter var(--env-transition-fast) var(--ease-standard);
   background:
     repeating-linear-gradient(
       112deg,
@@ -200,6 +213,7 @@
 .environment-fog {
   z-index: 9;
   opacity: var(--env-fog-opacity);
+  transition: opacity var(--env-transition-slow) var(--ease-standard), filter var(--env-transition-slow) var(--ease-standard);
   background:
     radial-gradient(ellipse at 44% 65%, rgba(205, 223, 211, .12), transparent 44%),
     linear-gradient(180deg, transparent 28%, rgba(205, 223, 211, .09) 52%, transparent 76%);
@@ -208,6 +222,7 @@
 .environment-vignette {
   z-index: 10;
   opacity: var(--env-vignette-opacity);
+  transition: opacity var(--env-transition-slow) var(--ease-standard), filter var(--env-transition-slow) var(--ease-standard);
   background:
     linear-gradient(180deg, rgba(1, 7, 12, .16), transparent 28%, rgba(0, 5, 8, .4) 100%),
     radial-gradient(ellipse at center, transparent 48%, rgba(0, 5, 9, .58) 100%);
@@ -849,7 +864,21 @@ textarea:focus,
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
+/* Environment state changes should ease into the new world, not jump between snapshots. */
+  .environment-scene,
+  .environment-sky,
+  .environment-sun,
+  .environment-moon,
+  .environment-clouds,
+  .environment-horizon,
+  .environment-terrain,
+  .environment-canopy,
+  .environment-light-shafts,
+  .environment-rain,
+  .environment-fog,
+  .environment-vignette {
+    transition: none !important;
+  }
   .dashboard-habit-row:hover {
     transform: none;
   }
@@ -1672,6 +1701,21 @@ textarea:focus,
   [data-ux-lit="true"] {
     transform: none;
     transition: border-color var(--unreal-motion-normal) var(--ease-standard), box-shadow var(--unreal-motion-normal) var(--ease-standard);
+  }
+
+  .environment-scene,
+  .environment-sky,
+  .environment-sun,
+  .environment-moon,
+  .environment-clouds,
+  .environment-horizon,
+  .environment-terrain,
+  .environment-canopy,
+  .environment-light-shafts,
+  .environment-rain,
+  .environment-fog,
+  .environment-vignette {
+    transition: none !important;
   }
 
   .environment-clouds,
