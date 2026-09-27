@@ -137,3 +137,21 @@ The design rule is:
 > one world, different terrain.
 
 The shell should feel spatial and natural without pretending that each module is a separate application.
+
+
+## Material separation v1
+
+The shared spatial shader now uses a bounded material-family response rather than a near-uniform lighting treatment:
+
+- mineral/architectural forms keep controlled roughness and moderate moisture retention;
+- terrain stays highly rough with low specular response and moderate dampening;
+- rock/stone receives a tighter specular lobe and stronger wet response;
+- foliage remains diffuse, retains less moisture, and avoids glossy rain response;
+- wet surfaces keep a distinct lower-roughness response without becoming emissive or dominant;
+- material diffuse response, wet-darkening retention, and specular gain remain in the same shader pass.
+
+The intent is perceptual separation through **light response**, not through adding textures or stronger base-color contrast.
+
+Quality target:
+
+> Under the same environmental light, terrain, rock, foliage, and wet surfaces should read as different physical substances before the viewer consciously inspects their colors.
