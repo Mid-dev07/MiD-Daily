@@ -1,0 +1,266 @@
+/* MiD Daily — Material Realism V1
+   Canonical surface/material layer for the Unreal rebuild.
+   Spatial depth remains owned by spatial-composition.css.
+*/
+
+:root {
+  --material-mineral-0: rgba(8, 16, 23, .88);
+  --material-mineral-1: rgba(18, 31, 41, .72);
+  --material-mineral-2: rgba(30, 46, 57, .34);
+  --material-edge: rgba(226, 238, 232, .13);
+  --material-edge-strong: rgba(229, 241, 235, .22);
+  --material-highlight: rgba(247, 252, 247, .075);
+  --material-contact: rgba(0, 0, 0, .34);
+  --material-recess-dark: rgba(2, 8, 13, .72);
+  --material-recess-light: rgba(16, 27, 35, .36);
+  --material-emissive-soft: .07;
+}
+
+.app-frame {
+  background:
+    radial-gradient(80% 54% at 72% 0%, rgba(79, 209, 255, .032), transparent 68%),
+    radial-gradient(72% 44% at 8% 86%, rgba(102, 138, 108, .032), transparent 72%),
+    var(--mi-void);
+}
+
+/*
+ * Primary product surfaces:
+ * directional mineral body + restrained edge highlight + contact shadow.
+ * No blanket blur: depth should come from light response, not translucency.
+ */
+.content-card,
+.glass-panel,
+.stat-card,
+.integration-panel,
+.ai-shell-card,
+.dashboard-signal-card,
+.assistant-channel-card,
+.secondary-panel,
+.notification-card,
+.finance-budget-row,
+.task-item-card,
+.schedule-events-card,
+.flexible-plan,
+.profile-hero-card,
+.profile-form-card,
+.insights-metric,
+.habit-board,
+.habit-composer,
+.social-foundation-card {
+  border-color: var(--material-edge);
+  background:
+    radial-gradient(
+      320px 220px at var(--ux-x, 18%) var(--ux-y, 8%),
+      rgba(238, 246, 239, .055),
+      transparent 72%
+    ),
+    linear-gradient(
+      145deg,
+      var(--material-mineral-2) 0%,
+      var(--material-mineral-1) 34%,
+      var(--material-mineral-0) 100%
+    );
+  box-shadow:
+    0 22px 56px rgba(0, 0, 0, .24),
+    inset 0 1px 0 var(--material-highlight),
+    inset 0 -1px 0 rgba(0, 0, 0, .12);
+}
+
+.content-card::before,
+.glass-panel::before,
+.stat-card::before,
+.dashboard-signal-card::before,
+.assistant-channel-card::before,
+.secondary-panel::before,
+.notification-card::before,
+.finance-budget-row::before,
+.task-item-card::before,
+.schedule-events-card::before,
+.flexible-plan::before,
+.profile-hero-card::before,
+.profile-form-card::before,
+.insights-metric::before,
+.habit-board::before,
+.habit-composer::before,
+.social-foundation-card::before {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, .035),
+      transparent 34%,
+      transparent 76%,
+      color-mix(in srgb, var(--module-accent, var(--mi-cyan)) 4%, transparent)
+    );
+}
+
+/* Raised command surfaces have a clearer shell-to-content separation. */
+.dashboard-command-deck,
+.dashboard-hero-aside {
+  border-color: rgba(226, 238, 232, .14);
+  background:
+    radial-gradient(
+      420px 220px at var(--ux-x, 20%) var(--ux-y, 8%),
+      color-mix(in srgb, var(--module-accent, var(--mi-cyan)) 6%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(29, 45, 56, .44),
+      rgba(7, 14, 21, .88)
+    );
+  box-shadow:
+    0 28px 76px rgba(0, 0, 0, .30),
+    inset 0 1px 0 rgba(255, 255, 255, .075),
+    inset 0 -1px 0 rgba(0, 0, 0, .16);
+}
+
+/* Recessed controls are visually cut into the surface, not floating glass. */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea,
+.global-search-input-wrap {
+  border-color: rgba(220, 234, 229, .13);
+  background:
+    linear-gradient(
+      145deg,
+      var(--material-recess-light),
+      var(--material-recess-dark)
+    );
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, .30),
+    inset 0 1px 0 rgba(255, 255, 255, .028),
+    0 1px 0 rgba(255, 255, 255, .018);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):hover,
+select:hover,
+textarea:hover {
+  border-color: rgba(226, 239, 233, .18);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus,
+.global-search-input-wrap:focus-within {
+  border-color: color-mix(
+    in srgb,
+    var(--module-accent, var(--mi-cyan)) 46%,
+    rgba(226, 239, 233, .16)
+  );
+  box-shadow:
+    inset 0 2px 7px rgba(0, 0, 0, .24),
+    0 0 0 3px color-mix(
+      in srgb,
+      var(--module-accent, var(--mi-cyan)) 10%,
+      transparent
+    ),
+    0 8px 24px rgba(0, 0, 0, .08);
+}
+
+/* Interaction controls: one physical response language, not a glow layer. */
+.primary-button,
+.secondary-button,
+.icon-button,
+.filter-button,
+.environment-control,
+.profile-chip,
+.search-trigger,
+.notification-trigger,
+.sidebar-toggle {
+  transition:
+    transform var(--unreal-motion-micro) var(--ease-spring),
+    border-color var(--unreal-motion-normal) var(--ease-standard),
+    box-shadow var(--unreal-motion-normal) var(--ease-standard),
+    background var(--unreal-motion-normal) var(--ease-standard);
+}
+
+.primary-button:hover,
+.secondary-button:hover,
+.icon-button:hover,
+.filter-button:hover,
+.environment-control:hover,
+.profile-chip:hover,
+.search-trigger:hover,
+.notification-trigger:hover,
+.sidebar-toggle:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--module-accent, var(--mi-cyan)) 24%,
+    var(--material-edge)
+  );
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, .16),
+    inset 0 1px 0 rgba(255, 255, 255, .09);
+}
+
+/* Lit state: emissive response is reserved for meaningful active states. */
+[data-ux-lit="true"] {
+  --material-emissive-alpha: var(--material-emissive-soft);
+  border-color: color-mix(
+    in srgb,
+    var(--module-accent, var(--mi-cyan)) 28%,
+    var(--material-edge-strong)
+  );
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, .27),
+    inset 0 1px 0 rgba(255, 255, 255, .085),
+    0 0 32px color-mix(
+      in srgb,
+      var(--module-accent, var(--mi-cyan)) calc(var(--material-emissive-alpha) * 100%),
+      transparent
+    );
+}
+
+/* Shell materials: glass is reserved for the spatial shell, not every card. */
+.sidebar,
+.topbar {
+  border-color: rgba(226, 238, 232, .13);
+  background:
+    radial-gradient(
+      380px 180px at var(--ux-x, 14%) var(--ux-y, 4%),
+      rgba(236, 246, 238, .045),
+      transparent 70%
+    ),
+    linear-gradient(145deg, rgba(18, 31, 39, .68), rgba(5, 12, 18, .72)),
+    rgba(8, 16, 22, .54);
+  box-shadow:
+    0 26px 70px rgba(0, 0, 0, .30),
+    inset 0 1px 0 rgba(255, 255, 255, .075);
+}
+
+/* Reduce visual noise where blur is not doing useful work. */
+.dashboard-habit-row,
+.workspace-context-lead,
+.workspace-context-item {
+  background:
+    linear-gradient(145deg, rgba(21, 35, 44, .34), rgba(5, 12, 17, .50));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .045),
+    0 10px 26px rgba(0, 0, 0, .10);
+}
+
+@media (max-width: 720px) {
+  .content-card,
+  .glass-panel,
+  .stat-card,
+  .integration-panel,
+  .ai-shell-card,
+  .dashboard-signal-card,
+  .assistant-channel-card,
+  .secondary-panel,
+  .notification-card,
+  .finance-budget-row,
+  .task-item-card,
+  .schedule-events-card,
+  .flexible-plan,
+  .profile-hero-card,
+  .profile-form-card,
+  .insights-metric,
+  .habit-board,
+  .habit-composer,
+  .social-foundation-card {
+    box-shadow:
+      0 14px 34px rgba(0, 0, 0, .18),
+      inset 0 1px 0 rgba(255, 255, 255, .06);
+  }
+}
