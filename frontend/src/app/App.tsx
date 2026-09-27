@@ -339,9 +339,13 @@ export function App() {
       }
     }
 
-    frame.addEventListener('pointerover', onPointerOver, { passive: true })
-    frame.addEventListener('pointermove', onPointerMove, { passive: true })
-    frame.addEventListener('pointerleave', onPointerLeave)
+    if (supportsPointerLighting) {
+      frame.addEventListener('pointerover', onPointerOver, { passive: true })
+      frame.addEventListener('pointermove', onPointerMove, { passive: true })
+      frame.addEventListener('pointerleave', onPointerLeave)
+    }
+    frame.addEventListener('focusin', onFocusIn)
+    frame.addEventListener('focusout', onFocusOut)
     return () => {
       window.cancelAnimationFrame(animationFrame)
       if (supportsPointerLighting) {
