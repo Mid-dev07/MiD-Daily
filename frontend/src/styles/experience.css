@@ -2083,3 +2083,48 @@ textarea:focus,
     0 24px 56px rgba(0,0,0,.14);
 }
 
+
+
+/* =========================================================
+   UNREAL ADVANCED INTERACTION — PHASE 5
+   Workload changes environmental emphasis; semantic focus is
+   carried by the same delegated pointer stream that lights DOM surfaces.
+========================================================= */
+.app-frame[data-workload="low"] {
+  --ux-workload-pressure: .18;
+  --ux-environment-opacity: .98;
+  --ux-world-opacity: .92;
+}
+
+.app-frame[data-workload="medium"] {
+  --ux-workload-pressure: .54;
+  --ux-environment-opacity: .95;
+  --ux-world-opacity: .86;
+}
+
+.app-frame[data-workload="high"] {
+  --ux-workload-pressure: .82;
+  --ux-environment-opacity: .91;
+  --ux-world-opacity: .78;
+}
+
+.app-frame {
+  --ux-focus-strength: 0;
+}
+
+.environment-scene {
+  opacity: var(--ux-environment-opacity, .98);
+  transition: opacity var(--env-transition-normal) var(--ease-standard);
+}
+
+.environment-world-canvas {
+  opacity: var(--ux-world-opacity, .92);
+  transition: opacity var(--env-transition-normal) var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .environment-scene,
+  .environment-world-canvas {
+    transition: none !important;
+  }
+}
