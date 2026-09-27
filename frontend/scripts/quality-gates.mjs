@@ -440,7 +440,7 @@ for (const contract of [
   'materialDiffuseResponse = 1.03;',
   'materialDiffuseResponse = 0.92;',
   'materialDiffuseResponse = 0.84;',
-  'float materialLighting =',
+  'vec3 materialLighting =',
   'clamp(materialWetness * moistureRetention',
 ]) {
   if (!materialSeparationSource.includes(contract)) failures.push('Environmental material separation v1 contract missing: ' + contract)
