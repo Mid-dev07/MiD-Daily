@@ -30,7 +30,7 @@ const anchors: WorldModuleAnchor[] = [
     view: 'dashboard',
     position: [0, 0.58, 1.25],
     color: [0.11, 0.42, 0.52],
-    camera: { eye: [0, 4.25, 10.8], target: [0, 1.4, 1.0] },
+    camera: { eye: [0, 3.25, 11.8], target: [0, 0.78, 0.8] },
     composition: {
       landmarkKind: 'shelter',
       landmark: [0, 0.18, -1.15],
@@ -44,7 +44,7 @@ const anchors: WorldModuleAnchor[] = [
     view: 'schedule',
     position: [-5.0, 0.34, -0.8],
     color: [0.34, 0.29, 0.54],
-    camera: { eye: [-2.4, 4.3, 10.8], target: [-1.8, 1.35, 0.2] },
+    camera: { eye: [-2.4, 3.25, 11.8], target: [-1.8, 0.74, 0.1] },
     composition: {
       landmarkKind: 'ridge',
       landmark: [-4.2, 0.18, -1.6],
@@ -58,7 +58,7 @@ const anchors: WorldModuleAnchor[] = [
     view: 'tasks',
     position: [-6.3, 0.3, 2.7],
     color: [0.22, 0.46, 0.31],
-    camera: { eye: [-3.5, 4.25, 11.2], target: [-3.0, 1.35, 1.3] },
+    camera: { eye: [-3.5, 3.2, 12.0], target: [-3.0, 0.74, 1.0] },
     composition: {
       landmarkKind: 'grove',
       landmark: [-5.5, 0.16, 1.35],
@@ -72,7 +72,7 @@ const anchors: WorldModuleAnchor[] = [
     view: 'finance',
     position: [5.3, 0.3, 2.8],
     color: [0.5, 0.39, 0.2],
-    camera: { eye: [3.4, 4.2, 11.2], target: [2.9, 1.35, 1.4] },
+    camera: { eye: [3.4, 3.2, 12.0], target: [2.9, 0.74, 1.1] },
     composition: {
       landmarkKind: 'shelter',
       landmark: [5, 0.16, 1.2],
@@ -86,7 +86,7 @@ const anchors: WorldModuleAnchor[] = [
     view: 'social',
     position: [6.2, 0.28, -1.3],
     color: [0.51, 0.26, 0.34],
-    camera: { eye: [3.9, 4.25, 10.4], target: [3.2, 1.35, -0.2] },
+    camera: { eye: [3.9, 3.2, 11.6], target: [3.2, 0.74, -0.2] },
     composition: {
       landmarkKind: 'grove',
       landmark: [5.4, 0.15, -1.15],
@@ -100,7 +100,7 @@ const anchors: WorldModuleAnchor[] = [
     view: 'assistant',
     position: [3.9, 0.26, -4.4],
     color: [0.2, 0.46, 0.53],
-    camera: { eye: [2.6, 4.2, 9.0], target: [2.0, 1.35, -1.9] },
+    camera: { eye: [2.6, 3.1, 10.1], target: [2.0, 0.72, -1.7] },
     composition: {
       landmarkKind: 'shelter',
       landmark: [3.6, 0.14, -3.3],
@@ -114,7 +114,7 @@ const anchors: WorldModuleAnchor[] = [
     view: 'profile',
     position: [0, 0.25, -6.7],
     color: [0.42, 0.45, 0.48],
-    camera: { eye: [0, 4.1, 7.8], target: [0, 1.3, -2.3] },
+    camera: { eye: [0, 3.05, 8.8], target: [0, 0.7, -2.1] },
     composition: {
       landmarkKind: 'ridge',
       landmark: [0, 0.16, -5.45],
@@ -128,7 +128,7 @@ const anchors: WorldModuleAnchor[] = [
     view: 'insights',
     position: [-3.9, 0.27, -5.2],
     color: [0.27, 0.33, 0.56],
-    camera: { eye: [-2.4, 4.15, 8.7], target: [-2.1, 1.3, -1.8] },
+    camera: { eye: [-2.4, 3.1, 9.8], target: [-2.1, 0.7, -1.7] },
     composition: {
       landmarkKind: 'shelter',
       landmark: [-3.5, 0.14, -4.2],
@@ -142,7 +142,7 @@ const anchors: WorldModuleAnchor[] = [
     view: 'habits',
     position: [-6.1, 0.26, -3.5],
     color: [0.39, 0.51, 0.27],
-    camera: { eye: [-3.8, 4.2, 9.5], target: [-3.2, 1.3, -0.9] },
+    camera: { eye: [-3.8, 3.15, 10.6], target: [-3.2, 0.72, -0.8] },
     composition: {
       landmarkKind: 'grove',
       landmark: [-5.2, 0.14, -2.65],
