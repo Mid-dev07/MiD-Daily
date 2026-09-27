@@ -149,7 +149,7 @@ export function App() {
   useEffect(() => {
     const frame = document.querySelector('.app-frame')
     if (!(frame instanceof HTMLElement)) return
-    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
+    const supportsPointerLighting = window.matchMedia('(hover: hover) and (pointer: fine)').matches
 
     const microTiltSelector = '.feature-landscape, .dashboard-command-deck, .dashboard-hero-aside'
 
@@ -340,9 +340,11 @@ export function App() {
     frame.addEventListener('pointerleave', onPointerLeave)
     return () => {
       window.cancelAnimationFrame(animationFrame)
-      frame.removeEventListener('pointerover', onPointerOver)
-      frame.removeEventListener('pointermove', onPointerMove)
-      frame.removeEventListener('pointerleave', onPointerLeave)
+      if (supportsPointerLighting) {
+        frame.removeEventListener('pointerover', onPointerOver)
+        frame.removeEventListener('pointermove', onPointerMove)
+        frame.removeEventListener('pointerleave', onPointerLeave)
+      }
       frame.removeEventListener('focusin', onFocusIn)
       frame.removeEventListener('focusout', onFocusOut)
       clearSurface()
