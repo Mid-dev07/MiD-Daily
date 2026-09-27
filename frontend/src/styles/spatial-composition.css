@@ -403,7 +403,6 @@
   .view-key[data-module] [data-spatial-role],
   .view-key[data-module] [data-spatial-role]:hover {
     transform: none !important;
-    --spatial-x: 0px;
     --spatial-z: 0px;
     --spatial-hover-z: 0px;
     transition: none !important;
