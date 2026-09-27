@@ -1293,12 +1293,12 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
         draw(rockC, [7.0, 0.05, 3.8], [1.7, 0.42, 0.64], warm, 3, 0, -0.12)
         draw(rockA, [0, 0.08, 1.15], [1.8, 0.46, 1.2], moss, 3, 0, 0.04)
 
-        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [-6.7, 0.04, -2.4], 1.02, warm, fern, contactShadow, shadowSoftness)
-        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [6.5, 0.04, -1.8], 0.88, warm, moss, contactShadow, shadowSoftness)
-        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [-8.2, 0.03, 1.8], 1.16, warm, fern, contactShadow, shadowSoftness)
-        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [8.4, 0.03, 2.5], 1.04, warm, moss, contactShadow, shadowSoftness)
-        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [-3.2, 0.03, -7.0], 0.78, warm, fern, contactShadow, shadowSoftness)
-        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [3.6, 0.03, -7.5], 0.82, warm, moss, contactShadow, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [-6.7, 0.04, -2.4], 1.02, warm, fern, shadowTint, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [6.5, 0.04, -1.8], 0.88, warm, moss, shadowTint, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [-8.2, 0.03, 1.8], 1.16, warm, fern, shadowTint, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [8.4, 0.03, 2.5], 1.04, warm, moss, shadowTint, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [-3.2, 0.03, -7.0], 0.78, warm, fern, shadowTint, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [3.6, 0.03, -7.5], 0.82, warm, moss, shadowTint, shadowSoftness)
 
         if (spatialPathQuery.matches) {
           drawSpatialPath(
