@@ -590,7 +590,7 @@ if (/uTime|timestamp *0\.001|Math\.sin\(t/.test(weatherIntelligenceSource)) {
 
 const interactionMotionSource = readFileSync(join(srcDir, 'styles/experience.css'), 'utf8')
 const pointerBridgeSource = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
-if (!/focus:\s*focusStrength/.test(pointerBridgeSource)
+if (!/detail:\s*\{[\s\S]*focus,/.test(pointerBridgeSource)
   || !/const emitWorldPointer = \(clientX: number, clientY: number, focus: number\)/.test(pointerBridgeSource)
   || !/emitWorldPointer\(window\.innerWidth \/ 2, window\.innerHeight \/ 2, 0\)/.test(pointerBridgeSource)) {
   failures.push('Shared pointer state must carry semantic focus and recenter the world on pointer leave.')
