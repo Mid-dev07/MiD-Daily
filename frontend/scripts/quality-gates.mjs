@@ -10,6 +10,35 @@ const effectsPath = join(root, '../docs/MID_EFFECTS_CONSTITUTION.md')
 if (!existsSync(identityPath)) failures.push('MiD core identity system document is missing.')
 if (!existsSync(effectsPath)) failures.push('MiD effects constitution document is missing.')
 const srcDir = join(root, 'src')
+const appCompositionSource = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
+const workspaceDataSource = readFileSync(join(srcDir, 'features/workspace/useWorkspaceData.ts'), 'utf8')
+const workspaceProfileSource = readFileSync(join(srcDir, 'features/profile/useWorkspaceProfile.ts'), 'utf8')
+const foregroundInteractionSource = readFileSync(join(srcDir, 'app/useForegroundInteraction.ts'), 'utf8')
+const workspaceContextRailPath = join(srcDir, 'components/layout/WorkspaceContextRail.tsx')
+const environmentHookSource = readFileSync(join(srcDir, 'environment/useEnvironment.ts'), 'utf8')
+
+if (appCompositionSource.split('\n').length > 320) {
+  failures.push('App.tsx must remain a composition root; move data/interaction orchestration into dedicated hooks and components.')
+}
+for (const [label, source] of [
+  ['workspace data orchestration', workspaceDataSource],
+  ['workspace profile orchestration', workspaceProfileSource],
+  ['foreground interaction orchestration', foregroundInteractionSource],
+]) {
+  if (!source.trim()) failures.push(label + ' refactor boundary is empty.')
+}
+if (!existsSync(workspaceContextRailPath)) {
+  failures.push('Workspace context rail must remain isolated from the application composition root.')
+}
+if (!/const EnvironmentScene = lazy\(\(\) => import\('\.\.\/environment\/EnvironmentScene'/.test(appCompositionSource)) {
+  failures.push('Heavy WebGL environment renderer must remain code-split from the initial application chunk.')
+}
+if (!/forceWeatherFetch\s*=\s*true/.test(environmentHookSource)
+  || !/usableCached && !forceWeatherFetch/.test(environmentHookSource)
+  || !/visibilityState === 'visible'/.test(environmentHookSource)
+  || !/refresh\(false, false\)/.test(environmentHookSource)) {
+  failures.push('Background environment refresh must respect the fresh weather cache instead of refetching on every visibility change.')
+}
 const indexHtml = readFileSync(join(root, 'index.html'), 'utf8')
 const manifest = readFileSync(join(root, 'public/manifest.webmanifest'), 'utf8')
 const authGate = readFileSync(join(srcDir, 'features/auth/AuthGate.tsx'), 'utf8')
@@ -115,6 +144,7 @@ if (/draw\(box, \[-2\.2, 0\.63, 0\.0\][\s\S]{0,260}draw\(box, \[0, 1\.08, -0\.01
 }
 
 const appSourceForInteraction = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
+const pointerInteractionSource = appSourceForInteraction + '\n' + foregroundInteractionSource
 const environmentFiles = [
   'environment/types.ts',
   'environment/astronomy.ts',
@@ -220,7 +250,7 @@ if (!/G0/.test(experienceSystem) || !/G1/.test(experienceSystem) || !/G2/.test(e
 if (!/data-ux-lit/.test(uiSystem + '\n' + materialSystem) || !/action-focus/.test(uiSystem) || !/prefers-reduced-motion:\s*reduce/.test(uiSystem)) {
   failures.push('Living material interaction contract is missing from the active UI stylesheet.')
 }
-if (!/surfaceSelector/.test(appSourceForInteraction) || !/requestAnimationFrame/.test(appSourceForInteraction) || !/pointermove/.test(appSourceForInteraction)) {
+if (!/(?:surfaceSelector|SURFACE_SELECTOR)/.test(pointerInteractionSource) || !/requestAnimationFrame/.test(pointerInteractionSource) || !/pointermove/.test(pointerInteractionSource)) {
   failures.push('Foreground material interaction must use one delegated pointer stream with requestAnimationFrame.')
 }
 if (!/UNREAL FINAL RENDER CORE — PHASE 1 COMPLETE/.test(experienceSystem) || !/--ux-rx/.test(experienceSystem) || !/--ux-ry/.test(experienceSystem) || !/--ux-elevation/.test(experienceSystem)) {
@@ -425,7 +455,7 @@ if (/pointermove/.test(environmentScene) || existsSync(join(srcDir, 'hooks/useLi
 if (!/mid:world-invalidate/.test(environmentScene)) {
   failures.push('Environment shell must wake the adaptive spatial renderer when environment/view state changes.')
 }
-if (!/mid:world-pointer/.test(appSourceForInteraction) || !/CustomEvent/.test(appSourceForInteraction)) {
+if (!/mid:world-pointer/.test(pointerInteractionSource) || !/CustomEvent/.test(pointerInteractionSource)) {
   failures.push('The shared App interaction stream must route pointer state into the spatial world.')
 }
 if (!/activeView={activeView}/.test(appSourceForInteraction)) {
@@ -723,7 +753,7 @@ if (/\buTime\b|timestamp\s*\*\s*0\.001|Math\.sin\(\s*t\b/.test(weatherIntelligen
 
 
 const interactionMotionSource = readFileSync(join(srcDir, 'styles/experience.css'), 'utf8')
-const pointerBridgeSource = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
+const pointerBridgeSource = pointerInteractionSource
 if (!/detail:\s*\{[\s\S]*focus,/.test(pointerBridgeSource)
   || !/const emitWorldPointer = \(clientX: number, clientY: number, focus: number\)/.test(pointerBridgeSource)
   || !/emitWorldPointer\(window\.innerWidth \/ 2, window\.innerHeight \/ 2, 0\)/.test(pointerBridgeSource)) {
