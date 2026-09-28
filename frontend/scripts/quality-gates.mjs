@@ -790,7 +790,7 @@ for (const contract of [
   'float precipitation = clamp(uPrecipitation',
   'rainfallPooling',
   'puddleSpecular',
-  'nearWeatherWash',
+  'weatherHaze',
   'visualState.precipitation',
   'puddleOpacity',
   'puddleColor',
@@ -806,7 +806,7 @@ if (!/environmentBlend[\s\S]*precipitation/.test(weatherIntelligenceSource)) {
 if (!/rainfallPooling[\s\S]*horizontalWetness/.test(weatherIntelligenceSource)) {
   failures.push('Rain response must remain surface-orientation aware rather than applying uniform gloss.')
 }
-if (!/nearWeatherWash[\s\S]*atmosphericFade/.test(weatherIntelligenceSource)) {
+if (!/weatherHaze[\s\S]*atmosphericFade/.test(weatherIntelligenceSource)) {
   failures.push('Weather air density must contribute to spatial atmospheric wash.')
 }
 if (/\buTime\b|timestamp\s*\*\s*0\.001|Math\.sin\(\s*t\b/.test(weatherIntelligenceSource)) {
