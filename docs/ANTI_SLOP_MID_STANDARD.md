@@ -2,10 +2,13 @@
 
 This project applies Anti-Slop v3.2.18 in DURING mode, alongside the existing MiD Unreal standards.
 
-Source: https://github.com/miqdadbadjuber/anti-slop
+Editorial source: https://github.com/dharmawan-id/anti-ai-slop
+Local skill: `skills/anti-slop/SKILL.md`
+Local spine: `skills/anti-slop/AGENTS.md`
 
 ## Required skill coverage
 
+- anti-slop: natural human-edited language, concrete wording, cadence variation, false-agency removal, and Indonesian-specific editorial rules.
 - antislop: purpose-first decisions, craftsmanship, identity, evidence, functionality, resilience, and delivery gate.
 - antislop-ui: visual hierarchy, materials, color restraint, composition, decoration, and purposeful motion.
 - antislop-human: contrast, keyboard access, focus, non-text contrast, state completeness, zoom, and form reachability.
