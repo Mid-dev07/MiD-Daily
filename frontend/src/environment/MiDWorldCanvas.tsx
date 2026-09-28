@@ -716,14 +716,15 @@ function createMesh(gl: WebGL2RenderingContext, data: Float32Array, positionLoca
 function dayTint(environment: EnvironmentState): Vec3 {
   switch (environment.dayPhase) {
     case 'dawn':
+      return [0.4, 0.31, 0.22]
     case 'golden-hour':
-      return [0.36, 0.29, 0.21]
+      return [0.42, 0.3, 0.2]
     case 'night':
       return [0.13, 0.2, 0.28]
     case 'dusk':
-      return [0.24, 0.18, 0.2]
+      return [0.27, 0.2, 0.2]
     default:
-      return [0.18, 0.24, 0.24]
+      return [0.25, 0.31, 0.28]
   }
 }
 
