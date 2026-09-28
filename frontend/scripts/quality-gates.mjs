@@ -10,6 +10,23 @@ const effectsPath = join(root, '../docs/MID_EFFECTS_CONSTITUTION.md')
 if (!existsSync(identityPath)) failures.push('MiD core identity system document is missing.')
 if (!existsSync(effectsPath)) failures.push('MiD effects constitution document is missing.')
 const srcDir = join(root, 'src')
+const indexHtml = readFileSync(join(root, 'index.html'), 'utf8')
+const manifest = readFileSync(join(root, 'public/manifest.webmanifest'), 'utf8')
+const authGate = readFileSync(join(srcDir, 'features/auth/AuthGate.tsx'), 'utf8')
+const authView = readFileSync(join(srcDir, 'features/auth/AuthView.tsx'), 'utf8')
+const topbarSource = readFileSync(join(srcDir, 'components/layout/Topbar.tsx'), 'utf8')
+if (!/<title>MiD Daily<\\/title>/.test(indexHtml) || !/MiD Daily/.test(indexHtml)) {
+  failures.push('Customer-facing browser identity must use the MiD Daily product name.')
+}
+if (!/"name": "MiD Daily"/.test(manifest) || !/"short_name": "MiD"/.test(manifest)) {
+  failures.push('MiD PWA metadata must use MiD Daily as product name and MiD as compact brand name.')
+}
+if (/Loading MiD-Daily/.test(authGate) || !/<strong>MiD<\\/strong>/.test(authView) || !/Daily workspace/.test(authView)) {
+  failures.push('Authentication entry points must use the canonical MiD brand/product naming.')
+}
+if (/Search MiD-Daily/.test(topbarSource)) {
+  failures.push('Topbar customer-facing accessibility labels must use the canonical MiD brand name.')
+}
 
 function walk(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
