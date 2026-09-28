@@ -146,7 +146,6 @@ function buildActionFocus(
 
   return {
     status: 'READY',
-    index: '002',
     label: 'SCHEDULE',
     title: 'Use the open space intentionally.',
     detail: 'Nothing urgent is pulling you elsewhere right now.',
