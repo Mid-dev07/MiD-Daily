@@ -250,7 +250,7 @@ if (!/G0/.test(experienceSystem) || !/G1/.test(experienceSystem) || !/G2/.test(e
 if (!/data-ux-lit/.test(uiSystem + '\n' + materialSystem) || !/action-focus/.test(uiSystem) || !/prefers-reduced-motion:\s*reduce/.test(uiSystem)) {
   failures.push('Living material interaction contract is missing from the active UI stylesheet.')
 }
-if (!/surfaceSelector/.test(pointerInteractionSource) || !/requestAnimationFrame/.test(pointerInteractionSource) || !/pointermove/.test(pointerInteractionSource)) {
+if (!/(?:surfaceSelector|SURFACE_SELECTOR)/.test(pointerInteractionSource) || !/requestAnimationFrame/.test(pointerInteractionSource) || !/pointermove/.test(pointerInteractionSource)) {
   failures.push('Foreground material interaction must use one delegated pointer stream with requestAnimationFrame.')
 }
 if (!/UNREAL FINAL RENDER CORE — PHASE 1 COMPLETE/.test(experienceSystem) || !/--ux-rx/.test(experienceSystem) || !/--ux-ry/.test(experienceSystem) || !/--ux-elevation/.test(experienceSystem)) {
@@ -455,7 +455,7 @@ if (/pointermove/.test(environmentScene) || existsSync(join(srcDir, 'hooks/useLi
 if (!/mid:world-invalidate/.test(environmentScene)) {
   failures.push('Environment shell must wake the adaptive spatial renderer when environment/view state changes.')
 }
-if (!/mid:world-pointer/.test(appSourceForInteraction) || !/CustomEvent/.test(appSourceForInteraction)) {
+if (!/mid:world-pointer/.test(pointerInteractionSource) || !/CustomEvent/.test(pointerInteractionSource)) {
   failures.push('The shared App interaction stream must route pointer state into the spatial world.')
 }
 if (!/activeView={activeView}/.test(appSourceForInteraction)) {
