@@ -846,6 +846,7 @@ function drawGroundCover(
     kind: number,
     emissive?: number,
     rotation?: number,
+    opacity?: number,
   ) => void,
   foliage: Mesh,
   composition: ReturnType<typeof worldModuleAnchor>['composition'],
