@@ -188,6 +188,16 @@ if (!visualGapPass.includes('environment-scene[data-day-phase="day"] .environmen
   || !visualGapPass.includes('dashboard-command-deck::after')) {
   failures.push('Visual Gap Pass stylesheet must preserve daylight-first atmosphere, reduced navigation HUD, and simplified dashboard composition.')
 }
+if (!materialSystem.includes('--material-world-warmth')
+  || !materialSystem.includes('--material-world-coolness')
+  || !materialSystem.includes('var(--env-warmth')
+  || !materialSystem.includes('var(--env-sky-coolness')
+  || !materialSystem.includes('var(--env-material-wetness')
+  || !materialSystem.includes('var(--env-material-air-density')
+  || !materialSystem.includes('data-weather="rain"')
+  || !materialSystem.includes('data-day-phase="night"')) {
+  failures.push('Material system must couple live daylight and weather state into information-surface response.')
+}
 if (dashboard.includes('YOUR DAY, LIVE') || dashboard.includes('YOUR DAY ·')) {
   failures.push('Dashboard command-center copy must remain softened after the visual gap pass.')
 }
