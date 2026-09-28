@@ -1529,6 +1529,14 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
             activeAnchor.composition.landmarkScale,
           )
 
+          drawGroundCover(
+            draw,
+            foliage,
+            activeAnchor.composition,
+            fern,
+            activeAnchor.composition.landmarkScale,
+          )
+
           const composition = activeAnchor.composition
           const [lx, ly, lz] = composition.landmark
           const landmarkScale = Math.max(0.72, Math.min(1.08, composition.landmarkScale))
