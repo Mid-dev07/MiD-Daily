@@ -11,7 +11,7 @@ import { environmentCssVariables } from '../environment/visual'
 import { useWorkspaceData } from '../features/workspace/useWorkspaceData'
 import { useWorkspaceProfile } from '../features/profile/useWorkspaceProfile'
 import { getToday as getAppToday, APP_TIMEZONE } from '../lib/dateTime'
-import { readUserStorage } from '../lib/userStorage'
+import { readUserStorage, writeUserStorage } from '../lib/userStorage'
 import type { View } from '../types'
 
 const DashboardView = lazy(() => import('../features/dashboard/DashboardView').then((module) => ({ default: module.DashboardView })))
@@ -33,7 +33,7 @@ export function App() {
   const { environment, requestLocation, refresh: refreshEnvironment } = useEnvironment()
   const [activeView, setActiveView] = useState<View>(() => viewFromPath(window.location.pathname))
   const [searchOpen, setSearchOpen] = useState(false)
-  const [sidebarHidden, setSidebarHidden] = useState(() => readUserStorage('mid-daily.sidebar-hidden', userId, false))
+  const [sidebarHidden, setSidebarHidden] = useState(() => readUserStorage(SIDEBAR_HIDDEN_STORAGE_KEY, user?.id, false))
   const [toast, setToast] = useState('')
 
   const {
@@ -42,7 +42,6 @@ export function App() {
     finance,
     schedule,
     budgets,
-    readyScope,
     toggleTask,
     saveTask,
     deleteTask,
@@ -63,6 +62,10 @@ export function App() {
   useEffect(() => {
     setSidebarHidden(readUserStorage('mid-daily.sidebar-hidden', userId, false))
   }, [userId])
+
+  useEffect(() => {
+    writeUserStorage(SIDEBAR_HIDDEN_STORAGE_KEY, userId, sidebarHidden)
+  }, [sidebarHidden, userId])
 
   useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
@@ -91,7 +94,8 @@ export function App() {
     setActiveView(view)
   }, [])
 
-  const toggleSidebar = useCallback(() => setSidebarHidden((current) => !current), [])  const openSearch = useCallback(() => setSearchOpen(true), [])
+  const toggleSidebar = useCallback(() => setSidebarHidden((current) => !current), [])
+  const openSearch = useCallback(() => setSearchOpen(true), [])
   const closeSearch = useCallback(() => setSearchOpen(false), [])
   const openProfile = useCallback(() => navigate('profile'), [navigate])
   const handleEnvironmentAction = useCallback(() => {
