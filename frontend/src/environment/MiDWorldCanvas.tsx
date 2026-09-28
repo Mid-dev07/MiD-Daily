@@ -439,12 +439,11 @@ function groundSurfaceY(x: number, z: number, offset = 0) {
 }
 
 function terrainGeometry() {
-  const segments = 24
+  const segments = 28
   const size = 18
   const step = (size * 2) / segments
   const vertices: number[] = []
 
-  const point = (x: number, z: number): Vec3 => [x, terrainHeight(x, z), z]
   const normalAt = (x: number, z: number): Vec3 => {
     const left = terrainHeight(x - step, z)
     const right = terrainHeight(x + step, z)
@@ -460,14 +459,30 @@ function terrainGeometry() {
     return [nx, ny, nz]
   }
 
+  type SurfacePoint = {
+    position: Vec3
+    normal: Vec3
+  }
+
+  const point = (x: number, z: number): SurfacePoint => ({
+    position: [x, terrainHeight(x, z), z],
+    normal: normalAt(x, z),
+  })
+
   const pushTriangle = (
-    a: Vec3,
-    b: Vec3,
-    c: Vec3,
-    normal: Vec3,
+    a: SurfacePoint,
+    b: SurfacePoint,
+    c: SurfacePoint,
   ) => {
     for (const corner of [a, b, c]) {
-      vertices.push(corner[0], corner[1], corner[2], normal[0], normal[1], normal[2])
+      vertices.push(
+        corner.position[0],
+        corner.position[1],
+        corner.position[2],
+        corner.normal[0],
+        corner.normal[1],
+        corner.normal[2],
+      )
     }
   }
 
@@ -484,14 +499,13 @@ function terrainGeometry() {
       const c = point(x1, z1)
       const d = point(x0, z1)
 
-      pushTriangle(a, b, c, normalAt((x0 + x1) * 0.5, (z0 + z1) * 0.5))
-      pushTriangle(a, c, d, normalAt((x0 + x1) * 0.5, (z0 + z1) * 0.5))
+      pushTriangle(a, b, c)
+      pushTriangle(a, c, d)
     }
   }
 
   return new Float32Array(vertices)
 }
-
 function foliageGeometry() {
   const vertices: number[] = []
   const blades = 10
