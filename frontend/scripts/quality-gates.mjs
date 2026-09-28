@@ -56,6 +56,9 @@ if (authGate.includes('Loading MiD-Daily') || !authView.includes('<strong>MiD</s
 if (/Search MiD-Daily/.test(topbarSource)) {
   failures.push('Topbar customer-facing accessibility labels must use the canonical MiD brand name.')
 }
+if (topbarSource.includes('viewIndices') || topbarSource.includes('topbar-kicker')) {
+  failures.push('Topbar HUD metadata must remain reduced: view indexes and product kicker should not return to the primary header.')
+}
 
 function walk(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -91,6 +94,8 @@ const mainSource = readFileSync(join(srcDir, 'main.tsx'), 'utf8')
 const environmentScene = readFileSync(join(srcDir, 'environment/EnvironmentScene.tsx'), 'utf8')
 const environmentStageStylePath = join(srcDir, 'styles/environment-depth.css')
 const environmentStageStyle = existsSync(environmentStageStylePath) ? readFileSync(environmentStageStylePath, 'utf8') : ''
+const visualGapPassPath = join(srcDir, 'styles/visual-gap-pass.css')
+const visualGapPass = existsSync(visualGapPassPath) ? readFileSync(visualGapPassPath, 'utf8') : ''
 const worldModuleSource = readFileSync(join(srcDir, 'environment/moduleWorld.ts'), 'utf8')
 if (!environmentStageStyle.includes('ECOSYSTEM DEPTH V1 · GROUND MATERIAL FIELD')) {
   failures.push('Ecosystem depth v1 must keep a restrained ground-material field in the environment stylesheet.')
@@ -139,6 +144,12 @@ if (!/const relief = [\s\S]*\* 2\.65/.test(worldCanvasSource)
 if (!/eye: \[[^\]]+, 2\.(?:5|6|7|8)/.test(worldModuleSource)) {
   failures.push('Living environment finalization must use the grounded authored nature camera rail.')
 }
+if (!/function treeTrunkGeometry\(\)[\s\S]*?const levels = \[/.test(worldCanvasSource)
+  || !/function canopyGeometry\(\)[\s\S]*?const segments = 12[\s\S]*?const rings = 5/.test(worldCanvasSource)
+  || !/organicRadius/.test(worldCanvasSource)
+  || !/const lobe =/.test(worldCanvasSource)) {
+  failures.push('Visual nature pass must retain multi-ring organic trunk taper and irregular canopy lobes.')
+}
 if (/draw\(box, \[-2\.2, 0\.63, 0\.0\][\s\S]{0,260}draw\(box, \[0, 1\.08, -0\.01\]/.test(readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8'))) {
   failures.push('Legacy cyan architectural bars must not remain in the natural environment stage.')
 }
@@ -170,6 +181,15 @@ if (!/--env-material-wetness/.test(readFileSync(join(srcDir, 'environment/visual
 }
 if (!/var\(--env-material-wetness/.test(materialSystem) || !/var\(--env-material-air-density/.test(materialSystem)) {
   failures.push('Material system must consume live atmospheric coupling variables.')
+}
+if (!visualGapPass.includes('environment-scene[data-day-phase="day"] .environment-sky')
+  || !visualGapPass.includes('environment-scene[data-day-phase="morning"] .environment-sky')
+  || !visualGapPass.includes('nav-index')
+  || !visualGapPass.includes('dashboard-command-deck::after')) {
+  failures.push('Visual Gap Pass stylesheet must preserve daylight-first atmosphere, reduced navigation HUD, and simplified dashboard composition.')
+}
+if (dashboard.includes('YOUR DAY, LIVE') || dashboard.includes('YOUR DAY ·')) {
+  failures.push('Dashboard command-center copy must remain softened after the visual gap pass.')
 }
 if (!/var\(--env-atmosphere-softness/.test(experienceSystem)) {
   failures.push('Workspace atmosphere must consume the live environment density signal.')
@@ -374,8 +394,8 @@ if (!existsSync(brandMarkSource)) failures.push('Canonical MiD brand mark compon
 if (!/MiDMark/.test(sidebarSource)) failures.push('Primary shell must use the canonical MiD brand mark.')
 if (!/CORE EXPERIENCE V1 — THE MI D ROOM/.test(experienceSystem)) failures.push('Core MiD room experience layer is missing from experience.css.')
 const appSource = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
-if (!/nav-index/.test(sidebarSource) || !/index: '001'/.test(sidebarSource) || !/index: '009'/.test(sidebarSource)) {
-  failures.push('Field-guide navigation must keep explicit navigation indices.')
+if (/nav-index/.test(sidebarSource) || /index:\s*'00[1-9]'/.test(sidebarSource)) {
+  failures.push('Field-guide navigation must not reintroduce HUD-style navigation indices.')
 }
 if (!/useRef(?:<[^>]+>)?\(null\)/.test(sidebarSource) || !/scrollIntoView/.test(sidebarSource)) {
   failures.push('Active field-guide navigation should remain discoverable when the mobile rail scrolls horizontally.')

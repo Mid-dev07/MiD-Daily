@@ -546,29 +546,40 @@ function foliageGeometry() {
 
 function treeTrunkGeometry() {
   const vertices: number[] = []
-  const sides = 7
+  const sides = 9
+  const levels = [
+    { y: 0, radius: 0.29, bend: 0 },
+    { y: 0.72, radius: 0.265, bend: 0.035 },
+    { y: 1.42, radius: 0.225, bend: 0.08 },
+    { y: 2.15, radius: 0.17, bend: 0.13 },
+  ]
   const phase = 0.31
 
-  for (let index = 0; index < sides; index += 1) {
-    const next = (index + 1) % sides
-    const a0 = (index / sides) * Math.PI * 2 + phase
-    const a1 = (next / sides) * Math.PI * 2 + phase
-    const bottomRadius0 = 0.28 + (index % 2) * 0.025
-    const bottomRadius1 = 0.28 + (next % 2) * 0.025
-    const topRadius0 = 0.2 + ((index + 1) % 3) * 0.012
-    const topRadius1 = 0.2 + ((next + 1) % 3) * 0.012
+  const point = (ring: number, index: number): Vec3 => {
+    const level = levels[ring]
+    const angle = (index / sides) * Math.PI * 2 + phase
+    const organicRadius = 1 + 0.065 * Math.sin(index * 1.73 + phase + ring * 0.58)
+    return [
+      Math.cos(angle) * level.radius * organicRadius + level.bend,
+      level.y,
+      Math.sin(angle) * level.radius * organicRadius + level.bend * 0.34,
+    ]
+  }
 
-    const p0: Vec3 = [Math.cos(a0) * bottomRadius0, 0, Math.sin(a0) * bottomRadius0]
-    const p1: Vec3 = [Math.cos(a1) * bottomRadius1, 0, Math.sin(a1) * bottomRadius1]
-    const q1: Vec3 = [Math.cos(a1) * topRadius1, 2.15, Math.sin(a1) * topRadius1]
-    const q0: Vec3 = [Math.cos(a0) * topRadius0, 2.15, Math.sin(a0) * topRadius0]
+  for (let ring = 0; ring < levels.length - 1; ring += 1) {
+    const nextRing = ring + 1
+    for (let index = 0; index < sides; index += 1) {
+      const nextIndex = (index + 1) % sides
+      const a = point(ring, index)
+      const b = point(ring, nextIndex)
+      const c = point(nextRing, nextIndex)
+      const d = point(nextRing, index)
+      const angle = ((index + 0.5) / sides) * Math.PI * 2 + phase
+      const normal: Vec3 = [Math.cos(angle), 0.14, Math.sin(angle)]
 
-    const nx = Math.cos((a0 + a1) * 0.5)
-    const nz = Math.sin((a0 + a1) * 0.5)
-    const normal: Vec3 = [nx, 0.14, nz]
-
-    for (const corner of [p0, p1, q1, p0, q1, q0]) {
-      vertices.push(corner[0], corner[1], corner[2], normal[0], normal[1], normal[2])
+      for (const corner of [a, b, c, a, c, d]) {
+        vertices.push(corner[0], corner[1], corner[2], normal[0], normal[1], normal[2])
+      }
     }
   }
 
@@ -577,19 +588,26 @@ function treeTrunkGeometry() {
 
 function canopyGeometry() {
   const vertices: number[] = []
-  const segments = 10
-  const rings = 4
+  const segments = 12
+  const rings = 5
 
   const point = (ring: number, index: number): { position: Vec3; normal: Vec3 } => {
     const theta = (ring / rings) * Math.PI
-    const y = Math.cos(theta)
-    const radius = Math.sin(theta)
     const angle = (index / segments) * Math.PI * 2
+    const baseY = Math.cos(theta)
+    const baseRadius = Math.sin(theta)
+    const lobe =
+      1 +
+      0.11 * Math.sin(angle * 3 + ring * 0.92) +
+      0.05 * Math.cos(angle * 5 - ring * 0.64)
+    const verticalScale = 0.9 + 0.05 * Math.cos(angle * 2 - ring * 0.52)
+    const offsetX = 0.05 * Math.sin(angle * 2 + ring * 0.7)
+    const offsetZ = 0.04 * Math.cos(angle * 3 - ring * 0.45)
 
     const position: Vec3 = [
-      Math.cos(angle) * radius,
-      y,
-      Math.sin(angle) * radius,
+      Math.cos(angle) * baseRadius * lobe + offsetX,
+      baseY * verticalScale,
+      Math.sin(angle) * baseRadius * lobe + offsetZ,
     ]
     const normalLength = Math.hypot(position[0], position[1], position[2]) || 1
     const normal: Vec3 = [
@@ -698,14 +716,15 @@ function createMesh(gl: WebGL2RenderingContext, data: Float32Array, positionLoca
 function dayTint(environment: EnvironmentState): Vec3 {
   switch (environment.dayPhase) {
     case 'dawn':
+      return [0.4, 0.31, 0.22]
     case 'golden-hour':
-      return [0.36, 0.29, 0.21]
+      return [0.42, 0.3, 0.2]
     case 'night':
       return [0.13, 0.2, 0.28]
     case 'dusk':
-      return [0.24, 0.18, 0.2]
+      return [0.27, 0.2, 0.2]
     default:
-      return [0.18, 0.24, 0.24]
+      return [0.25, 0.31, 0.28]
   }
 }
 

@@ -8,16 +8,16 @@ interface SidebarProps {
   onNavigate: (view: View) => void
 }
 
-const navigation: Array<{ id: View; label: string; icon: MiDIconName; index: string }> = [
-  { id: 'dashboard', label: 'Today', icon: 'home', index: '001' },
-  { id: 'schedule', label: 'Schedule', icon: 'clock', index: '002' },
-  { id: 'tasks', label: 'Tasks', icon: 'check', index: '003' },
-  { id: 'finance', label: 'Finance', icon: 'wallet', index: '004' },
-  { id: 'social', label: 'Social', icon: 'pulse', index: '005' },
-  { id: 'assistant', label: 'Assistant', icon: 'spark', index: '006' },
-  { id: 'profile', label: 'Profile', icon: 'user', index: '007' },
-  { id: 'insights', label: 'Insights', icon: 'chart', index: '008' },
-  { id: 'habits', label: 'Habits', icon: 'habit', index: '009' },
+const navigation: Array<{ id: View; label: string; icon: MiDIconName }> = [
+  { id: 'dashboard', label: 'Today', icon: 'home' },
+  { id: 'schedule', label: 'Schedule', icon: 'clock' },
+  { id: 'tasks', label: 'Tasks', icon: 'check' },
+  { id: 'finance', label: 'Finance', icon: 'wallet' },
+  { id: 'social', label: 'Social', icon: 'pulse' },
+  { id: 'assistant', label: 'Assistant', icon: 'spark' },
+  { id: 'profile', label: 'Profile', icon: 'user' },
+  { id: 'insights', label: 'Insights', icon: 'chart' },
+  { id: 'habits', label: 'Habits', icon: 'habit' },
 ]
 
 export function Sidebar({ activeView, onNavigate }: SidebarProps) {
@@ -47,7 +47,6 @@ export function Sidebar({ activeView, onNavigate }: SidebarProps) {
             ref={activeView === item.id ? activeNavigationRef : undefined}
             onClick={() => onNavigate(item.id)}
           >
-            <span className="nav-index" aria-hidden="true">{item.index}</span>
             <span className="nav-icon"><MiDIcon name={item.icon} size={17} /></span>
             <span>{item.label}</span>
           </button>

@@ -11,6 +11,7 @@ import './styles/materials.css'
 import './styles/responsive.css'
 import './styles/spatial-composition.css'
 import './styles/environment-depth.css'
+import './styles/visual-gap-pass.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

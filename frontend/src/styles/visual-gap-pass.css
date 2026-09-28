@@ -1,0 +1,350 @@
+/* MiD Daily — Visual Gap Pass V1
+   Purpose: move the experience from command-center UI toward a calm personal room
+   with daylight-first atmosphere, spatial information, and restrained instrument cues.
+
+   Ownership:
+   - daylight + atmospheric field
+   - shell density and HUD reduction
+   - dashboard material composition
+   - lightweight procedural nature detail
+   No new runtime dependency, no perpetual animation.
+*/
+
+/* =========================================================
+   01 · DAYLIGHT FIRST
+========================================================= */
+
+.environment-scene[data-day-phase="morning"] .environment-sky {
+  background:
+    radial-gradient(78% 52% at 68% 25%, rgba(245, 221, 168, .28), transparent 58%),
+    linear-gradient(180deg, #6f9dad 0%, #a9c8c2 44%, #78957f 72%, #173026 100%);
+}
+
+.environment-scene[data-day-phase="day"] .environment-sky {
+  background:
+    radial-gradient(72% 54% at 68% 22%, rgba(255, 226, 169, .30), transparent 58%),
+    radial-gradient(62% 40% at 30% 45%, rgba(194, 220, 214, .20), transparent 62%),
+    linear-gradient(180deg, #75a5b5 0%, #b9d0cb 45%, #748f78 73%, #182d24 100%);
+}
+
+.environment-scene[data-day-phase="dawn"] .environment-sky {
+  background:
+    radial-gradient(76% 54% at 64% 34%, rgba(246, 188, 129, .26), transparent 58%),
+    linear-gradient(180deg, #536e80 0%, #a9a89e 46%, #617761 72%, #15251f 100%);
+}
+
+.environment-scene[data-day-phase="golden-hour"] .environment-sky {
+  background:
+    radial-gradient(74% 54% at 70% 37%, rgba(255, 205, 130, .38), transparent 58%),
+    linear-gradient(180deg, #617786 0%, #d8b681 46%, #6f775d 72%, #1a2920 100%);
+}
+
+.environment-scene[data-day-phase="day"] .environment-vignette,
+.environment-scene[data-day-phase="morning"] .environment-vignette {
+  background:
+    linear-gradient(180deg, rgba(7, 19, 23, .06), transparent 32%, rgba(5, 15, 11, .16) 100%),
+    radial-gradient(ellipse at center, transparent 56%, rgba(5, 14, 15, .18) 100%);
+}
+
+.environment-scene[data-day-phase="day"] .environment-horizon,
+.environment-scene[data-day-phase="morning"] .environment-horizon {
+  opacity: .34;
+}
+
+.environment-scene[data-day-phase="day"] .environment-clouds,
+.environment-scene[data-day-phase="morning"] .environment-clouds {
+  mix-blend-mode: screen;
+}
+
+.environment-scene[data-day-phase="day"] .environment-light-shafts {
+  opacity: calc(var(--env-sun-beam) * 1.16);
+}
+
+/* Keep the dark UI readable without making the world itself dark. */
+.app-frame {
+  background:
+    radial-gradient(860px 520px at 78% 8%, rgba(79, 209, 255, .018), transparent 70%),
+    rgba(10, 17, 25, .08);
+}
+
+.app-frame::after {
+  background:
+    linear-gradient(180deg, rgba(1, 5, 9, .012), rgba(1, 5, 9, .055) 72%, rgba(0, 5, 8, .12)),
+    linear-gradient(90deg, rgba(1, 5, 9, .05), transparent 18%, transparent 82%, rgba(1, 5, 9, .04));
+}
+
+/* Organic texture without image assets or runtime loops. */
+.environment-terrain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 14% 35%, rgba(121, 150, 116, .10) 0 3px, transparent 4px),
+    radial-gradient(circle at 31% 58%, rgba(143, 158, 121, .08) 0 2px, transparent 3px),
+    radial-gradient(circle at 53% 42%, rgba(115, 143, 108, .08) 0 3px, transparent 4px),
+    radial-gradient(circle at 72% 64%, rgba(136, 153, 114, .07) 0 2px, transparent 3px),
+    repeating-linear-gradient(168deg, transparent 0 22px, rgba(200, 214, 191, .022) 23px, transparent 24px);
+  opacity: calc(.28 + var(--env-nature-saturation) * .16);
+  mix-blend-mode: soft-light;
+}
+
+.environment-canopy::before {
+  content: "";
+  position: absolute;
+  inset: -10% -5% 18%;
+  background:
+    radial-gradient(ellipse at 6% 46%, rgba(35, 67, 45, .46) 0 16%, transparent 17%),
+    radial-gradient(ellipse at 16% 36%, rgba(55, 85, 56, .34) 0 14%, transparent 15%),
+    radial-gradient(ellipse at 28% 43%, rgba(45, 78, 50, .30) 0 11%, transparent 12%),
+    radial-gradient(ellipse at 70% 40%, rgba(47, 81, 50, .32) 0 13%, transparent 14%),
+    radial-gradient(ellipse at 84% 34%, rgba(35, 67, 44, .42) 0 16%, transparent 17%),
+    radial-gradient(ellipse at 95% 46%, rgba(27, 56, 38, .48) 0 18%, transparent 19%);
+  filter: blur(6px);
+  opacity: .64;
+}
+
+/* =========================================================
+   02 · LESS HUD, MORE ROOM
+========================================================= */
+
+.sidebar {
+  border-color: rgba(226, 236, 224, .09);
+  background:
+    linear-gradient(145deg, rgba(18, 31, 39, .50), rgba(5, 12, 18, .46)),
+    rgba(8, 16, 22, .30);
+  box-shadow:
+    0 22px 58px rgba(0, 0, 0, .22),
+    inset 0 1px 0 rgba(255, 255, 255, .055);
+}
+
+.nav-list {
+  gap: 5px;
+}
+
+.nav-index {
+  display: none;
+}
+
+.nav-item {
+  min-height: 44px;
+  grid-template-columns: 24px minmax(0, 1fr);
+  border-color: transparent;
+  background: transparent;
+}
+
+.nav-item.is-active {
+  border-color: rgba(126, 170, 138, .12);
+  background:
+    linear-gradient(100deg, color-mix(in srgb, #7aa67f 14%, transparent), transparent 76%),
+    rgba(216, 232, 220, .028);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .035);
+}
+
+.topbar {
+  min-height: 60px;
+  margin-top: 10px;
+  padding: 10px;
+  border-color: rgba(205, 221, 233, .09);
+  background:
+    radial-gradient(320px 140px at var(--ux-x, 12%) var(--ux-y, 4%), rgba(184, 218, 197, .045), transparent 72%),
+    linear-gradient(145deg, rgba(13, 25, 36, .54), rgba(5, 12, 19, .38)),
+    rgba(7, 15, 21, .18);
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, .16),
+    inset 0 1px rgba(255, 255, 255, .055);
+}
+
+.topbar-kicker {
+  display: none;
+}
+
+.topbar-index {
+  display: none;
+}
+
+.topbar-title-row h1 {
+  font-size: clamp(18px, 1.75vw, 24px);
+}
+
+.environment-attribution-inline {
+  font-size: 8px;
+  letter-spacing: .04em;
+  opacity: .48;
+}
+
+.search-trigger {
+  gap: 0;
+}
+
+.search-trigger kbd {
+  display: none;
+}
+
+/* Controls should read as tools in the room, not a row of widgets. */
+.sidebar-toggle,
+.notification-trigger,
+.search-trigger,
+.environment-control,
+.profile-chip,
+.icon-button,
+.filter-button,
+.secondary-button {
+  background:
+    linear-gradient(145deg, rgba(220, 237, 225, .032), rgba(3, 10, 15, .24)),
+    rgba(5, 12, 17, .18);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, .045),
+    0 6px 18px rgba(0, 0, 0, .07);
+}
+
+.sidebar-toggle-copy {
+  font-size: 9px;
+}
+
+/* =========================================================
+   03 · INFORMATION BELONGS TO ONE SPACE
+========================================================= */
+
+.workspace::before {
+  background:
+    radial-gradient(
+      620px 360px at var(--cinematic-key-x, 72%) var(--cinematic-key-y, 14%),
+      color-mix(in srgb, var(--nature-sun) 7%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      70% 30% at 50% 100%,
+      color-mix(in srgb, var(--nature-sage) 5%, transparent),
+      transparent 74%
+    );
+  opacity: .72;
+}
+
+.dashboard-command-deck {
+  border-radius: 28px 14px 28px 14px;
+  border-color: rgba(205, 221, 233, .10);
+  background:
+    radial-gradient(56% 120% at 78% 12%, rgba(128, 177, 155, .045), transparent 70%),
+    linear-gradient(145deg, rgba(15, 29, 37, .54), rgba(5, 12, 18, .62));
+  box-shadow:
+    0 30px 78px rgba(0, 0, 0, .18),
+    inset 0 1px rgba(255, 255, 255, .055);
+}
+
+.dashboard-command-deck::after {
+  display: none;
+}
+
+.dashboard-hero-aside {
+  background: transparent;
+  box-shadow: none;
+  border-left-color: rgba(205, 221, 233, .07);
+}
+
+.dashboard-live {
+  letter-spacing: .07em;
+  text-transform: none;
+  color: rgba(168, 198, 174, .72);
+}
+
+.dashboard-signal-grid {
+  margin-top: 18px;
+  border-top-color: rgba(206, 224, 227, .06);
+}
+
+.dashboard-signal-card {
+  min-height: 100px;
+  padding: 14px 18px 18px;
+}
+
+.dashboard-signal-card::before {
+  opacity: .24;
+}
+
+.dashboard-habits,
+.dashboard-overview > .content-card,
+.dashboard-secondary-grid > .content-card {
+  border-color: rgba(205, 221, 233, .07);
+  background:
+    linear-gradient(145deg, rgba(18, 31, 42, .34), rgba(5, 12, 18, .44)),
+    rgba(7, 14, 21, .20);
+  box-shadow:
+    0 22px 58px rgba(0, 0, 0, .16),
+    inset 0 1px rgba(255, 255, 255, .038);
+}
+
+.dashboard-habits {
+  border-radius: 26px 10px 26px 10px;
+}
+
+.dashboard-habit-row {
+  border-color: rgba(225, 238, 230, .06);
+  background: rgba(8, 16, 22, .18);
+}
+
+.dashboard-overview {
+  gap: 14px;
+}
+
+.dashboard-overview > .content-card {
+  min-height: 320px;
+}
+
+.dashboard-secondary-details,
+.dashboard-focus-disclosure {
+  border-color: rgba(205, 221, 233, .065);
+  background: rgba(7, 14, 20, .18);
+}
+
+/* Hero stays prominent, but the title no longer dominates the room. */
+.dashboard-command-deck .page-intro h2 {
+  font-size: clamp(48px, 5.4vw, 74px);
+}
+
+.page-intro p,
+.workspace-header p {
+  color: rgba(222, 233, 226, .66);
+}
+
+/* =========================================================
+   04 · SPATIAL NATURALISM
+========================================================= */
+
+.environment-scene[data-renderer="webgl"] .environment-terrain {
+  opacity: .24;
+}
+
+.environment-scene[data-renderer="webgl"] .environment-canopy {
+  opacity: .28;
+}
+
+.environment-scene[data-renderer="webgl"] .environment-horizon {
+  opacity: .24;
+}
+
+@media (max-width: 820px) {
+  .nav-index,
+  .topbar-kicker,
+  .topbar-index {
+    display: none;
+  }
+
+  .topbar {
+    min-height: 58px;
+  }
+
+  .dashboard-command-deck {
+    border-radius: 22px 10px 22px 10px;
+  }
+
+  .dashboard-command-deck .page-intro h2 {
+    font-size: clamp(44px, 11vw, 62px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .environment-terrain::after,
+  .environment-canopy::before {
+    filter: none;
+  }
+}
