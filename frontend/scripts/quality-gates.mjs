@@ -394,8 +394,8 @@ if (!existsSync(brandMarkSource)) failures.push('Canonical MiD brand mark compon
 if (!/MiDMark/.test(sidebarSource)) failures.push('Primary shell must use the canonical MiD brand mark.')
 if (!/CORE EXPERIENCE V1 — THE MI D ROOM/.test(experienceSystem)) failures.push('Core MiD room experience layer is missing from experience.css.')
 const appSource = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
-if (!/nav-index/.test(sidebarSource) || !/index: '001'/.test(sidebarSource) || !/index: '009'/.test(sidebarSource)) {
-  failures.push('Field-guide navigation must keep explicit navigation indices.')
+if (/nav-index/.test(sidebarSource) || /index:\s*'00[1-9]'/.test(sidebarSource)) {
+  failures.push('Field-guide navigation must not reintroduce HUD-style navigation indices.')
 }
 if (!/useRef(?:<[^>]+>)?\(null\)/.test(sidebarSource) || !/scrollIntoView/.test(sidebarSource)) {
   failures.push('Active field-guide navigation should remain discoverable when the mobile rail scrolls horizontally.')
