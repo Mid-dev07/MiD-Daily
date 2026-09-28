@@ -126,7 +126,7 @@ export function useEnvironment(): UseEnvironment {
   const [now, setNow] = useState(() => new Date())
   const requestVersion = useRef(0)
 
-  const refresh = useCallback(async (preferFreshLocation = false) => {
+  const refresh = useCallback(async (preferFreshLocation = false, forceWeatherFetch = true) => {
     const version = ++requestVersion.current
     setError(null)
 
@@ -162,6 +162,13 @@ export function useEnvironment(): UseEnvironment {
     const usableCached = cached && !weatherCacheIsStale(cached) ? cached : null
     if (usableCached) setWeather(usableCached)
     else setWeather(null)
+
+    if (usableCached && !forceWeatherFetch) {
+      setStatus('ready')
+      setError(null)
+      return
+    }
+
     setStatus('loading')
 
     const controller = new AbortController()
@@ -187,7 +194,7 @@ export function useEnvironment(): UseEnvironment {
     }
   }, [location])
 
-  const requestLocation = useCallback(() => refresh(true), [refresh])
+  const requestLocation = useCallback(() => refresh(true, true), [refresh])
 
   useEffect(() => {
     let active = true
@@ -195,10 +202,10 @@ export function useEnvironment(): UseEnvironment {
       const saved = readStoredLocation()
       if (!saved) {
         const permission = await permissionState()
-        if (active && permission === 'granted') void refresh(true)
+        if (active && permission === 'granted') void refresh(true, true)
         return
       }
-      if (active) void refresh(false)
+      if (active) void refresh(false, false)
     }
     void bootstrap()
     return () => { active = false }
@@ -211,7 +218,7 @@ export function useEnvironment(): UseEnvironment {
 
   useEffect(() => {
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible' && location) void refresh(false)
+      if (document.visibilityState === 'visible' && location) void refresh(false, false)
     }
     document.addEventListener('visibilitychange', handleVisibility)
     return () => document.removeEventListener('visibilitychange', handleVisibility)
@@ -222,5 +229,5 @@ export function useEnvironment(): UseEnvironment {
     [now, location, weather, status, error],
   )
 
-  return { environment, requestLocation, refresh: () => refresh(false) }
+  return { environment, requestLocation, refresh: () => refresh(false, true) }
 }
