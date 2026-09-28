@@ -1455,15 +1455,11 @@ textarea:focus,
 }
 
 /* Working region: information surfaces stay substantial but quiet. */
-.dashboard-overview {
+.dashboard-workplane {
   gap: 16px;
 }
 
-.dashboard-overview > .content-card {
-  min-height: 340px;
-}
-
-.dashboard-overview .card-heading {
+.dashboard-workplane .card-heading {
   margin-bottom: 20px;
 }
 

@@ -913,7 +913,7 @@ textarea:focus {
   box-shadow: 0 0 13px rgba(79,209,255,.16);
 }
 
-.dashboard-overview,
+.dashboard-workplane,
 .dashboard-context-grid {
   display: grid;
   grid-template-columns: 1.06fr .94fr;
@@ -1119,10 +1119,9 @@ textarea:focus {
 
 .action-focus-main { min-width: 0; }
 
-.action-focus-code {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+.action-focus-context {
+  display: inline-flex;
+  align-items: baseline;
   gap: 8px;
   margin-bottom: 12px;
   color: var(--mi-text-dim);
@@ -1131,10 +1130,10 @@ textarea:focus {
   text-transform: uppercase;
 }
 
-.action-focus-code span { color: var(--action-accent, var(--mi-cyan)); }
-.action-focus-code i { color: rgba(128,157,172,.30); font-style: normal; }
-.action-focus-code strong { color: rgba(225,236,232,.70); font-weight: 750; }
-.action-focus-code em { color: rgba(128,157,172,.40); font-style: normal; font-weight: 650; }
+.action-focus-context strong {
+  color: color-mix(in srgb, var(--action-accent, var(--mi-cyan)) 72%, var(--mi-text) 28%);
+  font-weight: 750;
+}
 
 .action-focus-eyebrow {
   display: inline-flex;
@@ -1951,7 +1950,7 @@ textarea:focus {
   .profile-email { display: none; }
 
   .workspace { padding: 20px 16px 104px; }
-  .dashboard-overview,
+  .dashboard-workplane,
   .dashboard-context-grid,
   .profile-layout,
   .insights-grid,

@@ -201,6 +201,18 @@ if (!materialSystem.includes('--material-world-warmth')
 if (dashboard.includes('YOUR DAY, LIVE') || dashboard.includes('YOUR DAY ·')) {
   failures.push('Dashboard command-center copy must remain softened after the visual gap pass.')
 }
+if (!/dashboard-workplane/.test(dashboard)
+  || /className="content-card dashboard-agenda"/.test(dashboard)
+  || /className="content-card dashboard-focus"/.test(dashboard)
+  || !/data-spatial-role="primary"/.test(dashboard)) {
+  failures.push('Today must keep one shared spatial workplane instead of separate agenda/focus card walls.')
+}
+if (actionFocus.includes('action-focus-code') || /index:\s*'/.test(actionFocus) || !actionFocus.includes('action-focus-context')) {
+  failures.push('Action Focus must use calm live-priority context rather than legacy field-guide HUD indexing.')
+}
+if (!worldCanvasSource.includes('const lobeCenters = [') || !worldCanvasSource.includes('lobeIndex')) {
+  failures.push('Canopy geometry must retain authored multi-lobe natural clustering without adding render families.')
+}
 if (!/var\(--env-atmosphere-softness/.test(experienceSystem)) {
   failures.push('Workspace atmosphere must consume the live environment density signal.')
 }

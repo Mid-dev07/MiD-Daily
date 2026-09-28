@@ -29,7 +29,7 @@
 }
 
 .environment-scene[data-renderer="webgl"] .environment-terrain {
-  opacity: .08;
+  opacity: .06;
 }
 
 .environment-scene[data-renderer="webgl"] .environment-canopy {
