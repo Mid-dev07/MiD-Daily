@@ -82,7 +82,7 @@ export function AuthView() {
   return (
     <main className="auth-shell">
       <section className="auth-card">
-        <div className="auth-brand"><span className="brand-mark">M</span><div><strong>MiD-Daily</strong><span>Daily management workspace</span></div></div>
+        <div className="auth-brand"><span className="brand-mark">M</span><div><strong>MiD</strong><span>Daily workspace</span></div></div>
         <span className="section-kicker">ACCOUNT</span>
         <h1>{title}</h1>
         <p className="auth-subtitle">Sign in to keep your Schedule, Tasks, Finance, and integrations tied to your account.</p>

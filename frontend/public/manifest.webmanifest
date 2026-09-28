@@ -1,6 +1,6 @@
 {
-  "name": "MiD-Daily",
-  "short_name": "MiD Daily",
+  "name": "MiD Daily",
+  "short_name": "MiD",
   "description": "A living personal operating workspace for the reality of your day.",
   "start_url": "/",
   "scope": "/",

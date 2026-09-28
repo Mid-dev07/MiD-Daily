@@ -1,4 +1,4 @@
-# MiD Daily — Core Identity System
+# MiD — Core Identity System
 
 Status: Identity Lock v1.0
 
@@ -13,6 +13,26 @@ MiD is a living personal operating workspace that helps a person understand the 
 The product is not a generic dashboard, planner, finance tracker, AI assistant, or game-like interface.
 
 Those are capabilities inside the same workspace.
+
+## 02 — Brand Architecture
+
+MiD is the canonical brand name.
+
+MiD Daily is the canonical product name shown to users. “Daily” describes the product's role without replacing the MiD brand.
+
+The public web address is **mid-manager.xyz**. The domain is an address, not a second product name, and should not appear as the primary visible brand in the interface.
+
+**MiD-Daily** remains the repository/project identifier for internal engineering purposes. It should not be used as the primary customer-facing name when “MiD” or “MiD Daily” is more appropriate.
+
+Canonical hierarchy:
+
+1. Brand — MiD
+2. Product — MiD Daily
+3. Descriptor — personal daily management workspace
+4. Web address — mid-manager.xyz
+5. Internal repository identifier — MiD-Daily
+
+Visible product surfaces should prefer “MiD” for compact identity and “MiD Daily” where the full product name is useful, such as the document title, browser title, install metadata, and onboarding/authentication context.
 
 ## 02 — The MiD Idea
 

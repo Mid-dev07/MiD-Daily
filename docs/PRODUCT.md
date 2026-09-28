@@ -1,7 +1,7 @@
-# MiD-Daily — Product Baseline
+# MiD Daily — Product Baseline
 
 ## Vision
-MiD-Daily is a lightweight personal daily-management workspace that brings schedule, tasks, finance, habits, insights, and connected tools into one living personal operating workspace.
+MiD Daily is a lightweight personal daily-management workspace that brings schedule, tasks, finance, habits, insights, and connected tools into one living personal operating workspace.
 
 ## Target
 Personal use first, with a clear ownership model suitable for small-scale multi-user expansion.
@@ -40,6 +40,16 @@ The roadmap is complete for the current product scope. Provider-specific setup a
 - Instagram analytics is a read-only workspace. User-scoped Connect uses Business Login OAuth when configured; a deployment-scoped fallback remains supported for legacy deployments.
 - Google Calendar two-way sync and calendar selection remain future work because they require external-change detection, conflict resolution, and additional account UX.
 - Credentialed end-user acceptance flows (email recovery, Google OAuth, Telegram/Calendar consent, Instagram OAuth consent) require a real interactive provider session and are not represented as completed solely from automated CI evidence.
+
+## Brand reference
+
+- Brand: **MiD**
+- Product: **MiD Daily**
+- Descriptor: **personal daily management workspace**
+- Public web address: **mid-manager.xyz**
+- Internal repository identifier: **MiD-Daily**
+
+Use the brand/product names above consistently in customer-facing surfaces. The domain and repository name are identifiers, not alternate product names.
 
 ## Identity reference
 The canonical product identity is defined in `docs/MID_IDENTITY_SYSTEM.md`. UNREAL is an execution layer on top of that identity.
