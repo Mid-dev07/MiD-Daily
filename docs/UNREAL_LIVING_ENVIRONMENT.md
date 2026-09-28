@@ -189,3 +189,18 @@ The spatial renderer is now explicitly structured around natural landforms rathe
 The quality rule is:
 
 > Remove anything that makes the environment read like a technical demo before adding another effect.
+
+
+## Ecosystem depth v1
+
+The environment now moves one layer beyond isolated landforms into a restrained ecosystem reading:
+
+- workspace paths use small natural stone placements instead of flat geometric bars;
+- rain pooling uses irregular wet-patch geometry rather than rectangular puddle primitives;
+- authored grove landmarks use actual procedural trunk and canopy forms instead of only foliage cards;
+- the CSS environment adds a low-energy ground material field so the transition between WebGL terrain and the ambient envelope is less abrupt;
+- all additions reuse the existing WebGL2 material system, event-driven render budget, reduced-motion handling, and desktop/fine-pointer spatial boundary.
+
+Quality target:
+
+> The scene should read as one connected outdoor place with ground, stone, vegetation, moisture, and spatial orientation—not as a collection of low-poly objects.

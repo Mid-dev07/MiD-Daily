@@ -629,6 +629,34 @@ function groundShadowGeometry() {
   return new Float32Array(vertices)
 }
 
+function wetPatchGeometry() {
+  const vertices: number[] = []
+  const segments = 12
+
+  for (let index = 0; index < segments; index += 1) {
+    const a0 = (index / segments) * Math.PI * 2
+    const a1 = ((index + 1) / segments) * Math.PI * 2
+    const irregular0 = 0.82 + 0.16 * Math.sin(index * 1.91 + 0.4)
+    const irregular1 = 0.82 + 0.16 * Math.sin((index + 1) * 1.91 + 0.4)
+    const edge0: Vec3 = [
+      Math.cos(a0) * irregular0,
+      0,
+      Math.sin(a0) * irregular0,
+    ]
+    const edge1: Vec3 = [
+      Math.cos(a1) * irregular1,
+      0,
+      Math.sin(a1) * irregular1,
+    ]
+
+    for (const point of [[0, 0, 0], edge0, edge1] as Vec3[]) {
+      vertices.push(point[0], point[1], point[2], 0, 1, 0)
+    }
+  }
+
+  return new Float32Array(vertices)
+}
+
 function createMesh(gl: WebGL2RenderingContext, data: Float32Array, positionLocation: number, normalLocation: number): Mesh {
   const vao = gl.createVertexArray()
   const buffer = gl.createBuffer()
@@ -724,34 +752,38 @@ function drawSpatialPath(
     emissive?: number,
     rotation?: number,
   ) => void,
-  box: Mesh,
+  rockA: Mesh,
+  rockB: Mesh,
   start: Vec3,
   end: Vec3,
-  color: Vec3,
+  primary: Vec3,
+  secondary: Vec3,
 ) {
   const dx = end[0] - start[0]
   const dz = end[2] - start[2]
   const distance = Math.hypot(dx, dz)
   if (distance < 0.7) return
 
-  const segments = Math.min(7, Math.max(3, Math.ceil(distance / 1.2)))
+  const segments = Math.min(9, Math.max(4, Math.ceil(distance / 1.05)))
   const angle = Math.atan2(-dz, dx)
 
   for (let index = 0; index < segments; index += 1) {
-    const a = index / segments
-    const b = (index + 1) / segments
-    const midX = start[0] + (dx * (a + b)) * 0.5
-    const midZ = start[2] + (dz * (a + b)) * 0.5
-    const segmentLength = distance * (b - a)
+    const t = (index + 0.5) / segments
+    const lateral = Math.sin(index * 1.47) * 0.16
+    const midX = start[0] + dx * t + (-Math.sin(angle) * lateral)
+    const midZ = start[2] + dz * t + (-Math.cos(angle) * lateral)
+    const scale = 0.22 + (index % 3) * 0.035
+    const mesh = index % 2 === 0 ? rockA : rockB
+    const color = index % 2 === 0 ? primary : secondary
 
     draw(
-      box,
-      [midX, 0.015, midZ],
-      [segmentLength * 0.44, 0.018, 0.075],
+      mesh,
+      [midX, 0.022 + (index % 3) * 0.006, midZ],
+      [scale, 0.11 + (index % 2) * 0.02, scale * 0.72],
       color,
-      5,
-      0.008,
-      angle,
+      3,
+      0,
+      angle + (index % 2 === 0 ? 0.16 : -0.2),
     )
   }
 }
@@ -770,10 +802,13 @@ function drawWorldComposition(
   rockB: Mesh,
   rockC: Mesh,
   foliage: Mesh,
+  treeTrunk: Mesh,
+  treeCanopy: Mesh,
   composition: ReturnType<typeof worldModuleAnchor>['composition'],
   stone: Vec3,
   moss: Vec3,
   fern: Vec3,
+  warm: Vec3,
   scale: number,
 ) {
   const [fx, , fz] = composition.foregroundLeft
@@ -790,9 +825,35 @@ function drawWorldComposition(
   draw(rockA, [hx + 3.0 * s, 0.03, hz + 0.22], [1.18 * s, 0.44 * s, 0.76 * s], fern, 3, 0, -0.2)
 
   if (composition.landmarkKind === 'grove') {
-    draw(foliage, [lx - 0.9 * s, ly - 0.05, lz], [1.0 * s, 0.92 * s, 1.0 * s], fern, 4, 0, -0.14)
-    draw(foliage, [lx + 0.2 * s, ly - 0.05, lz + 0.2 * s], [0.78 * s, 0.74 * s, 0.78 * s], moss, 4, 0, 0.2)
-    draw(rockC, [lx + 0.75 * s, 0.05, lz + 0.16 * s], [0.72 * s, 0.34 * s, 0.56 * s], stone, 3, 0, 0.08)
+    draw(
+      treeTrunk,
+      [lx - 0.7 * s, ly + 0.02, lz],
+      [0.48 * s, 0.82 * s, 0.48 * s],
+      warm,
+      1,
+      0,
+      -0.08,
+    )
+    draw(
+      treeCanopy,
+      [lx - 0.7 * s, ly + 1.64 * s, lz],
+      [1.16 * s, 0.84 * s, 1.0 * s],
+      fern,
+      4,
+      0,
+      0.08,
+    )
+    draw(
+      treeCanopy,
+      [lx + 0.12 * s, ly + 1.78 * s, lz + 0.26 * s],
+      [0.72 * s, 0.58 * s, 0.66 * s],
+      moss,
+      4,
+      0,
+      -0.12,
+    )
+    draw(foliage, [lx + 0.82 * s, ly - 0.05, lz + 0.12 * s], [0.72 * s, 0.68 * s, 0.72 * s], fern, 4, 0, 0.2)
+    draw(rockC, [lx + 0.76 * s, 0.05, lz + 0.16 * s], [0.72 * s, 0.34 * s, 0.56 * s], stone, 3, 0, 0.08)
     return
   }
 
@@ -952,6 +1013,7 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
       const treeTrunk = createMesh(gl, treeTrunkGeometry(), positionLocation, normalLocation)
       const treeCanopy = createMesh(gl, canopyGeometry(), positionLocation, normalLocation)
       const shadow = createMesh(gl, groundShadowGeometry(), positionLocation, normalLocation)
+      const wetPatch = createMesh(gl, wetPatchGeometry(), positionLocation, normalLocation)
 
       const projection = new Float32Array(16)
       const view = new Float32Array(16)
@@ -1192,9 +1254,9 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
             mineral[2] * 0.58,
           ]
           draw(
-            box,
-            [-2.8, 0.012, 2.5],
-            [1.45, 0.006, 0.44],
+            wetPatch,
+            [-2.8, 0.014, 2.5],
+            [1.32, 1, 0.46],
             puddleColor,
             5,
             0,
@@ -1202,9 +1264,9 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
             puddleOpacity,
           )
           draw(
-            box,
-            [3.25, 0.014, 1.8],
-            [1.05, 0.006, 0.34],
+            wetPatch,
+            [3.25, 0.016, 1.8],
+            [0.92, 1, 0.36],
             puddleColor,
             5,
             0,
@@ -1212,9 +1274,9 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
             puddleOpacity * 0.82,
           )
           draw(
-            box,
-            [-4.9, 0.012, -4.0],
-            [0.82, 0.006, 0.28],
+            wetPatch,
+            [-4.9, 0.014, -4.0],
+            [0.74, 1, 0.30],
             puddleColor,
             5,
             0,
@@ -1303,9 +1365,11 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
         if (spatialPathQuery.matches) {
           drawSpatialPath(
             draw,
-            box,
+            rockA,
+            rockB,
             [0, 0.02, 1.15],
             activeAnchor.position,
+            stone,
             moss,
           )
           drawWorldComposition(
@@ -1314,10 +1378,13 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
             rockB,
             rockC,
             foliage,
+            treeTrunk,
+            treeCanopy,
             activeAnchor.composition,
             stone,
             moss,
             fern,
+            warm,
             activeAnchor.composition.landmarkScale,
           )
 
@@ -1464,6 +1531,7 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
         gl.deleteVertexArray(treeTrunk.vao)
         gl.deleteVertexArray(treeCanopy.vao)
         gl.deleteVertexArray(shadow.vao)
+        gl.deleteVertexArray(wetPatch.vao)
         gl.deleteProgram(program)
       }
     } catch {
