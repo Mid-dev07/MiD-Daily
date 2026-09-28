@@ -133,11 +133,11 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
 
   return (
     <section className="workspace dashboard-page page-enter">
-      <section className="dashboard-command-deck" data-spatial-role="primary" aria-label="Today command deck">
+      <section className="dashboard-command-deck" data-spatial-role="primary" aria-label="Today workspace">
         <div className="dashboard-hero-grid">
           <div className="page-intro">
             <div>
-              <span className="section-kicker">YOUR DAY · {currentTimeLabel}</span>
+              <span className="section-kicker">THIS MOMENT · {currentTimeLabel}</span>
               <h2>Today</h2>
               <p>{formatDate(today)} · see what matters now, then decide what comes next.</p>
             </div>
@@ -148,7 +148,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
           </div>
 
           <div className="dashboard-hero-aside">
-            <span className="dashboard-live"><i aria-hidden="true" /> YOUR DAY, LIVE</span>
+            <span className="dashboard-live"><i aria-hidden="true" /> Right now</span>
             <strong>{currentSchedule ? 'In progress' : nextSchedule ? 'Next up' : 'Open space'}</strong>
             <small>{currentSchedule ? 'You are here now.' : nextSchedule ? 'This is the next thing already on your path.' : 'There is no active block right now.'}</small>
           </div>
@@ -187,7 +187,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
       <section className="content-card dashboard-habits" data-spatial-role="rhythm" aria-label="Today's habits">
         <div className="card-heading">
           <div>
-            <span className="section-kicker">RHYTHM</span>
+            <span className="section-kicker">Rhythm</span>
             <h3>Today’s habits</h3>
           </div>
           <button className="dashboard-section-link" type="button" onClick={() => onNavigate('habits')}>
@@ -319,7 +319,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
           <section className="content-card dashboard-flexible" data-spatial-role="supporting">
             <div className="card-heading">
               <div>
-                <span className="section-kicker">Adaptive</span>
+                <span className="section-kicker">Flexible</span>
                 <h3>Flexible plans</h3>
               </div>
               <span className="card-meta">{flexiblePlans.length} active</span>
