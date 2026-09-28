@@ -16,6 +16,41 @@
   --material-emissive-soft: .07;
 }
 
+/*
+ * Environment coupling:
+ * the world should tint the information layer, not only sit behind it.
+ * These values are driven by EnvironmentScene -> environmentCssVariables().
+ */
+.app-frame {
+  --material-world-warmth: rgba(224, 184, 116, calc(.012 + var(--env-warmth, .42) * .036));
+  --material-world-coolness: rgba(112, 158, 176, calc(.010 + var(--env-sky-coolness, .20) * .030));
+  --material-world-wetness: rgba(192, 222, 226, calc(var(--env-material-wetness, 0) * .052));
+  --material-world-air-shadow: calc(.24 + var(--env-material-air-density, 0) * .10);
+  --material-world-edge: color-mix(
+    in srgb,
+    var(--material-edge) 82%,
+    rgba(192, 222, 226, calc(var(--env-material-wetness, 0) * 26%))
+  );
+}
+
+.app-frame[data-weather="rain"],
+.app-frame[data-weather="showers"],
+.app-frame[data-weather="heavy-rain"],
+.app-frame[data-weather="storm"] {
+  --material-world-coolness: rgba(102, 139, 153, calc(.024 + var(--env-sky-coolness, .45) * .035));
+  --material-world-wetness: rgba(192, 222, 226, calc(.028 + var(--env-material-wetness, .35) * .07));
+}
+
+.app-frame[data-weather="fog"] {
+  --material-world-coolness: rgba(146, 173, 178, calc(.026 + var(--env-sky-coolness, .50) * .038));
+  --material-world-air-shadow: calc(.20 + var(--env-material-air-density, .55) * .12);
+}
+
+.app-frame[data-day-phase="night"] {
+  --material-world-warmth: rgba(224, 184, 116, .006);
+  --material-world-coolness: rgba(112, 158, 176, .038);
+}
+
 .app-frame {
   background:
     radial-gradient(80% 54% at 72% 0%, rgba(79, 209, 255, .032), transparent 68%),
@@ -47,8 +82,18 @@
 .habit-board,
 .habit-composer,
 .social-foundation-card {
-  border-color: var(--material-edge);
+  border-color: var(--material-world-edge);
   background:
+    radial-gradient(
+      360px 210px at 74% 0%,
+      var(--material-world-warmth),
+      transparent 72%
+    ),
+    radial-gradient(
+      340px 240px at 18% 12%,
+      var(--material-world-coolness),
+      transparent 74%
+    ),
     radial-gradient(
       320px 220px at var(--ux-x, 18%) var(--ux-y, 8%),
       rgba(238, 246, 239, .055),
@@ -61,7 +106,7 @@
       var(--material-mineral-0) 100%
     );
   box-shadow:
-    0 22px 56px rgba(0, 0, 0, .24),
+    0 22px 56px rgb(0 0 0 / var(--material-world-air-shadow)),
     inset 0 1px 0 color-mix(
       in srgb,
       var(--material-highlight) 82%,
@@ -102,8 +147,18 @@
 /* Raised command surfaces have a clearer shell-to-content separation. */
 .dashboard-command-deck,
 .dashboard-hero-aside {
-  border-color: rgba(226, 238, 232, .14);
+  border-color: color-mix(in srgb, var(--material-world-edge) 86%, rgba(226, 238, 232, .14));
   background:
+    radial-gradient(
+      520px 240px at 72% 0%,
+      var(--material-world-warmth),
+      transparent 74%
+    ),
+    radial-gradient(
+      420px 220px at 22% 8%,
+      var(--material-world-coolness),
+      transparent 72%
+    ),
     radial-gradient(
       420px 220px at var(--ux-x, 20%) var(--ux-y, 8%),
       color-mix(in srgb, var(--module-accent, var(--mi-cyan)) 6%, transparent),
@@ -115,7 +170,7 @@
       rgba(7, 14, 21, .88)
     );
   box-shadow:
-    0 28px 76px rgba(0, 0, 0, .30),
+    0 28px 76px rgb(0 0 0 / calc(var(--material-world-air-shadow) + .05)),
     inset 0 1px 0 rgba(255, 255, 255, .075),
     inset 0 -1px 0 rgba(0, 0, 0, .16);
 }
