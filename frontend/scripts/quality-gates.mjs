@@ -210,7 +210,7 @@ if (!/dashboard-workplane/.test(dashboard)
 if (/action-focus-code/.test(actionFocus) || /index:s*'/.test(actionFocus) || !/action-focus-context/.test(actionFocus)) {
   failures.push('Action Focus must use calm live-priority context rather than legacy field-guide HUD indexing.')
 }
-if (!/const lobeCenters = [/.test(worldCanvasSource) || !/lobeIndex/.test(worldCanvasSource)) {
+if (!worldCanvasSource.includes('const lobeCenters = [') || !worldCanvasSource.includes('lobeIndex')) {
   failures.push('Canopy geometry must retain authored multi-lobe natural clustering without adding render families.')
 }
 if (!/var\(--env-atmosphere-softness/.test(experienceSystem)) {
