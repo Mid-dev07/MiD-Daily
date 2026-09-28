@@ -220,3 +220,17 @@ Spatial objects now resolve their contact height from the same deterministic ter
 Quality target:
 
 > A camera move should reveal one continuous physical ground surface. Objects may be stylized, but they must not visibly float, sink, or hover independently of terrain.
+
+
+## Terrain surface v2
+
+Terrain sampling is now denser and uses per-vertex normals:
+
+- the surface grid uses 28 × 28 cells without adding a second render pass;
+- each terrain vertex gets its own normal derived from adjacent terrain heights;
+- both triangles in each cell preserve their actual corner normals instead of sharing one center normal;
+- the same deterministic height function remains the source for terrain grounding.
+
+Quality target:
+
+> Terrain relief should read as a continuous natural landform before the viewer notices the procedural mesh.

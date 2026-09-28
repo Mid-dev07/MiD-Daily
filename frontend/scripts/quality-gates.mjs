@@ -74,6 +74,12 @@ if (!/draw\(\s*wetPatch[\s\S]{0,900}groundSurfaceY\(/.test(worldCanvasSource)) {
   failures.push('Weather wet patches must remain terrain-grounded.')
 }
 
+if (!/const segments = 28/.test(worldCanvasSource)
+  || !/type SurfacePoint =/.test(worldCanvasSource)
+  || !/const point = \(x: number, z: number\): SurfacePoint/.test(worldCanvasSource)
+  || !/normal: normalAt\(x, z\)/.test(worldCanvasSource)) {
+  failures.push('Terrain surface v2 must use denser 28-segment sampling with per-vertex normals.')
+}
 if (!/const relief = [\s\S]*\* 2\.65/.test(worldCanvasSource)
   || !/const sides = 9/.test(worldCanvasSource)
   || !/const blades = 10/.test(worldCanvasSource)
@@ -441,8 +447,11 @@ if (existsSync(moduleWorldPath)) {
 } 
 
 const microstructureSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
-if (!/const segments = 24/.test(microstructureSource) || !/float fineNoise = surfaceHash\(floor\(vWorldPosition\.xz \* 11\.0\)\)/.test(microstructureSource)) {
-  failures.push('Environmental microstructure v1 contract is missing: terrain density and fine deterministic surface variation must remain explicit.')
+if (!/const segments = 28/.test(microstructureSource)
+  || !/const midsizeBreak =/.test(microstructureSource)
+  || !/const microRelief =/.test(microstructureSource)
+  || !/float fineNoise = surfaceHash\(floor\(vWorldPosition\.xz \* 11\.0\)\)/.test(microstructureSource)) {
+  failures.push('Environmental microstructure v2 contract is missing: denser terrain sampling and fine deterministic surface variation must remain explicit.')
 }
 if (!/float slope = 1\.0 - max\(normal\.y, 0\.0\)/.test(microstructureSource) || !/groundVariation/.test(microstructureSource)) {
   failures.push('Environmental microstructure v1 must keep slope-aware ground response in the shared material shader.')
