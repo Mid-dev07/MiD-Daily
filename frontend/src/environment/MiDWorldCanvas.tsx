@@ -837,6 +837,52 @@ function drawProjectedGroundShadow(
   )
 }
 
+function drawGroundCover(
+  draw: (
+    mesh: Mesh,
+    position: Vec3,
+    scale: Vec3,
+    color: Vec3,
+    kind: number,
+    emissive?: number,
+    rotation?: number,
+  ) => void,
+  foliage: Mesh,
+  composition: ReturnType<typeof worldModuleAnchor>['composition'],
+  fern: Vec3,
+  scale: number,
+) {
+  const [fx, , fz] = composition.foregroundLeft
+  const [rx, , rz] = composition.foregroundRight
+  const [hx, , hz] = composition.horizon
+  const [lx, , lz] = composition.landmark
+  const points: Array<[number, number, number, number]> = [
+    [fx + 0.55 * scale, fz - 0.18 * scale, 0.48, 0.12],
+    [fx - 0.32 * scale, fz + 0.52 * scale, 0.36, -0.24],
+    [rx - 0.58 * scale, rz + 0.16 * scale, 0.44, 0.28],
+    [rx + 0.32 * scale, rz - 0.46 * scale, 0.34, -0.18],
+    [hx - 1.15 * scale, hz + 0.36 * scale, 0.3, 0.18],
+    [hx + 1.32 * scale, hz - 0.28 * scale, 0.34, -0.2],
+    [lx - 0.88 * scale, lz + 0.54 * scale, 0.4, 0.16],
+    [lx + 0.96 * scale, lz - 0.38 * scale, 0.3, -0.14],
+  ]
+
+  points.forEach(([x, z, size, rotation], index) => {
+    const y = groundSurfaceY(x, z, 0.018)
+    const depthScale = index < 4 ? 1 : 0.78
+    draw(
+      foliage,
+      [x, y, z],
+      [size * depthScale, size * 0.78 * depthScale, size * depthScale],
+      fern,
+      4,
+      0,
+      rotation,
+      index < 4 ? 0.82 : 0.54,
+    )
+  })
+}
+
 function drawSpatialPath(
   draw: (
     mesh: Mesh,
