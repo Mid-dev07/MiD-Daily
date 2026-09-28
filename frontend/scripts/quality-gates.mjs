@@ -33,7 +33,7 @@ if (!existsSync(workspaceContextRailPath)) {
 if (!/const EnvironmentScene = lazy\(\(\) => import\('\.\.\/environment\/EnvironmentScene'/.test(appCompositionSource)) {
   failures.push('Heavy WebGL environment renderer must remain code-split from the initial application chunk.')
 }
-if (!/const forceWeatherFetch = true/.test(environmentHookSource)
+if (!/forceWeatherFetch\s*=\s*true/.test(environmentHookSource)
   || !/usableCached && !forceWeatherFetch/.test(environmentHookSource)
   || !/visibilityState === 'visible'/.test(environmentHookSource)
   || !/refresh\(false, false\)/.test(environmentHookSource)) {
