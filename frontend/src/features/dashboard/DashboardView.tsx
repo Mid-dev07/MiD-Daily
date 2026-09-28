@@ -184,7 +184,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
       </section>
       </section>
 
-      <section className="content-card dashboard-habits" data-spatial-role="rhythm" aria-label="Today's habits">
+      <section className="dashboard-habits" data-spatial-role="rhythm" aria-label="Today's habits">
         <div className="card-heading">
           <div>
             <span className="section-kicker">Rhythm</span>
@@ -232,8 +232,8 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
         )}
       </section>
 
-      <div className="dashboard-overview" data-spatial-role="secondary-group">
-        <section className="content-card dashboard-agenda" data-spatial-role="supporting">
+      <section className="dashboard-workplane" data-spatial-role="primary" aria-label="Daily workplane">
+        <section className="dashboard-workplane-zone dashboard-agenda">
           <div className="card-heading">
             <div>
               <span className="section-kicker">Today</span>
@@ -264,7 +264,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
           )}
         </section>
 
-        <section className="content-card dashboard-focus" data-spatial-role="focus">
+        <section className="dashboard-workplane-zone dashboard-focus">
           <div className="card-heading">
             <div>
               <span className="section-kicker">Focus</span>
@@ -297,7 +297,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
             </button>
           )}
         </section>
-      </div>
+      </section>
 
       <Suspense fallback={<section className="content-card connection-loading" data-spatial-role="instrument">Preparing quick capture…</section>}>
         <QuickCapture />
