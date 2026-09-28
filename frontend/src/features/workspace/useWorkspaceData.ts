@@ -15,7 +15,6 @@ import { useWorkspaceRealtime } from './useWorkspaceRealtime'
 import { useReminderScheduler } from '../schedule/hooks/useReminderScheduler'
 import { hasCompletedRemoteSync, markRemoteSyncComplete } from '../../lib/dataSync'
 import { hasUserStorage, readUserStorage, writeUserStorage } from '../../lib/userStorage'
-import { useAuth } from '../auth/AuthProvider'
 import type { FinanceBudget, FinanceBudgetDraft, FinanceDraft, FinanceEntry, Task, TaskDraft } from '../../types'
 import type { ScheduleItem } from '../schedule/schedule.types'
 
@@ -27,12 +26,11 @@ const BUDGET_STORAGE_KEY = 'mid-daily.finance-budgets'
 const reportError = (reason: unknown) => reason instanceof Error ? reason.message : 'Remote data sync failed.'
 
 interface UseWorkspaceDataOptions {
+  userId?: string
   onNotice?: (message: string) => void
 }
 
-export function useWorkspaceData({ onNotice }: UseWorkspaceDataOptions = {}) {
-  const { user } = useAuth()
-  const userId = user?.id
+export function useWorkspaceData({ userId, onNotice }: UseWorkspaceDataOptions = {}) {
   const workspaceScope = userId ?? 'demo'
 
   const [tasks, setTasks] = useState<Task[]>(() => normalizeTaskList(readUserStorage(TASK_STORAGE_KEY, userId, userId ? [] : initialTasks)))
@@ -307,7 +305,6 @@ export function useWorkspaceData({ onNotice }: UseWorkspaceDataOptions = {}) {
   }
 
   return {
-    user,
     userId,
     tasks,
     finance,
