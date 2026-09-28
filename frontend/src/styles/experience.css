@@ -1649,7 +1649,7 @@ textarea:focus,
   grid-column: span 2;
 }
 
-.dashboard-overview,
+.dashboard-workplane,
 .dashboard-context-grid {
   column-gap: 16px;
 }
@@ -1991,7 +1991,6 @@ textarea:focus,
 }
 
 .dashboard-habits,
-.dashboard-overview > .content-card,
 .dashboard-secondary-grid > .content-card {
   background:
     linear-gradient(145deg, rgba(18,31,42,.56), rgba(5,12,18,.70)),
@@ -2003,14 +2002,6 @@ textarea:focus,
 
 /* Panel vocabulary: varied surfaces instead of one universal card. */
 .dashboard-habits {
-  border-radius: 28px 12px 28px 12px;
-}
-
-.dashboard-overview > .content-card:first-child {
-  border-radius: 12px 28px 12px 28px;
-}
-
-.dashboard-overview > .content-card:nth-child(2) {
   border-radius: 28px 12px 28px 12px;
 }
 
