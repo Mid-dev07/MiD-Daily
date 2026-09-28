@@ -590,52 +590,66 @@ function canopyGeometry() {
   const vertices: number[] = []
   const segments = 12
   const rings = 5
+  const lobeCenters = [
+    { x: -0.43, y: 0.03, z: 0.02, scale: 0.88 },
+    { x: 0.38, y: 0.10, z: 0.08, scale: 0.96 },
+    { x: 0.02, y: -0.02, z: -0.42, scale: 0.82 },
+  ]
 
-  const point = (ring: number, index: number): { position: Vec3; normal: Vec3 } => {
-    const theta = (ring / rings) * Math.PI
-    const angle = (index / segments) * Math.PI * 2
-    const baseY = Math.cos(theta)
-    const baseRadius = Math.sin(theta)
-    const lobe =
-      1 +
-      0.11 * Math.sin(angle * 3 + ring * 0.92) +
-      0.05 * Math.cos(angle * 5 - ring * 0.64)
-    const verticalScale = 0.9 + 0.05 * Math.cos(angle * 2 - ring * 0.52)
-    const offsetX = 0.05 * Math.sin(angle * 2 + ring * 0.7)
-    const offsetZ = 0.04 * Math.cos(angle * 3 - ring * 0.45)
+  for (let lobeIndex = 0; lobeIndex < lobeCenters.length; lobeIndex += 1) {
+    const center = lobeCenters[lobeIndex]
 
-    const position: Vec3 = [
-      Math.cos(angle) * baseRadius * lobe + offsetX,
-      baseY * verticalScale,
-      Math.sin(angle) * baseRadius * lobe + offsetZ,
-    ]
-    const normalLength = Math.hypot(position[0], position[1], position[2]) || 1
-    const normal: Vec3 = [
-      position[0] / normalLength,
-      position[1] / normalLength,
-      position[2] / normalLength,
-    ]
-    return { position, normal }
-  }
+    const point = (ring: number, index: number): { position: Vec3; normal: Vec3 } => {
+      const theta = (ring / rings) * Math.PI
+      const angle = (index / segments) * Math.PI * 2
+      const baseY = Math.cos(theta)
+      const baseRadius = Math.sin(theta)
+      const lobe =
+        1 +
+        0.11 * Math.sin(angle * 3 + ring * 0.92 + lobeIndex * 1.13) +
+        0.05 * Math.cos(angle * 5 - ring * 0.64 + lobeIndex * 0.71)
+      const verticalScale = 0.88 + 0.06 * Math.cos(angle * 2 - ring * 0.52 + lobeIndex)
+      const offsetX = 0.05 * Math.sin(angle * 2 + ring * 0.7 + lobeIndex * 0.42)
+      const offsetZ = 0.04 * Math.cos(angle * 3 - ring * 0.45 + lobeIndex * 0.63)
 
-  for (let ring = 0; ring < rings; ring += 1) {
-    const nextRing = ring + 1
-    for (let index = 0; index < segments; index += 1) {
-      const nextIndex = (index + 1) % segments
-      const a = point(ring, index)
-      const b = point(ring, nextIndex)
-      const c = point(nextRing, nextIndex)
-      const d = point(nextRing, index)
+      const local: Vec3 = [
+        Math.cos(angle) * baseRadius * lobe * center.scale + offsetX,
+        baseY * verticalScale * center.scale,
+        Math.sin(angle) * baseRadius * lobe * center.scale + offsetZ,
+      ]
+      const position: Vec3 = [
+        local[0] + center.x,
+        local[1] + center.y,
+        local[2] + center.z,
+      ]
+      const localNormalLength = Math.hypot(local[0], local[1], local[2]) || 1
+      const normal: Vec3 = [
+        local[0] / localNormalLength,
+        local[1] / localNormalLength,
+        local[2] / localNormalLength,
+      ]
+      return { position, normal }
+    }
 
-      for (const corner of [a, b, c, a, c, d]) {
-        vertices.push(
-          corner.position[0],
-          corner.position[1],
-          corner.position[2],
-          corner.normal[0],
-          corner.normal[1],
-          corner.normal[2],
-        )
+    for (let ring = 0; ring < rings; ring += 1) {
+      const nextRing = ring + 1
+      for (let index = 0; index < segments; index += 1) {
+        const nextIndex = (index + 1) % segments
+        const a = point(ring, index)
+        const b = point(ring, nextIndex)
+        const c = point(nextRing, nextIndex)
+        const d = point(nextRing, index)
+
+        for (const corner of [a, b, c, a, c, d]) {
+          vertices.push(
+            corner.position[0],
+            corner.position[1],
+            corner.position[2],
+            corner.normal[0],
+            corner.normal[1],
+            corner.normal[2],
+          )
+        }
       }
     }
   }
