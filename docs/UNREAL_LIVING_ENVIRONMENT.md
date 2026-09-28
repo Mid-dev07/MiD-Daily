@@ -204,3 +204,19 @@ The environment now moves one layer beyond isolated landforms into a restrained 
 Quality target:
 
 > The scene should read as one connected outdoor place with ground, stone, vegetation, moisture, and spatial orientation—not as a collection of low-poly objects.
+
+
+## Terrain grounding v1
+
+Spatial objects now resolve their contact height from the same deterministic terrain function used by the terrain mesh:
+
+- natural path stones sit on terrain rather than a fixed horizontal plane;
+- wet patches follow local ground height;
+- foreground, horizon, and landmark rocks share terrain contact;
+- tree trunks, foliage clusters, and module markers are grounded from terrain;
+- projected and contact shadows use local terrain height at their final footprint;
+- authored composition still controls x/z placement and vertical offsets, while terrain owns the physical contact plane.
+
+Quality target:
+
+> A camera move should reveal one continuous physical ground surface. Objects may be stylized, but they must not visibly float, sink, or hover independently of terrain.

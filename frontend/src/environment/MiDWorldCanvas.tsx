@@ -434,6 +434,10 @@ function terrainHeight(x: number, z: number) {
   return relief * (1 - centerCalm * 0.78)
 }
 
+function groundSurfaceY(x: number, z: number, offset = 0) {
+  return terrainHeight(x, z) + offset
+}
+
 function terrainGeometry() {
   const segments = 24
   const size = 18
@@ -732,7 +736,7 @@ function drawProjectedGroundShadow(
 
   draw(
     shadowMesh,
-    [centerX, 0.006, centerZ],
+    [centerX, groundSurfaceY(centerX, centerZ, 0.006), centerZ],
     [scaleX, 1, scaleZ],
     color,
     6,
@@ -778,7 +782,7 @@ function drawSpatialPath(
 
     draw(
       mesh,
-      [midX, 0.022 + (index % 3) * 0.006, midZ],
+      [midX, groundSurfaceY(midX, midZ, 0.022 + (index % 3) * 0.006), midZ],
       [scale, 0.11 + (index % 2) * 0.02, scale * 0.72],
       color,
       3,
@@ -817,17 +821,17 @@ function drawWorldComposition(
   const [lx, ly, lz] = composition.landmark
   const s = Math.max(0.72, Math.min(1.08, scale))
 
-  draw(rockA, [fx, 0.05, fz], [1.45 * s, 0.72 * s, 1.08 * s], stone, 3, 0, -0.18)
-  draw(rockB, [rx, 0.045, rz], [1.3 * s, 0.64 * s, 1.02 * s], moss, 3, 0, 0.16)
+  draw(rockA, [fx, groundSurfaceY(fx, fz, 0.05), fz], [1.45 * s, 0.72 * s, 1.08 * s], stone, 3, 0, -0.18)
+  draw(rockB, [rx, groundSurfaceY(rx, rz, 0.045), rz], [1.3 * s, 0.64 * s, 1.02 * s], moss, 3, 0, 0.16)
 
-  draw(rockC, [hx - 2.0 * s, 0.04, hz + 0.15], [2.05 * s, 0.66 * s, 1.1 * s], stone, 3, 0, -0.08)
-  draw(rockB, [hx + 1.2 * s, 0.035, hz - 0.1], [1.72 * s, 0.52 * s, 0.92 * s], moss, 3, 0, 0.14)
-  draw(rockA, [hx + 3.0 * s, 0.03, hz + 0.22], [1.18 * s, 0.44 * s, 0.76 * s], fern, 3, 0, -0.2)
+  draw(rockC, [hx - 2.0 * s, groundSurfaceY(hx - 2.0 * s, hz + 0.15, 0.04), hz + 0.15], [2.05 * s, 0.66 * s, 1.1 * s], stone, 3, 0, -0.08)
+  draw(rockB, [hx + 1.2 * s, groundSurfaceY(hx + 1.2 * s, hz - 0.1, 0.035), hz - 0.1], [1.72 * s, 0.52 * s, 0.92 * s], moss, 3, 0, 0.14)
+  draw(rockA, [hx + 3.0 * s, groundSurfaceY(hx + 3.0 * s, hz + 0.22, 0.03), hz + 0.22], [1.18 * s, 0.44 * s, 0.76 * s], fern, 3, 0, -0.2)
 
   if (composition.landmarkKind === 'grove') {
     draw(
       treeTrunk,
-      [lx - 0.7 * s, ly + 0.02, lz],
+      [lx - 0.7 * s, groundSurfaceY(lx - 0.7 * s, lz, ly + 0.02), lz],
       [0.48 * s, 0.82 * s, 0.48 * s],
       warm,
       1,
@@ -836,7 +840,7 @@ function drawWorldComposition(
     )
     draw(
       treeCanopy,
-      [lx - 0.7 * s, ly + 1.64 * s, lz],
+      [lx - 0.7 * s, groundSurfaceY(lx - 0.7 * s, lz, ly + 1.64 * s), lz],
       [1.16 * s, 0.84 * s, 1.0 * s],
       fern,
       4,
@@ -845,29 +849,29 @@ function drawWorldComposition(
     )
     draw(
       treeCanopy,
-      [lx + 0.12 * s, ly + 1.78 * s, lz + 0.26 * s],
+      [lx + 0.12 * s, groundSurfaceY(lx + 0.12 * s, lz + 0.26 * s, ly + 1.78 * s), lz + 0.26 * s],
       [0.72 * s, 0.58 * s, 0.66 * s],
       moss,
       4,
       0,
       -0.12,
     )
-    draw(foliage, [lx + 0.82 * s, ly - 0.05, lz + 0.12 * s], [0.72 * s, 0.68 * s, 0.72 * s], fern, 4, 0, 0.2)
-    draw(rockC, [lx + 0.76 * s, 0.05, lz + 0.16 * s], [0.72 * s, 0.34 * s, 0.56 * s], stone, 3, 0, 0.08)
+    draw(foliage, [lx + 0.82 * s, groundSurfaceY(lx + 0.82 * s, lz + 0.12 * s, ly - 0.05), lz + 0.12 * s], [0.72 * s, 0.68 * s, 0.72 * s], fern, 4, 0, 0.2)
+    draw(rockC, [lx + 0.76 * s, groundSurfaceY(lx + 0.76 * s, lz + 0.16 * s, 0.05), lz + 0.16 * s], [0.72 * s, 0.34 * s, 0.56 * s], stone, 3, 0, 0.08)
     return
   }
 
   if (composition.landmarkKind === 'ridge') {
-    draw(rockA, [lx - 1.0 * s, 0.06, lz], [1.15 * s, 0.56 * s, 0.82 * s], stone, 3, 0, -0.14)
-    draw(rockB, [lx + 0.15 * s, 0.05, lz - 0.12 * s], [1.35 * s, 0.72 * s, 0.92 * s], moss, 3, 0, 0.12)
-    draw(rockC, [lx + 1.15 * s, 0.045, lz + 0.08 * s], [0.92 * s, 0.48 * s, 0.72 * s], fern, 3, 0, -0.18)
+    draw(rockA, [lx - 1.0 * s, groundSurfaceY(lx - 1.0 * s, lz, 0.06), lz], [1.15 * s, 0.56 * s, 0.82 * s], stone, 3, 0, -0.14)
+    draw(rockB, [lx + 0.15 * s, groundSurfaceY(lx + 0.15 * s, lz - 0.12 * s, 0.05), lz - 0.12 * s], [1.35 * s, 0.72 * s, 0.92 * s], moss, 3, 0, 0.12)
+    draw(rockC, [lx + 1.15 * s, groundSurfaceY(lx + 1.15 * s, lz + 0.08 * s, 0.045), lz + 0.08 * s], [0.92 * s, 0.48 * s, 0.72 * s], fern, 3, 0, -0.18)
     return
   }
 
-  draw(rockA, [lx - 0.72 * s, 0.06, lz], [0.86 * s, 0.42 * s, 0.68 * s], stone, 3, 0, -0.22)
-  draw(rockB, [lx + 0.02 * s, 0.08 * s, lz + 0.08 * s], [1.15 * s, 0.58 * s, 0.76 * s], moss, 3, 0, 0.08)
-  draw(rockC, [lx + 0.82 * s, 0.045, lz - 0.06 * s], [0.7 * s, 0.34 * s, 0.54 * s], fern, 3, 0, -0.12)
-  draw(foliage, [lx - 0.1 * s, 0.03, lz + 0.78 * s], [0.58 * s, 0.62 * s, 0.58 * s], fern, 4, 0, 0.18)
+  draw(rockA, [lx - 0.72 * s, groundSurfaceY(lx - 0.72 * s, lz, 0.06), lz], [0.86 * s, 0.42 * s, 0.68 * s], stone, 3, 0, -0.22)
+  draw(rockB, [lx + 0.02 * s, groundSurfaceY(lx + 0.02 * s, lz + 0.08 * s, 0.08 * s), lz + 0.08 * s], [1.15 * s, 0.58 * s, 0.76 * s], moss, 3, 0, 0.08)
+  draw(rockC, [lx + 0.82 * s, groundSurfaceY(lx + 0.82 * s, lz - 0.06 * s, 0.045), lz - 0.06 * s], [0.7 * s, 0.34 * s, 0.54 * s], fern, 3, 0, -0.12)
+  draw(foliage, [lx - 0.1 * s, groundSurfaceY(lx - 0.1 * s, lz + 0.78 * s, 0.03), lz + 0.78 * s], [0.58 * s, 0.62 * s, 0.58 * s], fern, 4, 0, 0.18)
 }
 
 function drawTree(
@@ -1255,7 +1259,7 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
           ]
           draw(
             wetPatch,
-            [-2.8, 0.014, 2.5],
+            [ -2.8, groundSurfaceY(-2.8, 2.5, 0.014), 2.5 ],
             [1.32, 1, 0.46],
             puddleColor,
             5,
@@ -1265,7 +1269,7 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
           )
           draw(
             wetPatch,
-            [3.25, 0.016, 1.8],
+            [ 3.25, groundSurfaceY(3.25, 1.8, 0.016), 1.8 ],
             [0.92, 1, 0.36],
             puddleColor,
             5,
@@ -1275,7 +1279,7 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
           )
           draw(
             wetPatch,
-            [-4.9, 0.014, -4.0],
+            [ -4.9, groundSurfaceY(-4.9, -4.0, 0.014), -4.0 ],
             [0.74, 1, 0.30],
             puddleColor,
             5,
@@ -1346,21 +1350,21 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
           shadowSoftness,
         )
         // Natural grounding objects replace the former architectural primitives.
-        draw(rockB, [0, 0.08, 0.8], [2.9, 0.42, 1.9], stone, 3, 0, -0.08)
-        draw(rockC, [-5.8, 0.22, -2.0], [0.9, 0.62, 1.8], moss, 3, 0, 0.16)
-        draw(rockA, [5.7, 0.18, -1.4], [1.15, 0.62, 1.7], stone, 3, 0, -0.18)
-        draw(rockC, [-3.7, 0.08, -5.8], [2.5, 0.48, 0.72], stone, 3, 0, -0.08)
-        draw(rockA, [3.2, 0.06, -6.5], [1.9, 0.4, 0.58], moss, 3, 0, 0.16)
-        draw(rockB, [-7.4, 0.06, 3.2], [2.2, 0.5, 0.7], stone, 3, 0, 0.08)
-        draw(rockC, [7.0, 0.05, 3.8], [1.7, 0.42, 0.64], warm, 3, 0, -0.12)
-        draw(rockA, [0, 0.08, 1.15], [1.8, 0.46, 1.2], moss, 3, 0, 0.04)
+        draw(rockB, [0, groundSurfaceY(0, 0.8, 0.08), 0.8], [2.9, 0.42, 1.9], stone, 3, 0, -0.08)
+        draw(rockC, [-5.8, groundSurfaceY(-5.8, -2.0, 0.22), -2.0], [0.9, 0.62, 1.8], moss, 3, 0, 0.16)
+        draw(rockA, [5.7, groundSurfaceY(5.7, -1.4, 0.18), -1.4], [1.15, 0.62, 1.7], stone, 3, 0, -0.18)
+        draw(rockC, [-3.7, groundSurfaceY(-3.7, -5.8, 0.08), -5.8], [2.5, 0.48, 0.72], stone, 3, 0, -0.08)
+        draw(rockA, [3.2, groundSurfaceY(3.2, -6.5, 0.06), -6.5], [1.9, 0.4, 0.58], moss, 3, 0, 0.16)
+        draw(rockB, [-7.4, groundSurfaceY(-7.4, 3.2, 0.06), 3.2], [2.2, 0.5, 0.7], stone, 3, 0, 0.08)
+        draw(rockC, [7.0, groundSurfaceY(7.0, 3.8, 0.05), 3.8], [1.7, 0.42, 0.64], warm, 3, 0, -0.12)
+        draw(rockA, [0, groundSurfaceY(0, 1.15, 0.08), 1.15], [1.8, 0.46, 1.2], moss, 3, 0, 0.04)
 
-        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [-6.7, 0.04, -2.4], 1.02, warm, fern, shadowTint, shadowSoftness)
-        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [6.5, 0.04, -1.8], 0.88, warm, moss, shadowTint, shadowSoftness)
-        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [-8.2, 0.03, 1.8], 1.16, warm, fern, shadowTint, shadowSoftness)
-        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [8.4, 0.03, 2.5], 1.04, warm, moss, shadowTint, shadowSoftness)
-        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [-3.2, 0.03, -7.0], 0.78, warm, fern, shadowTint, shadowSoftness)
-        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [3.6, 0.03, -7.5], 0.82, warm, moss, shadowTint, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [-6.7, groundSurfaceY(-6.7, -2.4, 0.04), -2.4], 1.02, warm, fern, shadowTint, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [6.5, groundSurfaceY(6.5, -1.8, 0.04), -1.8], 0.88, warm, moss, shadowTint, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [-8.2, groundSurfaceY(-8.2, 1.8, 0.03), 1.8], 1.16, warm, fern, shadowTint, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [8.4, groundSurfaceY(8.4, 2.5, 0.03), 2.5], 1.04, warm, moss, shadowTint, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [-3.2, groundSurfaceY(-3.2, -7.0, 0.03), -7.0], 0.78, warm, fern, shadowTint, shadowSoftness)
+        drawTree(draw, treeTrunk, treeCanopy, shadow, lightDirection, [3.6, groundSurfaceY(3.6, -7.5, 0.03), -7.5], 0.82, warm, moss, shadowTint, shadowSoftness)
 
         if (spatialPathQuery.matches) {
           drawSpatialPath(
@@ -1442,28 +1446,28 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
           mineral[1] * 0.3,
           mineral[2] * 0.28,
         ]
-        draw(box, [0, -0.02, 0.0], [4.9, 0.008, 2.8], contactShadow, 6, 0, 0, 0.22)
-        draw(box, [-5.2, 0.004, 3.0], [0.9, 0.008, 0.68], contactShadow, 6, 0, -0.12, 0.3)
-        draw(box, [5.1, 0.004, 2.8], [0.78, 0.008, 0.6], contactShadow, 6, 0, 0.22, 0.3)
-        draw(box, [-8.4, 0.004, 5.6], [1.72, 0.008, 1.3], contactShadow, 6, 0, 0.12, 0.28)
-        draw(box, [7.6, 0.004, -7.2], [1.66, 0.008, 1.26], contactShadow, 6, 0, -0.18, 0.28)
+        draw(box, [0, groundSurfaceY(0, 0.0, -0.02), 0.0], [4.9, 0.008, 2.8], contactShadow, 6, 0, 0, 0.22)
+        draw(box, [-5.2, groundSurfaceY(-5.2, 3.0, 0.004), 3.0], [0.9, 0.008, 0.68], contactShadow, 6, 0, -0.12, 0.3)
+        draw(box, [5.1, groundSurfaceY(5.1, 2.8, 0.004), 2.8], [0.78, 0.008, 0.6], contactShadow, 6, 0, 0.22, 0.3)
+        draw(box, [-8.4, groundSurfaceY(-8.4, 5.6, 0.004), 5.6], [1.72, 0.008, 1.3], contactShadow, 6, 0, 0.12, 0.28)
+        draw(box, [7.6, groundSurfaceY(7.6, -7.2, 0.004), -7.2], [1.66, 0.008, 1.26], contactShadow, 6, 0, -0.18, 0.28)
 
-        draw(rockA, [-5.2, 0.06, 3.0], [0.72, 0.42, 0.54], stone, 3, 0.0, -0.12)
-        draw(rockB, [5.1, 0.04, 2.8], [0.62, 0.34, 0.48], warm, 3, 0.0, 0.22)
-        draw(rockC, [-3.3, 0.03, -3.9], [0.52, 0.28, 0.44], fern, 3, 0.0, -0.32)
-        draw(rockA, [3.8, 0.04, -4.5], [0.7, 0.36, 0.52], moss, 3, 0.0, 0.16)
-        draw(rockB, [-8.4, 0.02, 5.6], [1.55, 0.72, 1.2], stone, 3, 0.0, 0.12)
-        draw(rockC, [8.1, 0.02, 4.8], [1.38, 0.68, 1.1], mineral, 3, 0.0, -0.22)
-        draw(rockA, [-8.8, 0.02, -6.8], [1.7, 0.82, 1.25], warm, 3, 0.0, 0.28)
-        draw(rockB, [7.6, 0.02, -7.2], [1.5, 0.74, 1.18], moss, 3, 0.0, -0.18)
-        draw(rockC, [-1.0, 0.02, -7.8], [1.05, 0.5, 0.86], stone, 3, 0.0, 0.05)
+        draw(rockA, [-5.2, groundSurfaceY(-5.2, 3.0, 0.06), 3.0], [0.72, 0.42, 0.54], stone, 3, 0.0, -0.12)
+        draw(rockB, [5.1, groundSurfaceY(5.1, 2.8, 0.04), 2.8], [0.62, 0.34, 0.48], warm, 3, 0.0, 0.22)
+        draw(rockC, [-3.3, groundSurfaceY(-3.3, -3.9, 0.03), -3.9], [0.52, 0.28, 0.44], fern, 3, 0.0, -0.32)
+        draw(rockA, [3.8, groundSurfaceY(3.8, -4.5, 0.04), -4.5], [0.7, 0.36, 0.52], moss, 3, 0.0, 0.16)
+        draw(rockB, [-8.4, groundSurfaceY(-8.4, 5.6, 0.02), 5.6], [1.55, 0.72, 1.2], stone, 3, 0.0, 0.12)
+        draw(rockC, [8.1, groundSurfaceY(8.1, 4.8, 0.02), 4.8], [1.38, 0.68, 1.1], mineral, 3, 0.0, -0.22)
+        draw(rockA, [-8.8, groundSurfaceY(-8.8, -6.8, 0.02), -6.8], [1.7, 0.82, 1.25], warm, 3, 0.0, 0.28)
+        draw(rockB, [7.6, groundSurfaceY(7.6, -7.2, 0.02), -7.2], [1.5, 0.74, 1.18], moss, 3, 0.0, -0.18)
+        draw(rockC, [-1.0, groundSurfaceY(-1.0, -7.8, 0.02), -7.8], [1.05, 0.5, 0.86], stone, 3, 0.0, 0.05)
 
-        draw(foliage, [-7.2, -0.02, -0.8], [1.15, 0.95, 1.15], fern, 4, 0, 0.2)
-        draw(foliage, [-5.9, -0.02, 1.5], [0.82, 0.72, 0.82], moss, 4, 0, -0.25)
-        draw(foliage, [6.5, -0.02, 0.6], [1.0, 0.84, 1.0], fern, 4, 0, -0.12)
-        draw(foliage, [4.7, -0.02, -2.3], [0.86, 0.78, 0.86], moss, 4, 0, 0.24)
-        draw(foliage, [-2.9, -0.02, -5.2], [1.05, 0.9, 1.05], fern, 4, 0, -0.18)
-        draw(foliage, [3.9, -0.02, -6.4], [0.92, 0.8, 0.92], moss, 4, 0, 0.16)
+        draw(foliage, [-7.2, groundSurfaceY(-7.2, -0.8, -0.02), -0.8], [1.15, 0.95, 1.15], fern, 4, 0, 0.2)
+        draw(foliage, [-5.9, groundSurfaceY(-5.9, 1.5, -0.02), 1.5], [0.82, 0.72, 0.82], moss, 4, 0, -0.25)
+        draw(foliage, [6.5, groundSurfaceY(6.5, 0.6, -0.02), 0.6], [1.0, 0.84, 1.0], fern, 4, 0, -0.12)
+        draw(foliage, [4.7, groundSurfaceY(4.7, -2.3, -0.02), -2.3], [0.86, 0.78, 0.86], moss, 4, 0, 0.24)
+        draw(foliage, [-2.9, groundSurfaceY(-2.9, -5.2, -0.02), -5.2], [1.05, 0.9, 1.05], fern, 4, 0, -0.18)
+        draw(foliage, [3.9, groundSurfaceY(3.9, -6.4, -0.02), -6.4], [0.92, 0.8, 0.92], moss, 4, 0, 0.16)
 
         for (const anchor of MODULE_ANCHORS) {
           const active = anchor.view === activeViewRef.current
@@ -1477,7 +1481,7 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
             : [0.3, 0.08, 0.22]
           draw(
             rockA,
-            anchor.position,
+            [anchor.position[0], groundSurfaceY(anchor.position[0], anchor.position[2], 0.03), anchor.position[2]],
             scale,
             active ? anchor.color : moss,
             3,
