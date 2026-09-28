@@ -169,6 +169,18 @@ if (!/function rockGeometry\(variant = 0\)[\s\S]*?const sides = 10/.test(worldCa
   || !/float organicNoise\(vec2 position\)/.test(worldCanvasSource)) {
   failures.push('Natural material pass must retain smoother rock profiles, grounded cover vegetation, and continuous surface noise.')
 }
+if (!/float grassField = upwardFace/.test(worldCanvasSource)
+  || !/float rockMoss = upwardFace/.test(worldCanvasSource)
+  || !/float barkVariation = organicNoise/.test(worldCanvasSource)
+  || !/float leafClusterVariation = smoothstep/.test(worldCanvasSource)) {
+  failures.push('Natural ecosystem pass must differentiate soil/grass, lichen, bark, and leaf cluster response through shared material noise.')
+}
+if (!/function drawGroundCover\([\s\S]*?fern: Vec3,[\s\S]*?moss: Vec3,[\s\S]*?number,\n\) /.test(worldCanvasSource)
+  || !/const points: Array<\[number, number, number, number, boolean\]>/.test(worldCanvasSource)
+  || !/useMoss/.test(worldCanvasSource)) {
+  failures.push('Ground cover must retain deterministic material variation between fern and moss clusters.')
+}
+
 if (/draw\(box, \[-2\.2, 0\.63, 0\.0\][\s\S]{0,260}draw\(box, \[0, 1\.08, -0\.01\]/.test(readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8'))) {
   failures.push('Legacy cyan architectural bars must not remain in the natural environment stage.')
 }
