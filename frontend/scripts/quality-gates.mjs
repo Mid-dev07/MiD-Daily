@@ -207,7 +207,7 @@ if (!/dashboard-workplane/.test(dashboard)
   || !/data-spatial-role="primary"/.test(dashboard)) {
   failures.push('Today must keep one shared spatial workplane instead of separate agenda/focus card walls.')
 }
-if (/action-focus-code/.test(actionFocus) || /index:s*'/.test(actionFocus) || !/action-focus-context/.test(actionFocus)) {
+if (actionFocus.includes('action-focus-code') || /index:\s*'/.test(actionFocus) || !actionFocus.includes('action-focus-context')) {
   failures.push('Action Focus must use calm live-priority context rather than legacy field-guide HUD indexing.')
 }
 if (!worldCanvasSource.includes('const lobeCenters = [') || !worldCanvasSource.includes('lobeIndex')) {
