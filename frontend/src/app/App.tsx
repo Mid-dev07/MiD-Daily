@@ -30,6 +30,7 @@ const SIDEBAR_HIDDEN_STORAGE_KEY = 'mid-daily.sidebar-hidden'
 
 export function App() {
   const { user } = useAuth()
+  const userId = user?.id
   const { environment, requestLocation, refresh: refreshEnvironment } = useEnvironment()
   const [activeView, setActiveView] = useState<View>(() => viewFromPath(window.location.pathname))
   const [searchOpen, setSearchOpen] = useState(false)
@@ -37,7 +38,6 @@ export function App() {
   const [toast, setToast] = useState('')
 
   const {
-    userId,
     tasks,
     finance,
     schedule,
@@ -50,7 +50,7 @@ export function App() {
     saveBudget,
     deleteBudget,
     handleScheduleChange,
-  } = useWorkspaceData({ onNotice: setToast })
+  } = useWorkspaceData({ userId, onNotice: setToast })
 
   const { profile, setProfile, profileLoading } = useWorkspaceProfile({
     user,
