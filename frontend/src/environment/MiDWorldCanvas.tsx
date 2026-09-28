@@ -66,6 +66,26 @@ float surfaceHash(vec2 position) {
   return fract(sin(dot(position, vec2(127.1, 311.7))) * 43758.5453123);
 }
 
+float smoothNoise(vec2 position) {
+  vec2 cell = floor(position);
+  vec2 local = fract(position);
+  local = local * local * (3.0 - 2.0 * local);
+
+  float a = surfaceHash(cell);
+  float b = surfaceHash(cell + vec2(1.0, 0.0));
+  float c = surfaceHash(cell + vec2(0.0, 1.0));
+  float d = surfaceHash(cell + vec2(1.0, 1.0));
+
+  return mix(mix(a, b, local.x), mix(c, d, local.x), local.y);
+}
+
+float organicNoise(vec2 position) {
+  float broad = smoothNoise(position * 0.42);
+  float medium = smoothNoise(position * 1.2) * 0.42;
+  float fine = smoothNoise(position * 3.4) * 0.16;
+  return broad * 0.62 + medium + fine;
+}
+
 void main() {
   vec3 normal = normalize(vWorldNormal);
   vec3 lightDir = normalize(uLightDirection);
@@ -139,10 +159,10 @@ void main() {
   float specular = pow(max(dot(normal, halfVector), 0.0), specularPower) * specularStrength;
   float rim = pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0) * 0.05;
 
-  float macroNoise = surfaceHash(floor(vWorldPosition.xz * 1.35));
-  float microNoise = surfaceHash(floor(vWorldPosition.xz * 4.5));
-  float fineNoise = surfaceHash(floor(vWorldPosition.xz * 11.0));
-  float surfaceVariation = mix(0.91, 1.08, macroNoise * 0.68 + microNoise * 0.22 + fineNoise * 0.10);
+  float macroNoise = organicNoise(vWorldPosition.xz * 0.92);
+  float microNoise = organicNoise(vWorldPosition.xz * 2.6);
+  float fineNoise = smoothNoise(vWorldPosition.xz * 9.0);
+  float surfaceVariation = mix(0.9, 1.07, macroNoise * 0.7 + microNoise * 0.2 + fineNoise * 0.1);
 
   vec3 materialBase = uBaseColor * surfaceVariation;
   if (uKind > 1.5 && uKind < 2.5) {
