@@ -165,16 +165,43 @@ void main() {
   float surfaceVariation = mix(0.9, 1.07, macroNoise * 0.7 + microNoise * 0.2 + fineNoise * 0.1);
 
   vec3 materialBase = uBaseColor * surfaceVariation;
+  float upwardFace = smoothstep(0.58, 0.94, max(normal.y, 0.0));
+  float slope = 1.0 - max(normal.y, 0.0);
+
   if (uKind > 1.5 && uKind < 2.5) {
     float naturalBreak = mix(0.84, 1.06, macroNoise * 0.72 + microNoise * 0.28);
-    float slope = 1.0 - max(normal.y, 0.0);
     float shallowCavity = 1.0 - smoothstep(0.25, 0.82, macroNoise);
+    float soilPatch = smoothstep(0.22, 0.78, macroNoise * 0.72 + microNoise * 0.28);
+    float grassField = upwardFace * smoothstep(0.42, 0.78, soilPatch + fineNoise * 0.12);
+    vec3 soilTone = vec3(0.74, 0.66, 0.49);
+    vec3 grassTone = vec3(0.46, 0.62, 0.42);
     float groundVariation = 1.0 - slope * 0.16 - shallowCavity * 0.035;
     materialBase *= naturalBreak * groundVariation;
+    materialBase = mix(
+      materialBase,
+      materialBase * mix(soilTone, grassTone, grassField),
+      0.045 + grassField * 0.06,
+    );
+  } else if (uKind > 2.5 && uKind < 3.5) {
+    float rockMoss = upwardFace * smoothstep(0.48, 0.78, macroNoise + microNoise * 0.22);
+    vec3 lichenTint = vec3(0.22, 0.30, 0.20);
+    materialBase = mix(materialBase, materialBase * 0.9 + lichenTint * 0.09, rockMoss * 0.28);
+    materialBase *= 1.0 - slope * 0.035;
+  } else if (uKind > 0.5 && uKind < 1.5) {
+    float barkVariation = organicNoise(vWorldPosition.xz * 2.15);
+    float barkRidge = smoothstep(0.58, 0.82, barkVariation);
+    float barkBase = mix(0.86, 1.05, barkVariation);
+    materialBase *= barkBase;
+    materialBase += vec3(0.025, 0.018, 0.01) * barkRidge * upwardFace;
+    float trunkBaseShade = 1.0 - smoothstep(0.05, 0.7, max(vWorldPosition.y, 0.0)) * 0.08;
+    materialBase *= trunkBaseShade;
   } else if (uKind > 3.5 && uKind < 4.5) {
     float leafBacklight = pow(max(dot(-normal, lightDir), 0.0), 1.6) * 0.09;
+    float leafClusterVariation = smoothstep(0.22, 0.82, organicNoise(vWorldPosition.xz * 1.75));
     float dampLeaf = mix(1.0, 1.08, wet * 0.46);
+    vec3 leafTone = mix(vec3(0.86, 0.95, 0.80), vec3(0.58, 0.78, 0.52), leafClusterVariation);
     materialBase *= dampLeaf;
+    materialBase = mix(materialBase, materialBase * 0.96 + leafTone * 0.022, 0.18);
     materialBase += vec3(0.012, 0.028, 0.016) * leafBacklight * (1.0 - wet * 0.3);
   }
 
@@ -890,35 +917,41 @@ function drawGroundCover(
   foliage: Mesh,
   composition: ReturnType<typeof worldModuleAnchor>['composition'],
   fern: Vec3,
+  moss: Vec3,
   scale: number,
 ) {
   const [fx, , fz] = composition.foregroundLeft
   const [rx, , rz] = composition.foregroundRight
   const [hx, , hz] = composition.horizon
   const [lx, , lz] = composition.landmark
-  const points: Array<[number, number, number, number]> = [
-    [fx + 0.55 * scale, fz - 0.18 * scale, 0.48, 0.12],
-    [fx - 0.32 * scale, fz + 0.52 * scale, 0.36, -0.24],
-    [rx - 0.58 * scale, rz + 0.16 * scale, 0.44, 0.28],
-    [rx + 0.32 * scale, rz - 0.46 * scale, 0.34, -0.18],
-    [hx - 1.15 * scale, hz + 0.36 * scale, 0.3, 0.18],
-    [hx + 1.32 * scale, hz - 0.28 * scale, 0.34, -0.2],
-    [lx - 0.88 * scale, lz + 0.54 * scale, 0.4, 0.16],
-    [lx + 0.96 * scale, lz - 0.38 * scale, 0.3, -0.14],
+  const points: Array<[number, number, number, number, boolean]> = [
+    [fx + 0.55 * scale, fz - 0.18 * scale, 0.48, 0.12, false],
+    [fx - 0.32 * scale, fz + 0.52 * scale, 0.36, -0.24, true],
+    [fx + 1.02 * scale, fz + 0.44 * scale, 0.31, 0.36, false],
+    [rx - 0.58 * scale, rz + 0.16 * scale, 0.44, 0.28, true],
+    [rx + 0.32 * scale, rz - 0.46 * scale, 0.34, -0.18, false],
+    [rx + 0.86 * scale, rz + 0.32 * scale, 0.28, 0.06, true],
+    [hx - 1.15 * scale, hz + 0.36 * scale, 0.3, 0.18, false],
+    [hx + 1.32 * scale, hz - 0.28 * scale, 0.34, -0.2, true],
+    [lx - 0.88 * scale, lz + 0.54 * scale, 0.4, 0.16, false],
+    [lx + 0.96 * scale, lz - 0.38 * scale, 0.3, -0.14, true],
   ]
 
-  points.forEach(([x, z, size, rotation], index) => {
+  points.forEach(([x, z, size, rotation, useMoss], index) => {
     const y = groundSurfaceY(x, z, 0.018)
-    const depthScale = index < 4 ? 1 : 0.78
+    const foreground = index < 6
+    const depthScale = foreground ? 1 : 0.78
+    const material = useMoss ? moss : fern
+    const opacity = foreground ? 0.86 - (index % 3) * 0.04 : 0.54 - (index % 2) * 0.06
     draw(
       foliage,
       [x, y, z],
       [size * depthScale, size * 0.78 * depthScale, size * depthScale],
-      fern,
+      material,
       4,
       0,
       rotation,
-      index < 4 ? 0.82 : 0.54,
+      opacity,
     )
   })
 }
@@ -1574,6 +1607,7 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
             foliage,
             activeAnchor.composition,
             fern,
+            moss,
             activeAnchor.composition.landmarkScale,
           )
 
