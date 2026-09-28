@@ -7,7 +7,7 @@ export function AuthGate({ children }: PropsWithChildren) {
 
   if (!configured) return children
   if (loading) {
-    return <main className="auth-shell"><section className="auth-card"><span className="section-kicker">ACCOUNT</span><h1>Loading MiD-Daily…</h1><p className="auth-subtitle">Restoring your session.</p></section></main>
+    return <main className="auth-shell"><section className="auth-card"><span className="section-kicker">ACCOUNT</span><h1>Loading MiD…</h1><p className="auth-subtitle">Restoring your session.</p></section></main>
   }
   if (recovery || !user) return <AuthView />
   return children
