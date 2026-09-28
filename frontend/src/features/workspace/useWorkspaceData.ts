@@ -310,7 +310,6 @@ export function useWorkspaceData({ userId, onNotice }: UseWorkspaceDataOptions =
     finance,
     schedule,
     budgets,
-    readyScope,
     toggleTask,
     saveTask,
     deleteTask,
