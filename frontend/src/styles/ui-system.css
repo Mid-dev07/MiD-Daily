@@ -1950,7 +1950,7 @@ textarea:focus {
   .profile-email { display: none; }
 
   .workspace { padding: 20px 16px 104px; }
-  .dashboard-overview,
+  .dashboard-workplane,
   .dashboard-context-grid,
   .profile-layout,
   .insights-grid,
