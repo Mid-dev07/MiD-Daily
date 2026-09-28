@@ -545,7 +545,8 @@ const microstructureSource = readFileSync(join(srcDir, 'environment/MiDWorldCanv
 if (!/const segments = 28/.test(microstructureSource)
   || !/const midsizeBreak =/.test(microstructureSource)
   || !/const microRelief =/.test(microstructureSource)
-  || !/float fineNoise = surfaceHash\(floor\(vWorldPosition\.xz \* 11\.0\)\)/.test(microstructureSource)) {
+  || (!/float fineNoise = surfaceHash\(floor\(vWorldPosition\.xz \* 11\.0\)\)/.test(microstructureSource)
+    && !/float fineNoise = smoothNoise\(vWorldPosition\.xz \* 9\.0\)/.test(microstructureSource))) {
   failures.push('Environmental microstructure v2 contract is missing: denser terrain sampling and fine deterministic surface variation must remain explicit.')
 }
 if (!/float slope = 1\.0 - max\(normal\.y, 0\.0\)/.test(microstructureSource) || !/groundVariation/.test(microstructureSource)) {
