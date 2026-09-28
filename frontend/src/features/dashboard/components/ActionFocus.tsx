@@ -15,7 +15,6 @@ interface ActionFocusProps {
 
 interface ActionFocusState {
   status: string
-  index: string
   label: string
   title: string
   detail: string
@@ -47,7 +46,6 @@ function buildActionFocus(
   if (currentSchedule) {
     return {
       status: 'NOW',
-      index: '002',
       label: 'SCHEDULE',
       title: 'Stay with what is happening now.',
       detail: currentSchedule.startTime + '–' + currentSchedule.endTime + ' · ' + currentSchedule.title,
@@ -65,7 +63,6 @@ function buildActionFocus(
   if (overdue.length) {
     return {
       status: 'ATTENTION',
-      index: '003',
       label: 'TASKS',
       title: 'Close the oldest overdue loop first.',
       detail: overdue.length + ' overdue · ' + overdue[0].title,
@@ -83,7 +80,6 @@ function buildActionFocus(
   if (priorityToday) {
     return {
       status: 'FOCUS',
-      index: '003',
       label: 'TASKS',
       title: 'Protect today’s priority.',
       detail: 'High priority · ' + priorityToday.title,
@@ -98,7 +94,6 @@ function buildActionFocus(
   if (nextSchedule && parseMinutes(nextSchedule.startTime) - nowMinutes <= 120) {
     return {
       status: 'NEXT',
-      index: '002',
       label: 'SCHEDULE',
       title: 'Prepare for what is next.',
       detail: nextSchedule.startTime + ' · ' + nextSchedule.title,
@@ -121,7 +116,6 @@ function buildActionFocus(
   if (openTasks.length) {
     return {
       status: 'FOCUS',
-      index: '003',
       label: 'TASKS',
       title: 'Move one useful task forward.',
       detail: openTasks.length + ' open · next up: ' + openTasks[0].title,
@@ -140,7 +134,6 @@ function buildActionFocus(
   if (monthIncome - monthExpense < 0) {
     return {
       status: 'REVIEW',
-      index: '004',
       label: 'FINANCE',
       title: 'Give this month’s balance a quick review.',
       detail: 'Current month balance is below zero.',
@@ -182,11 +175,9 @@ export function ActionFocus({ onNavigate, tasks, schedule, finance, now, timezon
   return (
     <section className="content-card action-focus" data-spatial-role="focus" style={accentStyle} aria-labelledby="action-focus-title">
       <div className="action-focus-main">
-        <div className="action-focus-code" aria-hidden="true">
-          <span>{focus.index}</span>
-          <i>/</i>
-          <strong>{focus.label}</strong>
-          <em>LIVE PRIORITY</em>
+        <div className="action-focus-context">
+          <span>Live priority</span>
+          <strong>{focus.status}</strong>
         </div>
         <div className="action-focus-eyebrow">
           <span className="action-focus-dot" aria-hidden="true" />
@@ -203,7 +194,7 @@ export function ActionFocus({ onNavigate, tasks, schedule, finance, now, timezon
           </span>
           <div>
             <span>Recommended workspace</span>
-            <strong>{focus.index} · {focus.label}</strong>
+            <strong>{focus.label}</strong>
           </div>
         </div>
         <button className="primary-button action-focus-action" type="button" onClick={() => onNavigate(focus.target)}>
