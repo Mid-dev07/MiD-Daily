@@ -56,13 +56,13 @@ jobs:
           set -euo pipefail
           base=https://mid-daily.e41262272.workers.dev
           html=$(curl --fail --silent --show-error --location "$base/")
-          printf '%s' "$html" | grep -Eq '<title>MiD-Daily</title>|/assets/'
+          printf '%s' "$html" | grep -Eq '<title>MiD Daily</title>|/assets/'
           asset=$(printf '%s' "$html" | grep -oE 'src="/assets/[^"]+\.js"' | head -n 1 | cut -d'"' -f2)
           test -n "$asset"
           curl --fail --silent --show-error --location "$base$asset" -o /tmp/mid-daily-app.js
           test -s /tmp/mid-daily-app.js
           manifest=$(curl --fail --silent --show-error --location "$base/manifest.webmanifest")
-          printf '%s' "$manifest" | grep -q '"name": "MiD-Daily"'
+          printf '%s' "$manifest" | grep -q '"name": "MiD Daily"'
           curl --fail --silent --show-error --location "$base/icon.svg" -o /tmp/mid-daily-icon.svg
           test -s /tmp/mid-daily-icon.svg
           echo "Frontend smoke test passed."
