@@ -150,6 +150,12 @@ if (!/function treeTrunkGeometry\(\)[\s\S]*?const levels = \[/.test(worldCanvasS
   || !/const lobe =/.test(worldCanvasSource)) {
   failures.push('Visual nature pass must retain multi-ring organic trunk taper and irregular canopy lobes.')
 }
+if (!/function rockGeometry\(variant = 0\)[\s\S]*?const sides = 10/.test(worldCanvasSource)
+  || !/function drawGroundCover\([\s\S]*?groundSurfaceY/.test(worldCanvasSource)
+  || !/float smoothNoise\(vec2 position\)/.test(worldCanvasSource)
+  || !/float organicNoise\(vec2 position\)/.test(worldCanvasSource)) {
+  failures.push('Natural material pass must retain smoother rock profiles, grounded cover vegetation, and continuous surface noise.')
+}
 if (/draw\(box, \[-2\.2, 0\.63, 0\.0\][\s\S]{0,260}draw\(box, \[0, 1\.08, -0\.01\]/.test(readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8'))) {
   failures.push('Legacy cyan architectural bars must not remain in the natural environment stage.')
 }
@@ -539,7 +545,8 @@ const microstructureSource = readFileSync(join(srcDir, 'environment/MiDWorldCanv
 if (!/const segments = 28/.test(microstructureSource)
   || !/const midsizeBreak =/.test(microstructureSource)
   || !/const microRelief =/.test(microstructureSource)
-  || !/float fineNoise = surfaceHash\(floor\(vWorldPosition\.xz \* 11\.0\)\)/.test(microstructureSource)) {
+  || (!/float fineNoise = surfaceHash\(floor\(vWorldPosition\.xz \* 11\.0\)\)/.test(microstructureSource)
+    && !/float fineNoise = smoothNoise\(vWorldPosition\.xz \* 9\.0\)/.test(microstructureSource))) {
   failures.push('Environmental microstructure v2 contract is missing: denser terrain sampling and fine deterministic surface variation must remain explicit.')
 }
 if (!/float slope = 1\.0 - max\(normal\.y, 0\.0\)/.test(microstructureSource) || !/groundVariation/.test(microstructureSource)) {

@@ -234,6 +234,57 @@
 .dashboard-command-deck::after {
   display: none;
 }
+.dashboard-page .content-card {
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, rgba(27, 45, 54, .52) 72%, transparent),
+      rgba(5, 12, 18, .48)
+    ),
+    radial-gradient(
+      420px 220px at var(--ux-x, 22%) var(--ux-y, 8%),
+      color-mix(in srgb, var(--module-accent, var(--mi-cyan)) 4%, transparent),
+      transparent 74%
+    );
+  box-shadow:
+    0 20px 54px rgba(0, 0, 0, .14),
+    inset 0 1px rgba(255, 255, 255, .038);
+}
+
+.dashboard-page .dashboard-command-deck {
+  background:
+    radial-gradient(
+      58% 120% at var(--cinematic-key-x, 72%) var(--cinematic-key-y, 14%),
+      rgba(196, 174, 126, .055),
+      transparent 70%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(18, 33, 41, .40),
+      rgba(5, 12, 18, .52)
+    );
+  box-shadow:
+    0 26px 66px rgba(0, 0, 0, .15),
+    inset 0 1px rgba(255, 255, 255, .048);
+}
+
+.dashboard-workplane {
+  background:
+    radial-gradient(
+      62% 130% at var(--cinematic-key-x, 72%) var(--cinematic-key-y, 14%),
+      rgba(188, 170, 128, .035),
+      transparent 70%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(17, 31, 39, .22),
+      rgba(5, 12, 18, .34)
+    );
+  border-color: rgba(205, 221, 233, .07);
+  box-shadow:
+    0 22px 62px rgba(0, 0, 0, .12),
+    inset 0 1px rgba(255, 255, 255, .032);
+}
 
 .dashboard-hero-aside {
   background: transparent;

@@ -66,6 +66,26 @@ float surfaceHash(vec2 position) {
   return fract(sin(dot(position, vec2(127.1, 311.7))) * 43758.5453123);
 }
 
+float smoothNoise(vec2 position) {
+  vec2 cell = floor(position);
+  vec2 local = fract(position);
+  local = local * local * (3.0 - 2.0 * local);
+
+  float a = surfaceHash(cell);
+  float b = surfaceHash(cell + vec2(1.0, 0.0));
+  float c = surfaceHash(cell + vec2(0.0, 1.0));
+  float d = surfaceHash(cell + vec2(1.0, 1.0));
+
+  return mix(mix(a, b, local.x), mix(c, d, local.x), local.y);
+}
+
+float organicNoise(vec2 position) {
+  float broad = smoothNoise(position * 0.42);
+  float medium = smoothNoise(position * 1.2) * 0.42;
+  float fine = smoothNoise(position * 3.4) * 0.16;
+  return broad * 0.62 + medium + fine;
+}
+
 void main() {
   vec3 normal = normalize(vWorldNormal);
   vec3 lightDir = normalize(uLightDirection);
@@ -139,10 +159,10 @@ void main() {
   float specular = pow(max(dot(normal, halfVector), 0.0), specularPower) * specularStrength;
   float rim = pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0) * 0.05;
 
-  float macroNoise = surfaceHash(floor(vWorldPosition.xz * 1.35));
-  float microNoise = surfaceHash(floor(vWorldPosition.xz * 4.5));
-  float fineNoise = surfaceHash(floor(vWorldPosition.xz * 11.0));
-  float surfaceVariation = mix(0.91, 1.08, macroNoise * 0.68 + microNoise * 0.22 + fineNoise * 0.10);
+  float macroNoise = organicNoise(vWorldPosition.xz * 0.92);
+  float microNoise = organicNoise(vWorldPosition.xz * 2.6);
+  float fineNoise = smoothNoise(vWorldPosition.xz * 9.0);
+  float surfaceVariation = mix(0.9, 1.07, macroNoise * 0.7 + microNoise * 0.2 + fineNoise * 0.1);
 
   vec3 materialBase = uBaseColor * surfaceVariation;
   if (uKind > 1.5 && uKind < 2.5) {
@@ -367,37 +387,61 @@ function boxGeometry() {
 
 function rockGeometry(variant = 0) {
   const vertices: number[] = []
-  const sides = 9
+  const sides = 10
   const phase = variant * 0.83
   const radii = Array.from({ length: sides }, (_, index) => (
-    0.76 + 0.24 * ((Math.sin(index * 1.71 + phase) + 1) * 0.5)
+    0.74 + 0.26 * ((Math.sin(index * 1.71 + phase) + 1) * 0.5)
   ))
   const heights = Array.from({ length: sides }, (_, index) => (
-    0.58 + 0.42 * ((Math.cos(index * 1.43 + phase * 0.7) + 1) * 0.5)
+    0.62 + 0.4 * ((Math.cos(index * 1.43 + phase * 0.7) + 1) * 0.5)
   ))
+
+  const normalFor = (point: Vec3): Vec3 => {
+    const normal = [point[0], point[1] * 0.82, point[2]] as Vec3
+    const length = Math.hypot(normal[0], normal[1], normal[2]) || 1
+    return [normal[0] / length, normal[1] / length, normal[2] / length]
+  }
+
+  const ringPoint = (index: number, radiusScale: number, heightScale: number): Vec3 => {
+    const angle = (index / sides) * Math.PI * 2
+    const wobble = 1 + 0.035 * Math.sin(index * 2.31 + phase)
+    const radius = radii[index] * radiusScale * wobble
+    return [
+      Math.cos(angle) * radius,
+      heights[index] * heightScale,
+      Math.sin(angle) * radius,
+    ]
+  }
 
   for (let i = 0; i < sides; i += 1) {
     const next = (i + 1) % sides
-    const a0 = (i / sides) * Math.PI * 2
-    const a1 = (next / sides) * Math.PI * 2
-    const r0 = radii[i]
-    const r1 = radii[next]
-    const p0: Vec3 = [Math.cos(a0) * r0, 0, Math.sin(a0) * r0]
-    const p1: Vec3 = [Math.cos(a1) * r1, 0, Math.sin(a1) * r1]
-    const q1: Vec3 = [Math.cos(a1) * r1 * .82, heights[next], Math.sin(a1) * r1 * .82]
-    const q0: Vec3 = [Math.cos(a0) * r0 * .82, heights[i], Math.sin(a0) * r0 * .82]
-    const normal: Vec3 = [
-      Math.cos((a0 + a1) * .5),
-      .22 + (variant * .025),
-      Math.sin((a0 + a1) * .5),
+    const bottomA: Vec3 = [
+      Math.cos((i / sides) * Math.PI * 2) * radii[i],
+      0,
+      Math.sin((i / sides) * Math.PI * 2) * radii[i],
     ]
+    const bottomB: Vec3 = [
+      Math.cos((next / sides) * Math.PI * 2) * radii[next],
+      0,
+      Math.sin((next / sides) * Math.PI * 2) * radii[next],
+    ]
+    const shoulderA = ringPoint(i, 0.9, 0.58)
+    const shoulderB = ringPoint(next, 0.9, 0.58)
+    const crownA = ringPoint(i, 0.55, 0.9)
+    const crownB = ringPoint(next, 0.55, 0.9)
 
-    for (const corner of [p0, p1, q1, p0, q1, q0]) {
+    for (const corner of [bottomA, bottomB, shoulderB, bottomA, shoulderB, shoulderA, shoulderA, shoulderB, crownB, shoulderA, crownB, crownA]) {
+      const normal = normalFor(corner)
       vertices.push(corner[0], corner[1], corner[2], normal[0], normal[1], normal[2])
     }
+  }
 
-    const centerTop: Vec3 = [0, .82 + variant * .045, 0]
-    for (const corner of [q0, q1, centerTop]) {
+  const top: Vec3 = [0, 0.96 + variant * 0.045, 0]
+  for (let i = 0; i < sides; i += 1) {
+    const next = (i + 1) % sides
+    const crownA = ringPoint(i, 0.55, 0.9)
+    const crownB = ringPoint(next, 0.55, 0.9)
+    for (const corner of [crownA, crownB, top]) {
       vertices.push(corner[0], corner[1], corner[2], 0, 1, 0)
     }
   }
@@ -791,6 +835,53 @@ function drawProjectedGroundShadow(
     rotation,
     opacity,
   )
+}
+
+function drawGroundCover(
+  draw: (
+    mesh: Mesh,
+    position: Vec3,
+    scale: Vec3,
+    color: Vec3,
+    kind: number,
+    emissive?: number,
+    rotation?: number,
+    opacity?: number,
+  ) => void,
+  foliage: Mesh,
+  composition: ReturnType<typeof worldModuleAnchor>['composition'],
+  fern: Vec3,
+  scale: number,
+) {
+  const [fx, , fz] = composition.foregroundLeft
+  const [rx, , rz] = composition.foregroundRight
+  const [hx, , hz] = composition.horizon
+  const [lx, , lz] = composition.landmark
+  const points: Array<[number, number, number, number]> = [
+    [fx + 0.55 * scale, fz - 0.18 * scale, 0.48, 0.12],
+    [fx - 0.32 * scale, fz + 0.52 * scale, 0.36, -0.24],
+    [rx - 0.58 * scale, rz + 0.16 * scale, 0.44, 0.28],
+    [rx + 0.32 * scale, rz - 0.46 * scale, 0.34, -0.18],
+    [hx - 1.15 * scale, hz + 0.36 * scale, 0.3, 0.18],
+    [hx + 1.32 * scale, hz - 0.28 * scale, 0.34, -0.2],
+    [lx - 0.88 * scale, lz + 0.54 * scale, 0.4, 0.16],
+    [lx + 0.96 * scale, lz - 0.38 * scale, 0.3, -0.14],
+  ]
+
+  points.forEach(([x, z, size, rotation], index) => {
+    const y = groundSurfaceY(x, z, 0.018)
+    const depthScale = index < 4 ? 1 : 0.78
+    draw(
+      foliage,
+      [x, y, z],
+      [size * depthScale, size * 0.78 * depthScale, size * depthScale],
+      fern,
+      4,
+      0,
+      rotation,
+      index < 4 ? 0.82 : 0.54,
+    )
+  })
 }
 
 function drawSpatialPath(
@@ -1436,6 +1527,14 @@ export function MiDWorldCanvas({ environment, activeView, workload, onReady }: M
             moss,
             fern,
             warm,
+            activeAnchor.composition.landmarkScale,
+          )
+
+          drawGroundCover(
+            draw,
+            foliage,
+            activeAnchor.composition,
+            fern,
             activeAnchor.composition.landmarkScale,
           )
 
