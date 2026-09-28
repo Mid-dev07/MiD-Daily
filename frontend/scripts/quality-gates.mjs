@@ -74,6 +74,12 @@ if (!/draw\(\s*wetPatch[\s\S]{0,900}groundSurfaceY\(/.test(worldCanvasSource)) {
   failures.push('Weather wet patches must remain terrain-grounded.')
 }
 
+if (!/const segments = 28/.test(worldCanvasSource)
+  || !/type SurfacePoint =/.test(worldCanvasSource)
+  || !/const point = \(x: number, z: number\): SurfacePoint/.test(worldCanvasSource)
+  || !/normal: normalAt\(x, z\)/.test(worldCanvasSource)) {
+  failures.push('Terrain surface v2 must use denser 28-segment sampling with per-vertex normals.')
+}
 if (!/const relief = [\s\S]*\* 2\.65/.test(worldCanvasSource)
   || !/const sides = 9/.test(worldCanvasSource)
   || !/const blades = 10/.test(worldCanvasSource)
