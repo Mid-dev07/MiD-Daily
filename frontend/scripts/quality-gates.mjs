@@ -15,13 +15,13 @@ const manifest = readFileSync(join(root, 'public/manifest.webmanifest'), 'utf8')
 const authGate = readFileSync(join(srcDir, 'features/auth/AuthGate.tsx'), 'utf8')
 const authView = readFileSync(join(srcDir, 'features/auth/AuthView.tsx'), 'utf8')
 const topbarSource = readFileSync(join(srcDir, 'components/layout/Topbar.tsx'), 'utf8')
-if (!/<title>MiD Daily<\\/title>/.test(indexHtml) || !/MiD Daily/.test(indexHtml)) {
+if (!indexHtml.includes('<title>MiD Daily</title>') || !indexHtml.includes('MiD Daily')) {
   failures.push('Customer-facing browser identity must use the MiD Daily product name.')
 }
 if (!/"name": "MiD Daily"/.test(manifest) || !/"short_name": "MiD"/.test(manifest)) {
   failures.push('MiD PWA metadata must use MiD Daily as product name and MiD as compact brand name.')
 }
-if (/Loading MiD-Daily/.test(authGate) || !/<strong>MiD<\\/strong>/.test(authView) || !/Daily workspace/.test(authView)) {
+if (authGate.includes('Loading MiD-Daily') || !authView.includes('<strong>MiD</strong>') || !authView.includes('Daily workspace')) {
   failures.push('Authentication entry points must use the canonical MiD brand/product naming.')
 }
 if (/Search MiD-Daily/.test(topbarSource)) {
