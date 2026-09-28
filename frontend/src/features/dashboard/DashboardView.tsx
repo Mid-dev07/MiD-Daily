@@ -232,7 +232,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
         )}
       </section>
 
-      <section className="dashboard-workplane" data-spatial-role="primary" aria-label="Daily workplane">
+      <section className="dashboard-workplane" data-spatial-role="secondary-group" aria-label="Daily workplane">
         <section className="dashboard-workplane-zone dashboard-agenda">
           <div className="card-heading">
             <div>
@@ -264,7 +264,7 @@ export function DashboardView({ tasks, schedule, finance, onToggleTask, onNaviga
           )}
         </section>
 
-        <section className="dashboard-workplane-zone dashboard-focus">
+        <section className="dashboard-workplane-zone dashboard-focus" data-spatial-role="focus">
           <div className="card-heading">
             <div>
               <span className="section-kicker">Focus</span>
