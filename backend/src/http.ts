@@ -1,8 +1,9 @@
 import type { IncomingMessage } from 'node:http'
 
-const DEFAULT_BODY_LIMIT = 64 * 1024
+const DEFAULT_JSON_BODY_LIMIT = 64 * 1024
+const DEFAULT_TEXT_BODY_LIMIT = 256 * 1024
 
-export async function readRequestBody(req: IncomingMessage, maxBytes = DEFAULT_BODY_LIMIT) {
+export async function readRequestBody(req: IncomingMessage, maxBytes = DEFAULT_TEXT_BODY_LIMIT) {
   return new Promise<string>((resolve, reject) => {
     let body = ''
     let settled = false
@@ -34,7 +35,7 @@ export async function readRequestBody(req: IncomingMessage, maxBytes = DEFAULT_B
   })
 }
 
-export async function readRequestJson(req: IncomingMessage, maxBytes = DEFAULT_BODY_LIMIT) {
+export async function readRequestJson(req: IncomingMessage, maxBytes = DEFAULT_JSON_BODY_LIMIT) {
   const body = await readRequestBody(req, maxBytes)
   if (!body.trim()) return {}
 
