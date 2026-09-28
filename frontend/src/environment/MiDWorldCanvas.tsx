@@ -224,7 +224,7 @@ void main() {
   float viewDistance = length(uCameraPosition - vWorldPosition);
   float farBand = smoothstep(12.0, 32.0, viewDistance);
   float atmosphericDensity = clamp(uAirDensity * 0.34, 0.0, 0.48);
-  float weatherHaze = precipitation * smoothstep(10.0, 4.0, viewDistance) * 0.016;
+  float weatherHaze = precipitation * smoothstep(10.0, 4.0, viewDistance) * atmosphericDensity * 0.016;
   float atmosphericFade = min(
     0.58,
     farBand * atmosphericDensity * 0.68 + weatherHaze,
