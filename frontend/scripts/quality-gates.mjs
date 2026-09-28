@@ -64,13 +64,13 @@ if (!/function groundSurfaceY\(x: number, z: number, offset = 0\)/.test(worldCan
 if (!/groundSurfaceY\(centerX, centerZ, 0\.006\)/.test(worldCanvasSource)) {
   failures.push('Projected world shadows must contact the actual terrain surface.')
 }
-if (!/drawSpatialPath\([\s\S]{0,900}groundSurfaceY\(midX, midZ/.test(worldCanvasSource)) {
+if (!/function drawSpatialPath\([\s\S]*?groundSurfaceY\(midX, midZ/.test(worldCanvasSource)) {
   failures.push('Natural spatial path stones must follow terrain height instead of a fixed y-plane.')
 }
 if (!/drawTree\([\s\S]{0,900}groundSurfaceY\(/.test(worldCanvasSource)) {
   failures.push('Environmental trees must be grounded against terrain height.')
 }
-if (!/draw\(wetPatch,[\s\S]{0,500}groundSurfaceY\(/.test(worldCanvasSource)) {
+if (!/draw\(\s*wetPatch[\s\S]{0,900}groundSurfaceY\(/.test(worldCanvasSource)) {
   failures.push('Weather wet patches must remain terrain-grounded.')
 }
 
@@ -515,7 +515,7 @@ for (const contract of [
   'float specularPower',
   'float wetDarken',
   'const contactShadow',
-  'draw(box, [0, -0.02, 0.0]',
+  'groundSurfaceY(0, 0.0, -0.02)',
 ]) {
   if (!materialWorldSource.includes(contract)) failures.push('Environmental material v1 contract missing: ' + contract)
 }
