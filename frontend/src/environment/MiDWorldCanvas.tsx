@@ -218,15 +218,16 @@ void main() {
   vec3 color = base + reflected + emissive + uBaseColor * grid;
 
   float distanceFade = smoothstep(24.0, 6.0, length(vWorldPosition.xz));
-  float localContrast = mix(0.92, 1.0, distanceFade);
+  float localContrast = mix(0.98, 1.025, distanceFade);
   color *= localContrast;
 
   float viewDistance = length(uCameraPosition - vWorldPosition);
-  float atmosphericDensity = clamp(uAirDensity * 0.45, 0.0, 0.64);
-  float nearWeatherWash = smoothstep(18.0, 5.0, viewDistance) * atmosphericDensity * 0.08;
+  float farBand = smoothstep(12.0, 32.0, viewDistance);
+  float atmosphericDensity = clamp(uAirDensity * 0.34, 0.0, 0.48);
+  float weatherHaze = precipitation * smoothstep(10.0, 4.0, viewDistance) * atmosphericDensity * 0.016;
   float atmosphericFade = min(
-    0.8,
-    smoothstep(10.0, 30.0, viewDistance) * atmosphericDensity + nearWeatherWash,
+    0.58,
+    farBand * atmosphericDensity * 0.68 + weatherHaze,
   );
   vec3 coolAtmosphere = mix(
     vec3(0.045, 0.07, 0.09),
@@ -552,19 +553,42 @@ function terrainGeometry() {
 }
 function foliageGeometry() {
   const vertices: number[] = []
-  const blades = 10
-  const heights = [0.62, 0.78, 0.69, 0.88, 0.73, 0.81, 0.66, 0.91, 0.75, 0.84]
+  const blades = 12
+  const heights = [0.64, 0.79, 0.71, 0.91, 0.76, 0.84, 0.68, 0.94, 0.77, 0.87, 0.7, 0.82]
+
+  const pushTriangle = (a: Vec3, b: Vec3, c: Vec3) => {
+    const ux = b[0] - a[0]
+    const uy = b[1] - a[1]
+    const uz = b[2] - a[2]
+    const vx = c[0] - a[0]
+    const vy = c[1] - a[1]
+    const vz = c[2] - a[2]
+    let nx = uy * vz - uz * vy
+    let ny = uz * vx - ux * vz
+    let nz = ux * vy - uy * vx
+    const length = Math.hypot(nx, ny, nz) || 1
+    nx /= length
+    ny /= length
+    nz /= length
+
+    for (const point of [a, b, c]) {
+      vertices.push(point[0], point[1], point[2], nx, ny, nz)
+    }
+    for (const point of [c, b, a]) {
+      vertices.push(point[0], point[1], point[2], -nx, -ny, -nz)
+    }
+  }
 
   for (let index = 0; index < blades; index += 1) {
     const angle = (index / blades) * Math.PI * 2
     const cos = Math.cos(angle)
     const sin = Math.sin(angle)
-    const width = 0.095 + (index % 3) * 0.026
+    const width = 0.085 + (index % 4) * 0.023
     const height = heights[index]
-    const lean = 0.07 + (index % 4) * 0.024
-    const bottomLeft: Vec3 = [-width, 0, 0]
-    const bottomRight: Vec3 = [width, 0, 0]
-    const tip: Vec3 = [lean, height, 0]
+    const leanX = 0.055 + (index % 5) * 0.022
+    const leanZ = Math.sin(index * 1.47) * 0.06
+    const midY = height * (0.42 + (index % 3) * 0.035)
+    const midLean = leanX * 0.42
 
     const rotate = (point: Vec3): Vec3 => [
       point[0] * cos - point[2] * sin,
@@ -572,17 +596,15 @@ function foliageGeometry() {
       point[0] * sin + point[2] * cos,
     ]
 
-    const a = rotate(bottomLeft)
-    const b = rotate(bottomRight)
-    const c = rotate(tip)
-    const normal: Vec3 = [sin, 0.18, cos]
+    const bottomLeft = rotate([-width, 0, 0])
+    const bottomRight = rotate([width, 0, 0])
+    const midLeft = rotate([-width * 0.62, midY, leanZ * 0.18])
+    const midRight = rotate([width * 0.62, midY, leanZ * 0.18])
+    const tip = rotate([midLean + leanX * 0.58, height, leanZ])
 
-    for (const corner of [a, b, c]) {
-      vertices.push(corner[0], corner[1], corner[2], normal[0], normal[1], normal[2])
-    }
-    for (const corner of [b, a, c]) {
-      vertices.push(corner[0], corner[1], corner[2], -normal[0], -normal[1], -normal[2])
-    }
+    pushTriangle(bottomLeft, bottomRight, midRight)
+    pushTriangle(bottomLeft, midRight, midLeft)
+    pushTriangle(midLeft, midRight, tip)
   }
 
   return new Float32Array(vertices)
@@ -610,6 +632,22 @@ function treeTrunkGeometry() {
     ]
   }
 
+  const pushVertex = (corner: Vec3, ring: number) => {
+    const level = levels[ring]
+    const nx = corner[0] - level.bend
+    const ny = 0.12 + (ring === levels.length - 1 ? 0.05 : 0)
+    const nz = corner[2] - level.bend * 0.34
+    const length = Math.hypot(nx, ny, nz) || 1
+    vertices.push(
+      corner[0],
+      corner[1],
+      corner[2],
+      nx / length,
+      ny / length,
+      nz / length,
+    )
+  }
+
   for (let ring = 0; ring < levels.length - 1; ring += 1) {
     const nextRing = ring + 1
     for (let index = 0; index < sides; index += 1) {
@@ -618,12 +656,13 @@ function treeTrunkGeometry() {
       const b = point(ring, nextIndex)
       const c = point(nextRing, nextIndex)
       const d = point(nextRing, index)
-      const angle = ((index + 0.5) / sides) * Math.PI * 2 + phase
-      const normal: Vec3 = [Math.cos(angle), 0.14, Math.sin(angle)]
 
-      for (const corner of [a, b, c, a, c, d]) {
-        vertices.push(corner[0], corner[1], corner[2], normal[0], normal[1], normal[2])
-      }
+      pushVertex(a, ring)
+      pushVertex(b, ring)
+      pushVertex(c, nextRing)
+      pushVertex(a, ring)
+      pushVertex(c, nextRing)
+      pushVertex(d, nextRing)
     }
   }
 
@@ -632,8 +671,8 @@ function treeTrunkGeometry() {
 
 function canopyGeometry() {
   const vertices: number[] = []
-  const segments = 12
-  const rings = 5
+  const segments = 14
+  const rings = 6
   const lobeCenters = [
     { x: -0.43, y: 0.03, z: 0.02, scale: 0.88 },
     { x: 0.38, y: 0.10, z: 0.08, scale: 0.96 },
@@ -650,11 +689,11 @@ function canopyGeometry() {
       const baseRadius = Math.sin(theta)
       const lobe =
         1 +
-        0.11 * Math.sin(angle * 3 + ring * 0.92 + lobeIndex * 1.13) +
-        0.05 * Math.cos(angle * 5 - ring * 0.64 + lobeIndex * 0.71)
-      const verticalScale = 0.88 + 0.06 * Math.cos(angle * 2 - ring * 0.52 + lobeIndex)
-      const offsetX = 0.05 * Math.sin(angle * 2 + ring * 0.7 + lobeIndex * 0.42)
-      const offsetZ = 0.04 * Math.cos(angle * 3 - ring * 0.45 + lobeIndex * 0.63)
+        0.12 * Math.sin(angle * 3 + ring * 0.86 + lobeIndex * 1.13) +
+        0.055 * Math.cos(angle * 5 - ring * 0.68 + lobeIndex * 0.71)
+      const verticalScale = 0.86 + 0.08 * Math.cos(angle * 2 - ring * 0.52 + lobeIndex)
+      const offsetX = 0.055 * Math.sin(angle * 2 + ring * 0.7 + lobeIndex * 0.42)
+      const offsetZ = 0.045 * Math.cos(angle * 3 - ring * 0.45 + lobeIndex * 0.63)
 
       const local: Vec3 = [
         Math.cos(angle) * baseRadius * lobe * center.scale + offsetX,

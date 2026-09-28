@@ -133,7 +133,7 @@ if (!/const segments = 28/.test(worldCanvasSource)
 }
 if (!/const relief = [\s\S]*\* 2\.65/.test(worldCanvasSource)
   || !/const sides = 9/.test(worldCanvasSource)
-  || !/const blades = 10/.test(worldCanvasSource)
+  || !/const blades = 12/.test(worldCanvasSource)
   || !/function treeTrunkGeometry/.test(worldCanvasSource)
   || !/function canopyGeometry/.test(worldCanvasSource)
   || !/function wetPatchGeometry/.test(worldCanvasSource)
@@ -145,10 +145,23 @@ if (!/eye: \[[^\]]+, 2\.(?:5|6|7|8)/.test(worldModuleSource)) {
   failures.push('Living environment finalization must use the grounded authored nature camera rail.')
 }
 if (!/function treeTrunkGeometry\(\)[\s\S]*?const levels = \[/.test(worldCanvasSource)
-  || !/function canopyGeometry\(\)[\s\S]*?const segments = 12[\s\S]*?const rings = 5/.test(worldCanvasSource)
+  || !/function canopyGeometry\(\)[\s\S]*?const segments = 14[\s\S]*?const rings = 6/.test(worldCanvasSource)
   || !/organicRadius/.test(worldCanvasSource)
   || !/const lobe =/.test(worldCanvasSource)) {
   failures.push('Visual nature pass must retain multi-ring organic trunk taper and irregular canopy lobes.')
+}
+if (!/function foliageGeometry\(\)[\s\S]*?const blades = 12/.test(worldCanvasSource)
+  || !/function treeTrunkGeometry\(\)[\s\S]*?const pushVertex = \(corner: Vec3, ring: number\)/.test(worldCanvasSource)
+  || !/function canopyGeometry\(\)[\s\S]*?const segments = 14[\s\S]*?const rings = 6/.test(worldCanvasSource)) {
+  failures.push('De-blur depth pass must retain curved foliage blades, smoothed trunk normals, and higher-fidelity canopy sampling.')
+}
+if (!/float farBand = smoothstep\(12\.0, 32\.0, viewDistance\)/.test(worldCanvasSource)
+  || !/float atmosphericDensity = clamp\(uAirDensity \* 0\.34/.test(worldCanvasSource)
+  || !/float weatherHaze = precipitation/.test(worldCanvasSource)) {
+  failures.push('Atmospheric depth must preserve sharp near-field detail and reserve haze for distance/weather.')
+}
+if (/environment-canopy::before[\s\S]*filter:\s*blur\(/.test(visualGapPass)) {
+  failures.push('Environment canopy foreground/background shaping must not use a blur filter.')
 }
 if (!/function rockGeometry\(variant = 0\)[\s\S]*?const sides = 10/.test(worldCanvasSource)
   || !/function drawGroundCover\([\s\S]*?groundSurfaceY/.test(worldCanvasSource)
@@ -777,7 +790,7 @@ for (const contract of [
   'float precipitation = clamp(uPrecipitation',
   'rainfallPooling',
   'puddleSpecular',
-  'nearWeatherWash',
+  'weatherHaze',
   'visualState.precipitation',
   'puddleOpacity',
   'puddleColor',
@@ -793,7 +806,7 @@ if (!/environmentBlend[\s\S]*precipitation/.test(weatherIntelligenceSource)) {
 if (!/rainfallPooling[\s\S]*horizontalWetness/.test(weatherIntelligenceSource)) {
   failures.push('Rain response must remain surface-orientation aware rather than applying uniform gloss.')
 }
-if (!/nearWeatherWash[\s\S]*atmosphericFade/.test(weatherIntelligenceSource)) {
+if (!/weatherHaze[\s\S]*atmosphericFade/.test(weatherIntelligenceSource)) {
   failures.push('Weather air density must contribute to spatial atmospheric wash.')
 }
 if (/\buTime\b|timestamp\s*\*\s*0\.001|Math\.sin\(\s*t\b/.test(weatherIntelligenceSource)) {

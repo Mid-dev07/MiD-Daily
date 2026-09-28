@@ -99,8 +99,8 @@
     radial-gradient(ellipse at 70% 40%, rgba(47, 81, 50, .32) 0 13%, transparent 14%),
     radial-gradient(ellipse at 84% 34%, rgba(35, 67, 44, .42) 0 16%, transparent 17%),
     radial-gradient(ellipse at 95% 46%, rgba(27, 56, 38, .48) 0 18%, transparent 19%);
-  filter: blur(6px);
-  opacity: .64;
+  filter: none;
+  opacity: .52;
 }
 
 /* =========================================================
