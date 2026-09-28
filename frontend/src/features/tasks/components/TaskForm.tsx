@@ -74,7 +74,7 @@ export function TaskForm({ open, initialTask, onClose, onSubmit }: TaskFormProps
           <button className="icon-button" type="button" disabled={saving} onClick={onClose} aria-label="Close task form">×</button>
         </div>
 
-        <form className="schedule-form" onSubmit={submit}>
+        <form className="schedule-form" aria-busy={saving} data-form-state={saving ? 'saving' : error ? 'error' : 'ready'} onSubmit={submit}>
           <label>Title<input disabled={saving} value={draft.title} onChange={(event) => setField('title', event.target.value)} placeholder="e.g. Finish API documentation" autoFocus maxLength={200} /></label>
 
           <div className="form-grid two">
@@ -98,7 +98,8 @@ export function TaskForm({ open, initialTask, onClose, onSubmit }: TaskFormProps
           <label>Progress<input disabled={saving} type="number" min="0" max="100" value={draft.progress} onChange={(event) => setField('progress', Number(event.target.value))} /></label>
           <label>Notes<textarea disabled={saving} value={draft.notes ?? ''} onChange={(event) => setField('notes', event.target.value)} rows={4} placeholder="Optional context, acceptance criteria, or next step" maxLength={5000} /></label>
 
-          {error && <div className="form-error" role="alert">{error}</div>}
+          {error && <div className="form-status form-status--error" role="alert">{error}</div>}
+          {saving && <div className="form-status form-status--saving" role="status" aria-live="polite">Saving task…</div>}
           <div className="modal-actions"><button className="secondary-button" type="button" disabled={saving} onClick={onClose}>Cancel</button><button className="primary-button" disabled={saving} type="submit">{saving ? 'Saving…' : initialTask ? 'Save changes' : 'Add task'}</button></div>
         </form>
       </section>

@@ -141,7 +141,7 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
           <button className="icon-button" type="button" disabled={saving} onClick={onClose} aria-label="Close form">×</button>
         </div>
 
-        <form className="schedule-form" onSubmit={submit}>
+        <form className="schedule-form" aria-busy={saving} data-form-state={saving ? 'saving' : error ? 'error' : 'ready'} onSubmit={submit}>
           <label>Title<input disabled={saving} value={draft.title} onChange={(e) => setField('title', e.target.value)} placeholder="e.g. Study for database exam" autoFocus maxLength={200} /></label>
 
           <div className="form-section">
@@ -225,7 +225,8 @@ export function ScheduleForm({ open, initialItem, defaultDate, onClose, onSubmit
             </div>
           </details>
 
-          {error && <div className="form-error" role="alert">{error}</div>}
+          {error && <div className="form-status form-status--error" role="alert">{error}</div>}
+          {saving && <div className="form-status form-status--saving" role="status" aria-live="polite">Saving activity…</div>}
           <div className="modal-actions"><button className="secondary-button" disabled={saving} type="button" onClick={onClose}>Cancel</button><button className="primary-button" disabled={saving} type="submit">{saving ? 'Saving…' : initialItem ? 'Save changes' : 'Add activity'}</button></div>
         </form>
       </section>
