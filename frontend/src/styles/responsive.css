@@ -81,7 +81,7 @@ video {
     grid-template-columns: minmax(0, 1.45fr) minmax(260px, .75fr);
   }
 
-  .dashboard-overview,
+  .dashboard-workplane,
   .dashboard-context-grid {
     grid-template-columns: minmax(0, 1.35fr) minmax(260px, .8fr);
   }
