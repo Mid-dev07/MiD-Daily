@@ -32,6 +32,7 @@ import { deleteInstagramConnectionByUserId, getInstagramConnectionByUserId, isIn
 import { buildInstagramAuthorizationUrl, exchangeForLongLivedInstagramToken, exchangeInstagramCode, isInstagramOAuthConfigured } from './integrations/instagramOAuth.js'
 import { getWhatsAppConfig, isWhatsAppConfigured, parseWhatsAppCommand, sendWhatsAppText, verifyWebhookChallenge, verifyWhatsAppSignature, buildWhatsAppUpdateHash } from './integrations/whatsapp.js'
 import { createWhatsAppLinkCode, deleteWhatsAppConnectionByUserId, getWhatsAppConnectionByUserId, getWhatsAppConnectionByWaId, redeemWhatsAppLinkCode, claimWhatsAppUpdate, isWhatsAppPersistenceConfigured } from './integrations/whatsappStore.js'
+import { readRequestBody, readRequestJson } from './http.js'
 import {
   createSchedule,
   deleteSchedule,
@@ -432,47 +433,6 @@ async function getValidAccessToken(ownerId: string, connection: GoogleConnection
     await refreshAccessToken(ownerId, connection)
   }
   return connection.token.accessToken
-}
-
-async function readRequestBody(req: IncomingMessage) {
-  return await new Promise<string>((resolve, reject) => {
-    let body = ''
-    req.on('data', (chunk: Buffer | string) => {
-      body += chunk.toString()
-      if (body.length > 256 * 1024) {
-        reject(new Error('Request body is too large.'))
-        req.destroy()
-      }
-    })
-    req.on('end', () => resolve(body))
-    req.on('error', reject)
-  })
-}
-
-async function readRequestJson(req: IncomingMessage) {
-
-  return await new Promise<Record<string, unknown>>((resolve, reject) => {
-    let body = ''
-    req.on('data', (chunk: Buffer | string) => {
-      body += chunk.toString()
-      if (body.length > 64 * 1024) {
-        reject(new Error('Request body is too large.'))
-        req.destroy()
-      }
-    })
-    req.on('end', () => {
-      if (!body.trim()) {
-        resolve({})
-        return
-      }
-      try {
-        resolve(JSON.parse(body) as Record<string, unknown>)
-      } catch {
-        reject(new Error('Request body must be valid JSON.'))
-      }
-    })
-    req.on('error', reject)
-  })
 }
 
 async function handlePasswordExposureCheck(res: ServerResponse, url: URL) {
