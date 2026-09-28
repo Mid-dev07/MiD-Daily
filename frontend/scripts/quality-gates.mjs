@@ -507,7 +507,8 @@ for (const materialKind of [
   '], stone, 3',
   '], fern, 4',
   '], moss, 4',
-  '5,\n      0.008,',
+  'wetPatch',
+  '5,\n            0,',
   'contactShadow, 6',
 ]) {
   if (!materialWorldSource.includes(materialKind)) failures.push('Environmental material kind missing: ' + materialKind)
