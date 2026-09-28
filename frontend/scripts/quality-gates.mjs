@@ -57,6 +57,7 @@ if (!environmentStageStyle.includes('MiD Unreal Living Environment — Stage V2'
 if (!environmentScene.includes('environment-stage-depth')) {
   failures.push('Living environment Stage V2 must expose the restrained stage-depth layer.')
 }
+const worldCanvasSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
 if (!/function groundSurfaceY\(x: number, z: number, offset = 0\)/.test(worldCanvasSource)) {
   failures.push('Terrain grounding v1 must expose a shared terrain contact resolver.')
 }
@@ -73,7 +74,6 @@ if (!/draw\(wetPatch,[\s\S]{0,500}groundSurfaceY\(/.test(worldCanvasSource)) {
   failures.push('Weather wet patches must remain terrain-grounded.')
 }
 
-const worldCanvasSource = readFileSync(join(srcDir, 'environment/MiDWorldCanvas.tsx'), 'utf8')
 if (!/const relief = [\s\S]*\* 2\.65/.test(worldCanvasSource)
   || !/const sides = 9/.test(worldCanvasSource)
   || !/const blades = 10/.test(worldCanvasSource)
