@@ -9,6 +9,16 @@ const identityPath = join(root, '../docs/MID_IDENTITY_SYSTEM.md')
 const effectsPath = join(root, '../docs/MID_EFFECTS_CONSTITUTION.md')
 if (!existsSync(identityPath)) failures.push('MiD core identity system document is missing.')
 if (!existsSync(effectsPath)) failures.push('MiD effects constitution document is missing.')
+const antiSlopSkillPath = join(root, '../skills/anti-slop/SKILL.md')
+const antiSlopSpinePath = join(root, '../skills/anti-slop/AGENTS.md')
+const antiSlopAttributionPath = join(root, '../skills/anti-slop/ATTRIBUTION.md')
+if (!existsSync(antiSlopSkillPath) || !existsSync(antiSlopSpinePath) || !existsSync(antiSlopAttributionPath)) {
+  failures.push('Local anti-slop skill bundle must remain installed with its compact spine and attribution.')
+}
+const agentContract = readFileSync(join(root, '../AGENTS.md'), 'utf8')
+if (!agentContract.includes('skills/anti-slop/SKILL.md') || !agentContract.includes('skills/anti-slop/AGENTS.md')) {
+  failures.push('Agent operating contract must activate the local anti-slop skill and spine.')
+}
 const srcDir = join(root, 'src')
 const appCompositionSource = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
 const workspaceDataSource = readFileSync(join(srcDir, 'features/workspace/useWorkspaceData.ts'), 'utf8')
