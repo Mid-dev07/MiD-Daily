@@ -144,6 +144,7 @@ if (/draw\(box, \[-2\.2, 0\.63, 0\.0\][\s\S]{0,260}draw\(box, \[0, 1\.08, -0\.01
 }
 
 const appSourceForInteraction = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
+const pointerInteractionSource = appSourceForInteraction + '\n' + foregroundInteractionSource
 const environmentFiles = [
   'environment/types.ts',
   'environment/astronomy.ts',
@@ -249,7 +250,7 @@ if (!/G0/.test(experienceSystem) || !/G1/.test(experienceSystem) || !/G2/.test(e
 if (!/data-ux-lit/.test(uiSystem + '\n' + materialSystem) || !/action-focus/.test(uiSystem) || !/prefers-reduced-motion:\s*reduce/.test(uiSystem)) {
   failures.push('Living material interaction contract is missing from the active UI stylesheet.')
 }
-if (!/surfaceSelector/.test(appSourceForInteraction) || !/requestAnimationFrame/.test(appSourceForInteraction) || !/pointermove/.test(appSourceForInteraction)) {
+if (!/surfaceSelector/.test(pointerInteractionSource) || !/requestAnimationFrame/.test(pointerInteractionSource) || !/pointermove/.test(pointerInteractionSource)) {
   failures.push('Foreground material interaction must use one delegated pointer stream with requestAnimationFrame.')
 }
 if (!/UNREAL FINAL RENDER CORE — PHASE 1 COMPLETE/.test(experienceSystem) || !/--ux-rx/.test(experienceSystem) || !/--ux-ry/.test(experienceSystem) || !/--ux-elevation/.test(experienceSystem)) {
@@ -752,7 +753,7 @@ if (/\buTime\b|timestamp\s*\*\s*0\.001|Math\.sin\(\s*t\b/.test(weatherIntelligen
 
 
 const interactionMotionSource = readFileSync(join(srcDir, 'styles/experience.css'), 'utf8')
-const pointerBridgeSource = readFileSync(join(srcDir, 'app/App.tsx'), 'utf8')
+const pointerBridgeSource = pointerInteractionSource
 if (!/detail:\s*\{[\s\S]*focus,/.test(pointerBridgeSource)
   || !/const emitWorldPointer = \(clientX: number, clientY: number, focus: number\)/.test(pointerBridgeSource)
   || !/emitWorldPointer\(window\.innerWidth \/ 2, window\.innerHeight \/ 2, 0\)/.test(pointerBridgeSource)) {
