@@ -46,6 +46,9 @@ const environmentScene = readFileSync(join(srcDir, 'environment/EnvironmentScene
 const environmentStageStylePath = join(srcDir, 'styles/environment-depth.css')
 const environmentStageStyle = existsSync(environmentStageStylePath) ? readFileSync(environmentStageStylePath, 'utf8') : ''
 const worldModuleSource = readFileSync(join(srcDir, 'environment/moduleWorld.ts'), 'utf8')
+if (!environmentStageStyle.includes('ECOSYSTEM DEPTH V1 · GROUND MATERIAL FIELD')) {
+  failures.push('Ecosystem depth v1 must keep a restrained ground-material field in the environment stylesheet.')
+}
 if (!environmentStageStyle.includes('MiD Unreal Living Environment — Stage V2')
   || !environmentStageStyle.includes('daylight')
   || !environmentStageStyle.includes('environment-scene[data-renderer="webgl"] .environment-canopy')) {
@@ -59,8 +62,11 @@ if (!/const relief = [\s\S]*\* 2\.65/.test(worldCanvasSource)
   || !/const sides = 9/.test(worldCanvasSource)
   || !/const blades = 10/.test(worldCanvasSource)
   || !/function treeTrunkGeometry/.test(worldCanvasSource)
-  || !/function canopyGeometry/.test(worldCanvasSource)) {
-  failures.push('Living environment finalization must retain layered terrain relief and organic low-poly geometry without increasing the renderer dependency surface.')
+  || !/function canopyGeometry/.test(worldCanvasSource)
+  || !/function wetPatchGeometry/.test(worldCanvasSource)
+  || !/const wetPatch = createMesh/.test(worldCanvasSource)
+  || !/treeTrunk,\s*treeCanopy/.test(worldCanvasSource)) {
+  failures.push('Living environment ecosystem depth must retain layered terrain, organic trees, natural wet patches, and reuse the existing renderer surface.')
 }
 if (!/eye: \[[^\]]+, 2\.(?:5|6|7|8)/.test(worldModuleSource)) {
   failures.push('Living environment finalization must use the grounded authored nature camera rail.')
@@ -839,8 +845,11 @@ if (/\buTime\b|timestamp\s*\*\s*0\.001|Math\.sin\(\s*t\b/.test(worldRenderer)) {
 if (!/cameraState|desiredCamera|cameraBlend/.test(worldRenderer)) {
   failures.push('Spatial world must use the event-driven semantic camera rail.')
 }
-if (!/function drawSpatialPath/.test(worldRenderer) || !/drawSpatialPath\(\s*draw,\s*box/.test(worldRenderer)) {
-  failures.push('Spatial world must connect the active module anchor to the workspace via the shared spatial path.')
+if (!/function drawSpatialPath/.test(worldRenderer) || !/drawSpatialPath\(\s*draw,\s*rockA,\s*rockB/.test(worldRenderer)) {
+  failures.push('Spatial world must connect the active module anchor with natural stone-path geometry.')
+}
+if (/function drawSpatialPath[\s\S]{0,1800}\bbox\b/.test(worldRenderer)) {
+  failures.push('Natural spatial path must not use box geometry as its visible path material.')
 }
 if (!/spatialPathQuery/.test(worldRenderer) || !/spatialPathQuery\.matches/.test(worldRenderer)) {
   failures.push('Spatial path must be reduced on small/touch layouts.')
