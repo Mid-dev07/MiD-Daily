@@ -2496,3 +2496,4 @@ input[type="file"]::file-selector-button {
 .schedule-form[data-form-state="saving"] select,
 .schedule-form[data-form-state="saving"] textarea {
   cursor: progress;
+}
