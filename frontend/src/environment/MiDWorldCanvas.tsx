@@ -367,37 +367,61 @@ function boxGeometry() {
 
 function rockGeometry(variant = 0) {
   const vertices: number[] = []
-  const sides = 9
+  const sides = 10
   const phase = variant * 0.83
   const radii = Array.from({ length: sides }, (_, index) => (
-    0.76 + 0.24 * ((Math.sin(index * 1.71 + phase) + 1) * 0.5)
+    0.74 + 0.26 * ((Math.sin(index * 1.71 + phase) + 1) * 0.5)
   ))
   const heights = Array.from({ length: sides }, (_, index) => (
-    0.58 + 0.42 * ((Math.cos(index * 1.43 + phase * 0.7) + 1) * 0.5)
+    0.62 + 0.4 * ((Math.cos(index * 1.43 + phase * 0.7) + 1) * 0.5)
   ))
+
+  const normalFor = (point: Vec3): Vec3 => {
+    const normal = [point[0], point[1] * 0.82, point[2]] as Vec3
+    const length = Math.hypot(normal[0], normal[1], normal[2]) || 1
+    return [normal[0] / length, normal[1] / length, normal[2] / length]
+  }
+
+  const ringPoint = (index: number, radiusScale: number, heightScale: number): Vec3 => {
+    const angle = (index / sides) * Math.PI * 2
+    const wobble = 1 + 0.035 * Math.sin(index * 2.31 + phase)
+    const radius = radii[index] * radiusScale * wobble
+    return [
+      Math.cos(angle) * radius,
+      heights[index] * heightScale,
+      Math.sin(angle) * radius,
+    ]
+  }
 
   for (let i = 0; i < sides; i += 1) {
     const next = (i + 1) % sides
-    const a0 = (i / sides) * Math.PI * 2
-    const a1 = (next / sides) * Math.PI * 2
-    const r0 = radii[i]
-    const r1 = radii[next]
-    const p0: Vec3 = [Math.cos(a0) * r0, 0, Math.sin(a0) * r0]
-    const p1: Vec3 = [Math.cos(a1) * r1, 0, Math.sin(a1) * r1]
-    const q1: Vec3 = [Math.cos(a1) * r1 * .82, heights[next], Math.sin(a1) * r1 * .82]
-    const q0: Vec3 = [Math.cos(a0) * r0 * .82, heights[i], Math.sin(a0) * r0 * .82]
-    const normal: Vec3 = [
-      Math.cos((a0 + a1) * .5),
-      .22 + (variant * .025),
-      Math.sin((a0 + a1) * .5),
+    const bottomA: Vec3 = [
+      Math.cos((i / sides) * Math.PI * 2) * radii[i],
+      0,
+      Math.sin((i / sides) * Math.PI * 2) * radii[i],
     ]
+    const bottomB: Vec3 = [
+      Math.cos((next / sides) * Math.PI * 2) * radii[next],
+      0,
+      Math.sin((next / sides) * Math.PI * 2) * radii[next],
+    ]
+    const shoulderA = ringPoint(i, 0.9, 0.58)
+    const shoulderB = ringPoint(next, 0.9, 0.58)
+    const crownA = ringPoint(i, 0.55, 0.9)
+    const crownB = ringPoint(next, 0.55, 0.9)
 
-    for (const corner of [p0, p1, q1, p0, q1, q0]) {
+    for (const corner of [bottomA, bottomB, shoulderB, bottomA, shoulderB, shoulderA, shoulderA, shoulderB, crownB, shoulderA, crownB, crownA]) {
+      const normal = normalFor(corner)
       vertices.push(corner[0], corner[1], corner[2], normal[0], normal[1], normal[2])
     }
+  }
 
-    const centerTop: Vec3 = [0, .82 + variant * .045, 0]
-    for (const corner of [q0, q1, centerTop]) {
+  const top: Vec3 = [0, 0.96 + variant * 0.045, 0]
+  for (let i = 0; i < sides; i += 1) {
+    const next = (i + 1) % sides
+    const crownA = ringPoint(i, 0.55, 0.9)
+    const crownB = ringPoint(next, 0.55, 0.9)
+    for (const corner of [crownA, crownB, top]) {
       vertices.push(corner[0], corner[1], corner[2], 0, 1, 0)
     }
   }
